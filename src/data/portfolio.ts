@@ -80,8 +80,9 @@ export const portfolio = {
     },
   ],
   certifications: [
-    { title: "Certification entry", detail: "Credential details pending verification" },
-    { title: "Certification entry", detail: "Credential details pending verification" },
+    // Set verified: true only once a real credential (issuer, date, credential URL) is supplied.
+    { title: "Certification entry", detail: "Credential details pending verification", verified: false },
+    { title: "Certification entry", detail: "Credential details pending verification", verified: false },
   ],
   social: [
     { label: "LinkedIn", href: "https://www.linkedin.com/in/tamas-nemeth-8820a6a5/", placeholder: false },

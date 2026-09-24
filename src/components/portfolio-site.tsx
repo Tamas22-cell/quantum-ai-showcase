@@ -1,12 +1,17 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ArrowDown,
   ArrowUpRight,
   Atom,
+  Blocks,
   Braces,
+  BrainCircuit,
   Check,
+  CircleDashed,
+  Code2,
   Cpu,
   Github,
+  LineChart,
   Linkedin,
   Menu,
   Network,
@@ -18,25 +23,35 @@ import {
 import { Button } from "@/components/ui/button";
 import { portfolio } from "@/data/portfolio";
 import { QuantumLab } from "@/components/quantum-lab";
+import { QuantumField } from "@/components/quantum-field";
 
 const projectIcons = [ShieldCheck, Network, Orbit];
 const researchIcons = [Orbit, Atom, Braces, Cpu];
+const disciplineIcons = [BrainCircuit, Code2, Blocks, LineChart, Atom];
 
-function PlaceholderLink({
-  label,
-  icon,
-  compact = false,
-}: {
-  label: string;
-  icon?: React.ReactNode;
-  compact?: boolean;
-}) {
+/**
+ * Honest capability map: each discipline links only to items already present
+ * on this page (project titles / research codes). No proficiency scores.
+ */
+const disciplineLinks: Record<string, string[]> = {
+  "AI agents": ["AgentTrust", "AI Financial Research Platform"],
+  Python: ["AI Financial Research Platform", "Qiskit workflows"],
+  Blockchain: ["AgentTrust"],
+  "Quantitative finance": ["AI Financial Research Platform", "Quantum Portfolio Lab"],
+  "Quantum computing": ["QAOA", "VQE", "Hybrid algorithms"],
+};
+
+const focusRing =
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background";
+
+function PlaceholderLink({ label, icon, compact = false }: { label: string; icon?: React.ReactNode; compact?: boolean }) {
   return (
     <span
       aria-label={`${label}. Link pending verification.`}
       title="URL pending verification"
-      className={`inline-flex cursor-not-allowed items-center gap-2 border border-border bg-surface px-3 font-mono text-muted-foreground ${compact ? "h-8 text-[10px] uppercase" : "h-11 text-xs"}`}
+      className={`inline-flex cursor-not-allowed items-center gap-2 rounded-sm border border-dashed border-border-strong bg-surface px-3 font-mono text-muted-foreground ${compact ? "h-8 text-[10px] uppercase" : "h-11 text-xs"}`}
     >
+      <CircleDashed className="size-3" aria-hidden="true" />
       {icon}
       {label}
     </span>
@@ -45,42 +60,90 @@ function PlaceholderLink({
 
 function SectionHeading({ index, title, copy }: { index: string; title: string; copy?: string }) {
   return (
-    <div className="mb-10 grid gap-4 border-b border-border pb-6 md:grid-cols-[minmax(0,1fr)_minmax(18rem,0.8fr)] md:items-end">
+    <div className="mb-12 grid gap-4 border-b border-border pb-8 md:grid-cols-[minmax(0,1fr)_minmax(18rem,0.8fr)] md:items-end">
       <div className="min-w-0">
-        <span className="font-mono text-xs text-primary">{index} /</span>
-        <h2 className="mt-2 text-3xl font-semibold tracking-normal text-foreground sm:text-4xl">{title}</h2>
+        <span className="inline-flex items-center gap-2 font-mono text-xs text-primary">
+          <span className="h-px w-6 bg-primary" aria-hidden="true" />
+          {index}
+        </span>
+        <h2 className="mt-3 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl lg:text-5xl">{title}</h2>
       </div>
       {copy ? <p className="max-w-xl text-sm leading-7 text-muted-foreground md:justify-self-end">{copy}</p> : null}
     </div>
   );
 }
 
+/** Tracks which section is in view to highlight the nav item. */
+function useActiveSection(ids: string[]) {
+  const [active, setActive] = useState<string>("");
+  useEffect(() => {
+    const io = new IntersectionObserver(
+      (entries) => {
+        const hit = entries.filter((e) => e.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+        if (hit) setActive(hit.target.id);
+      },
+      { rootMargin: "-40% 0px -50% 0px", threshold: [0, 0.25, 0.5] },
+    );
+    ids.forEach((id) => { const el = document.getElementById(id); if (el) io.observe(el); });
+    return () => io.disconnect();
+  }, [ids]);
+  return active;
+}
+
+const sectionIds = portfolio.navigation.map((n) => n.href.slice(1));
+
 export function PortfolioSite() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const active = useActiveSection(sectionIds);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 12);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // Escape closes the mobile menu.
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setMenuOpen(false);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [menuOpen]);
+
+  const linkedin = portfolio.social.find((link) => link.label === "LinkedIn")?.href ?? "#";
+  const github = portfolio.social.find((link) => link.label === "GitHub")?.href ?? "#";
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-background text-foreground">
-      <a
-        href="#main"
-        className="fixed left-4 top-4 z-[60] -translate-y-24 bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground focus:translate-y-0"
-      >
+      <a href="#main" className="fixed left-4 top-4 z-[60] -translate-y-24 rounded-sm bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground focus:translate-y-0">
         Skip to content
       </a>
 
-      <header className="fixed inset-x-0 top-0 z-50 border-b border-border/80 bg-background/90 backdrop-blur-xl">
+      <header className={`fixed inset-x-0 top-0 z-50 border-b transition-colors duration-300 ${scrolled || menuOpen ? "border-border/80 bg-background/85 backdrop-blur-xl" : "border-transparent bg-transparent"}`}>
         <div className="mx-auto grid h-16 max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-5 sm:px-8">
-          <a href="#top" className="flex min-w-0 items-center gap-3" aria-label="Quantum AI Lab home">
-            <span className="grid size-8 shrink-0 place-items-center border border-primary/50 bg-signal-soft text-primary">
+          <a href="#top" className={`flex min-w-0 items-center gap-3 rounded-sm ${focusRing}`} aria-label="Quantum AI Lab home">
+            <span className="grid size-8 shrink-0 place-items-center rounded-sm border border-primary/50 bg-signal-soft text-primary">
               <Atom className="size-4" aria-hidden="true" />
             </span>
-            <span className="truncate font-mono text-xs font-medium uppercase text-foreground sm:text-sm">Quantum AI Lab</span>
+            <span className="truncate font-mono text-xs font-medium uppercase tracking-wider text-foreground sm:text-sm">Quantum AI Lab</span>
           </a>
-          <nav className="hidden items-center gap-7 lg:flex" aria-label="Primary navigation">
-            {portfolio.navigation.map((item) => (
-              <a key={item.href} href={item.href} className="font-mono text-[11px] uppercase text-muted-foreground transition-colors hover:text-primary">
-                {item.label}
-              </a>
-            ))}
+          <nav className="hidden items-center gap-1 lg:flex" aria-label="Primary navigation">
+            {portfolio.navigation.map((item) => {
+              const isActive = active === item.href.slice(1);
+              return (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  aria-current={isActive ? "true" : undefined}
+                  className={`relative rounded-sm px-3 py-2 font-mono text-[11px] uppercase tracking-wider transition-colors hover:text-primary ${focusRing} ${isActive ? "text-primary" : "text-muted-foreground"}`}
+                >
+                  {item.label}
+                  <span className={`absolute inset-x-3 -bottom-px h-px bg-primary transition-transform duration-300 ${isActive ? "scale-x-100" : "scale-x-0"}`} aria-hidden="true" />
+                </a>
+              );
+            })}
           </nav>
           <Button
             variant="ghost"
@@ -95,10 +158,16 @@ export function PortfolioSite() {
           </Button>
         </div>
         {menuOpen ? (
-          <nav id="mobile-navigation" className="border-t border-border bg-surface px-5 py-4 lg:hidden" aria-label="Mobile navigation">
-            <div className="mx-auto grid max-w-7xl gap-1">
-              {portfolio.navigation.map((item) => (
-                <a key={item.href} href={item.href} onClick={() => setMenuOpen(false)} className="border-b border-border/60 py-3 font-mono text-xs uppercase text-muted-foreground last:border-0 hover:text-primary">
+          <nav id="mobile-navigation" className="animate-fade-in border-t border-border bg-surface/95 px-5 py-4 backdrop-blur-xl lg:hidden" aria-label="Mobile navigation">
+            <div className="mx-auto grid max-w-7xl gap-1 sm:grid-cols-2 sm:gap-x-6">
+              {portfolio.navigation.map((item, i) => (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setMenuOpen(false)}
+                  className={`flex items-center gap-3 rounded-sm border-b border-border/60 py-3.5 font-mono text-xs uppercase tracking-wider text-muted-foreground hover:text-primary ${focusRing}`}
+                >
+                  <span className="text-primary/70">0{i + 1}</span>
                   {item.label}
                 </a>
               ))}
@@ -108,18 +177,22 @@ export function PortfolioSite() {
       </header>
 
       <main id="main">
-        <section id="top" className="lab-grid relative flex min-h-[92svh] items-center border-b border-border px-5 pb-16 pt-28 sm:px-8">
-          <div className="absolute inset-0 bg-[linear-gradient(90deg,var(--color-background)_0%,transparent_52%,var(--color-background)_100%)]" aria-hidden="true" />
+        {/* HERO */}
+        <section id="top" className="lab-grid relative isolate flex min-h-[94svh] items-center overflow-hidden border-b border-border px-5 pb-16 pt-28 sm:px-8">
+          <QuantumField className="absolute inset-0 -z-10 h-full w-full opacity-80" />
+          <div className="hero-glow absolute -right-40 top-1/4 -z-10 size-[36rem] rounded-full" aria-hidden="true" />
+          <div className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,var(--color-background)_0%,color-mix(in_oklab,var(--color-background)_55%,transparent)_55%,transparent_100%)]" aria-hidden="true" />
+          <div className="absolute inset-x-0 bottom-0 -z-10 h-40 bg-gradient-to-t from-background to-transparent" aria-hidden="true" />
           <div className="relative mx-auto w-full max-w-7xl">
-            <div className="mb-10 flex items-center gap-3 font-mono text-[10px] uppercase text-primary reveal-up">
-              <span className="size-1.5 bg-primary signal-pulse" />
+            <div className="reveal-up mb-10 inline-flex items-center gap-3 rounded-full border border-primary/30 bg-signal-soft px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider text-primary">
+              <span className="signal-pulse size-1.5 rounded-full bg-primary" />
               Independent research portfolio
             </div>
-            <div className="max-w-5xl reveal-up [animation-delay:100ms]">
-              <p className="mb-4 font-mono text-sm text-muted-foreground">{portfolio.name} / Researcher</p>
-              <h1 className="text-5xl font-semibold leading-[1.04] tracking-normal text-foreground sm:text-7xl lg:text-8xl">
+            <div className="reveal-up max-w-5xl [animation-delay:100ms]">
+              <p className="mb-5 font-mono text-sm text-muted-foreground">{portfolio.name} / Researcher</p>
+              <h1 className="text-5xl font-semibold leading-[1.02] tracking-tight text-foreground sm:text-7xl lg:text-8xl">
                 AI & Quantum
-                <span className="block text-primary">Computing Researcher</span>
+                <span className="text-gradient-signal block">Computing Researcher</span>
               </h1>
               <p className="mt-8 max-w-2xl text-base leading-8 text-muted-foreground sm:text-lg">{portfolio.intro}</p>
               <div className="mt-10 flex flex-wrap gap-3">
@@ -127,21 +200,25 @@ export function PortfolioSite() {
                   <a href="#projects">Explore research <ArrowDown aria-hidden="true" /></a>
                 </Button>
                 <Button asChild variant="signalOutline" size="lg">
+                  <a href="#quantum-lab">Try the Quantum Lab <Atom aria-hidden="true" /></a>
+                </Button>
+                <Button asChild variant="ghost" size="lg">
                   <a href="#contact">Connect <ArrowUpRight aria-hidden="true" /></a>
                 </Button>
               </div>
             </div>
-            <div className="mt-16 grid max-w-4xl grid-cols-2 border-l border-t border-border sm:grid-cols-3 lg:grid-cols-5 reveal-up [animation-delay:200ms]">
+            <div className="reveal-up mt-16 grid max-w-4xl grid-cols-2 overflow-hidden rounded-md border border-border bg-background/60 backdrop-blur-sm sm:grid-cols-3 lg:grid-cols-5 [animation-delay:200ms]">
               {portfolio.disciplines.map((item, index) => (
-                <div key={item} className="min-w-0 border-b border-r border-border bg-background/60 px-4 py-4">
-                  <span className="font-mono text-[9px] text-primary">0{index + 1}</span>
-                  <p className="mt-2 text-xs text-muted-foreground">{item}</p>
+                <div key={item} className="min-w-0 border-b border-r border-border px-4 py-4 last:border-r-0">
+                  <span className="font-mono text-[10px] text-primary">0{index + 1}</span>
+                  <p className="mt-2 text-xs text-foreground/80">{item}</p>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
+        {/* ABOUT + capability map */}
         <section id="about" className="border-b border-border px-5 py-24 sm:px-8 lg:py-32">
           <div className="mx-auto max-w-7xl">
             <SectionHeading index="01" title="About" copy="Cross-disciplinary research spanning intelligent systems, financial computation, and emerging quantum methods." />
@@ -151,26 +228,59 @@ export function PortfolioSite() {
                 {portfolio.about.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
               </div>
             </div>
+
+            <div className="mt-20">
+              <div className="mb-6 flex items-center justify-between gap-4">
+                <h3 className="font-mono text-xs uppercase tracking-wider text-primary">Capability map</h3>
+                <span className="hidden font-mono text-[10px] uppercase text-muted-foreground sm:block">Disciplines → where they appear on this page</span>
+              </div>
+              <div className="relative grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+                <div className="signal-line absolute inset-x-8 top-10 hidden h-px opacity-40 lg:block" aria-hidden="true" />
+                {portfolio.disciplines.map((item, i) => {
+                  const Icon = disciplineIcons[i] ?? Cpu;
+                  return (
+                    <div key={item} className="card-interactive group relative rounded-md border border-border bg-card p-5">
+                      <span className="relative grid size-10 place-items-center rounded-full border border-primary/40 bg-background text-primary transition-shadow group-hover:shadow-[var(--shadow-signal)]">
+                        <Icon className="size-4" aria-hidden="true" />
+                      </span>
+                      <p className="mt-5 font-medium">{item}</p>
+                      <ul className="mt-3 space-y-1.5">
+                        {(disciplineLinks[item] ?? []).map((l) => (
+                          <li key={l} className="flex items-center gap-2 font-mono text-[10px] uppercase text-muted-foreground">
+                            <span className="size-1 rounded-full bg-primary/70" aria-hidden="true" />{l}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </section>
 
+        {/* PROJECTS */}
         <section id="projects" className="bg-surface px-5 py-24 sm:px-8 lg:py-32">
           <div className="mx-auto max-w-7xl">
             <SectionHeading index="02" title="Selected projects" copy="Research concepts and works in progress. Repository links will be added after their destinations are verified." />
-            <div className="grid gap-px bg-border lg:grid-cols-3">
+            <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
               {portfolio.projects.map((project, index) => {
                 const Icon = projectIcons[index] ?? Cpu;
                 return (
-                  <article key={project.title} className="group flex min-h-[25rem] flex-col bg-card p-6 transition-colors hover:bg-surface-raised sm:p-8">
+                  <article key={project.title} tabIndex={0} className={`card-interactive group relative flex min-h-[26rem] flex-col overflow-hidden rounded-md border border-border bg-card p-6 sm:p-8 ${focusRing}`}>
+                    <div className="signal-line absolute inset-x-0 top-0 h-px scale-x-0 transition-transform duration-500 group-hover:scale-x-100 group-focus-visible:scale-x-100" aria-hidden="true" />
                     <div className="flex items-start justify-between">
                       <span className="font-mono text-xs text-muted-foreground">PRJ / {project.index}</span>
-                      <span className="grid size-11 place-items-center border border-border text-primary transition-colors group-hover:border-primary/60"><Icon className="size-5" aria-hidden="true" /></span>
+                      <span className="grid size-11 place-items-center rounded-sm border border-border text-primary transition-colors group-hover:border-primary/60 group-hover:bg-signal-soft"><Icon className="size-5" aria-hidden="true" /></span>
                     </div>
-                    <h3 className="mt-16 text-2xl font-semibold tracking-normal">{project.title}</h3>
+                    <span className="mt-12 inline-flex w-fit items-center gap-1.5 rounded-full border border-border px-2 py-0.5 font-mono text-[9px] uppercase text-muted-foreground">
+                      <span className="size-1 rounded-full bg-muted-foreground" aria-hidden="true" /> Concept · in progress
+                    </span>
+                    <h3 className="mt-4 text-2xl font-semibold tracking-tight">{project.title}</h3>
                     <p className="mt-4 text-sm leading-7 text-muted-foreground">{project.description}</p>
                     <div className="mt-auto pt-8">
                       <div className="mb-5 flex flex-wrap gap-2">
-                        {project.tags.map((tag) => <span key={tag} className="border border-border px-2 py-1 font-mono text-[9px] uppercase text-muted-foreground">{tag}</span>)}
+                        {project.tags.map((tag) => <span key={tag} className="rounded-sm border border-border bg-surface px-2 py-1 font-mono text-[9px] uppercase text-muted-foreground">{tag}</span>)}
                       </div>
                       <PlaceholderLink label={project.link.label} compact />
                     </div>
@@ -181,6 +291,7 @@ export function PortfolioSite() {
           </div>
         </section>
 
+        {/* RESEARCH */}
         <section id="research" className="border-y border-border px-5 py-24 sm:px-8 lg:py-32">
           <div className="mx-auto max-w-7xl">
             <SectionHeading index="03" title="Research vectors" copy="Current areas of study across variational methods, quantum software, and hybrid computation." />
@@ -188,9 +299,12 @@ export function PortfolioSite() {
               {portfolio.research.map((item, index) => {
                 const Icon = researchIcons[index] ?? Cpu;
                 return (
-                  <article key={item.code} className="grid gap-5 py-7 md:grid-cols-[6rem_minmax(0,0.8fr)_minmax(0,1fr)] md:items-center">
-                    <div className="flex items-center gap-3 text-primary"><Icon className="size-4" aria-hidden="true" /><span className="font-mono text-xs">{item.code}</span></div>
-                    <h3 className="text-lg font-semibold">{item.title}</h3>
+                  <article key={item.code} className="group grid gap-4 py-8 transition-colors hover:bg-surface/60 md:grid-cols-[8rem_minmax(0,0.8fr)_minmax(0,1fr)] md:items-center md:px-4">
+                    <div className="flex items-center gap-3 text-primary">
+                      <span className="grid size-8 place-items-center rounded-sm border border-primary/30 bg-signal-soft"><Icon className="size-4" aria-hidden="true" /></span>
+                      <span className="font-mono text-xs">{item.code}</span>
+                    </div>
+                    <h3 className="text-lg font-semibold transition-colors group-hover:text-primary">{item.title}</h3>
                     <p className="text-sm leading-7 text-muted-foreground">{item.description}</p>
                   </article>
                 );
@@ -199,67 +313,73 @@ export function PortfolioSite() {
           </div>
         </section>
 
-        <section id="quantum-lab" className="lab-grid border-b border-border px-5 py-24 sm:px-8 lg:py-32">
+        {/* QUANTUM LAB */}
+        <section id="quantum-lab" className="lab-grid relative border-b border-border px-5 py-24 sm:px-8 lg:py-32">
           <div className="mx-auto max-w-7xl">
             <SectionHeading index="Q" title="Interactive Quantum Lab" copy="A single-qubit circuit simulator running in your browser. Apply gates, watch the state move on the Bloch sphere, and sample measurements." />
             <QuantumLab />
           </div>
         </section>
 
-
+        {/* CERTIFICATIONS */}
         <section id="certifications" className="bg-surface px-5 py-24 sm:px-8 lg:py-32">
           <div className="mx-auto max-w-7xl">
             <SectionHeading index="04" title="Certifications" copy="This section is reserved for verified credentials. No certification claims are displayed until details are supplied." />
             <div className="grid gap-4 md:grid-cols-2">
-              {portfolio.certifications.map((item, index) => (
-                <div key={index} className="grid min-h-36 grid-cols-[auto_minmax(0,1fr)] gap-5 border border-dashed border-border-strong bg-card p-6">
-                  <span className="grid size-9 place-items-center border border-border font-mono text-xs text-muted-foreground">—</span>
-                  <div className="min-w-0"><h3 className="font-medium text-muted-foreground">{item.title}</h3><p className="mt-2 font-mono text-[10px] uppercase leading-5 text-muted-foreground">{item.detail}</p></div>
-                </div>
-              ))}
+              {portfolio.certifications.map((item, index) => {
+                const verified = (item as { verified?: boolean }).verified === true;
+                return (
+                  <div key={index} className={`grid min-h-36 grid-cols-[auto_minmax(0,1fr)] gap-5 rounded-md border bg-card p-6 ${verified ? "border-primary/40" : "border-dashed border-border-strong"}`}>
+                    <span className={`grid size-9 place-items-center rounded-sm border ${verified ? "border-primary/50 text-primary" : "border-border text-muted-foreground"}`}>
+                      {verified ? <ShieldCheck className="size-4" aria-hidden="true" /> : <CircleDashed className="size-4" aria-hidden="true" />}
+                    </span>
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-3">
+                        <h3 className="font-medium text-muted-foreground">{item.title}</h3>
+                        <span className={`rounded-full border px-2 py-0.5 font-mono text-[9px] uppercase ${verified ? "border-primary/50 text-primary" : "border-border-strong text-muted-foreground"}`}>
+                          {verified ? "Verified" : "Pending verification"}
+                        </span>
+                      </div>
+                      <p className="mt-2 font-mono text-[10px] uppercase leading-5 text-muted-foreground">{item.detail}</p>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </section>
 
-        <section id="contact" className="lab-grid relative px-5 py-24 sm:px-8 lg:py-36">
-          <div className="absolute inset-x-0 top-0 h-px signal-line" aria-hidden="true" />
+        {/* CONTACT */}
+        <section id="contact" className="lab-grid relative overflow-hidden px-5 py-24 sm:px-8 lg:py-36">
+          <div className="signal-line absolute inset-x-0 top-0 h-px" aria-hidden="true" />
+          <div className="hero-glow absolute -left-40 bottom-0 size-[30rem] rounded-full" aria-hidden="true" />
           <div className="relative mx-auto grid max-w-7xl gap-12 lg:grid-cols-[1.2fr_0.8fr] lg:items-end">
             <div>
-              <span className="font-mono text-xs text-primary">05 / CONTACT</span>
-              <h2 className="mt-5 max-w-3xl text-4xl font-semibold leading-tight tracking-normal sm:text-6xl">Interested in the intersection of intelligence, markets, and quantum systems?</h2>
+              <span className="inline-flex items-center gap-2 font-mono text-xs text-primary"><span className="h-px w-6 bg-primary" aria-hidden="true" />05 / CONTACT</span>
+              <h2 className="mt-5 max-w-3xl text-4xl font-semibold leading-tight tracking-tight sm:text-6xl">Interested in the intersection of intelligence, markets, and quantum systems?</h2>
             </div>
             <div className="lg:justify-self-end">
-              <p className="max-w-md text-sm leading-7 text-muted-foreground">Verified contact destinations will be connected here. Until then, the buttons remain intentionally inactive.</p>
+              <p className="max-w-md text-sm leading-7 text-muted-foreground">Reach out through LinkedIn or follow ongoing work on GitHub. Both links open in a new tab.</p>
               <div className="mt-6 flex flex-wrap gap-3">
-                <a
-                  href={portfolio.social.find((link) => link.label === "LinkedIn")?.href ?? "#"}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="LinkedIn profile of Tamás Németh (opens in a new tab)"
-                  className="inline-flex h-11 items-center gap-2 border border-border bg-surface px-3 font-mono text-xs text-foreground transition-colors hover:border-primary/60 hover:text-primary"
-                >
-                  <Linkedin className="size-4" aria-hidden="true" />
-                  LinkedIn
-                </a>
-                <a
-                  href={portfolio.social.find((link) => link.label === "GitHub")?.href ?? "#"}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="GitHub profile of Tamás Németh (opens in a new tab)"
-                  className="inline-flex h-11 items-center gap-2 border border-border bg-surface px-3 font-mono text-xs text-foreground transition-colors hover:border-primary/60 hover:text-primary"
-                >
-                  <Github className="size-4" aria-hidden="true" />
-                  GitHub
-                </a>
+                <Button asChild variant="signal" size="lg">
+                  <a href={linkedin} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn profile of Tamás Németh (opens in a new tab)">
+                    <Linkedin aria-hidden="true" /> LinkedIn <ArrowUpRight aria-hidden="true" />
+                  </a>
+                </Button>
+                <Button asChild variant="signalOutline" size="lg">
+                  <a href={github} target="_blank" rel="noopener noreferrer" aria-label="GitHub profile of Tamás Németh (opens in a new tab)">
+                    <Github aria-hidden="true" /> GitHub <ArrowUpRight aria-hidden="true" />
+                  </a>
+                </Button>
               </div>
             </div>
           </div>
         </section>
       </main>
 
-      <footer className="border-t border-border px-5 py-6 sm:px-8">
+      <footer className="border-t border-border px-5 py-8 sm:px-8">
         <div className="mx-auto flex max-w-7xl flex-col gap-3 font-mono text-[10px] uppercase text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-          <span>© 2026 {portfolio.name}</span>
+          <span>© 2026 {portfolio.name} · Quantum AI Lab</span>
           <span className="flex items-center gap-2"><Check className="size-3 text-primary" aria-hidden="true" /> Portfolio content awaiting final verification</span>
         </div>
       </footer>

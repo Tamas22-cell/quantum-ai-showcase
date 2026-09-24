@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -53,6 +53,9 @@ const R = 120;
 function BlochSphere({ v }: { v: { x: number; y: number; z: number } }) {
   const [rot, setRot] = useState({ yaw: -0.6, pitch: 0.35 });
   const drag = useRef<{ x: number; y: number } | null>(null);
+  // Render the projected sphere client-side only: trig floats differ between server and browser.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   // Physics convention (z up) -> screen: rotate by yaw about z, then pitch about screen x.
   const project = useCallback(
@@ -63,7 +66,8 @@ function BlochSphere({ v }: { v: { x: number; y: number; z: number } }) {
       const cp = Math.cos(rot.pitch), sp = Math.sin(rot.pitch);
       const depth = y1 * cp - z * sp;
       const up = y1 * sp + z * cp;
-      return { sx: SIZE / 2 + x1 * R, sy: SIZE / 2 - up * R, d: depth };
+      // Round to avoid SSR/client float mismatches during hydration.
+      return { sx: Math.round((SIZE / 2 + x1 * R) * 100) / 100, sy: Math.round((SIZE / 2 - up * R) * 100) / 100, d: depth };
     },
     [rot],
   );
@@ -102,6 +106,7 @@ function BlochSphere({ v }: { v: { x: number; y: number; z: number } }) {
     setRot((r) => ({ yaw: r.yaw - dx * 0.01, pitch: Math.max(-1.4, Math.min(1.4, r.pitch + dy * 0.01)) }));
   };
 
+  if (!mounted) return <div className="aspect-square w-full max-w-[420px]" aria-hidden="true" />;
   return (
     <svg
       viewBox={`0 0 ${SIZE} ${SIZE}`}
@@ -112,6 +117,17 @@ function BlochSphere({ v }: { v: { x: number; y: number; z: number } }) {
       onPointerMove={onMove}
       onPointerUp={() => (drag.current = null)}
       onPointerCancel={() => (drag.current = null)}
+      tabIndex={0}
+      onKeyDown={(e) => {
+        // Arrow keys rotate the sphere for keyboard users.
+        const k: Record<string, [number, number]> = { ArrowLeft: [0.15, 0], ArrowRight: [-0.15, 0], ArrowUp: [0, -0.15], ArrowDown: [0, 0.15] };
+        const d = k[e.key];
+        if (!d) return;
+        e.preventDefault();
+        setRot((r) => ({ yaw: r.yaw + d[0], pitch: Math.max(-1.4, Math.min(1.4, r.pitch + d[1])) }));
+      }}
+      focusable="true"
+      style={{ outline: "none" }}
     >
       <defs>
         <radialGradient id="bloch-fill" cx="40%" cy="35%">
@@ -161,19 +177,24 @@ export function QuantumLab() {
   };
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-      <div className="flex flex-col items-center rounded-md border border-border bg-surface p-5">
+    <div className="grid gap-6 overflow-hidden rounded-lg border border-border bg-card/80 p-4 shadow-[0_30px_80px_-40px_oklch(0.82_0.145_192/0.35)] backdrop-blur-sm sm:p-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-8">
+      <div className="flex flex-col items-center rounded-md border border-border bg-background/70 p-5 focus-within:border-primary/60">
+        <div className="mb-2 flex w-full items-center justify-between font-mono text-[10px] uppercase text-muted-foreground">
+          <span className="flex items-center gap-2"><span className="signal-pulse size-1.5 rounded-full bg-primary" aria-hidden="true" />Bloch sphere</span>
+          <span>1 qubit · local simulation</span>
+        </div>
         <BlochSphere v={v} />
-        <p className="mt-2 font-mono text-xs text-muted-foreground">Drag to rotate · Bloch vector ({v.x.toFixed(2)}, {v.y.toFixed(2)}, {v.z.toFixed(2)})</p>
+        <p className="mt-2 text-center font-mono text-xs text-muted-foreground">Drag or use arrow keys to rotate · Bloch vector ({v.x.toFixed(2)}, {v.y.toFixed(2)}, {v.z.toFixed(2)})</p>
       </div>
 
       <div className="flex min-w-0 flex-col gap-6">
         <div>
           <h3 className="font-mono text-xs uppercase text-primary">Gates</h3>
-          <div className="mt-3 grid grid-cols-4 gap-3">
+          <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
             {(Object.keys(GATES) as Gate[]).map((g) => (
-              <Button key={g} variant="signalOutline" className="h-14 font-mono text-lg" onClick={() => addGate(g)} title={GATE_INFO[g]} aria-label={`Apply ${GATE_INFO[g]}`}>
-                {g}
+              <Button key={g} variant="signalOutline" className="h-auto flex-col gap-1 py-3 hover:bg-signal-soft" onClick={() => addGate(g)} title={GATE_INFO[g]} aria-label={`Apply ${GATE_INFO[g]}`}>
+                <span className="font-mono text-xl">{g}</span>
+                <span className="text-[10px] font-normal text-muted-foreground">{GATE_INFO[g].split(" — ")[0]}</span>
               </Button>
             ))}
           </div>
