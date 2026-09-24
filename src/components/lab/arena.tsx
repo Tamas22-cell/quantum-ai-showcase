@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { Fragment, useMemo, useRef, useState } from "react";
 import { Dice5, Download, Loader2, Play, Plus, Square, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -22,7 +22,7 @@ function download(name: string, text: string, type: string) {
 }
 
 /** Circular layout preview of the Max-Cut graph; optionally colours nodes by a cut assignment. */
-function GraphView({ g, assignment }: { g: Graph; assignment?: number }) {
+function GraphView({ g, assignment }: { g: Graph; assignment?: number | undefined }) {
   const pos = Array.from({ length: g.n }, (_, i) => {
     const a = (2 * Math.PI * i) / g.n - Math.PI / 2;
     return { x: 100 + 70 * Math.cos(a), y: 100 + 70 * Math.sin(a) };
@@ -158,7 +158,7 @@ export function Arena() {
           <Panel title="Results"><p className="text-sm text-muted-foreground">Configure an instance and press <span className="text-foreground">Run benchmark</span>. The same master seed always reproduces the same solutions and samples.</p></Panel>
         ) : (
           <>
-            {stale ? <p className="rounded-sm border border-amber/40 bg-card px-3 py-2 text-xs text-muted-foreground" role="status">Settings changed since this run — results below belong to the previous configuration.</p> : null}
+            {stale ? <p className="rounded-sm border border-border-strong bg-card px-3 py-2 text-xs text-muted-foreground" role="status">Settings changed since this run — results below belong to the previous configuration.</p> : null}
             <Panel title="Scoreboard" aside={
               <div className="flex gap-2">
                 <Button type="button" size="sm" variant="outline" onClick={() => download(`arena-seed${result.config.seed}.csv`, arenaToCsv(result), "text/csv")}><Download className="size-4" aria-hidden="true" />CSV</Button>
@@ -214,7 +214,7 @@ export function Arena() {
 
             <Panel title="Environment & reproducibility">
               <dl className="grid gap-x-4 gap-y-1.5 font-mono text-[11px] sm:grid-cols-[160px_1fr]">
-                {Object.entries(result.environment).map(([k, v]) => (<><dt key={`${k}-k`} className="text-muted-foreground">{k}</dt><dd key={`${k}-v`} className="break-all">{v}</dd></>))}
+                {Object.entries(result.environment).map(([k, v]) => (<Fragment key={k}><dt className="text-muted-foreground">{k}</dt><dd className="break-all">{v}</dd></Fragment>))}
                 <dt className="text-muted-foreground">master seed</dt><dd>{result.config.seed}</dd>
                 <dt className="text-muted-foreground">run at</dt><dd>{result.createdAt}</dd>
               </dl>

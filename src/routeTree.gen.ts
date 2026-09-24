@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as LabIndexRouteImport } from './routes/lab.index'
+import { Route as LabArenaRouteImport } from './routes/lab.arena'
 import { Route as LabCircuitBuilderRouteImport } from './routes/lab.circuit-builder'
 
 const IndexRoute = IndexRouteImport.update({
@@ -23,6 +24,11 @@ const LabIndexRoute = LabIndexRouteImport.update({
   path: '/lab/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LabArenaRoute = LabArenaRouteImport.update({
+  id: '/lab/arena',
+  path: '/lab/arena',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LabCircuitBuilderRoute = LabCircuitBuilderRouteImport.update({
   id: '/lab/circuit-builder',
   path: '/lab/circuit-builder',
@@ -31,30 +37,34 @@ const LabCircuitBuilderRoute = LabCircuitBuilderRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/lab/arena': typeof LabArenaRoute
   '/lab/circuit-builder': typeof LabCircuitBuilderRoute
   '/lab/': typeof LabIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/lab/arena': typeof LabArenaRoute
   '/lab/circuit-builder': typeof LabCircuitBuilderRoute
   '/lab': typeof LabIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/lab/arena': typeof LabArenaRoute
   '/lab/circuit-builder': typeof LabCircuitBuilderRoute
   '/lab/': typeof LabIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/lab/circuit-builder' | '/lab/'
+  fullPaths: '/' | '/lab/arena' | '/lab/circuit-builder' | '/lab/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/lab/circuit-builder' | '/lab'
-  id: '__root__' | '/' | '/lab/circuit-builder' | '/lab/'
+  to: '/' | '/lab/arena' | '/lab/circuit-builder' | '/lab'
+  id: '__root__' | '/' | '/lab/arena' | '/lab/circuit-builder' | '/lab/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  LabArenaRoute: typeof LabArenaRoute
   LabCircuitBuilderRoute: typeof LabCircuitBuilderRoute
   LabIndexRoute: typeof LabIndexRoute
 }
@@ -75,6 +85,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LabIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lab/arena': {
+      id: '/lab/arena'
+      path: '/lab/arena'
+      fullPath: '/lab/arena'
+      preLoaderRoute: typeof LabArenaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lab/circuit-builder': {
       id: '/lab/circuit-builder'
       path: '/lab/circuit-builder'
@@ -87,6 +104,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  LabArenaRoute: LabArenaRoute,
   LabCircuitBuilderRoute: LabCircuitBuilderRoute,
   LabIndexRoute: LabIndexRoute,
 }
