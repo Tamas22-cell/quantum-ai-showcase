@@ -179,10 +179,10 @@ export function QaoaLab() {
                   const set = (v: number) => setAngles((a) => { const next = key === "g" ? g.slice() : b.slice(); next[k] = v; return { ...a, [key]: next }; });
                   return (
                     <label key={key} className="block font-mono text-[10px] uppercase text-muted-foreground">
-                      <span className="flex justify-between"><span>{name}</span><span className="text-foreground">{fmt(arr[k]!)}</span></span>
+                      <span className="flex justify-between normal-case"><span>{name}</span><span className="text-foreground">{fmt(arr[k]!)}</span></span>
                       <div className="mt-1 flex items-center gap-2">
                         <input type="range" min={-max} max={max} step={0.001} value={arr[k]} onChange={(e) => set(Number(e.target.value))} className="w-full accent-[var(--primary)]" aria-label={`${name} slider`} />
-                        <input type="number" step={0.01} value={arr[k]} onChange={(e) => set(Number(e.target.value))} className={`${field} w-24`} aria-label={`${name} value`} />
+                        <input type="number" step={0.01} value={+arr[k]!.toFixed(4)} onChange={(e) => set(Number(e.target.value))} className={`${field} w-24`} aria-label={`${name} value`} />
                       </div>
                     </label>
                   );
