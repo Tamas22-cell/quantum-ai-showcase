@@ -63,7 +63,8 @@ function BlochSphere({ v }: { v: { x: number; y: number; z: number } }) {
       const cp = Math.cos(rot.pitch), sp = Math.sin(rot.pitch);
       const depth = y1 * cp - z * sp;
       const up = y1 * sp + z * cp;
-      return { sx: SIZE / 2 + x1 * R, sy: SIZE / 2 - up * R, d: depth };
+      // Round to avoid SSR/client float mismatches during hydration.
+      return { sx: Math.round((SIZE / 2 + x1 * R) * 100) / 100, sy: Math.round((SIZE / 2 - up * R) * 100) / 100, d: depth };
     },
     [rot],
   );
