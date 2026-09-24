@@ -72,7 +72,7 @@ export type QaoaRun = {
  */
 export async function optimizeQaoa(
   g: Graph,
-  opts: { p: number; restarts: number; maxIter: number; rng: Rng; signal?: AbortSignal; onProgress?: (frac: number) => void },
+  opts: { p: number; restarts: number; maxIter: number; rng: Rng; signal?: AbortSignal | undefined; onProgress?: (frac: number) => void },
 ): Promise<QaoaRun> {
   const table = cutTable(g);
   const { p, restarts, maxIter, rng } = opts;
