@@ -72,7 +72,7 @@ export type QaoaLabResult = QaoaAnalysis & {
 export async function runQaoaLab(c: QaoaLabConfig, opts: { signal?: AbortSignal; onProgress?: (f: number) => void } = {}): Promise<QaoaLabResult> {
   const errs = validateQaoaLabConfig(c);
   if (errs.length) throw new RangeError(errs.join(" "));
-  const run = await optimizeQaoa(c.graph, { p: c.p, restarts: c.restarts, maxIter: c.maxIter, rng: createRng(c.seed), signal: opts.signal, onProgress: opts.onProgress });
+  const run = await optimizeQaoa(c.graph, { p: c.p, restarts: c.restarts, maxIter: c.maxIter, rng: createRng(c.seed), signal: opts.signal, onProgress: (f) => opts.onProgress?.(f) });
   if (!run.gammas.every(Number.isFinite) || !run.betas.every(Number.isFinite)) throw new Error("Optimisation produced non-finite parameters.");
   return { config: structuredClone(c), gammas: run.gammas, betas: run.betas, probs: run.probs, history: run.history, evaluations: run.evaluations, ...analyzeDistribution(c.graph, run.probs) };
 }
