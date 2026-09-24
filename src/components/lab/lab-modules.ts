@@ -7,7 +7,7 @@ export type LabModule = {
   topics: string[];
   status: "available" | "in-development";
   group: "core" | "command";
-  to?: "/lab/circuit-builder" | "/lab/entanglement" | "/lab/arena" | "/lab/assistant";
+  to?: "/lab/circuit-builder" | "/lab/entanglement" | "/lab/qaoa" | "/lab/arena" | "/lab/assistant";
 };
 
 export const LAB_MODULES: LabModule[] = [
@@ -25,7 +25,7 @@ export const LAB_MODULES: LabModule[] = [
   {
     id: "qaoa", index: "03", title: "QAOA Optimization Lab",
     summary: "QAOA for small weighted Max-Cut graphs, compared against an exhaustive classical baseline.",
-    topics: ["Max-Cut", "Cost Hamiltonian", "Classical baseline"], status: "in-development", group: "core",
+    topics: ["Max-Cut", "Cost Hamiltonian", "Classical baseline"], status: "available", to: "/lab/qaoa", group: "core",
   },
   {
     id: "vqe", index: "04", title: "VQE Research Lab",
