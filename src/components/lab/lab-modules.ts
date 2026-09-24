@@ -7,7 +7,7 @@ export type LabModule = {
   topics: string[];
   status: "available" | "in-development";
   group: "core" | "command";
-  to?: "/lab/circuit-builder" | "/lab/entanglement" | "/lab/qaoa" | "/lab/vqe" | "/lab/portfolio" | "/lab/arena" | "/lab/assistant" | "/lab/qml" | "/lab/reports" | "/lab/ibm";
+  to?: "/lab/circuit-builder" | "/lab/entanglement" | "/lab/qaoa" | "/lab/vqe" | "/lab/portfolio" | "/lab/arena" | "/lab/assistant" | "/lab/qml" | "/lab/reports" | "/lab/ibm" | "/lab/finance";
 };
 
 export const LAB_MODULES: LabModule[] = [
@@ -60,12 +60,12 @@ export const LAB_MODULES: LabModule[] = [
   },
   {
     id: "finance", index: "C4", title: "Live Quantum Finance Lab", group: "command",
-    summary: "Portfolio optimisation with optional market-data provider; labelled sample datasets until a provider is connected.",
-    topics: ["Covariance", "Backtest", "Sample data"], status: "in-development",
+    summary: "Demo, CSV or optional live prices → returns, covariance, correlation → QUBO/QAOA portfolio selection vs equal-weight, min-variance and exhaustive baselines. Live data not configured.",
+    topics: ["Covariance", "QAOA", "Demo + CSV", "PDF report"], status: "available", to: "/lab/finance",
   },
   {
     id: "reports", index: "C5", title: "Research Report Generator", group: "command",
-    summary: "Client-side PDF reports from seeded experiments in all seven labs: configuration, charts, limitations and reproducibility settings.",
+    summary: "Client-side PDF reports from seeded experiments in all all eight labs: configuration, charts, limitations and reproducibility settings.",
     topics: ["PDF", "Client-side", "Reproducibility"], status: "available", to: "/lab/reports",
   },
 ];

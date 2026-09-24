@@ -38,7 +38,7 @@ export function validateFinance(series: PriceSeries, input: FinanceInput): strin
 
 const asWeights = (d: PortfolioData, x: number): WeightPortfolio => { const m = portfolioMetrics(d, x); return { weights: m.weights, ret: m.ret, vol: m.vol }; };
 
-export async function runFinanceExperiment(series: PriceSeries, input: FinanceInput, opts: { signal?: AbortSignal; onProgress?: (f: number) => void; demoSeed?: number } = {}): Promise<FinanceExperiment> {
+export async function runFinanceExperiment(series: PriceSeries, input: FinanceInput, opts: { signal?: AbortSignal; onProgress?: (f: number) => void; demoSeed?: number | undefined } = {}): Promise<FinanceExperiment> {
   const errs = validateFinance(series, input);
   if (errs.length) throw new RangeError(errs.join(" "));
   const stats = computeStats(sliceRange(series, input.range), input.symbols).stats!;
