@@ -164,7 +164,7 @@ export function EntanglementLab() {
           ) : <p className="mt-4 text-sm text-muted-foreground">Run Experiment to compute S.</p>}
           <div className="mt-4 rounded-md border border-border bg-surface p-3 text-xs leading-6 text-muted-foreground">
             <strong className="text-foreground">S = E(a,b) + E(a,b′) + E(a′,b) − E(a′,b′).</strong> Any local-hidden-variable (classical) model obeys |S| ≤ 2.
-            Quantum mechanics allows up to Tsirelson's bound 2√2 ≈ {TSIRELSON.toFixed(4)}, reached by Φ⁺ at the default angles. Sampled S fluctuates by roughly ±1/√shots per term.
+            Quantum mechanics allows up to Tsirelson's bound 2√2 ≈ {TSIRELSON.toFixed(4)}, reached by Φ⁺ at the default angles. Sampled S fluctuates by roughly ±1/√shots per term, so with few shots it can land slightly above 2√2 — that is sampling noise, not a physical violation.
             A real Bell test also needs spacelike separation, efficient detectors and random setting choices — none of which a simulation provides.
           </div>
         </Panel>
