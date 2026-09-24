@@ -5,7 +5,7 @@
 - [x] Research Lab dashboard (/lab): Core labs + Research Command Center groups, honest status.
 - [x] Module 1 — Quantum Circuit Builder (/lab/circuit-builder).
 - [x] C1 — Quantum vs Classical Arena (/lab/arena): QAOA Max-Cut engine, exhaustive/greedy/SA/random baselines, seeded, CSV/JSON export, 10 tests.
-- [ ] Module 2 — Entanglement Lab.
+- [x] Module 2 — Entanglement Lab (/lab/entanglement): Bell states, X/Y/Z bases, correlations, seeded CHSH, 8 tests.
 - [ ] Module 3 — QAOA Lab UI (engine now exists via Arena).
 - [ ] Module 4 — VQE Lab.
 - [ ] Module 5 — Quantum Portfolio Optimizer.

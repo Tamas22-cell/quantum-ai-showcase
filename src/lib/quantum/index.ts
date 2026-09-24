@@ -9,3 +9,4 @@ export * from "./optimize";
 export * from "./qaoa";
 export * from "./classical";
 export * from "./benchmark";
+export * from "./entanglement";

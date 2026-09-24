@@ -7,7 +7,7 @@ export type LabModule = {
   topics: string[];
   status: "available" | "in-development";
   group: "core" | "command";
-  to?: "/lab/circuit-builder" | "/lab/arena" | "/lab/assistant";
+  to?: "/lab/circuit-builder" | "/lab/entanglement" | "/lab/arena" | "/lab/assistant";
 };
 
 export const LAB_MODULES: LabModule[] = [
@@ -20,7 +20,7 @@ export const LAB_MODULES: LabModule[] = [
   {
     id: "entanglement", index: "02", title: "Quantum Entanglement Lab",
     summary: "Bell-state preparation, joint measurement correlations, and a configurable CHSH experiment.",
-    topics: ["Bell states", "Correlations", "CHSH"], status: "in-development", group: "core",
+    topics: ["Bell states", "X · Y · Z bases", "CHSH"], status: "available", to: "/lab/entanglement", group: "core",
   },
   {
     id: "qaoa", index: "03", title: "QAOA Optimization Lab",
