@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import { EXAMPLE_CIRCUITS, probabilities, simulate } from "@/lib/quantum";
-import { runArena } from "@/lib/quantum/benchmark";
+import { runArena, type ArenaConfig } from "@/lib/quantum/benchmark";
+import { GRAPH_PRESETS } from "@/lib/quantum/maxcut";
 import { demoReply } from "./demo";
 import { circuitDepth, parseProposal } from "./proposal";
 import { readTransfer, TRANSFER_KEY, writeTransfer } from "./transfer";
@@ -97,7 +98,8 @@ describe("Regression: existing modules", () => {
     for (const ex of EXAMPLE_CIRCUITS) expect(parseProposal(ex.circuit).ok).toBe(true);
   });
   it("C1 Arena still runs reproducibly", async () => {
-    const cfg = { graph: { n: 3, edges: [{ u: 0, v: 1, w: 1 }, { u: 1, v: 2, w: 1 }, { u: 0, v: 2, w: 1 }] }, p: 1, seed: 7 } as never;
+    const cfg: ArenaConfig = { graph: GRAPH_PRESETS[0]!.graph, seed: 7, p: 1, restarts: 2, maxIter: 60, shots: 300, saSteps: 300, greedyRestarts: 2 };
+    expect((await runArena(cfg)).results.find((x) => x.id === "exhaustive")!.value).toBe(2);
     const a = await runArena(cfg); const b = await runArena(cfg);
     const strip = (r: unknown) => JSON.stringify(r, (k, v) => (/ms|time/i.test(k) ? undefined : v));
     expect(strip(a)).toBe(strip(b));
