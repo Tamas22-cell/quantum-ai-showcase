@@ -158,7 +158,7 @@ export function PortfolioSite() {
             <SectionHeading index="02" title="Selected projects" copy="Research concepts and works in progress. Repository links will be added after their destinations are verified." />
             <div className="grid gap-px bg-border lg:grid-cols-3">
               {portfolio.projects.map((project, index) => {
-                const Icon = projectIcons[index];
+                const Icon = projectIcons[index] ?? Cpu;
                 return (
                   <article key={project.title} className="group flex min-h-[25rem] flex-col bg-card p-6 transition-colors hover:bg-surface-raised sm:p-8">
                     <div className="flex items-start justify-between">
@@ -185,7 +185,7 @@ export function PortfolioSite() {
             <SectionHeading index="03" title="Research vectors" copy="Current areas of study across variational methods, quantum software, and hybrid computation." />
             <div className="divide-y divide-border border-y border-border">
               {portfolio.research.map((item, index) => {
-                const Icon = researchIcons[index];
+                const Icon = researchIcons[index] ?? Cpu;
                 return (
                   <article key={item.code} className="grid gap-5 py-7 md:grid-cols-[6rem_minmax(0,0.8fr)_minmax(0,1fr)] md:items-center">
                     <div className="flex items-center gap-3 text-primary"><Icon className="size-4" aria-hidden="true" /><span className="font-mono text-xs">{item.code}</span></div>
