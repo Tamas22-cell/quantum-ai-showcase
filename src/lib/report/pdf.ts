@@ -17,7 +17,7 @@ const SERIES: [number, number, number][] = [CYAN, EMERALD, AMBER, [150, 110, 220
 
 const MAP: Record<string, string> = {
   "⟨": "<", "⟩": ">", "γ": "gamma", "β": "beta", "θ": "theta", "ψ": "psi", "Ψ": "Psi", "Φ": "Phi", "π": "pi", "μ": "mu", "Σ": "Sum", "Π": "Prod",
-  "√": "sqrt", "≤": "<=", "≥": ">=", "≈": "~", "−": "-", "⊗": "(x)", "₀": "0", "₂": "2", "ᵀ": "^T", "′": "'", "†": "^dag", "→": "->", "∈": " in ", "≥0": ">=0", "½": "1/2",
+  "√": "sqrt", "≤": "<=", "≥": ">=", "≈": "~", "−": "-", "⊗": "(x)", "₀": "0", "₂": "2", "ᵀ": "^T", "′": "'", "†": "^dag", "→": "->", "∈": " in ", "≥0": ">=0", "½": "1/2", "⁺": "+", "⁻": "-", "ψ⁺": "psi+",
 };
 /** Built-in PDF fonts only cover WinAnsi; transliterate scientific symbols so nothing renders as garbage. */
 export function pdfSafe(t: string): string {
@@ -145,7 +145,7 @@ export function renderReportPdf(doc: ReportDoc, opts: PdfOptions = {}): jsPDF {
 
   const total = doc.sections.length;
   doc.sections.forEach((sec, si) => {
-    ensure(60); y += 12;
+    ensure(140); y += 12;
     font(13, "bold"); color(NAVY); pdf.text(pdfSafe(sec.heading), M, y + 4); y += 12; color(CYAN, "fill"); pdf.rect(M, y, 34, 2, "F"); y += 14;
     for (const b of sec.blocks) {
       switch (b.type) {
