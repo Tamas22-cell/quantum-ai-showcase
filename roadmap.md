@@ -13,4 +13,4 @@
 - [x] C2 — AI Research Assistant (needs Lovable Cloud + AI; circuits validated by engine before loading into builder). (built; demo mode default, Live AI opt-in)
 - [ ] C3 — IBM Quantum (blocked: needs external Python/Qiskit service host + user's IBM API token; simulator mode first).
 - [ ] C4 — Live Finance Lab (depends on Module 5; market-data provider + API key needed for live data; sample data until then).
-- [ ] C5 — Report Generator (client-side PDF from Arena/lab results; Cloud for saved experiments).
+- [x] C5 — Research Report Generator (/lab/reports): client-side jsPDF reports for all 7 labs, 13 tests.

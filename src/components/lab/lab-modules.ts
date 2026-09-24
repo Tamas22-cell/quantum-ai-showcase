@@ -7,7 +7,7 @@ export type LabModule = {
   topics: string[];
   status: "available" | "in-development";
   group: "core" | "command";
-  to?: "/lab/circuit-builder" | "/lab/entanglement" | "/lab/qaoa" | "/lab/vqe" | "/lab/portfolio" | "/lab/arena" | "/lab/assistant" | "/lab/qml";
+  to?: "/lab/circuit-builder" | "/lab/entanglement" | "/lab/qaoa" | "/lab/vqe" | "/lab/portfolio" | "/lab/arena" | "/lab/assistant" | "/lab/qml" | "/lab/reports";
 };
 
 export const LAB_MODULES: LabModule[] = [
@@ -65,7 +65,7 @@ export const LAB_MODULES: LabModule[] = [
   },
   {
     id: "reports", index: "C5", title: "Research Report Generator", group: "command",
-    summary: "PDF reports from completed experiments with configuration, charts, limitations and reproducibility settings.",
-    topics: ["PDF", "Reproducibility"], status: "in-development",
+    summary: "Client-side PDF reports from seeded experiments in all seven labs: configuration, charts, limitations and reproducibility settings.",
+    topics: ["PDF", "Client-side", "Reproducibility"], status: "available", to: "/lab/reports",
   },
 ];

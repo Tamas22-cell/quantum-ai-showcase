@@ -18,6 +18,7 @@ import { Route as LabEntanglementRouteImport } from './routes/lab.entanglement'
 import { Route as LabPortfolioRouteImport } from './routes/lab.portfolio'
 import { Route as LabQaoaRouteImport } from './routes/lab.qaoa'
 import { Route as LabQmlRouteImport } from './routes/lab.qml'
+import { Route as LabReportsRouteImport } from './routes/lab.reports'
 import { Route as LabVqeRouteImport } from './routes/lab.vqe'
 
 const IndexRoute = IndexRouteImport.update({
@@ -65,6 +66,11 @@ const LabQmlRoute = LabQmlRouteImport.update({
   path: '/lab/qml',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LabReportsRoute = LabReportsRouteImport.update({
+  id: '/lab/reports',
+  path: '/lab/reports',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LabVqeRoute = LabVqeRouteImport.update({
   id: '/lab/vqe',
   path: '/lab/vqe',
@@ -80,6 +86,7 @@ export interface FileRoutesByFullPath {
   '/lab/portfolio': typeof LabPortfolioRoute
   '/lab/qaoa': typeof LabQaoaRoute
   '/lab/qml': typeof LabQmlRoute
+  '/lab/reports': typeof LabReportsRoute
   '/lab/vqe': typeof LabVqeRoute
   '/lab/': typeof LabIndexRoute
 }
@@ -92,6 +99,7 @@ export interface FileRoutesByTo {
   '/lab/portfolio': typeof LabPortfolioRoute
   '/lab/qaoa': typeof LabQaoaRoute
   '/lab/qml': typeof LabQmlRoute
+  '/lab/reports': typeof LabReportsRoute
   '/lab/vqe': typeof LabVqeRoute
   '/lab': typeof LabIndexRoute
 }
@@ -105,6 +113,7 @@ export interface FileRoutesById {
   '/lab/portfolio': typeof LabPortfolioRoute
   '/lab/qaoa': typeof LabQaoaRoute
   '/lab/qml': typeof LabQmlRoute
+  '/lab/reports': typeof LabReportsRoute
   '/lab/vqe': typeof LabVqeRoute
   '/lab/': typeof LabIndexRoute
 }
@@ -119,6 +128,7 @@ export interface FileRouteTypes {
     | '/lab/portfolio'
     | '/lab/qaoa'
     | '/lab/qml'
+    | '/lab/reports'
     | '/lab/vqe'
     | '/lab/'
   fileRoutesByTo: FileRoutesByTo
@@ -131,6 +141,7 @@ export interface FileRouteTypes {
     | '/lab/portfolio'
     | '/lab/qaoa'
     | '/lab/qml'
+    | '/lab/reports'
     | '/lab/vqe'
     | '/lab'
   id:
@@ -143,6 +154,7 @@ export interface FileRouteTypes {
     | '/lab/portfolio'
     | '/lab/qaoa'
     | '/lab/qml'
+    | '/lab/reports'
     | '/lab/vqe'
     | '/lab/'
   fileRoutesById: FileRoutesById
@@ -156,6 +168,7 @@ export interface RootRouteChildren {
   LabPortfolioRoute: typeof LabPortfolioRoute
   LabQaoaRoute: typeof LabQaoaRoute
   LabQmlRoute: typeof LabQmlRoute
+  LabReportsRoute: typeof LabReportsRoute
   LabVqeRoute: typeof LabVqeRoute
   LabIndexRoute: typeof LabIndexRoute
 }
@@ -225,6 +238,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LabQmlRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lab/reports': {
+      id: '/lab/reports'
+      path: '/lab/reports'
+      fullPath: '/lab/reports'
+      preLoaderRoute: typeof LabReportsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lab/vqe': {
       id: '/lab/vqe'
       path: '/lab/vqe'
@@ -244,6 +264,7 @@ const rootRouteChildren: RootRouteChildren = {
   LabPortfolioRoute: LabPortfolioRoute,
   LabQaoaRoute: LabQaoaRoute,
   LabQmlRoute: LabQmlRoute,
+  LabReportsRoute: LabReportsRoute,
   LabVqeRoute: LabVqeRoute,
   LabIndexRoute: LabIndexRoute,
 }
