@@ -11,3 +11,4 @@ export * from "./classical";
 export * from "./benchmark";
 export * from "./entanglement";
 export * from "./qaoa-lab";
+export * from "./vqe";
