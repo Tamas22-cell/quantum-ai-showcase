@@ -7,7 +7,7 @@ export type LabModule = {
   topics: string[];
   status: "available" | "in-development";
   group: "core" | "command";
-  to?: "/lab/circuit-builder" | "/lab/entanglement" | "/lab/qaoa" | "/lab/vqe" | "/lab/portfolio" | "/lab/arena" | "/lab/assistant";
+  to?: "/lab/circuit-builder" | "/lab/entanglement" | "/lab/qaoa" | "/lab/vqe" | "/lab/portfolio" | "/lab/arena" | "/lab/assistant" | "/lab/qml";
 };
 
 export const LAB_MODULES: LabModule[] = [
@@ -40,7 +40,7 @@ export const LAB_MODULES: LabModule[] = [
   {
     id: "qml", index: "06", title: "Quantum Machine Learning Lab",
     summary: "Small variational quantum classifier compared with a classical baseline on the same split.",
-    topics: ["Feature maps", "Loss curves", "Confusion matrix"], status: "in-development", group: "core",
+    topics: ["Feature maps", "Loss curves", "Confusion matrix"], status: "available", to: "/lab/qml", group: "core",
   },
 
   {
