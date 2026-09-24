@@ -327,7 +327,7 @@ export function PortfolioSite() {
             <SectionHeading index="04" title="Certifications" copy="This section is reserved for verified credentials. No certification claims are displayed until details are supplied." />
             <div className="grid gap-4 md:grid-cols-2">
               {portfolio.certifications.map((item, index) => {
-                const verified = "verified" in item && item.verified === true;
+                const verified = (item as { verified?: boolean }).verified === true;
                 return (
                   <div key={index} className={`grid min-h-36 grid-cols-[auto_minmax(0,1fr)] gap-5 rounded-md border bg-card p-6 ${verified ? "border-primary/40" : "border-dashed border-border-strong"}`}>
                     <span className={`grid size-9 place-items-center rounded-sm border ${verified ? "border-primary/50 text-primary" : "border-border text-muted-foreground"}`}>
