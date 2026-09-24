@@ -13,7 +13,7 @@ import {
 const field = "w-full rounded-sm border border-border bg-surface px-2 py-1.5 font-mono text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 const pct = (x: number) => (Number.isFinite(x) ? `${(x * 100).toFixed(1)}%` : "—");
 const fmt = (x: number, d = 4) => (Number.isFinite(x) ? x.toFixed(d) : "—");
-const DEF_CFG: QmlConfig = { depth: 2, maxIter: 150, seed: 7, testFraction: 0.25 };
+const DEF_CFG: QmlConfig = { depth: 1, maxIter: 150, seed: 7, testFraction: 0.25 };
 const DEF_DATA = { kind: "xor" as DatasetKind, n: 60, seed: 3 };
 const LABEL = "Ideal noiseless classical statevector simulation — not quantum hardware.";
 
