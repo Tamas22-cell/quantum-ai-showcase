@@ -80,7 +80,7 @@ export function validateSettings(id: ReportModuleId, s: Settings): string[] {
     if (!Number.isFinite(n) || (f.kind === "int" && !Number.isInteger(n))) { errs.push(`${f.label} must be ${f.kind === "int" ? "an integer" : "a number"}.`); continue; }
     if ((f.min !== undefined && n < f.min) || (f.max !== undefined && n > f.max)) errs.push(`${f.label} must be between ${f.min} and ${f.max}.`);
   }
-  if (id === "portfolio" && !errs.length && Number(s.k) >= Number(s.assets)) errs.push("Select K must be smaller than the number of assets.");
+  if (id === "portfolio" && !errs.length && Number(s["k"]) >= Number(s["assets"])) errs.push("Select K must be smaller than the number of assets.");
   return errs;
 }
 
@@ -91,9 +91,10 @@ export async function runSource(id: ReportModuleId, s: Settings, opts: RunOpts =
   if (errs.length) throw new RangeError(errs.join(" "));
   const num = (k: string) => Number(s[k]);
   const seed = num("seed");
+  const sig = opts.signal ? { signal: opts.signal } : {};
   switch (id) {
     case "circuit": {
-      const ex = EXAMPLE_CIRCUITS.find((c) => c.id === s.exampleId)!;
+      const ex = EXAMPLE_CIRCUITS.find((c) => c.id === s["exampleId"])!;
       const probs = probabilities(simulate(ex.circuit));
       const measured = measuredQubits(ex.circuit);
       const dist = measured.length ? marginal(probs, measured) : probs;
@@ -101,19 +102,19 @@ export async function runSource(id: ReportModuleId, s: Settings, opts: RunOpts =
       return { kind: "circuit", exampleId: ex.id, circuit: structuredClone(ex.circuit), seed, shots: num("shots"), probs: Array.from(dist), counts: Array.from(counts), measured };
     }
     case "entanglement": {
-      const state = s.state as BellState;
+      const state = s["state"] as BellState;
       const B = ["X", "Y", "Z"] as const;
       const correlations = B.flatMap((a) => B.map((b) => ({ a, b, E: correlator(jointProbabilities(bellCircuit(state, a, b))) })));
       return { kind: "entanglement", state, seed, shots: num("shots"), zzProbs: Array.from(jointProbabilities(bellCircuit(state, "Z", "Z"))), correlations, chsh: runChsh(state, OPTIMAL_CHSH, num("shots"), seed) };
     }
     case "qaoa": {
-      const g = GRAPH_PRESETS.find((p) => p.id === s.presetId)!.graph;
-      return { kind: "qaoa", presetId: String(s.presetId), result: await runQaoaLab({ graph: structuredClone(g), p: num("p"), seed, restarts: num("restarts"), maxIter: num("maxIter") }, opts) };
+      const g = GRAPH_PRESETS.find((p) => p.id === s["presetId"])!.graph;
+      return { kind: "qaoa", presetId: String(s["presetId"]), result: await runQaoaLab({ graph: structuredClone(g), p: num("p"), seed, restarts: num("restarts"), maxIter: num("maxIter") }, opts) };
     }
     case "vqe": {
-      const h = HAMILTONIAN_PRESETS.find((p) => p.id === s.presetId)!.h;
-      const r = await runVqe({ hamiltonian: structuredClone(h), depth: num("depth"), rotations: "ry", optimizer: s.optimizer as OptimizerName, maxIter: num("maxIter"), restarts: num("restarts"), seed }, { signal: opts.signal, onProgress: (f) => opts.onProgress?.(f) });
-      return { kind: "vqe", presetId: String(s.presetId), result: r };
+      const h = HAMILTONIAN_PRESETS.find((p) => p.id === s["presetId"])!.h;
+      const r = await runVqe({ hamiltonian: structuredClone(h), depth: num("depth"), rotations: "ry", optimizer: s["optimizer"] as OptimizerName, maxIter: num("maxIter"), restarts: num("restarts"), seed }, { ...sig, onProgress: (f) => opts.onProgress?.(f) });
+      return { kind: "vqe", presetId: String(s["presetId"]), result: r };
     }
     case "portfolio": {
       const data = syntheticData(num("assets"), seed);
@@ -122,11 +123,11 @@ export async function runSource(id: ReportModuleId, s: Settings, opts: RunOpts =
       return { kind: "portfolio", data, model, result };
     }
     case "qml": {
-      const kind = s.dataset as DatasetKind, testFraction = 0.25;
+      const kind = s["dataset"] as DatasetKind, testFraction = 0.25;
       const data = generateDataset(kind, num("n"), seed);
       const { train, test } = trainTestSplit(data, testFraction, seed);
       const maxIter = num("maxIter");
-      const result = await trainQml(train, test, { depth: num("depth"), maxIter, seed, testFraction }, { signal: opts.signal, onProgress: (h) => opts.onProgress?.(h.iter / maxIter) });
+      const result = await trainQml(train, test, { depth: num("depth"), maxIter, seed, testFraction }, { ...sig, onProgress: (h) => opts.onProgress?.(h.iter / maxIter) });
       const quadratic = kind !== "linear";
       const lr = trainLogReg(train, { quadratic });
       const lp = (set: Sample[]) => set.map((p) => logRegPredict(lr, p.x1, p.x2));
@@ -139,9 +140,9 @@ export async function runSource(id: ReportModuleId, s: Settings, opts: RunOpts =
       };
     }
     case "arena": {
-      const g = GRAPH_PRESETS.find((p) => p.id === s.presetId)!.graph;
-      const r = await runArena({ graph: structuredClone(g), seed, p: num("p"), restarts: 3, maxIter: 150, shots: 1024, saSteps: 2000, greedyRestarts: 5 }, { signal: opts.signal, onProgress: (_l, f) => opts.onProgress?.(f) });
-      return { kind: "arena", presetId: String(s.presetId), result: r };
+      const g = GRAPH_PRESETS.find((p) => p.id === s["presetId"])!.graph;
+      const r = await runArena({ graph: structuredClone(g), seed, p: num("p"), restarts: 3, maxIter: 150, shots: 1024, saSteps: 2000, greedyRestarts: 5 }, { ...sig, onProgress: (_l, f) => opts.onProgress?.(f) });
+      return { kind: "arena", presetId: String(s["presetId"]), result: r };
     }
   }
 }
