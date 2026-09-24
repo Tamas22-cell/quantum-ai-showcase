@@ -64,7 +64,7 @@ describe("Finance — CSV parsing", () => {
 });
 
 describe("Finance — returns, covariance, correlation", () => {
-  it("simple returns", () => { expect(simpleReturns([100, 110, 99])).toEqual([0.1, -0.1].map((x, i) => (i ? 99 / 110 - 1 : x))); });
+  it("simple returns", () => { const r = simpleReturns([100, 110, 99]); expect(r[0]).toBeCloseTo(0.1, 14); expect(r[1]).toBeCloseTo(-0.1, 14); });
   it("matches hand-computed annualised statistics", () => {
     const prices = [[100], [100]];
     const ra = [0.01, -0.02, 0.03, 0.0], rb = [0.02, 0.01, -0.01, 0.0];
