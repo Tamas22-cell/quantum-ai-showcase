@@ -84,6 +84,6 @@ export const portfolio = {
   ],
   social: [
     { label: "LinkedIn", href: "https://www.linkedin.com/in/tamas-nemeth-8820a6a5/", placeholder: false },
-    { label: "GitHub", href: "#", placeholder: true },
+    { label: "GitHub", href: "https://github.com/Tamas22-cell", placeholder: false },
   ] satisfies PortfolioLink[],
 } as const;

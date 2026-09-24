@@ -232,7 +232,16 @@ export function PortfolioSite() {
                   <Linkedin className="size-4" aria-hidden="true" />
                   LinkedIn
                 </a>
-                <PlaceholderLink label="GitHub pending" icon={<Github className="size-4" aria-hidden="true" />} />
+                <a
+                  href={portfolio.social.find((link) => link.label === "GitHub")?.href ?? "#"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="GitHub profile of Tamás Németh (opens in a new tab)"
+                  className="inline-flex h-11 items-center gap-2 border border-border bg-surface px-3 font-mono text-xs text-foreground transition-colors hover:border-primary/60 hover:text-primary"
+                >
+                  <Github className="size-4" aria-hidden="true" />
+                  GitHub
+                </a>
               </div>
             </div>
           </div>
