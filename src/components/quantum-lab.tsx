@@ -72,8 +72,9 @@ function BlochSphere({ v }: { v: { x: number; y: number; z: number } }) {
     const pts = Array.from({ length: 73 }, (_, i) => project(...fn((i / 72) * Math.PI * 2)));
     const back: string[] = [], front: string[] = [];
     for (let i = 1; i < pts.length; i++) {
-      const seg = `M${pts[i - 1].sx},${pts[i - 1].sy}L${pts[i].sx},${pts[i].sy}`;
-      (pts[i].d > 0 ? back : front).push(seg);
+      const a = pts[i - 1]!, b = pts[i]!;
+      const seg = `M${a.sx},${a.sy}L${b.sx},${b.sy}`;
+      (b.d > 0 ? back : front).push(seg);
     }
     return { back: back.join(""), front: front.join("") };
   };
