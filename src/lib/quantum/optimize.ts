@@ -2,7 +2,7 @@
  * Derivative-free Nelder–Mead minimiser (deterministic given x0).
  * `onIter` receives the best value after each iteration and may be async so callers can yield to the UI.
  */
-export type NMOptions = { maxIter?: number; step?: number; tol?: number; signal?: AbortSignal; onIter?: (best: number, it: number) => void | Promise<void> };
+export type NMOptions = { maxIter?: number; step?: number; tol?: number; signal?: AbortSignal | undefined; onIter?: (best: number, it: number) => void | Promise<void> };
 
 export async function nelderMead(f: (x: number[]) => number, x0: number[], opts: NMOptions = {}) {
   const { maxIter = 200, step = 0.3, tol = 1e-8 } = opts;
