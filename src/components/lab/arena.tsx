@@ -91,7 +91,7 @@ export function Arena() {
     : [];
 
   return (
-    <div className="grid gap-5 lg:grid-cols-[minmax(0,380px)_minmax(0,1fr)]">
+    <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,380px)_minmax(0,1fr)]">
       {/* ---------------- Configuration ---------------- */}
       <div className="space-y-5">
         <Panel title="Problem instance">
@@ -189,7 +189,7 @@ export function Arena() {
               </p>
             </Panel>
 
-            <div className="grid gap-5 xl:grid-cols-2">
+            <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
               <Panel title="QAOA details">
                 <dl className="grid grid-cols-2 gap-x-4 gap-y-2 font-mono text-xs">
                   <dt className="text-muted-foreground">⟨C⟩ (expected cut)</dt><dd>{result.qaoa.expectation.toFixed(4)}</dd>
