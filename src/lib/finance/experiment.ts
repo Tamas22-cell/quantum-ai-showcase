@@ -13,7 +13,7 @@ import {
 
 export type FinanceInput = { symbols: string[]; range: RangeId; model: PortfolioModel; config: PortfolioConfig };
 export type FinanceExperiment = {
-  source: DataSource; demoSeed?: number; range: RangeId; stats: MarketStats; data: PortfolioData;
+  source: DataSource; demoSeed?: number | undefined; range: RangeId; stats: MarketStats; data: PortfolioData;
   model: PortfolioModel; result: PortfolioResult;
   fMax: number;
   approxRatio: number; // normalised, on ⟨f⟩
@@ -43,7 +43,7 @@ export async function runFinanceExperiment(series: PriceSeries, input: FinanceIn
   if (errs.length) throw new RangeError(errs.join(" "));
   const stats = computeStats(sliceRange(series, input.range), input.symbols).stats!;
   const data = toPortfolioData(stats, series.source);
-  const result = await runPortfolioQaoa(data, input.model, input.config, { signal: opts.signal, onProgress: opts.onProgress });
+  const result = await runPortfolioQaoa(data, input.model, input.config, opts);
   const table = exhaustivePortfolio(buildQubo(data, input.model), input.model).table;
   let fMax = -Infinity; for (const v of table) fMax = Math.max(fMax, v);
   return {
