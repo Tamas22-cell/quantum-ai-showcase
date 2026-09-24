@@ -83,7 +83,7 @@ export const portfolio = {
     { title: "Certification entry", detail: "Credential details pending verification" },
   ],
   social: [
-    { label: "LinkedIn", href: "#", placeholder: true },
+    { label: "LinkedIn", href: "https://www.linkedin.com/in/tamas-nemeth-8820a6a5/", placeholder: false },
     { label: "GitHub", href: "#", placeholder: true },
   ] satisfies PortfolioLink[],
 } as const;

@@ -222,7 +222,16 @@ export function PortfolioSite() {
             <div className="lg:justify-self-end">
               <p className="max-w-md text-sm leading-7 text-muted-foreground">Verified contact destinations will be connected here. Until then, the buttons remain intentionally inactive.</p>
               <div className="mt-6 flex flex-wrap gap-3">
-                <PlaceholderLink label="LinkedIn pending" icon={<Linkedin className="size-4" aria-hidden="true" />} />
+                <a
+                  href={portfolio.social[0].href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="LinkedIn profile of Tamás Németh (opens in a new tab)"
+                  className="inline-flex h-11 items-center gap-2 border border-border bg-surface px-3 font-mono text-xs text-foreground transition-colors hover:border-primary/60 hover:text-primary"
+                >
+                  <Linkedin className="size-4" aria-hidden="true" />
+                  LinkedIn
+                </a>
                 <PlaceholderLink label="GitHub pending" icon={<Github className="size-4" aria-hidden="true" />} />
               </div>
             </div>
