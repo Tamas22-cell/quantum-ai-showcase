@@ -12,6 +12,7 @@ const FAST: Record<ReportModuleId, Record<string, string | number>> = {
   portfolio: { ...SOURCES.portfolio.defaults, assets: 4, p: 1 },
   qml: { ...SOURCES.qml.defaults, n: 24, maxIter: 20 },
   arena: { ...SOURCES.arena.defaults, presetId: "square", p: 1 },
+  finance: { ...SOURCES.finance.defaults, assets: 4, p: 1 },
 };
 const IDS = Object.keys(SOURCES) as ReportModuleId[];
 const snaps = new Map<ReportModuleId, Snapshot>();

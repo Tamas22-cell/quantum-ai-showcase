@@ -9,6 +9,7 @@ import {
   type BellState, type Circuit, type ChshResult, type QaoaLabResult, type VqeResult, type PortfolioData, type PortfolioModel,
   type PortfolioResult, type QmlResult, type Sample, type ArenaResult, type OptimizerName, type DatasetKind,
 } from "@/lib/quantum";
+import { DEMO_UNIVERSE, RANGES, demoPrices, runFinanceExperiment, type FinanceExperiment, type RangeId } from "@/lib/finance";
 import type { ReportModuleId } from "./types";
 
 export type CircuitSnapshot = { kind: "circuit"; exampleId: string; circuit: Circuit; seed: number; shots: number; probs: number[]; counts: number[]; measured: number[] };
@@ -19,7 +20,9 @@ export type PortfolioSnapshot = { kind: "portfolio"; data: PortfolioData; model:
 export type QmlSnapshot = { kind: "qml"; seed: number; dataset: DatasetKind; n: number; testFraction: number; train: Sample[]; test: Sample[]; result: QmlResult; baseline: { trainAcc: number; testAcc: number; quadratic: boolean }; confusionTest: [[number, number], [number, number]] };
 export type ArenaSnapshot = { kind: "arena"; presetId: string; result: ArenaResult };
 
-export type Snapshot = CircuitSnapshot | EntanglementSnapshot | QaoaSnapshot | VqeSnapshot | PortfolioSnapshot | QmlSnapshot | ArenaSnapshot;
+export type FinanceSnapshot = { kind: "finance"; experiment: FinanceExperiment };
+
+export type Snapshot = FinanceSnapshot | CircuitSnapshot | EntanglementSnapshot | QaoaSnapshot | VqeSnapshot | PortfolioSnapshot | QmlSnapshot | ArenaSnapshot;
 
 export type FieldSpec = { key: string; label: string; kind: "int" | "number" | "select"; min?: number; max?: number; step?: number; options?: { value: string; label: string }[] };
 export type Settings = Record<string, string | number>;
@@ -67,6 +70,11 @@ export const SOURCES: Record<ReportModuleId, { name: string; route: string; fiel
     fields: [{ key: "presetId", label: "Graph", kind: "select", options: graphOpts }, { key: "p", label: "QAOA depth p", kind: "int", min: 1, max: 5 }, seedField],
     defaults: { presetId: "k4w", p: 2, seed: 42 },
   },
+  finance: {
+    name: "Live Quantum Finance Lab", route: "/lab/finance",
+    fields: [{ key: "assets", label: "Demo assets", kind: "int", min: 2, max: 8 }, { key: "range", label: "Time range", kind: "select", options: RANGES.map((r) => ({ value: r.id, label: r.label })) }, { key: "k", label: "Select K", kind: "int", min: 1, max: 7 }, { key: "riskAversion", label: "Risk aversion q", kind: "number", min: 0, max: 100, step: 0.5 }, { key: "penalty", label: "Penalty A", kind: "number", min: 0.1, max: 100, step: 0.1 }, { key: "p", label: "QAOA depth p", kind: "int", min: 1, max: 4 }, seedField],
+    defaults: { assets: 5, range: "1y", k: 2, riskAversion: 2, penalty: 1, p: 2, seed: 42 },
+  },
 };
 
 /** Validates settings against the field specs; returns readable errors (empty = valid). */
@@ -80,7 +88,7 @@ export function validateSettings(id: ReportModuleId, s: Settings): string[] {
     if (!Number.isFinite(n) || (f.kind === "int" && !Number.isInteger(n))) { errs.push(`${f.label} must be ${f.kind === "int" ? "an integer" : "a number"}.`); continue; }
     if ((f.min !== undefined && n < f.min) || (f.max !== undefined && n > f.max)) errs.push(`${f.label} must be between ${f.min} and ${f.max}.`);
   }
-  if (id === "portfolio" && !errs.length && Number(s["k"]) >= Number(s["assets"])) errs.push("Select K must be smaller than the number of assets.");
+  if ((id === "portfolio" || id === "finance") && !errs.length && Number(s["k"]) >= Number(s["assets"])) errs.push("Select K must be smaller than the number of assets.");
   return errs;
 }
 
@@ -93,6 +101,13 @@ export async function runSource(id: ReportModuleId, s: Settings, opts: RunOpts =
   const seed = num("seed");
   const sig = opts.signal ? { signal: opts.signal } : {};
   switch (id) {
+    case "finance": {
+      const series = demoPrices(seed);
+      const symbols = DEMO_UNIVERSE.slice(0, num("assets")).map((a) => a.symbol);
+      const model: PortfolioModel = { riskAversion: num("riskAversion"), k: num("k"), penalty: num("penalty"), excluded: [] };
+      const experiment = await runFinanceExperiment(series, { symbols, range: s["range"] as RangeId, model, config: { p: num("p"), seed, restarts: 3, maxIter: 150, shots: 2000 } }, { ...opts, demoSeed: seed });
+      return { kind: "finance", experiment };
+    }
     case "circuit": {
       const ex = EXAMPLE_CIRCUITS.find((c) => c.id === s["exampleId"])!;
       const probs = probabilities(simulate(ex.circuit));

@@ -5,7 +5,7 @@
 import { EXAMPLE_CIRCUITS, GRAPH_PRESETS, HAMILTONIAN_PRESETS, BELL_STATES, TSIRELSON, toBitstring, costHamiltonianTerms, mixerHamiltonianTerms, formatHamiltonian, portfolioMetrics, type Circuit, type Graph } from "@/lib/quantum";
 import type { Snapshot } from "./sources";
 import { SOURCES } from "./sources";
-import { CORE_DISCLAIMER, NO_ADVANTAGE, NO_FIN_ADVICE, NO_LIVE_DATA, NO_QML_CLAIM, ReportInputError, type Block, type ReportDoc, type Section } from "./types";
+import { CORE_DISCLAIMER, NO_ADVANTAGE, NO_FIN_ADVICE, NO_LIVE_DATA, NO_QML_CLAIM, NO_GUARANTEE, PAST_PERFORMANCE, QUANTUM_LABEL, ReportInputError, type Block, type ReportDoc, type Section } from "./types";
 
 const f = (x: number | null | undefined, d = 4) => (x === null || x === undefined || !Number.isFinite(x) ? "n/a" : x.toFixed(d));
 const pct = (x: number | null | undefined) => (x === null || x === undefined || !Number.isFinite(x) ? "n/a" : `${(x * 100).toFixed(1)}%`);
@@ -268,6 +268,47 @@ function arenaReport(s: Extract<Snapshot, { kind: "arena" }>, at: string): Repor
   ]);
 }
 
+function financeReport(s: Extract<Snapshot, { kind: "finance" }>, at: string): ReportDoc {
+  const e = s.experiment;
+  need(e && e.stats && Array.isArray(e.stats.symbols) && e.stats.symbols.length >= 2 && finiteArr(e.stats.mu), "Market statistics are missing.");
+  need(e.result && e.result.exact && finite(e.result.expectedObjective) && finiteArr(e.result.gammas), "QAOA portfolio result is missing.");
+  need(e.baselines && e.baselines.equalWeight && finite(e.baselines.equalWeight.ret), "Classical baselines are missing.");
+  const st = e.stats, r = e.result, b = e.baselines, m = e.model, n = st.symbols.length;
+  const sel = (x: number) => st.symbols.filter((_, i) => (x >> i) & 1).join(", ") || "(none)";
+  const w = (ws: number[]) => ws.map((v, i) => (Math.abs(v) > 1e-9 ? `${st.symbols[i]} ${pct(v)}` : "")).filter(Boolean).join(", ");
+  const srcLabel = e.source === "demo" ? `Demo mode: seeded synthetic prices (seed ${e.demoSeed ?? "n/a"}); not market data.` : e.source === "csv" ? "User-uploaded CSV prices, processed in the browser; not verified." : "Live market-data provider (configured server-side); data not independently verified.";
+  const results: Block[] = [
+    { type: "table", caption: "Classical calculations vs simulated QAOA (equal weights within a selection)", head: ["Method", "Type", "Portfolio", "Return", "Volatility"], rows: [
+      ["Equal weight (all assets)", "classical", w(b.equalWeight.weights), pct(b.equalWeight.ret), pct(b.equalWeight.vol)],
+      ["Global min-variance", "classical", b.minVariance ? `${w(b.minVariance.weights)}${b.minVariance.longOnly ? "" : " (uses shorts)"}` : "n/a (singular)", pct(b.minVariance?.ret), pct(b.minVariance?.vol)],
+      [`Min-variance K=${m.k} subset`, "classical exhaustive", b.minVarSubset ? sel(b.minVarSubset.x) : "n/a", pct(b.minVarSubset?.p.ret), pct(b.minVarSubset?.p.vol)],
+      ["Exhaustive QUBO optimum", "classical exhaustive", sel(r.exact.assignment), pct(b.exact.ret), pct(b.exact.vol)],
+      ["QAOA most likely", "simulated QAOA", sel(r.mostLikely.x), pct(b.qaoaMostLikely.ret), pct(b.qaoaMostLikely.vol)],
+      ["QAOA sampled best", "simulated QAOA", sel(r.sampledBest.x), pct(b.qaoaSampledBest.ret), pct(b.qaoaSampledBest.vol)],
+    ] },
+    { type: "kv", rows: [["Exact objective f*", f(r.exact.value)], ["Expected objective <f> (QAOA state)", f(r.expectedObjective)], ["Normalised approximation ratio", f(e.approxRatio)], ["P(optimal portfolio)", f(r.pOptimal)], ["P(feasible, |S| = K)", f(r.pFeasible)], ["gamma", arr(r.gammas)], ["beta", arr(r.betas)]] },
+  ];
+  if (r.probs?.length) { const t = topProbs(r.probs, n); results.push({ type: "bar", caption: "QAOA probability distribution (top selections; highlighted = exact optimum)", labels: t.labels, values: t.values, highlight: t.idx.flatMap((z, i) => (z === r.exact.assignment ? [i] : [])) }); }
+  if (r.history?.length) results.push({ type: "line", caption: "Convergence of best <f> (minimisation)", xLabel: "evaluations", yLabel: "<f>", series: [{ name: "best <f>", points: r.history.map((h) => [h.evals, h.best]) }], reference: { label: "exact min", y: r.exact.value } });
+  return wrap(s, at, [QUANTUM_LABEL, NO_FIN_ADVICE, NO_GUARANTEE, PAST_PERFORMANCE, e.source === "demo" ? NO_LIVE_DATA : srcLabel, NO_ADVANTAGE], [
+    `Market data: ${srcLabel} ${st.periods} returns from ${st.start} to ${st.end}.`,
+    `Select K=${m.k} of ${n} assets with risk aversion q=${m.riskAversion}. Exact optimum: ${sel(r.exact.assignment)}; QAOA assigns ${pct(r.pOptimal)} probability to it (approximation ratio ${f(e.approxRatio, 3)}).`,
+  ], [
+    { heading: "Experiment setup", blocks: [
+      { type: "notice", text: `MARKET DATA — ${srcLabel}` },
+      { type: "table", caption: `Annualised statistics (${st.periodsPerYear} periods/year)`, head: ["Asset", "Expected return", "Volatility", "Total return (range)"], rows: st.symbols.map((nm, i) => [nm, pct(st.mu[i]), pct(st.vol[i]), pct(st.totalReturn[i])]) },
+      { type: "table", caption: "Correlation matrix", head: ["", ...st.symbols], rows: st.corr.map((row, i) => [st.symbols[i]!, ...row.map((v) => f(v, 2))]) },
+      { type: "kv", rows: [["Time range", e.range], ["Risk aversion q", String(m.riskAversion)], ["Cardinality K", String(m.k)], ["Penalty A", String(m.penalty)], ["QAOA depth p", String(r.config.p)], ["Shots", String(r.config.shots)]] },
+      { type: "paragraph", text: "Objective (minimised): f(x) = q*x'Sx - mu'x + A*(sum x - K)^2, x in {0,1}^n, mapped to an Ising Hamiltonian via x = (1 - z)/2." },
+    ] },
+    { heading: "Methodology", blocks: [{ type: "paragraph", text: "Simple period returns are computed from closing prices; mean and unbiased sample covariance are annualised. These feed the same QUBO/QAOA engine as the Quantum Portfolio Optimizer. The classical reference enumerates all 2^n selections; the global minimum-variance portfolio uses the closed form w = S^-1 1 / 1'S^-1 1." }] },
+    { heading: "Results", blocks: results },
+    { heading: "Interpretation", blocks: [{ type: "paragraph", text: "Classical exhaustive search is exact and instantaneous at this size; the QAOA run illustrates the formulation only. Sample statistics from historical data are noisy estimates of future behaviour." }] },
+    { heading: "Limitations", blocks: [{ type: "bullets", items: ["Binary equal-weight selection; no transaction costs, taxes, liquidity or lot sizes.", "Estimation error in mean returns dominates small-sample portfolio optimisation.", "At most 8 assets (2^8 amplitudes) for exact and QAOA simulation.", "Uniform annualisation factor applied to every asset."] }] },
+    reproducibility(r.config.seed, [["Demo data seed", e.demoSeed === undefined ? "n/a" : String(e.demoSeed)], ["Restarts", String(r.config.restarts)], ["Max iterations", String(r.config.maxIter)]]),
+  ]);
+}
+
 /** Entry point. `generatedAt` is injectable for deterministic tests. */
 export function buildReport(snap: Snapshot | null | undefined, generatedAt: string = new Date().toISOString()): ReportDoc {
   need(snap && typeof snap === "object" && "kind" in snap, "No experiment data supplied.");
@@ -279,6 +320,7 @@ export function buildReport(snap: Snapshot | null | undefined, generatedAt: stri
     case "portfolio": return portfolioReport(snap, generatedAt);
     case "qml": return qmlReport(snap, generatedAt);
     case "arena": return arenaReport(snap, generatedAt);
+    case "finance": return financeReport(snap, generatedAt);
     default: throw new ReportInputError(`Unsupported module: ${String((snap as { kind: unknown }).kind)}`);
   }
 }

@@ -1,5 +1,5 @@
 /** Renderer-agnostic report document model. Builders produce it; the PDF renderer consumes it. */
-export type ReportModuleId = "circuit" | "entanglement" | "qaoa" | "vqe" | "portfolio" | "qml" | "arena";
+export type ReportModuleId = "circuit" | "entanglement" | "qaoa" | "vqe" | "portfolio" | "qml" | "arena" | "finance";
 
 export type Block =
   | { type: "paragraph"; text: string }
@@ -26,6 +26,9 @@ export const CORE_DISCLAIMER = "Ideal noiseless classical statevector simulation
 export const NO_ADVANTAGE = "No claim of quantum advantage is made or implied.";
 export const NO_QML_CLAIM = "No claim that the quantum ML model outperforms classical machine learning.";
 export const NO_FIN_ADVICE = "Not financial advice. Educational demonstration only.";
+export const NO_GUARANTEE = "No guaranteed returns.";
+export const PAST_PERFORMANCE = "Historical performance does not guarantee future results.";
+export const QUANTUM_LABEL = "Quantum calculations are ideal noiseless classical statevector simulations unless explicitly labelled as IBM Quantum hardware results.";
 export const NO_LIVE_DATA = "No live market data: inputs are synthetic (seeded) — no market-data provider is connected.";
 
 /** Thrown when an experiment snapshot is incomplete or malformed. */
