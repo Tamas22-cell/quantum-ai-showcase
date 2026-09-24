@@ -6,7 +6,8 @@
  *   Ry(π·x₁) q0, Ry(π·x₂) q1          — angle encoding of features scaled to [-1, 1]
  *   Ry(θ) Rz(θ) on q0 and on q1        — 4 trainable parameters
  *   CNOT(q0 → q1)                      — entangling layer
- * Output: P(class 1) = P(parity of q1q0 is odd) = (1 − ⟨Z₀Z₁⟩)/2, which is always in [0, 1].
+ * Output: P(class 1) = P(q1 = 1) after the final CNOT. Because CNOT maps Z₁ → Z₀Z₁, this equals the odd-parity
+ *   probability of the state just before the entangler, (1 − ⟨Z₀Z₁⟩)/2 — a non-linear readout that can express XOR.
  * Training minimises binary cross-entropy with the gradient-free Nelder–Mead optimiser (seeded init).
  * Ideal noiseless classical simulation — not quantum hardware; educational only.
  */
@@ -119,10 +120,10 @@ export function qmlCircuit(x1: number, x2: number, params: number[], depth: numb
 export function measurementProbs(x1: number, x2: number, params: number[], depth: number): number[] {
   return Array.from(probabilities(simulate(qmlCircuit(x1, x2, params, depth))));
 }
-/** P(class 1) = probability of odd parity (|01⟩ + |10⟩). */
+/** P(class 1) = P(q1 = 1) = p(|10⟩) + p(|11⟩) (index = q1q0). */
 export function predictProba(x1: number, x2: number, params: number[], depth: number): number {
   const p = measurementProbs(x1, x2, params, depth);
-  return p[1]! + p[2]!;
+  return p[2]! + p[3]!;
 }
 
 export function bceLoss(probs: number[], labels: (0 | 1)[]): number {
