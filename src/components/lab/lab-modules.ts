@@ -7,7 +7,7 @@ export type LabModule = {
   topics: string[];
   status: "available" | "in-development";
   group: "core" | "command";
-  to?: "/lab/circuit-builder" | "/lab/entanglement" | "/lab/qaoa" | "/lab/arena" | "/lab/assistant";
+  to?: "/lab/circuit-builder" | "/lab/entanglement" | "/lab/qaoa" | "/lab/vqe" | "/lab/arena" | "/lab/assistant";
 };
 
 export const LAB_MODULES: LabModule[] = [
@@ -30,7 +30,7 @@ export const LAB_MODULES: LabModule[] = [
   {
     id: "vqe", index: "04", title: "VQE Research Lab",
     summary: "Variational eigensolver for small explicit Hamiltonians with exact-diagonalisation reference.",
-    topics: ["Ansatz", "Optimizers", "Exact reference"], status: "in-development", group: "core",
+    topics: ["Ansatz", "Optimizers", "Exact reference"], status: "available", to: "/lab/vqe", group: "core",
   },
   {
     id: "portfolio", index: "05", title: "Quantum Portfolio Optimizer",
