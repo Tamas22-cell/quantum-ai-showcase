@@ -29,8 +29,11 @@ function LabDashboard() {
           they are not quantum hardware results and make no claim of quantum advantage. Modules are released one at a time as their calculations and tests are completed.
         </p>
       </div>
+      {(["core", "command"] as const).map((group) => (
+      <section key={group} className="mb-12" aria-label={group === "core" ? "Core laboratories" : "Research Command Center"}>
+      <h2 className="mb-5 font-mono text-xs uppercase tracking-wider text-primary">{group === "core" ? "Core laboratories" : "Research Command Center"}</h2>
       <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-        {LAB_MODULES.map((m) => {
+        {LAB_MODULES.filter((m) => m.group === group).map((m) => {
           const available = m.status === "available";
           const body = (
             <>
