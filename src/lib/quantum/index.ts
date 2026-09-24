@@ -10,3 +10,4 @@ export * from "./qaoa";
 export * from "./classical";
 export * from "./benchmark";
 export * from "./entanglement";
+export * from "./qaoa-lab";
