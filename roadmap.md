@@ -7,7 +7,7 @@
 - [x] C1 — Quantum vs Classical Arena (/lab/arena): QAOA Max-Cut engine, exhaustive/greedy/SA/random baselines, seeded, CSV/JSON export, 10 tests.
 - [x] Module 2 — Entanglement Lab (/lab/entanglement): Bell states, X/Y/Z bases, correlations, seeded CHSH, 8 tests.
 - [x] Module 3 — QAOA Lab (/lab/qaoa): graph editor, Hamiltonians, parameter inspector, seeded optimisation, exact comparison, 12 tests.
-- [ ] Module 4 — VQE Lab.
+- [x] Module 4 — VQE Research Lab (/lab/vqe), 14 tests.
 - [ ] Module 5 — Quantum Portfolio Optimizer.
 - [ ] Module 6 — Quantum ML Lab.
 - [x] C2 — AI Research Assistant (needs Lovable Cloud + AI; circuits validated by engine before loading into builder). (built; demo mode default, Live AI opt-in)
