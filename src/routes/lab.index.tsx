@@ -58,6 +58,8 @@ function LabDashboard() {
           );
         })}
       </div>
+      </section>
+      ))}
     </LabShell>
   );
 }
