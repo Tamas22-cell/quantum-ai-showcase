@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState, useTransition } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { readTransfer } from "@/lib/assistant/transfer";
-import { ChevronLeft, ChevronRight, Dices, RotateCcw, Trash2, Undo2 } from "lucide-react";
+import { writeIbmTransfer } from "@/lib/ibm/job";
+import { ChevronLeft, ChevronRight, Dices, RotateCcw, Send, Trash2, Undo2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -20,6 +22,7 @@ const fmtNum = (v: number) => (Math.abs(v) < 5e-13 ? 0 : v).toFixed(4);
 const fmtComplex = (re: number, im: number) => `${fmtNum(re)} ${im < -5e-13 ? "−" : "+"} ${fmtNum(Math.abs(im))}i`;
 
 export function CircuitBuilder() {
+  const navigate = useNavigate();
   const [circuit, setCircuit] = useState<Circuit>(EXAMPLE_CIRCUITS[0]!.circuit);
   const [history, setHistory] = useState<Circuit[]>([]);
   const [selected, setSelected] = useState<number | null>(null);
@@ -135,6 +138,7 @@ export function CircuitBuilder() {
             <div className="flex flex-wrap gap-2">
               <Button size="sm" variant="signalOutline" onClick={undo} disabled={!history.length}><Undo2 aria-hidden="true" />Undo</Button>
               <Button size="sm" variant="signalOutline" onClick={() => commit({ numQubits: n, ops: [] })} disabled={!circuit.ops.length}><RotateCcw aria-hidden="true" />Reset</Button>
+              <Button size="sm" variant="signalOutline" disabled={errors.length > 0} onClick={() => { if (writeIbmTransfer(circuit, window.sessionStorage)) void navigate({ to: "/lab/ibm" }); }}><Send aria-hidden="true" />Send to IBM prep</Button>
             </div>
           }
         >

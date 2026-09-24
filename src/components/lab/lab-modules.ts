@@ -7,7 +7,7 @@ export type LabModule = {
   topics: string[];
   status: "available" | "in-development";
   group: "core" | "command";
-  to?: "/lab/circuit-builder" | "/lab/entanglement" | "/lab/qaoa" | "/lab/vqe" | "/lab/portfolio" | "/lab/arena" | "/lab/assistant" | "/lab/qml" | "/lab/reports";
+  to?: "/lab/circuit-builder" | "/lab/entanglement" | "/lab/qaoa" | "/lab/vqe" | "/lab/portfolio" | "/lab/arena" | "/lab/assistant" | "/lab/qml" | "/lab/reports" | "/lab/ibm";
 };
 
 export const LAB_MODULES: LabModule[] = [
@@ -55,8 +55,8 @@ export const LAB_MODULES: LabModule[] = [
   },
   {
     id: "ibm", index: "C3", title: "IBM Quantum Cloud Integration", group: "command",
-    summary: "Optional Qiskit job submission to IBM Quantum hardware. Requires an external Python service and your IBM credentials — not connected.",
-    topics: ["Qiskit", "Jobs", "Not configured"], status: "in-development",
+    summary: "Validate circuits, export OpenQASM 3 and run ideal simulations. Hardware submission stays disabled until an external Qiskit service and your IBM token are configured.",
+    topics: ["OpenQASM 3", "Simulator mode", "Hardware not configured"], status: "available", to: "/lab/ibm",
   },
   {
     id: "finance", index: "C4", title: "Live Quantum Finance Lab", group: "command",
