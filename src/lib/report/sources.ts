@@ -16,7 +16,7 @@ export type EntanglementSnapshot = { kind: "entanglement"; state: BellState; see
 export type QaoaSnapshot = { kind: "qaoa"; presetId: string; result: QaoaLabResult };
 export type VqeSnapshot = { kind: "vqe"; presetId: string; result: VqeResult };
 export type PortfolioSnapshot = { kind: "portfolio"; data: PortfolioData; model: PortfolioModel; result: PortfolioResult };
-export type QmlSnapshot = { kind: "qml"; dataset: DatasetKind; n: number; testFraction: number; train: Sample[]; test: Sample[]; result: QmlResult; baseline: { trainAcc: number; testAcc: number; quadratic: boolean }; confusionTest: [[number, number], [number, number]] };
+export type QmlSnapshot = { kind: "qml"; seed: number; dataset: DatasetKind; n: number; testFraction: number; train: Sample[]; test: Sample[]; result: QmlResult; baseline: { trainAcc: number; testAcc: number; quadratic: boolean }; confusionTest: [[number, number], [number, number]] };
 export type ArenaSnapshot = { kind: "arena"; presetId: string; result: ArenaResult };
 
 export type Snapshot = CircuitSnapshot | EntanglementSnapshot | QaoaSnapshot | VqeSnapshot | PortfolioSnapshot | QmlSnapshot | ArenaSnapshot;
@@ -134,7 +134,7 @@ export async function runSource(id: ReportModuleId, s: Settings, opts: RunOpts =
       const lab = (set: Sample[]) => set.map((p) => p.y);
       const qTest = test.map((p) => predictProba(p.x1, p.x2, result.params, result.depth));
       return {
-        kind: "qml", dataset: kind, n: num("n"), testFraction, train, test, result,
+        kind: "qml", seed, dataset: kind, n: num("n"), testFraction, train, test, result,
         baseline: { trainAcc: accuracy(lp(train), lab(train)), testAcc: test.length ? accuracy(lp(test), lab(test)) : NaN, quadratic },
         confusionTest: confusionMatrix(qTest, lab(test)),
       };

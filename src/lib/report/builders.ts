@@ -231,7 +231,7 @@ function qmlReport(s: Extract<Snapshot, { kind: "qml" }>, at: string): ReportDoc
     { heading: "Results", blocks: results },
     { heading: "Interpretation", blocks: [{ type: "paragraph", text: "Accuracy differences on tiny synthetic datasets are dominated by model capacity and the random split; they are not evidence that quantum models outperform classical ones." }] },
     { heading: "Limitations", blocks: [{ type: "bullets", items: ["Only 2 features / 2 qubits.", "Small, unstratified splits — high variance.", "Local optimiser can settle in weaker minima."] }] },
-    reproducibility(undefined, [["Seed (data, split, init)", String(s.result ? s.train.length && (s as { seed?: number }).seed !== undefined ? (s as { seed?: number }).seed : "see settings" : "n/a")], ["Iterations", String(r.history?.length ?? "n/a")]]),
+    reproducibility(s.seed, [["Dataset", s.dataset], ["Samples", String(s.n)], ["Test fraction", String(s.testFraction)], ["Iterations recorded", String(r.history?.length ?? "n/a")]], ["The same seed drives dataset generation, train/test split and parameter initialisation."]),
   ]);
 }
 
