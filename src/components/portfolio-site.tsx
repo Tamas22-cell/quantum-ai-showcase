@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "@tanstack/react-router";
 import {
   ArrowDown,
   ArrowUpRight,
@@ -318,6 +319,13 @@ export function PortfolioSite() {
           <div className="mx-auto max-w-7xl">
             <SectionHeading index="Q" title="Interactive Quantum Lab" copy="A single-qubit circuit simulator running in your browser. Apply gates, watch the state move on the Bloch sphere, and sample measurements." />
             <QuantumLab />
+            <div className="mt-8 flex flex-col items-start justify-between gap-4 rounded-md border border-border bg-card/80 p-5 sm:flex-row sm:items-center">
+              <div>
+                <p className="font-mono text-xs uppercase text-primary">Quantum Research Dashboard</p>
+                <p className="mt-1 text-sm text-muted-foreground">Multi-qubit circuit builder with statevector, seeded sampling and histograms. More labs in development.</p>
+              </div>
+              <Button asChild variant="signal"><Link to="/lab">Open Research Lab <ArrowUpRight aria-hidden="true" /></Link></Button>
+            </div>
           </div>
         </section>
 

@@ -34,6 +34,8 @@
   --color-surface-raised: var(--surface-raised);
   --color-signal-soft: var(--signal-soft);
   --color-grid-line: var(--grid-line);
+  --color-emerald: var(--emerald);
+  --color-emerald-soft: var(--emerald-soft);
 }
 
 :root {
@@ -62,6 +64,8 @@
   --surface-raised: oklch(0.185 0.032 239);
   --signal-soft: oklch(0.82 0.145 192 / 0.09);
   --grid-line: oklch(0.82 0.145 192 / 0.055);
+  --emerald: oklch(0.8 0.16 160);
+  --emerald-soft: oklch(0.8 0.16 160 / 0.12);
   --shadow-signal: 0 0 32px oklch(0.82 0.145 192 / 0.16);
 }
 
