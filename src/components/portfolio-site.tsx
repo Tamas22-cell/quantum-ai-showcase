@@ -223,7 +223,7 @@ export function PortfolioSite() {
               <p className="max-w-md text-sm leading-7 text-muted-foreground">Verified contact destinations will be connected here. Until then, the buttons remain intentionally inactive.</p>
               <div className="mt-6 flex flex-wrap gap-3">
                 <a
-                  href={portfolio.social[0].href}
+                  href={portfolio.social.find((link) => link.label === "LinkedIn")?.href ?? "#"}
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="LinkedIn profile of Tamás Németh (opens in a new tab)"
