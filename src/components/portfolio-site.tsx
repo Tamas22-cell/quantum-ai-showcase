@@ -17,6 +17,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { portfolio } from "@/data/portfolio";
+import { QuantumLab } from "@/components/quantum-lab";
 
 const projectIcons = [ShieldCheck, Network, Orbit];
 const researchIcons = [Orbit, Atom, Braces, Cpu];
@@ -197,6 +198,14 @@ export function PortfolioSite() {
             </div>
           </div>
         </section>
+
+        <section id="quantum-lab" className="lab-grid border-b border-border px-5 py-24 sm:px-8 lg:py-32">
+          <div className="mx-auto max-w-7xl">
+            <SectionHeading index="Q" title="Interactive Quantum Lab" copy="A single-qubit circuit simulator running in your browser. Apply gates, watch the state move on the Bloch sphere, and sample measurements." />
+            <QuantumLab />
+          </div>
+        </section>
+
 
         <section id="certifications" className="bg-surface px-5 py-24 sm:px-8 lg:py-32">
           <div className="mx-auto max-w-7xl">
