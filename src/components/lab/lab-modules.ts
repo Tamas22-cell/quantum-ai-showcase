@@ -7,7 +7,7 @@ export type LabModule = {
   topics: string[];
   status: "available" | "in-development";
   group: "core" | "command";
-  to?: "/lab/circuit-builder" | "/lab/arena";
+  to?: "/lab/circuit-builder" | "/lab/arena" | "/lab/assistant";
 };
 
 export const LAB_MODULES: LabModule[] = [
@@ -51,7 +51,7 @@ export const LAB_MODULES: LabModule[] = [
   {
     id: "assistant", index: "C2", title: "Quantum AI Research Assistant", group: "command",
     summary: "Explains algorithms and drafts circuits that are validated by the engine before use in the Circuit Builder.",
-    topics: ["AI", "Validated circuits"], status: "in-development",
+    topics: ["AI", "Validated circuits", "Demo mode"], status: "available", to: "/lab/assistant",
   },
   {
     id: "ibm", index: "C3", title: "IBM Quantum Cloud Integration", group: "command",

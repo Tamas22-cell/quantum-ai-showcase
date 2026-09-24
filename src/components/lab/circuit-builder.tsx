@@ -1,4 +1,5 @@
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
+import { readTransfer } from "@/lib/assistant/transfer";
 import { ChevronLeft, ChevronRight, Dices, RotateCcw, Trash2, Undo2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -32,6 +33,12 @@ export function CircuitBuilder() {
   const [inputError, setInputError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const [hideZero, setHideZero] = useState(true);
+
+  // Load a circuit handed over by the AI Assistant (re-validated; one-shot).
+  useEffect(() => {
+    const incoming = readTransfer(window.sessionStorage);
+    if (incoming) setCircuit(incoming);
+  }, []);
 
   const n = circuit.numQubits;
   const errors = useMemo(() => validateCircuit(circuit, MAX_QUBITS, MAX_OPS), [circuit]);

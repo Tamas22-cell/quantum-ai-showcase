@@ -10,7 +10,7 @@
 - [ ] Module 4 — VQE Lab.
 - [ ] Module 5 — Quantum Portfolio Optimizer.
 - [ ] Module 6 — Quantum ML Lab.
-- [ ] C2 — AI Research Assistant (needs Lovable Cloud + AI; circuits validated by engine before loading into builder).
+- [x] C2 — AI Research Assistant (needs Lovable Cloud + AI; circuits validated by engine before loading into builder). (built; demo mode default, Live AI opt-in)
 - [ ] C3 — IBM Quantum (blocked: needs external Python/Qiskit service host + user's IBM API token; simulator mode first).
 - [ ] C4 — Live Finance Lab (depends on Module 5; market-data provider + API key needed for live data; sample data until then).
 - [ ] C5 — Report Generator (client-side PDF from Arena/lab results; Cloud for saved experiments).
