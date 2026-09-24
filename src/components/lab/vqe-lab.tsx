@@ -19,7 +19,7 @@ const fmt = (x: number, d = 6) => (Number.isFinite(x) ? x.toFixed(d) : "—");
 const presetH = (id: string) => structuredClone(HAMILTONIAN_PRESETS.find((p) => p.id === id)!.h);
 const cplx = (re: number, im: number) => `${fmt(re, 3)}${im < 0 ? " − " : " + "}${fmt(Math.abs(im), 3)}i`;
 
-function Stat({ label: l, value, hint, accent }: { label: string; value: string; hint?: string; accent?: boolean }) {
+function Stat({ label: l, value, hint, accent }: { label: string; value: string; hint?: string | undefined; accent?: boolean }) {
   return (
     <div className="rounded-sm border border-border bg-surface p-3">
       <div className="font-mono text-[10px] uppercase text-muted-foreground">{l}</div>

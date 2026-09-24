@@ -16,6 +16,7 @@ import { Route as LabAssistantRouteImport } from './routes/lab.assistant'
 import { Route as LabCircuitBuilderRouteImport } from './routes/lab.circuit-builder'
 import { Route as LabEntanglementRouteImport } from './routes/lab.entanglement'
 import { Route as LabQaoaRouteImport } from './routes/lab.qaoa'
+import { Route as LabVqeRouteImport } from './routes/lab.vqe'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -52,6 +53,11 @@ const LabQaoaRoute = LabQaoaRouteImport.update({
   path: '/lab/qaoa',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LabVqeRoute = LabVqeRouteImport.update({
+  id: '/lab/vqe',
+  path: '/lab/vqe',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -60,6 +66,7 @@ export interface FileRoutesByFullPath {
   '/lab/circuit-builder': typeof LabCircuitBuilderRoute
   '/lab/entanglement': typeof LabEntanglementRoute
   '/lab/qaoa': typeof LabQaoaRoute
+  '/lab/vqe': typeof LabVqeRoute
   '/lab/': typeof LabIndexRoute
 }
 export interface FileRoutesByTo {
@@ -69,6 +76,7 @@ export interface FileRoutesByTo {
   '/lab/circuit-builder': typeof LabCircuitBuilderRoute
   '/lab/entanglement': typeof LabEntanglementRoute
   '/lab/qaoa': typeof LabQaoaRoute
+  '/lab/vqe': typeof LabVqeRoute
   '/lab': typeof LabIndexRoute
 }
 export interface FileRoutesById {
@@ -79,6 +87,7 @@ export interface FileRoutesById {
   '/lab/circuit-builder': typeof LabCircuitBuilderRoute
   '/lab/entanglement': typeof LabEntanglementRoute
   '/lab/qaoa': typeof LabQaoaRoute
+  '/lab/vqe': typeof LabVqeRoute
   '/lab/': typeof LabIndexRoute
 }
 export interface FileRouteTypes {
@@ -90,6 +99,7 @@ export interface FileRouteTypes {
     | '/lab/circuit-builder'
     | '/lab/entanglement'
     | '/lab/qaoa'
+    | '/lab/vqe'
     | '/lab/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -99,6 +109,7 @@ export interface FileRouteTypes {
     | '/lab/circuit-builder'
     | '/lab/entanglement'
     | '/lab/qaoa'
+    | '/lab/vqe'
     | '/lab'
   id:
     | '__root__'
@@ -108,6 +119,7 @@ export interface FileRouteTypes {
     | '/lab/circuit-builder'
     | '/lab/entanglement'
     | '/lab/qaoa'
+    | '/lab/vqe'
     | '/lab/'
   fileRoutesById: FileRoutesById
 }
@@ -118,6 +130,7 @@ export interface RootRouteChildren {
   LabCircuitBuilderRoute: typeof LabCircuitBuilderRoute
   LabEntanglementRoute: typeof LabEntanglementRoute
   LabQaoaRoute: typeof LabQaoaRoute
+  LabVqeRoute: typeof LabVqeRoute
   LabIndexRoute: typeof LabIndexRoute
 }
 
@@ -172,6 +185,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LabQaoaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lab/vqe': {
+      id: '/lab/vqe'
+      path: '/lab/vqe'
+      fullPath: '/lab/vqe'
+      preLoaderRoute: typeof LabVqeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -182,6 +202,7 @@ const rootRouteChildren: RootRouteChildren = {
   LabCircuitBuilderRoute: LabCircuitBuilderRoute,
   LabEntanglementRoute: LabEntanglementRoute,
   LabQaoaRoute: LabQaoaRoute,
+  LabVqeRoute: LabVqeRoute,
   LabIndexRoute: LabIndexRoute,
 }
 export const routeTree = rootRouteImport
