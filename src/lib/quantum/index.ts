@@ -4,3 +4,8 @@ export * from "./gates";
 export * from "./statevector";
 export * from "./circuit";
 export * from "./examples";
+export * from "./maxcut";
+export * from "./optimize";
+export * from "./qaoa";
+export * from "./classical";
+export * from "./benchmark";

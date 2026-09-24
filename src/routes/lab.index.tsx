@@ -25,12 +25,15 @@ function LabDashboard() {
         <span className="inline-flex items-center gap-2 font-mono text-xs text-primary"><FlaskConical className="size-4" aria-hidden="true" />Quantum Research Dashboard</span>
         <h1 className="mt-3 text-4xl font-semibold tracking-tight sm:text-5xl">Interactive laboratories</h1>
         <p className="mt-4 text-sm leading-7 text-muted-foreground">
-          Six browser-based laboratories built on a shared, unit-tested statevector engine. All results are ideal classical simulations —
+          Browser-based laboratories built on a shared, unit-tested statevector engine. All results are ideal classical simulations —
           they are not quantum hardware results and make no claim of quantum advantage. Modules are released one at a time as their calculations and tests are completed.
         </p>
       </div>
+      {(["core", "command"] as const).map((group) => (
+      <section key={group} className="mb-12" aria-label={group === "core" ? "Core laboratories" : "Research Command Center"}>
+      <h2 className="mb-5 font-mono text-xs uppercase tracking-wider text-primary">{group === "core" ? "Core laboratories" : "Research Command Center"}</h2>
       <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-        {LAB_MODULES.map((m) => {
+        {LAB_MODULES.filter((m) => m.group === group).map((m) => {
           const available = m.status === "available";
           const body = (
             <>
@@ -55,6 +58,8 @@ function LabDashboard() {
           );
         })}
       </div>
+      </section>
+      ))}
     </LabShell>
   );
 }

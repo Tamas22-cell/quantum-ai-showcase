@@ -66,6 +66,8 @@
   --grid-line: oklch(0.82 0.145 192 / 0.055);
   --emerald: oklch(0.8 0.16 160);
   --emerald-soft: oklch(0.8 0.16 160 / 0.12);
+  --amber: oklch(0.82 0.15 80);
+  --rose: oklch(0.72 0.17 15);
   --shadow-signal: 0 0 32px oklch(0.82 0.145 192 / 0.16);
 }
 
