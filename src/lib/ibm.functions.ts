@@ -38,7 +38,7 @@ export const submitIbmJob = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<IbmSubmitResult> => {
     const { token, url, missing } = config();
     if (missing.length) return { ok: false, error: "IBM Quantum execution is not configured.", missing };
-    const built = buildJobRequest(data); // re-validate on the server
+    const built = buildJobRequest({ circuit: data.circuit, backend: data.backend, shots: data.shots }); // re-validate on the server
     if (!built.ok) return { ok: false, error: built.errors.join(" ") };
     try {
       const res = await fetch(`${url}/jobs`, {
@@ -65,8 +65,10 @@ export const getIbmJob = createServerFn({ method: "GET" })
       const res = await fetch(`${url}/jobs/${data.jobId}`, { headers: { "x-ibm-token": token! }, signal: AbortSignal.timeout(20_000) });
       if (!res.ok) return { ok: false, error: `Qiskit service responded ${res.status}.` };
       const body = (await res.json()) as { status?: unknown; counts?: unknown };
-      const counts = body.counts && typeof body.counts === "object" ? (body.counts as Record<string, number>) : undefined;
-      return { ok: true, status: String(body.status ?? "UNKNOWN"), counts };
+      const status = String(body.status ?? "UNKNOWN");
+      return body.counts && typeof body.counts === "object"
+        ? { ok: true, status, counts: body.counts as Record<string, number> }
+        : { ok: true, status };
     } catch {
       return { ok: false, error: "Could not reach the Qiskit service." };
     }
