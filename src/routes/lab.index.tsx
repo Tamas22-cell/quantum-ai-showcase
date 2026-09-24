@@ -25,7 +25,7 @@ function LabDashboard() {
         <span className="inline-flex items-center gap-2 font-mono text-xs text-primary"><FlaskConical className="size-4" aria-hidden="true" />Quantum Research Dashboard</span>
         <h1 className="mt-3 text-4xl font-semibold tracking-tight sm:text-5xl">Interactive laboratories</h1>
         <p className="mt-4 text-sm leading-7 text-muted-foreground">
-          Six browser-based laboratories built on a shared, unit-tested statevector engine. All results are ideal classical simulations —
+          Browser-based laboratories built on a shared, unit-tested statevector engine. All results are ideal classical simulations —
           they are not quantum hardware results and make no claim of quantum advantage. Modules are released one at a time as their calculations and tests are completed.
         </p>
       </div>
