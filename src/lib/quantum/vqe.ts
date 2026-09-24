@@ -114,7 +114,7 @@ export function expectation(h: Hamiltonian, s: StateVector): number {
 
 /** Cyclic Jacobi eigen-decomposition of a real symmetric matrix. Returns eigenvalues + column eigenvectors. */
 export function jacobiEigen(A: number[][]) {
-  const n = A.length, a = A.map((r) => r.slice()), v = A.map((_, i) => A.map((__, j) => (i === j ? 1 : 0)));
+  const n = A.length, a = A.map((r) => r.slice()), v: number[][] = A.map((_, i) => A.map((__, j) => (i === j ? 1 : 0)));
   for (let sweep = 0; sweep < 100; sweep++) {
     let off = 0;
     for (let p = 0; p < n; p++) for (let q = p + 1; q < n; q++) off += a[p]![q]! ** 2;
@@ -146,7 +146,7 @@ export function exactSpectrum(h: Hamiltonian) {
   const ground = Math.min(...values);
   const idx = values.map((_, i) => i).filter((i) => values[i]! - ground < 1e-8);
   const eig = [...new Set(values.map((x) => Math.round(x * 1e9) / 1e9))].sort((a, b) => a - b);
-  return { ground, degeneracy: idx.length / 2, eigenvalues: eig, groundBasis: idx.map((i) => vectors.map((row) => row[i]!)) };
+  return { ground, degeneracy: idx.length / 2, eigenvalues: eig, groundBasis: idx.map((i) => vectors.map((row) => row[i]!)) as number[][] };
 }
 
 /** Fidelity = ‖P_ground ψ‖² (projection onto the exact ground space). */
