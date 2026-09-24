@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -53,6 +53,9 @@ const R = 120;
 function BlochSphere({ v }: { v: { x: number; y: number; z: number } }) {
   const [rot, setRot] = useState({ yaw: -0.6, pitch: 0.35 });
   const drag = useRef<{ x: number; y: number } | null>(null);
+  // Render the projected sphere client-side only: trig floats differ between server and browser.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   // Physics convention (z up) -> screen: rotate by yaw about z, then pitch about screen x.
   const project = useCallback(
@@ -103,6 +106,7 @@ function BlochSphere({ v }: { v: { x: number; y: number; z: number } }) {
     setRot((r) => ({ yaw: r.yaw - dx * 0.01, pitch: Math.max(-1.4, Math.min(1.4, r.pitch + dy * 0.01)) }));
   };
 
+  if (!mounted) return <div className="aspect-square w-full max-w-[420px]" aria-hidden="true" />;
   return (
     <svg
       viewBox={`0 0 ${SIZE} ${SIZE}`}
