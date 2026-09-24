@@ -14,7 +14,7 @@ describe("Max-Cut", () => {
   it("cut values and exact optima of known graphs", () => {
     expect(exhaustiveMaxCut(preset("triangle")).value).toBe(2);
     expect(exhaustiveMaxCut(preset("square")).value).toBe(4);
-    expect(exhaustiveMaxCut(preset("square")).optimal.sort()).toEqual([0b0101, 0b1010]);
+    expect(exhaustiveMaxCut(preset("square")).optimal.sort((a, b) => a - b)).toEqual([0b0101, 0b1010]);
     expect(cutValue(preset("k4w"), 0b0011)).toBeCloseTo(1 + 2 + 2.5 + 1); // {0,1} vs {2,3}
   });
   it("rejects invalid graphs", () => {
