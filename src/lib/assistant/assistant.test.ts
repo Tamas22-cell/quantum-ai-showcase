@@ -101,7 +101,7 @@ describe("Regression: existing modules", () => {
     const cfg: ArenaConfig = { graph: GRAPH_PRESETS[0]!.graph, seed: 7, p: 1, restarts: 2, maxIter: 60, shots: 300, saSteps: 300, greedyRestarts: 2 };
     expect((await runArena(cfg)).results.find((x) => x.id === "exhaustive")!.value).toBe(2);
     const a = await runArena(cfg); const b = await runArena(cfg);
-    const strip = (r: unknown) => JSON.stringify(r, (k, v) => (/ms|time/i.test(k) ? undefined : v));
+    const strip = (r: unknown) => JSON.stringify(r, (k, v) => (/ms|time|createdAt/i.test(k) ? undefined : v));
     expect(strip(a)).toBe(strip(b));
   });
 });
