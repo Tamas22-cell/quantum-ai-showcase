@@ -36,6 +36,8 @@
   --color-grid-line: var(--grid-line);
   --color-emerald: var(--emerald);
   --color-emerald-soft: var(--emerald-soft);
+  --color-amber: var(--amber);
+  --color-rose: var(--rose);
 }
 
 :root {
