@@ -12,3 +12,4 @@ export * from "./benchmark";
 export * from "./entanglement";
 export * from "./qaoa-lab";
 export * from "./vqe";
+export * from "./portfolio";

@@ -72,9 +72,10 @@ export type QaoaRun = {
  */
 export async function optimizeQaoa(
   g: Graph,
-  opts: { p: number; restarts: number; maxIter: number; rng: Rng; signal?: AbortSignal | undefined; onProgress?: (frac: number) => void },
+  opts: { p: number; restarts: number; maxIter: number; rng: Rng; signal?: AbortSignal | undefined; onProgress?: (frac: number) => void; table?: Float64Array },
 ): Promise<QaoaRun> {
-  const table = cutTable(g);
+  // Optional custom diagonal objective (maximised); defaults to the Max-Cut table.
+  const table = opts.table ?? cutTable(g);
   const { p, restarts, maxIter, rng } = opts;
   let evals = 0, best = -Infinity, bestX: number[] = [];
   const history: QaoaRun["history"] = [];

@@ -7,7 +7,7 @@ export type LabModule = {
   topics: string[];
   status: "available" | "in-development";
   group: "core" | "command";
-  to?: "/lab/circuit-builder" | "/lab/entanglement" | "/lab/qaoa" | "/lab/vqe" | "/lab/arena" | "/lab/assistant";
+  to?: "/lab/circuit-builder" | "/lab/entanglement" | "/lab/qaoa" | "/lab/vqe" | "/lab/portfolio" | "/lab/arena" | "/lab/assistant";
 };
 
 export const LAB_MODULES: LabModule[] = [
@@ -35,7 +35,7 @@ export const LAB_MODULES: LabModule[] = [
   {
     id: "portfolio", index: "05", title: "Quantum Portfolio Optimizer",
     summary: "Educational QUBO formulation of binary asset selection on clearly labelled synthetic data.",
-    topics: ["QUBO / Ising", "Risk aversion", "Synthetic data"], status: "in-development", group: "core",
+    topics: ["QUBO / Ising", "Risk aversion", "Synthetic data"], status: "available", to: "/lab/portfolio", group: "core",
   },
   {
     id: "qml", index: "06", title: "Quantum Machine Learning Lab",
