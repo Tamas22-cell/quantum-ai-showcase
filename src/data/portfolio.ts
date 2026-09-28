@@ -40,7 +40,7 @@ export const portfolio = {
       tags: ["Python", "Multi-agent AI", "Financial research"],
       link: {
         label: "Open live project",
-        href: "https://ai-multi-agent-financial-research-platform.vercel.app",
+        href: "https://ai-multi-agent-financial-research-p.vercel.app",
         placeholder: false,
       },
     },
