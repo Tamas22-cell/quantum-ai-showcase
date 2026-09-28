@@ -283,7 +283,19 @@ export function PortfolioSite() {
                       <div className="mb-5 flex flex-wrap gap-2">
                         {project.tags.map((tag) => <span key={tag} className="rounded-sm border border-border bg-surface px-2 py-1 font-mono text-[9px] uppercase text-muted-foreground">{tag}</span>)}
                       </div>
-                      <PlaceholderLink label={project.link.label} compact />
+                      {project.link.placeholder ? (
+                        <PlaceholderLink label={project.link.label} compact />
+                      ) : (
+                        <a
+                          href={project.link.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={`inline-flex h-8 w-fit items-center gap-2 rounded-sm border border-primary/40 bg-signal-soft px-3 font-mono text-[10px] uppercase text-primary transition-colors hover:border-primary hover:bg-primary hover:text-primary-foreground ${focusRing}`}
+                        >
+                          <ArrowUpRight className="size-3" aria-hidden="true" />
+                          {project.link.label}
+                        </a>
+                      )}
                     </div>
                   </article>
                 );
