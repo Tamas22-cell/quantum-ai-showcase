@@ -1,10 +1,8 @@
 import { useMemo, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
 import { AlertTriangle, Bot, CheckCircle2, Loader2, Send, Sparkles, Trash2, XCircle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { askAssistant } from "@/lib/assistant.functions";
 import { demoReply } from "@/lib/assistant/demo";
 import { parseProposal } from "@/lib/assistant/proposal";
 import { writeTransfer } from "@/lib/assistant/transfer";
@@ -22,9 +20,7 @@ const EXAMPLES: Record<AssistantMode, string[]> = {
 };
 
 export function ResearchAssistant() {
-  const ask = useServerFn(askAssistant);
   const [mode, setMode] = useState<AssistantMode>("explain-algorithm");
-  const [live, setLive] = useState(false);
   const [input, setInput] = useState("");
   const [context, setContext] = useState("");
   const [messages, setMessages] = useState<Msg[]>([]);
@@ -40,9 +36,7 @@ export function ResearchAssistant() {
     setInput("");
     setBusy(true);
     try {
-      const reply = live
-        ? await ask({ data: { mode, messages: history.map(({ role, content }) => ({ role, content: content.slice(0, 4000) })), context: mode === "explain-results" && context.trim() ? context.slice(0, 4000) : undefined } })
-        : demoReply(mode, q);
+      const reply = demoReply(mode, q);
       setMessages((m) => [...m, reply.ok
         ? { id: nextId.current++, role: "assistant", mode, content: reply.answer, source: reply.source, circuitRaw: reply.circuitRaw }
         : { id: nextId.current++, role: "assistant", mode, content: reply.error, error: true }]);
@@ -69,7 +63,7 @@ export function ResearchAssistant() {
           {messages.length === 0 ? (
             <p className="text-sm text-muted-foreground">Ask a question or pick an example. Circuits proposed by the assistant are validated by the simulation engine before they can be loaded.</p>
           ) : messages.map((m) => <MessageView key={m.id} m={m} />)}
-          {busy ? <p className="flex items-center gap-2 font-mono text-xs text-primary"><Loader2 className="size-4 animate-spin" aria-hidden="true" />{live ? "Waiting for Lovable AI…" : "Generating scripted demo reply…"}</p> : null}
+          {busy ? <p className="flex items-center gap-2 font-mono text-xs text-primary"><Loader2 className="size-4 animate-spin" aria-hidden="true" />Generating scripted demo reply…</p> : null}
         </div>
 
         {mode === "explain-results" ? (
@@ -90,12 +84,7 @@ export function ResearchAssistant() {
 
       <aside className="space-y-4">
         <Panel title="Response engine">
-          <div className="space-y-2 text-xs">
-            <label className="flex items-start gap-2"><input type="radio" name="engine" checked={!live} onChange={() => setLive(false)} className="mt-0.5 accent-[var(--primary)]" />
-              <span><strong className="text-foreground">Demo mode</strong> — scripted replies, no AI, no cost.</span></label>
-            <label className="flex items-start gap-2"><input type="radio" name="engine" checked={live} onChange={() => setLive(true)} className="mt-0.5 accent-[var(--primary)]" />
-              <span><strong className="text-foreground">Live AI</strong> — server-side Lovable AI. Each question uses workspace AI credits.</span></label>
-          </div>
+          <p className="text-xs text-muted-foreground"><strong className="text-foreground">Demo mode</strong> — local scripted research replies, no external AI service and no usage cost.</p>
         </Panel>
         <Panel title="Example prompts">
           <ul className="space-y-2">
