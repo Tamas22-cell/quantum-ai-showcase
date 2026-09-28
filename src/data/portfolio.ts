@@ -34,27 +34,39 @@ export const portfolio = {
   projects: [
     {
       index: "01",
-      title: "AgentTrust",
+      title: "AI Multi-Agent Financial Research Platform",
       description:
-        "A research concept exploring trust, identity, and verifiable coordination for autonomous AI agents.",
-      tags: ["AI agents", "Trust systems", "Blockchain"],
-      link: { label: "GitHub pending", href: "#", placeholder: true },
+        "A deployed multi-agent financial research system combining macro, technical, crypto, sentiment, news, risk and market-analysis workflows.",
+      tags: ["Python", "Multi-agent AI", "Financial research"],
+      link: {
+        label: "Open live project",
+        href: "https://ai-multi-agent-financial-research-platform.vercel.app",
+        placeholder: false,
+      },
     },
     {
       index: "02",
-      title: "AI Financial Research Platform",
+      title: "Quantum Finance Lab",
       description:
-        "A structured workspace concept for AI-assisted financial research, synthesis, and analytical workflows.",
-      tags: ["Python", "AI research", "Quantitative finance"],
-      link: { label: "GitHub pending", href: "#", placeholder: true },
+        "A deployed hybrid quantum-classical finance research environment covering QAOA, VQE, QML, Qiskit and quantitative market analysis.",
+      tags: ["Qiskit", "QAOA", "Quantum finance"],
+      link: {
+        label: "Open live project",
+        href: "https://quantumfinancelab.vercel.app",
+        placeholder: false,
+      },
     },
     {
       index: "03",
-      title: "Quantum Portfolio Lab",
+      title: "Quantum Portfolio Optimizer",
       description:
-        "An experimental research environment for studying quantum and hybrid approaches to portfolio optimization.",
-      tags: ["Qiskit", "QAOA", "Optimization"],
-      link: { label: "GitHub pending", href: "#", placeholder: true },
+        "A deployed hybrid portfolio-optimization research project using real market data, QUBO formulation, QAOA and Qiskit.",
+      tags: ["Qiskit", "QAOA", "Portfolio optimization"],
+      link: {
+        label: "Open live project",
+        href: "https://quantum-portfolio-optimizer-ej1s.vercel.app",
+        placeholder: false,
+      },
     },
   ] satisfies Project[],
   research: [
