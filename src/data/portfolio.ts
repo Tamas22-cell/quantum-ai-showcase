@@ -92,9 +92,12 @@ export const portfolio = {
     },
   ],
   certifications: [
-    // Set verified: true only once a real credential (issuer, date, credential URL) is supplied.
-    { title: "Certification entry", detail: "Credential details pending verification", verified: false },
-    { title: "Certification entry", detail: "Credential details pending verification", verified: false },
+    {
+      title: "Development and Applications of Germanium Quantum Technologies",
+      detail: "DelftX / edX · Verified Certificate · Issued Sep 2026 · Credential ID c7a7a5d0baf54375b6b2523afbdbb856",
+      verified: true,
+      href: "https://courses.edx.org/certificates/c7a7a5d0baf54375b6b2523afbdbb856",
+    },
   ],
   social: [
     { label: "LinkedIn", href: "https://www.linkedin.com/in/tamas-nemeth-8820a6a5/", placeholder: false },
