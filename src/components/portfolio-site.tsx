@@ -263,7 +263,7 @@ export function PortfolioSite() {
         {/* PROJECTS */}
         <section id="projects" className="bg-surface px-5 py-24 sm:px-8 lg:py-32">
           <div className="mx-auto max-w-7xl">
-            <SectionHeading index="02" title="Selected projects" copy="Research concepts and works in progress. Repository links will be added after their destinations are verified." />
+            <SectionHeading index="02" title="Selected projects" copy="Live deployed research projects and production-ready portfolio showcases." />
             <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
               {portfolio.projects.map((project, index) => {
                 const Icon = projectIcons[index] ?? Cpu;
@@ -275,7 +275,7 @@ export function PortfolioSite() {
                       <span className="grid size-11 place-items-center rounded-sm border border-border text-primary transition-colors group-hover:border-primary/60 group-hover:bg-signal-soft"><Icon className="size-5" aria-hidden="true" /></span>
                     </div>
                     <span className="mt-12 inline-flex w-fit items-center gap-1.5 rounded-full border border-border px-2 py-0.5 font-mono text-[9px] uppercase text-muted-foreground">
-                      <span className="size-1 rounded-full bg-muted-foreground" aria-hidden="true" /> Concept · in progress
+                      <span className="size-1 rounded-full bg-muted-foreground" aria-hidden="true" /> Live · deployed
                     </span>
                     <h3 className="mt-4 text-2xl font-semibold tracking-tight">{project.title}</h3>
                     <p className="mt-4 text-sm leading-7 text-muted-foreground">{project.description}</p>
