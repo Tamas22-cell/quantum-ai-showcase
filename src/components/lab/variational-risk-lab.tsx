@@ -32,6 +32,7 @@ export function VariationalRiskLab() {
   const [shots, setShots] = useState(2048);
   const [seed, setSeed] = useState(42);
   const [running, setRunning] = useState(false);
+  const [status, setStatus] = useState("Ready to run.");
   const [result, setResult] = useState<RunResult | null>(null);
 
   const objectiveText = useMemo(
@@ -40,30 +41,39 @@ export function VariationalRiskLab() {
   );
 
   async function runExperiment() {
+    if (running) return;
     setRunning(true);
+    setStatus("Variational experiment started…");
     setResult(null);
-    await new Promise((resolve) => setTimeout(resolve, 120));
 
-    const rnd = seeded(seed + depth * 97 + riskAversion * 13 + shots);
-    const iterations: { step: number; cost: number }[] = [];
-    const start = 1.15 + riskAversion * 0.035 + rnd() * 0.08;
-    const floor = 0.32 + riskAversion * 0.018 + depth * 0.008;
-    for (let i = 0; i <= 24; i += 1) {
-      const decay = Math.exp(-i / (5.5 + depth));
-      const noise = (rnd() - 0.5) * 0.025 * (1 - i / 30);
-      iterations.push({ step: i, cost: Math.max(floor, floor + (start - floor) * decay + noise) });
+    try {
+      await new Promise<void>((resolve) => setTimeout(resolve, 700));
+
+      const rnd = seeded(seed + depth * 97 + riskAversion * 13 + shots);
+      const iterations: { step: number; cost: number }[] = [];
+      const start = 1.15 + riskAversion * 0.035 + rnd() * 0.08;
+      const floor = 0.32 + riskAversion * 0.018 + depth * 0.008;
+      for (let i = 0; i <= 24; i += 1) {
+        const decay = Math.exp(-i / (5.5 + depth));
+        const noise = (rnd() - 0.5) * 0.025 * (1 - i / 30);
+        iterations.push({ step: i, cost: Math.max(floor, floor + (start - floor) * decay + noise) });
+      }
+
+      const avgRisk = ASSETS.reduce((s, a) => s + a.risk, 0) / ASSETS.length;
+      const avgReturn = ASSETS.reduce((s, a) => s + a.ret, 0) / ASSETS.length;
+      const classicalRisk = avgRisk * (0.88 + riskAversion * 0.008);
+      const variationalRisk = classicalRisk * Math.max(0.78, 0.95 - depth * 0.018 + (rnd() - 0.5) * 0.025);
+      const expectedReturn = avgReturn * (0.92 + (10 - riskAversion) * 0.012 + depth * 0.006);
+      const concentration = 0.21 + depth * 0.012 + rnd() * 0.035;
+      const theta = Array.from({ length: Math.min(8, depth * 2) }, () => Number(((rnd() * 2 - 1) * Math.PI).toFixed(3)));
+
+      setResult({ iterations, classicalRisk, variationalRisk, expectedReturn, concentration, theta });
+      setStatus("Complete — results are shown below.");
+    } catch (error) {
+      setStatus(error instanceof Error ? `Run failed: ${error.message}` : "Run failed.");
+    } finally {
+      setRunning(false);
     }
-
-    const avgRisk = ASSETS.reduce((s, a) => s + a.risk, 0) / ASSETS.length;
-    const avgReturn = ASSETS.reduce((s, a) => s + a.ret, 0) / ASSETS.length;
-    const classicalRisk = avgRisk * (0.88 + riskAversion * 0.008);
-    const variationalRisk = classicalRisk * Math.max(0.78, 0.95 - depth * 0.018 + (rnd() - 0.5) * 0.025);
-    const expectedReturn = avgReturn * (0.92 + (10 - riskAversion) * 0.012 + depth * 0.006);
-    const concentration = 0.21 + depth * 0.012 + rnd() * 0.035;
-    const theta = Array.from({ length: Math.min(8, depth * 2) }, () => Number(((rnd() * 2 - 1) * Math.PI).toFixed(3)));
-
-    setResult({ iterations, classicalRisk, variationalRisk, expectedReturn, concentration, theta });
-    setRunning(false);
   }
 
   return (
@@ -90,10 +100,11 @@ export function VariationalRiskLab() {
               </label>
             </div>
             <div className="rounded-sm border border-border bg-background/40 p-3 font-mono text-[11px] leading-5 text-muted-foreground">{objectiveText}</div>
-            <Button type="button" onClick={runExperiment} disabled={running}>
+            <Button type="button" onClick={() => void runExperiment()} disabled={running} aria-busy={running}>
               {running ? <Activity className="size-4 animate-pulse" aria-hidden="true" /> : <Play className="size-4" aria-hidden="true" />}
               {running ? "Running variational experiment…" : "Run Variational Experiment"}
             </Button>
+            <p className="min-h-5 text-xs text-muted-foreground" aria-live="polite">{status}</p>
           </div>
         </Panel>
 
