@@ -79,6 +79,7 @@ export const portfolio = {
       code: "VQE",
       title: "Variational Quantum Eigensolver",
       description: "Exploring variational circuits and the classical–quantum optimization loop.",
+      href: "/lab/vqe",
     },
     {
       code: "QISKIT",

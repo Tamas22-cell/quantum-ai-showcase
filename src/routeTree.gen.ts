@@ -13,14 +13,17 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as LabIndexRouteImport } from './routes/lab.index'
 import { Route as LabArenaRouteImport } from './routes/lab.arena'
 import { Route as LabAssistantRouteImport } from './routes/lab.assistant'
+import { Route as LabBenchmarkRouteImport } from './routes/lab.benchmark'
 import { Route as LabCircuitBuilderRouteImport } from './routes/lab.circuit-builder'
 import { Route as LabEntanglementRouteImport } from './routes/lab.entanglement'
 import { Route as LabFinanceRouteImport } from './routes/lab.finance'
+import { Route as LabHistoryRouteImport } from './routes/lab.history'
 import { Route as LabIbmRouteImport } from './routes/lab.ibm'
 import { Route as LabPortfolioRouteImport } from './routes/lab.portfolio'
 import { Route as LabQaoaRouteImport } from './routes/lab.qaoa'
 import { Route as LabQmlRouteImport } from './routes/lab.qml'
 import { Route as LabReportsRouteImport } from './routes/lab.reports'
+import { Route as LabSnapshotRouteImport } from './routes/lab.snapshot'
 import { Route as LabVqeRouteImport } from './routes/lab.vqe'
 
 const IndexRoute = IndexRouteImport.update({
@@ -43,6 +46,11 @@ const LabAssistantRoute = LabAssistantRouteImport.update({
   path: '/lab/assistant',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LabBenchmarkRoute = LabBenchmarkRouteImport.update({
+  id: '/lab/benchmark',
+  path: '/lab/benchmark',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LabCircuitBuilderRoute = LabCircuitBuilderRouteImport.update({
   id: '/lab/circuit-builder',
   path: '/lab/circuit-builder',
@@ -56,6 +64,11 @@ const LabEntanglementRoute = LabEntanglementRouteImport.update({
 const LabFinanceRoute = LabFinanceRouteImport.update({
   id: '/lab/finance',
   path: '/lab/finance',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LabHistoryRoute = LabHistoryRouteImport.update({
+  id: '/lab/history',
+  path: '/lab/history',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LabIbmRoute = LabIbmRouteImport.update({
@@ -83,6 +96,11 @@ const LabReportsRoute = LabReportsRouteImport.update({
   path: '/lab/reports',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LabSnapshotRoute = LabSnapshotRouteImport.update({
+  id: '/lab/snapshot',
+  path: '/lab/snapshot',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LabVqeRoute = LabVqeRouteImport.update({
   id: '/lab/vqe',
   path: '/lab/vqe',
@@ -93,14 +111,17 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/lab/arena': typeof LabArenaRoute
   '/lab/assistant': typeof LabAssistantRoute
+  '/lab/benchmark': typeof LabBenchmarkRoute
   '/lab/circuit-builder': typeof LabCircuitBuilderRoute
   '/lab/entanglement': typeof LabEntanglementRoute
   '/lab/finance': typeof LabFinanceRoute
+  '/lab/history': typeof LabHistoryRoute
   '/lab/ibm': typeof LabIbmRoute
   '/lab/portfolio': typeof LabPortfolioRoute
   '/lab/qaoa': typeof LabQaoaRoute
   '/lab/qml': typeof LabQmlRoute
   '/lab/reports': typeof LabReportsRoute
+  '/lab/snapshot': typeof LabSnapshotRoute
   '/lab/vqe': typeof LabVqeRoute
   '/lab/': typeof LabIndexRoute
 }
@@ -108,14 +129,17 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/lab/arena': typeof LabArenaRoute
   '/lab/assistant': typeof LabAssistantRoute
+  '/lab/benchmark': typeof LabBenchmarkRoute
   '/lab/circuit-builder': typeof LabCircuitBuilderRoute
   '/lab/entanglement': typeof LabEntanglementRoute
   '/lab/finance': typeof LabFinanceRoute
+  '/lab/history': typeof LabHistoryRoute
   '/lab/ibm': typeof LabIbmRoute
   '/lab/portfolio': typeof LabPortfolioRoute
   '/lab/qaoa': typeof LabQaoaRoute
   '/lab/qml': typeof LabQmlRoute
   '/lab/reports': typeof LabReportsRoute
+  '/lab/snapshot': typeof LabSnapshotRoute
   '/lab/vqe': typeof LabVqeRoute
   '/lab': typeof LabIndexRoute
 }
@@ -124,14 +148,17 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/lab/arena': typeof LabArenaRoute
   '/lab/assistant': typeof LabAssistantRoute
+  '/lab/benchmark': typeof LabBenchmarkRoute
   '/lab/circuit-builder': typeof LabCircuitBuilderRoute
   '/lab/entanglement': typeof LabEntanglementRoute
   '/lab/finance': typeof LabFinanceRoute
+  '/lab/history': typeof LabHistoryRoute
   '/lab/ibm': typeof LabIbmRoute
   '/lab/portfolio': typeof LabPortfolioRoute
   '/lab/qaoa': typeof LabQaoaRoute
   '/lab/qml': typeof LabQmlRoute
   '/lab/reports': typeof LabReportsRoute
+  '/lab/snapshot': typeof LabSnapshotRoute
   '/lab/vqe': typeof LabVqeRoute
   '/lab/': typeof LabIndexRoute
 }
@@ -141,14 +168,17 @@ export interface FileRouteTypes {
     | '/'
     | '/lab/arena'
     | '/lab/assistant'
+    | '/lab/benchmark'
     | '/lab/circuit-builder'
     | '/lab/entanglement'
     | '/lab/finance'
+    | '/lab/history'
     | '/lab/ibm'
     | '/lab/portfolio'
     | '/lab/qaoa'
     | '/lab/qml'
     | '/lab/reports'
+    | '/lab/snapshot'
     | '/lab/vqe'
     | '/lab/'
   fileRoutesByTo: FileRoutesByTo
@@ -156,14 +186,17 @@ export interface FileRouteTypes {
     | '/'
     | '/lab/arena'
     | '/lab/assistant'
+    | '/lab/benchmark'
     | '/lab/circuit-builder'
     | '/lab/entanglement'
     | '/lab/finance'
+    | '/lab/history'
     | '/lab/ibm'
     | '/lab/portfolio'
     | '/lab/qaoa'
     | '/lab/qml'
     | '/lab/reports'
+    | '/lab/snapshot'
     | '/lab/vqe'
     | '/lab'
   id:
@@ -171,14 +204,17 @@ export interface FileRouteTypes {
     | '/'
     | '/lab/arena'
     | '/lab/assistant'
+    | '/lab/benchmark'
     | '/lab/circuit-builder'
     | '/lab/entanglement'
     | '/lab/finance'
+    | '/lab/history'
     | '/lab/ibm'
     | '/lab/portfolio'
     | '/lab/qaoa'
     | '/lab/qml'
     | '/lab/reports'
+    | '/lab/snapshot'
     | '/lab/vqe'
     | '/lab/'
   fileRoutesById: FileRoutesById
@@ -187,14 +223,17 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LabArenaRoute: typeof LabArenaRoute
   LabAssistantRoute: typeof LabAssistantRoute
+  LabBenchmarkRoute: typeof LabBenchmarkRoute
   LabCircuitBuilderRoute: typeof LabCircuitBuilderRoute
   LabEntanglementRoute: typeof LabEntanglementRoute
   LabFinanceRoute: typeof LabFinanceRoute
+  LabHistoryRoute: typeof LabHistoryRoute
   LabIbmRoute: typeof LabIbmRoute
   LabPortfolioRoute: typeof LabPortfolioRoute
   LabQaoaRoute: typeof LabQaoaRoute
   LabQmlRoute: typeof LabQmlRoute
   LabReportsRoute: typeof LabReportsRoute
+  LabSnapshotRoute: typeof LabSnapshotRoute
   LabVqeRoute: typeof LabVqeRoute
   LabIndexRoute: typeof LabIndexRoute
 }
@@ -229,6 +268,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LabAssistantRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lab/benchmark': {
+      id: '/lab/benchmark'
+      path: '/lab/benchmark'
+      fullPath: '/lab/benchmark'
+      preLoaderRoute: typeof LabBenchmarkRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lab/circuit-builder': {
       id: '/lab/circuit-builder'
       path: '/lab/circuit-builder'
@@ -248,6 +294,13 @@ declare module '@tanstack/react-router' {
       path: '/lab/finance'
       fullPath: '/lab/finance'
       preLoaderRoute: typeof LabFinanceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lab/history': {
+      id: '/lab/history'
+      path: '/lab/history'
+      fullPath: '/lab/history'
+      preLoaderRoute: typeof LabHistoryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/lab/ibm': {
@@ -285,6 +338,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LabReportsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lab/snapshot': {
+      id: '/lab/snapshot'
+      path: '/lab/snapshot'
+      fullPath: '/lab/snapshot'
+      preLoaderRoute: typeof LabSnapshotRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lab/vqe': {
       id: '/lab/vqe'
       path: '/lab/vqe'
@@ -299,14 +359,17 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LabArenaRoute: LabArenaRoute,
   LabAssistantRoute: LabAssistantRoute,
+  LabBenchmarkRoute: LabBenchmarkRoute,
   LabCircuitBuilderRoute: LabCircuitBuilderRoute,
   LabEntanglementRoute: LabEntanglementRoute,
   LabFinanceRoute: LabFinanceRoute,
+  LabHistoryRoute: LabHistoryRoute,
   LabIbmRoute: LabIbmRoute,
   LabPortfolioRoute: LabPortfolioRoute,
   LabQaoaRoute: LabQaoaRoute,
   LabQmlRoute: LabQmlRoute,
   LabReportsRoute: LabReportsRoute,
+  LabSnapshotRoute: LabSnapshotRoute,
   LabVqeRoute: LabVqeRoute,
   LabIndexRoute: LabIndexRoute,
 }
