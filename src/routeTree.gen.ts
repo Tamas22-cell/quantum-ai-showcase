@@ -14,6 +14,7 @@ import { Route as LabIndexRouteImport } from './routes/lab.index'
 import { Route as LabArenaRouteImport } from './routes/lab.arena'
 import { Route as LabAssistantRouteImport } from './routes/lab.assistant'
 import { Route as LabBenchmarkRouteImport } from './routes/lab.benchmark'
+import { Route as LabBlockchainRouteImport } from './routes/lab.blockchain'
 import { Route as LabCircuitBuilderRouteImport } from './routes/lab.circuit-builder'
 import { Route as LabEntanglementRouteImport } from './routes/lab.entanglement'
 import { Route as LabFinanceRouteImport } from './routes/lab.finance'
@@ -51,6 +52,11 @@ const LabAssistantRoute = LabAssistantRouteImport.update({
 const LabBenchmarkRoute = LabBenchmarkRouteImport.update({
   id: '/lab/benchmark',
   path: '/lab/benchmark',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LabBlockchainRoute = LabBlockchainRouteImport.update({
+  id: '/lab/blockchain',
+  path: '/lab/blockchain',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LabCircuitBuilderRoute = LabCircuitBuilderRouteImport.update({
@@ -124,6 +130,7 @@ export interface FileRoutesByFullPath {
   '/lab/arena': typeof LabArenaRoute
   '/lab/assistant': typeof LabAssistantRoute
   '/lab/benchmark': typeof LabBenchmarkRoute
+  '/lab/blockchain': typeof LabBlockchainRoute
   '/lab/circuit-builder': typeof LabCircuitBuilderRoute
   '/lab/entanglement': typeof LabEntanglementRoute
   '/lab/finance': typeof LabFinanceRoute
@@ -144,6 +151,7 @@ export interface FileRoutesByTo {
   '/lab/arena': typeof LabArenaRoute
   '/lab/assistant': typeof LabAssistantRoute
   '/lab/benchmark': typeof LabBenchmarkRoute
+  '/lab/blockchain': typeof LabBlockchainRoute
   '/lab/circuit-builder': typeof LabCircuitBuilderRoute
   '/lab/entanglement': typeof LabEntanglementRoute
   '/lab/finance': typeof LabFinanceRoute
@@ -165,6 +173,7 @@ export interface FileRoutesById {
   '/lab/arena': typeof LabArenaRoute
   '/lab/assistant': typeof LabAssistantRoute
   '/lab/benchmark': typeof LabBenchmarkRoute
+  '/lab/blockchain': typeof LabBlockchainRoute
   '/lab/circuit-builder': typeof LabCircuitBuilderRoute
   '/lab/entanglement': typeof LabEntanglementRoute
   '/lab/finance': typeof LabFinanceRoute
@@ -187,6 +196,7 @@ export interface FileRouteTypes {
     | '/lab/arena'
     | '/lab/assistant'
     | '/lab/benchmark'
+    | '/lab/blockchain'
     | '/lab/circuit-builder'
     | '/lab/entanglement'
     | '/lab/finance'
@@ -207,6 +217,7 @@ export interface FileRouteTypes {
     | '/lab/arena'
     | '/lab/assistant'
     | '/lab/benchmark'
+    | '/lab/blockchain'
     | '/lab/circuit-builder'
     | '/lab/entanglement'
     | '/lab/finance'
@@ -227,6 +238,7 @@ export interface FileRouteTypes {
     | '/lab/arena'
     | '/lab/assistant'
     | '/lab/benchmark'
+    | '/lab/blockchain'
     | '/lab/circuit-builder'
     | '/lab/entanglement'
     | '/lab/finance'
@@ -248,6 +260,7 @@ export interface RootRouteChildren {
   LabArenaRoute: typeof LabArenaRoute
   LabAssistantRoute: typeof LabAssistantRoute
   LabBenchmarkRoute: typeof LabBenchmarkRoute
+  LabBlockchainRoute: typeof LabBlockchainRoute
   LabCircuitBuilderRoute: typeof LabCircuitBuilderRoute
   LabEntanglementRoute: typeof LabEntanglementRoute
   LabFinanceRoute: typeof LabFinanceRoute
@@ -299,6 +312,13 @@ declare module '@tanstack/react-router' {
       path: '/lab/benchmark'
       fullPath: '/lab/benchmark'
       preLoaderRoute: typeof LabBenchmarkRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lab/blockchain': {
+      id: '/lab/blockchain'
+      path: '/lab/blockchain'
+      fullPath: '/lab/blockchain'
+      preLoaderRoute: typeof LabBlockchainRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/lab/circuit-builder': {
@@ -400,6 +420,7 @@ const rootRouteChildren: RootRouteChildren = {
   LabArenaRoute: LabArenaRoute,
   LabAssistantRoute: LabAssistantRoute,
   LabBenchmarkRoute: LabBenchmarkRoute,
+  LabBlockchainRoute: LabBlockchainRoute,
   LabCircuitBuilderRoute: LabCircuitBuilderRoute,
   LabEntanglementRoute: LabEntanglementRoute,
   LabFinanceRoute: LabFinanceRoute,

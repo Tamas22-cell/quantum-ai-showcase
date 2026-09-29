@@ -55,7 +55,7 @@ const agentCapabilities = ["Python", "Multi-agent AI", "Market Analysis", "News 
 const disciplineLinks: Record<string, string[]> = {
   "AI agents": ["AgentTrust", "AI Financial Research Platform", "AI Multi-Agent Research System"],
   Python: ["AI Financial Research Platform", "Qiskit workflows"],
-  Blockchain: ["AgentTrust"],
+  Blockchain: ["AgentTrust", "Blockchain Research Lab"],
   "Quantitative finance": ["AI Financial Research Platform", "Quantum Portfolio Lab"],
   "Quantum computing": ["QAOA", "VQE", "Hybrid algorithms"],
 };
@@ -294,14 +294,21 @@ export function PortfolioSite() {
                           Open Python Research Lab <ArrowRight className="size-3" aria-hidden="true" />
                         </span>
                       )}
+                      {item === "Blockchain" && (
+                        <span className="mt-4 inline-flex items-center gap-1 font-mono text-[10px] uppercase text-primary">
+                          Open Blockchain Research Lab <ArrowRight className="size-3" aria-hidden="true" />
+                        </span>
+                      )}
                     </>
                   );
                   const cardClass = "card-interactive group relative rounded-md border border-border bg-card p-5";
-                  return item === "Python" ? (
-                    <Link key={item} to="/lab/python" aria-label="Python — open the Python Research Lab" className={`${cardClass} block ${focusRing}`}>{card}</Link>
-                  ) : (
-                    <div key={item} className={cardClass}>{card}</div>
-                  );
+                  if (item === "Python") {
+                    return <Link key={item} to="/lab/python" aria-label="Python — open the Python Research Lab" className={`${cardClass} block ${focusRing}`}>{card}</Link>;
+                  }
+                  if (item === "Blockchain") {
+                    return <Link key={item} to="/lab/blockchain" aria-label="Blockchain — open the Blockchain Research Lab" className={`${cardClass} block ${focusRing}`}>{card}</Link>;
+                  }
+                  return <div key={item} className={cardClass}>{card}</div>;
                 })}
               </div>
             </div>
