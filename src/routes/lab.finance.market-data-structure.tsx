@@ -1,9 +1,7 @@
-import { lazy, Suspense } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 
 import { LabShell } from "@/components/lab/lab-shell";
-
-const MarketDataStructureLab = lazy(() => import("@/components/lab/market-data-structure-lab").then((m) => ({ default: m.MarketDataStructureLab })));
+import { MarketDataStructureLab } from "@/components/lab/market-data-structure-lab";
 
 export const Route = createFileRoute("/lab/finance/market-data-structure")({
   head: () => ({
@@ -30,9 +28,7 @@ function Page() {
           volatility, correlations, anomalies and a reproducible data-stability score.
         </p>
       </div>
-      <Suspense fallback={<div className="h-96 animate-pulse rounded-md border border-border bg-card" aria-label="Loading market data structure lab" />}>
-        <MarketDataStructureLab />
-      </Suspense>
+      <MarketDataStructureLab />
     </LabShell>
   );
 }
