@@ -35,6 +35,19 @@ const projectIcons = [ShieldCheck, Network, Orbit];
 const researchIcons = [Orbit, Atom, Braces, Cpu];
 const disciplineIcons = [BrainCircuit, Code2, Blocks, LineChart, Atom];
 
+/** Agentic pipeline shown in the AI Multi-Agent Research System section. */
+const pipelineSteps = [
+  { label: "Research Question", icon: Search, endpoint: true },
+  { label: "Planner Agent", icon: BrainCircuit, endpoint: false },
+  { label: "Data Agent", icon: Database, endpoint: false },
+  { label: "Market Agent", icon: LineChart, endpoint: false },
+  { label: "Risk Agent", icon: ShieldCheck, endpoint: false },
+  { label: "Critic Agent", icon: ScanSearch, endpoint: false },
+  { label: "Final Synthesis", icon: FileText, endpoint: true },
+];
+
+const agentCapabilities = ["Python", "Multi-agent AI", "Market Analysis", "News / Sentiment", "Risk Analysis", "LLM orchestration"];
+
 /**
  * Honest capability map: each discipline links only to items already present
  * on this page (project titles / research codes). No proficiency scores.
@@ -214,12 +227,31 @@ export function PortfolioSite() {
               </div>
             </div>
             <div className="reveal-up mt-16 grid max-w-4xl grid-cols-2 overflow-hidden rounded-md border border-border bg-background/60 backdrop-blur-sm sm:grid-cols-3 lg:grid-cols-5 [animation-delay:200ms]">
-              {portfolio.disciplines.map((item, index) => (
-                <div key={item} className="min-w-0 border-b border-r border-border px-4 py-4 last:border-r-0">
-                  <span className="font-mono text-[10px] text-primary">0{index + 1}</span>
-                  <p className="mt-2 text-xs text-foreground/80">{item}</p>
-                </div>
-              ))}
+              {portfolio.disciplines.map((item, index) => {
+                const cell = (
+                  <>
+                    <span className="font-mono text-[10px] text-primary">0{index + 1}</span>
+                    <p className="mt-2 text-xs text-foreground/80">{item}</p>
+                  </>
+                );
+                if (item === "AI agents") {
+                  return (
+                    <a
+                      key={item}
+                      href="#ai-agents"
+                      aria-label="AI agents — jump to the AI Multi-Agent Research System section"
+                      className={`group min-w-0 border-b border-r border-border px-4 py-4 transition-colors last:border-r-0 hover:bg-signal-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${focusRing}`}
+                    >
+                      {cell}
+                    </a>
+                  );
+                }
+                return (
+                  <div key={item} className="min-w-0 border-b border-r border-border px-4 py-4 last:border-r-0">
+                    {cell}
+                  </div>
+                );
+              })}
             </div>
           </div>
         </section>
