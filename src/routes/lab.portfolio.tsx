@@ -1,6 +1,7 @@
 import { lazy, Suspense } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 
+import { ExperimentSnapshotButton } from "@/components/lab/experiment-snapshot-button";
 import { LabShell } from "@/components/lab/lab-shell";
 
 const PortfolioLab = lazy(() => import("@/components/lab/portfolio-lab").then((m) => ({ default: m.PortfolioLab })));
@@ -29,6 +30,7 @@ function Page() {
           Choose K assets out of a small universe by minimising risk minus return with a cardinality penalty. See the QUBO and Ising forms,
           solve with seeded QAOA on the shared statevector simulator, and compare with the exact exhaustive optimum. Educational only.
         </p>
+        <div className="mt-4"><ExperimentSnapshotButton module="Quantum Portfolio Optimizer" route="/lab/portfolio" /></div>
       </div>
       <Suspense fallback={<div className="h-96 animate-pulse rounded-md border border-border bg-card" aria-label="Loading portfolio optimizer" />}>
         <PortfolioLab />
