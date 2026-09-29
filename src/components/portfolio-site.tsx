@@ -299,6 +299,11 @@ export function PortfolioSite() {
                           Open Blockchain Research Lab <ArrowRight className="size-3" aria-hidden="true" />
                         </span>
                       )}
+                      {item === "Quantitative finance" && (
+                        <span className="mt-4 inline-flex items-center gap-1 font-mono text-[10px] uppercase text-primary">
+                          Open Quantum Finance Lab <ArrowRight className="size-3" aria-hidden="true" />
+                        </span>
+                      )}
                     </>
                   );
                   const cardClass = "card-interactive group relative rounded-md border border-border bg-card p-5";
@@ -307,6 +312,9 @@ export function PortfolioSite() {
                   }
                   if (item === "Blockchain") {
                     return <Link key={item} to="/lab/blockchain" aria-label="Blockchain — open the Blockchain Research Lab" className={`${cardClass} block ${focusRing}`}>{card}</Link>;
+                  }
+                  if (item === "Quantitative finance") {
+                    return <Link key={item} to="/lab/finance" aria-label="Quantitative finance — open the Live Quantum Finance Lab" className={`${cardClass} block ${focusRing}`}>{card}</Link>;
                   }
                   return <div key={item} className={cardClass}>{card}</div>;
                 })}
