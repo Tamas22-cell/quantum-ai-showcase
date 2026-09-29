@@ -85,6 +85,7 @@ export const portfolio = {
       code: "QISKIT",
       title: "Quantum Software Workflows",
       description: "Building reproducible experiments and examining hardware-aware execution patterns with Qiskit.",
+      href: "/lab/qiskit",
     },
     {
       code: "HYBRID",
