@@ -1,5 +1,5 @@
 import { lazy, Suspense } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 
 import { LabShell } from "@/components/lab/lab-shell";
 
@@ -29,6 +29,9 @@ function Page() {
           Load prices (seeded synthetic data, your own CSV, or an optional live provider), compute returns, covariance and correlation,
           then select a portfolio with the same QUBO/QAOA engine as the Portfolio Optimizer — side by side with classical baselines.
         </p>
+        <Link to="/lab/finance/stress" className="mt-4 inline-flex items-center gap-2 rounded-sm border border-primary/50 bg-signal-soft px-3 py-2 font-mono text-[11px] uppercase text-primary hover:bg-primary/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+          Research project · Quantum Portfolio Stress Lab →
+        </Link>
       </div>
       <Suspense fallback={<div className="h-96 animate-pulse rounded-md border border-border bg-card" aria-label="Loading finance lab" />}>
         <FinanceLab />

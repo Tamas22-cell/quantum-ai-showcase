@@ -28,6 +28,7 @@ import { Route as LabReportsRouteImport } from './routes/lab.reports'
 import { Route as LabSnapshotRouteImport } from './routes/lab.snapshot'
 import { Route as LabVqeRouteImport } from './routes/lab.vqe'
 import { Route as LabFinanceIndexRouteImport } from './routes/lab.finance.index'
+import { Route as LabFinanceStressRouteImport } from './routes/lab.finance.stress'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -124,6 +125,11 @@ const LabFinanceIndexRoute = LabFinanceIndexRouteImport.update({
   path: '/lab/finance/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LabFinanceStressRoute = LabFinanceStressRouteImport.update({
+  id: '/lab/finance/stress',
+  path: '/lab/finance/stress',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -144,6 +150,7 @@ export interface FileRoutesByFullPath {
   '/lab/snapshot': typeof LabSnapshotRoute
   '/lab/vqe': typeof LabVqeRoute
   '/lab/': typeof LabIndexRoute
+  '/lab/finance/stress': typeof LabFinanceStressRoute
   '/lab/finance/': typeof LabFinanceIndexRoute
 }
 export interface FileRoutesByTo {
@@ -165,6 +172,7 @@ export interface FileRoutesByTo {
   '/lab/snapshot': typeof LabSnapshotRoute
   '/lab/vqe': typeof LabVqeRoute
   '/lab': typeof LabIndexRoute
+  '/lab/finance/stress': typeof LabFinanceStressRoute
   '/lab/finance': typeof LabFinanceIndexRoute
 }
 export interface FileRoutesById {
@@ -187,6 +195,7 @@ export interface FileRoutesById {
   '/lab/snapshot': typeof LabSnapshotRoute
   '/lab/vqe': typeof LabVqeRoute
   '/lab/': typeof LabIndexRoute
+  '/lab/finance/stress': typeof LabFinanceStressRoute
   '/lab/finance/': typeof LabFinanceIndexRoute
 }
 export interface FileRouteTypes {
@@ -210,6 +219,7 @@ export interface FileRouteTypes {
     | '/lab/snapshot'
     | '/lab/vqe'
     | '/lab/'
+    | '/lab/finance/stress'
     | '/lab/finance/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -231,6 +241,7 @@ export interface FileRouteTypes {
     | '/lab/snapshot'
     | '/lab/vqe'
     | '/lab'
+    | '/lab/finance/stress'
     | '/lab/finance'
   id:
     | '__root__'
@@ -252,6 +263,7 @@ export interface FileRouteTypes {
     | '/lab/snapshot'
     | '/lab/vqe'
     | '/lab/'
+    | '/lab/finance/stress'
     | '/lab/finance/'
   fileRoutesById: FileRoutesById
 }
@@ -274,6 +286,7 @@ export interface RootRouteChildren {
   LabSnapshotRoute: typeof LabSnapshotRoute
   LabVqeRoute: typeof LabVqeRoute
   LabIndexRoute: typeof LabIndexRoute
+  LabFinanceStressRoute: typeof LabFinanceStressRoute
   LabFinanceIndexRoute: typeof LabFinanceIndexRoute
 }
 
@@ -412,6 +425,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LabFinanceIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lab/finance/stress': {
+      id: '/lab/finance/stress'
+      path: '/lab/finance/stress'
+      fullPath: '/lab/finance/stress'
+      preLoaderRoute: typeof LabFinanceStressRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -434,6 +454,7 @@ const rootRouteChildren: RootRouteChildren = {
   LabSnapshotRoute: LabSnapshotRoute,
   LabVqeRoute: LabVqeRoute,
   LabIndexRoute: LabIndexRoute,
+  LabFinanceStressRoute: LabFinanceStressRoute,
   LabFinanceIndexRoute: LabFinanceIndexRoute,
 }
 export const routeTree = rootRouteImport

@@ -184,7 +184,7 @@ export function StressLab() {
       </div>
 
       <aside className="rounded-md border border-border bg-card p-4 text-xs leading-6 text-muted-foreground">
-        <strong className="text-foreground">Limitations.</strong> All asset parameters and scenarios are synthetic and hand-set for research illustration. QAOA runs on an ideal noiseless classical simulation, not quantum hardware, and selects a K-asset subset that is then weighted classically; any difference from the classical baseline reflects the cardinality constraint and objective, not a demonstrated quantum advantage. Not investment advice.
+        <strong className="text-foreground">Limitations.</strong> All asset parameters and scenarios are synthetic and hand-set for research illustration. QAOA runs on an ideal noiseless classical simulation, not quantum hardware, and selects a K-asset subset that is then weighted classically; any difference from the classical baseline reflects the cardinality constraint and objective, not evidence of quantum advantage. Not investment advice.
       </aside>
     </div>
   );
