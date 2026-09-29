@@ -21,6 +21,7 @@ import { Route as LabHistoryRouteImport } from './routes/lab.history'
 import { Route as LabIbmRouteImport } from './routes/lab.ibm'
 import { Route as LabPortfolioRouteImport } from './routes/lab.portfolio'
 import { Route as LabQaoaRouteImport } from './routes/lab.qaoa'
+import { Route as LabQiskitRouteImport } from './routes/lab.qiskit'
 import { Route as LabQmlRouteImport } from './routes/lab.qml'
 import { Route as LabReportsRouteImport } from './routes/lab.reports'
 import { Route as LabSnapshotRouteImport } from './routes/lab.snapshot'
@@ -86,6 +87,11 @@ const LabQaoaRoute = LabQaoaRouteImport.update({
   path: '/lab/qaoa',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LabQiskitRoute = LabQiskitRouteImport.update({
+  id: '/lab/qiskit',
+  path: '/lab/qiskit',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LabQmlRoute = LabQmlRouteImport.update({
   id: '/lab/qml',
   path: '/lab/qml',
@@ -119,6 +125,7 @@ export interface FileRoutesByFullPath {
   '/lab/ibm': typeof LabIbmRoute
   '/lab/portfolio': typeof LabPortfolioRoute
   '/lab/qaoa': typeof LabQaoaRoute
+  '/lab/qiskit': typeof LabQiskitRoute
   '/lab/qml': typeof LabQmlRoute
   '/lab/reports': typeof LabReportsRoute
   '/lab/snapshot': typeof LabSnapshotRoute
@@ -137,6 +144,7 @@ export interface FileRoutesByTo {
   '/lab/ibm': typeof LabIbmRoute
   '/lab/portfolio': typeof LabPortfolioRoute
   '/lab/qaoa': typeof LabQaoaRoute
+  '/lab/qiskit': typeof LabQiskitRoute
   '/lab/qml': typeof LabQmlRoute
   '/lab/reports': typeof LabReportsRoute
   '/lab/snapshot': typeof LabSnapshotRoute
@@ -156,6 +164,7 @@ export interface FileRoutesById {
   '/lab/ibm': typeof LabIbmRoute
   '/lab/portfolio': typeof LabPortfolioRoute
   '/lab/qaoa': typeof LabQaoaRoute
+  '/lab/qiskit': typeof LabQiskitRoute
   '/lab/qml': typeof LabQmlRoute
   '/lab/reports': typeof LabReportsRoute
   '/lab/snapshot': typeof LabSnapshotRoute
@@ -176,6 +185,7 @@ export interface FileRouteTypes {
     | '/lab/ibm'
     | '/lab/portfolio'
     | '/lab/qaoa'
+    | '/lab/qiskit'
     | '/lab/qml'
     | '/lab/reports'
     | '/lab/snapshot'
@@ -194,6 +204,7 @@ export interface FileRouteTypes {
     | '/lab/ibm'
     | '/lab/portfolio'
     | '/lab/qaoa'
+    | '/lab/qiskit'
     | '/lab/qml'
     | '/lab/reports'
     | '/lab/snapshot'
@@ -212,6 +223,7 @@ export interface FileRouteTypes {
     | '/lab/ibm'
     | '/lab/portfolio'
     | '/lab/qaoa'
+    | '/lab/qiskit'
     | '/lab/qml'
     | '/lab/reports'
     | '/lab/snapshot'
@@ -231,6 +243,7 @@ export interface RootRouteChildren {
   LabIbmRoute: typeof LabIbmRoute
   LabPortfolioRoute: typeof LabPortfolioRoute
   LabQaoaRoute: typeof LabQaoaRoute
+  LabQiskitRoute: typeof LabQiskitRoute
   LabQmlRoute: typeof LabQmlRoute
   LabReportsRoute: typeof LabReportsRoute
   LabSnapshotRoute: typeof LabSnapshotRoute
@@ -324,6 +337,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LabQaoaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lab/qiskit': {
+      id: '/lab/qiskit'
+      path: '/lab/qiskit'
+      fullPath: '/lab/qiskit'
+      preLoaderRoute: typeof LabQiskitRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lab/qml': {
       id: '/lab/qml'
       path: '/lab/qml'
@@ -367,6 +387,7 @@ const rootRouteChildren: RootRouteChildren = {
   LabIbmRoute: LabIbmRoute,
   LabPortfolioRoute: LabPortfolioRoute,
   LabQaoaRoute: LabQaoaRoute,
+  LabQiskitRoute: LabQiskitRoute,
   LabQmlRoute: LabQmlRoute,
   LabReportsRoute: LabReportsRoute,
   LabSnapshotRoute: LabSnapshotRoute,
