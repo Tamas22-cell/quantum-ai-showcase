@@ -198,7 +198,7 @@ export function PortfolioSite() {
 
       <main id="main">
         {/* HERO */}
-        <section id="top" className="lab-grid relative isolate flex min-h-[94svh] items-center overflow-hidden border-b border-border px-5 pb-16 pt-28 sm:px-8">
+        <section id="top" className="lab-grid relative isolate flex items-center overflow-hidden border-b border-border px-5 pb-16 pt-28 sm:px-8 lg:pb-20 lg:pt-32">
           <QuantumField className="absolute inset-0 -z-10 h-full w-full opacity-80" />
           <div className="hero-glow absolute -right-40 top-1/4 -z-10 size-[36rem] rounded-full" aria-hidden="true" />
           <div className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,var(--color-background)_0%,color-mix(in_oklab,var(--color-background)_55%,transparent)_55%,transparent_100%)]" aria-hidden="true" />
