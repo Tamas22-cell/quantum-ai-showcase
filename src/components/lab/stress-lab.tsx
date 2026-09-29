@@ -61,15 +61,16 @@ export function StressLab() {
         weights: c.weights.join(", "), riskPreference: String(c.riskPref), qaoaK: String(c.k), seed: String(c.seed),
         qaoaSelection: result.qaoa.selected.join(", "), qaoaMatchesExact: result.qaoa.matchesExact, data: "synthetic",
       },
-      summary: [row("Original", result.original.m), row("Classical", result.classical.m), row("QAOA", result.qaoa.m), ...lines].join("\n"),
+      summary: [row("Before (baseline)", result.baseline), row("Before (stressed)", result.original.m), row("After classical", result.classical.m), row("After QAOA", result.qaoa.m), ...lines].join("\n"),
     });
     setSaved(true);
   }
 
   const cols = result ? [
-    { key: "Original", w: result.original.w, m: result.original.m },
-    { key: "Classical", w: result.classical.w, m: result.classical.m },
-    { key: "QAOA", w: result.qaoa.w, m: result.qaoa.m },
+    { key: "Before · baseline", w: result.original.w, m: result.baseline },
+    { key: "Before · stressed", w: result.original.w, m: result.original.m },
+    { key: "After · classical", w: result.classical.w, m: result.classical.m },
+    { key: "After · QAOA", w: result.qaoa.w, m: result.qaoa.m },
   ] : [];
 
   return (
@@ -163,9 +164,9 @@ export function StressLab() {
                   <li key={a.ticker}>
                     <div className="mb-1 font-mono text-xs text-primary">{a.ticker}</div>
                     {cols.map((c, ci) => (
-                      <div key={c.key} className="grid grid-cols-[4.5rem_1fr_3rem] items-center gap-2 text-[11px]">
+                      <div key={c.key} className="grid grid-cols-[7.5rem_1fr_3rem] items-center gap-2 text-[11px]">
                         <span className="text-muted-foreground">{c.key}</span>
-                        <div className="h-2 overflow-hidden rounded-full bg-muted"><div className="h-full bg-primary" style={{ width: `${c.w[i]! * 100}%`, opacity: [0.4, 0.7, 1][ci] }} /></div>
+                        <div className="h-2 overflow-hidden rounded-full bg-muted"><div className="h-full bg-primary" style={{ width: `${c.w[i]! * 100}%`, opacity: [0.3, 0.3, 0.65, 1][ci] }} /></div>
                         <span className="text-right font-mono">{pct(c.w[i]!)}</span>
                       </div>
                     ))}
