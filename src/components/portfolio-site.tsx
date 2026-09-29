@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   ArrowDown,
+  ArrowRight,
   ArrowUpRight,
   Atom,
   Blocks,
@@ -11,12 +12,16 @@ import {
   CircleDashed,
   Code2,
   Cpu,
+  Database,
+  FileText,
   Github,
   LineChart,
   Linkedin,
   Menu,
   Network,
   Orbit,
+  ScanSearch,
+  Search,
   ShieldCheck,
   X,
 } from "lucide-react";
@@ -35,7 +40,7 @@ const disciplineIcons = [BrainCircuit, Code2, Blocks, LineChart, Atom];
  * on this page (project titles / research codes). No proficiency scores.
  */
 const disciplineLinks: Record<string, string[]> = {
-  "AI agents": ["AgentTrust", "AI Financial Research Platform"],
+  "AI agents": ["AgentTrust", "AI Financial Research Platform", "AI Multi-Agent Research System"],
   Python: ["AI Financial Research Platform", "Qiskit workflows"],
   Blockchain: ["AgentTrust"],
   "Quantitative finance": ["AI Financial Research Platform", "Quantum Portfolio Lab"],
