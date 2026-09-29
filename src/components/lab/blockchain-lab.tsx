@@ -80,7 +80,7 @@ export function BlockchainLab() {
 
   // Wallet demo
   const [wallet, setWallet] = useState<DemoWallet | null>(null);
-  const [message, setMessage] = useState("Transfer 10 DEMO from alice to bob");
+  const [message, setMessage] = useState("Transfer 10 SIM from alice to bob");
   const [signature, setSignature] = useState("");
   const [verifyMsg, setVerifyMsg] = useState("");
   const [verified, setVerified] = useState<boolean | null>(null);
@@ -137,7 +137,7 @@ export function BlockchainLab() {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-dashed border-border-strong bg-surface px-4 py-3 text-xs text-muted-foreground">
-        <span>Educational demo using SHA-256 and ECDSA from your browser's Web Crypto API. No real chain, funds, wallets or network calls.</span>
+        <span>Educational simulation using SHA-256 and ECDSA from your browser's Web Crypto API. No real chain, funds, wallets or network calls.</span>
         <Button type="button" variant="outline" size="sm" onClick={save} disabled={!hash}>
           {saved ? <Check className="size-4" aria-hidden="true" /> : <Save className="size-4" aria-hidden="true" />}
           {saved ? "Saved to history" : "Save experiment"}
@@ -218,7 +218,7 @@ export function BlockchainLab() {
               <div><span className={label}>Current hash · nonce {nonce}</span><Hash value={hash} highlight={valid ? difficulty : 0} /></div>
               <p className={valid ? "text-primary" : "text-muted-foreground"}>{valid ? "Valid proof-of-work for this difficulty." : "Hash does not meet the target yet."}</p>
             </div>
-            <p className="mt-4 text-xs text-muted-foreground">Real Bitcoin difficulty requires ~19+ leading hex zeros on specialised hardware; this demo caps at {MAX_DIFFICULTY} to stay responsive in the browser.</p>
+            <p className="mt-4 text-xs text-muted-foreground">Real Bitcoin difficulty requires ~19+ leading hex zeros on specialised hardware; this simulation caps at {MAX_DIFFICULTY} to stay responsive in the browser.</p>
           </section>
         </TabsContent>
 
@@ -251,17 +251,17 @@ export function BlockchainLab() {
         {/* 4. Wallet */}
         <TabsContent value="wallet" className="mt-4 grid gap-4 lg:grid-cols-2">
           <section className={panel} aria-labelledby="wallet-h">
-            <h2 id="wallet-h" className={label}>Demo wallet · ECDSA P-256</h2>
-            <Button type="button" className="mt-3" onClick={newWallet}><KeyRound className="size-4" aria-hidden="true" /> {wallet ? "Generate new demo keys" : "Generate demo keys"}</Button>
+            <h2 id="wallet-h" className={label}>Ephemeral test wallet · ECDSA P-256</h2>
+            <Button type="button" className="mt-3" onClick={newWallet}><KeyRound className="size-4" aria-hidden="true" /> {wallet ? "Generate new test keys" : "Generate test keys"}</Button>
             {wallet && (
               <div className="mt-4 space-y-3 text-xs">
-                <div><span className={label}>Demo address</span><Hash value={wallet.address} /></div>
+                <div><span className={label}>Test address</span><Hash value={wallet.address} /></div>
                 <div><span className={label}>Public key (raw, hex)</span><Hash value={wallet.publicHex} /></div>
                 <p className="text-muted-foreground">The private key stays inside this browser tab in memory and is never shown, stored or sent anywhere.</p>
               </div>
             )}
             <p className="mt-4 rounded-sm border border-dashed border-border-strong p-3 text-xs text-muted-foreground">
-              Demo only: no real funds, not a real wallet format, and never paste real seed phrases or private keys into any website.
+              Educational simulation only: no real funds, not a real wallet format, and never paste real seed phrases or private keys into any website.
             </p>
           </section>
           <section className={panel} aria-labelledby="sign-h">
@@ -342,7 +342,7 @@ export function BlockchainLab() {
           ))}
           <p className="text-xs text-muted-foreground md:col-span-2">
             Educational explainer, not a security assessment. No existing quantum computer can break the signatures or hashes used by real blockchains today;
-            the threat concerns future fault-tolerant machines. The ECDSA demo above is exactly the kind of scheme Shor's algorithm targets.
+            the threat concerns future fault-tolerant machines. The ECDSA example above is exactly the kind of scheme Shor's algorithm targets.
           </p>
         </TabsContent>
       </Tabs>
@@ -352,7 +352,7 @@ export function BlockchainLab() {
         <ul className="mt-1 list-disc space-y-1 pl-5">
           <li>Educational browser simulation — not connected to any real blockchain network; no network calls are made.</li>
           <li>Transactions and analytics use synthetic, seeded data, not real chain data or investment information.</li>
-          <li>No wallet connection and no private-key custody: demo keys are generated in memory, never stored or uploaded, and vanish when you leave the page.</li>
+          <li>No wallet connection and no private-key custody: test keys are generated in memory, never stored or uploaded, and vanish when you leave the page.</li>
           <li>Mining difficulty is capped for responsiveness; timings are not representative of real networks.</li>
         </ul>
       </aside>

@@ -189,7 +189,7 @@ export function QmlLab() {
   return (
     <div className="space-y-6">
       <div role="note" className="rounded-md border border-amber/40 bg-amber/10 p-3 text-xs leading-6 text-foreground">
-        <strong>{LABEL}</strong> Educational demonstration only. No claim of quantum advantage, and no evidence that this QML model outperforms classical machine learning.
+        <strong>{LABEL}</strong> Educational simulation only. No claim of quantum advantage, and no evidence that this QML model outperforms classical machine learning.
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -301,7 +301,7 @@ export function QmlLab() {
         </div>
         <p className="mt-3 text-xs leading-6 text-muted-foreground">
           Same train/test split for both. Logistic regression: full-batch gradient descent, zero initialisation, 2,000 epochs, L2 = 10⁻³ (deterministic).
-          Linear logistic regression cannot separate XOR or circle data; adding quadratic features usually fixes that. <strong className="text-foreground">This comparison does NOT demonstrate quantum advantage</strong>: the
+          Linear logistic regression cannot separate XOR or circle data; adding quadratic features usually fixes that. <strong className="text-foreground">This comparison does NOT show quantum advantage</strong>: the
           datasets are tiny, the quantum model is simulated classically, and differences mostly reflect feature choices, not quantum effects.
         </p>
       </Panel>
@@ -312,7 +312,7 @@ export function QmlLab() {
           <li>Only 2 qubits and 2 input features; results say nothing about scaling to real problems.</li>
           <li>Nelder–Mead is a local optimiser; different seeds can reach different minima.</li>
           <li>The train/test split is random, not stratified; small test sets make accuracy estimates noisy.</li>
-          <li>Educational demonstration only. No evidence that this model outperforms classical machine learning.</li>
+          <li>Educational simulation only. No evidence that this model outperforms classical machine learning.</li>
         </ul>
       </Panel>
     </div>

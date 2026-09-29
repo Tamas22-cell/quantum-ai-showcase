@@ -34,7 +34,7 @@ function snapshotText(item: ExperimentSnapshot) {
     `Captured: ${new Date(item.createdAt).toLocaleString()}`,
     fields,
     item.summary ? `Summary: ${item.summary}` : "",
-    "Generated client-side. Educational/research demo; not investment advice.",
+    "Generated client-side. Educational research simulation; not investment advice.",
   ].filter(Boolean).join("\n");
 }
 
@@ -114,7 +114,7 @@ function drawCard(canvas: HTMLCanvasElement, item: ExperimentSnapshot) {
   ctx.fillText("quantum-ai-showcase.vercel.app", 92, 838);
   ctx.fillStyle = "#73879d";
   ctx.textAlign = "right";
-  ctx.fillText("Client-side research demo · reproducible from saved experiment data", W - 92, 838);
+  ctx.fillText("Client-side research simulation · reproducible from saved experiment data", W - 92, 838);
   ctx.textAlign = "left";
 }
 

@@ -222,9 +222,9 @@ function qmlReport(s: Extract<Snapshot, { kind: "qml" }>, at: string): ReportDoc
     results.push({ type: "line", caption: "Training loss", xLabel: "iteration", yLabel: "BCE", series: [{ name: "loss", points: r.history.map((h) => [h.iter, h.loss]) }] });
     results.push({ type: "line", caption: "Accuracy", xLabel: "iteration", yLabel: "accuracy", series: [{ name: "train", points: r.history.map((h) => [h.iter, h.trainAcc]) }, { name: "test", points: r.history.map((h) => [h.iter, h.testAcc]) }] });
   } else results.push({ type: "notice", text: "Training history not provided." });
-  return wrap(s, at, [NO_ADVANTAGE, NO_QML_CLAIM, "Educational demonstration only."], [
+  return wrap(s, at, [NO_ADVANTAGE, NO_QML_CLAIM, "Educational simulation only."], [
     `2-qubit variational classifier (depth ${r.depth}) on the ${s.dataset} dataset (${s.train.length} train / ${s.test.length} test).`,
-    `Quantum test accuracy ${pct(r.testAcc)} vs classical baseline ${pct(b?.testAcc)}; this comparison does not demonstrate any advantage.`,
+    `Quantum test accuracy ${pct(r.testAcc)} vs classical baseline ${pct(b?.testAcc)}; this comparison does not show any advantage.`,
   ], [
     { heading: "Experiment setup", blocks: [{ type: "kv", rows: [["Dataset", s.dataset], ["Samples", String(s.n)], ["Test fraction", String(s.testFraction)], ["Depth", String(r.depth)], ["Parameters", String(r.params.length)], ["Encoding", "Angle encoding Ry(π·x) per feature"], ["Readout", "P(q1 = 1) after CNOT entangler"]] }] },
     { heading: "Methodology", blocks: [{ type: "paragraph", text: "Each input is angle-encoded into 2 qubits, followed by trainable Ry/Rz layers and CNOT entanglers. Class-1 probability is read out exactly. Parameters minimise binary cross-entropy with seeded Nelder–Mead. The baseline is logistic regression trained by gradient descent on the same split." }] },
@@ -276,7 +276,7 @@ function financeReport(s: Extract<Snapshot, { kind: "finance" }>, at: string): R
   const st = e.stats, r = e.result, b = e.baselines, m = e.model, n = st.symbols.length;
   const sel = (x: number) => st.symbols.filter((_, i) => (x >> i) & 1).join(", ") || "(none)";
   const w = (ws: number[]) => ws.map((v, i) => (Math.abs(v) > 1e-9 ? `${st.symbols[i]} ${pct(v)}` : "")).filter(Boolean).join(", ");
-  const srcLabel = e.source === "demo" ? `Demo mode: seeded synthetic prices (seed ${e.demoSeed ?? "n/a"}); not market data.` : e.source === "csv" ? "User-uploaded CSV prices, processed in the browser; not verified." : "Live market-data provider (configured server-side); data not independently verified.";
+  const srcLabel = e.source === "demo" ? `Synthetic mode: seeded synthetic prices (seed ${e.demoSeed ?? "n/a"}); not market data.` : e.source === "csv" ? "User-uploaded CSV prices, processed in the browser; not verified." : "Live market-data provider (configured server-side); data not independently verified.";
   const results: Block[] = [
     { type: "table", caption: "Classical calculations vs simulated QAOA (equal weights within a selection)", head: ["Method", "Type", "Portfolio", "Return", "Volatility"], rows: [
       ["Equal weight (all assets)", "classical", w(b.equalWeight.weights), pct(b.equalWeight.ret), pct(b.equalWeight.vol)],
@@ -305,7 +305,7 @@ function financeReport(s: Extract<Snapshot, { kind: "finance" }>, at: string): R
     { heading: "Results", blocks: results },
     { heading: "Interpretation", blocks: [{ type: "paragraph", text: "Classical exhaustive search is exact and instantaneous at this size; the QAOA run illustrates the formulation only. Sample statistics from historical data are noisy estimates of future behaviour." }] },
     { heading: "Limitations", blocks: [{ type: "bullets", items: ["Binary equal-weight selection; no transaction costs, taxes, liquidity or lot sizes.", "Estimation error in mean returns dominates small-sample portfolio optimisation.", "At most 8 assets (2^8 amplitudes) for exact and QAOA simulation.", "Uniform annualisation factor applied to every asset."] }] },
-    reproducibility(r.config.seed, [["Demo data seed", e.demoSeed === undefined ? "n/a" : String(e.demoSeed)], ["Restarts", String(r.config.restarts)], ["Max iterations", String(r.config.maxIter)]]),
+    reproducibility(r.config.seed, [["Synthetic data seed", e.demoSeed === undefined ? "n/a" : String(e.demoSeed)], ["Restarts", String(r.config.restarts)], ["Max iterations", String(r.config.maxIter)]]),
   ]);
 }
 
