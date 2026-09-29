@@ -1,6 +1,7 @@
 import { lazy, Suspense } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 
+import { ExperimentSnapshotButton } from "@/components/lab/experiment-snapshot-button";
 import { LabShell } from "@/components/lab/lab-shell";
 
 const VqeLab = lazy(() => import("@/components/lab/vqe-lab").then((m) => ({ default: m.VqeLab })));
@@ -29,6 +30,7 @@ function Page() {
           Define a small Pauli Hamiltonian, choose a hardware-efficient Ry/Rz ansatz and a classical optimizer, and watch the variational energy
           approach the exact ground-state energy obtained by diagonalisation. All runs are seeded and reproducible.
         </p>
+        <div className="mt-4"><ExperimentSnapshotButton module="VQE Research Lab" route="/lab/vqe" /></div>
       </div>
       <Suspense fallback={<div className="h-96 animate-pulse rounded-md border border-border bg-card" aria-label="Loading VQE lab" />}>
         <VqeLab />
