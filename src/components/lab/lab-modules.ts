@@ -7,7 +7,7 @@ export type LabModule = {
   topics: string[];
   status: "available" | "in-development";
   group: "core" | "command";
-  to?: "/lab/circuit-builder" | "/lab/entanglement" | "/lab/qaoa" | "/lab/vqe" | "/lab/portfolio" | "/lab/arena" | "/lab/assistant" | "/lab/qml" | "/lab/reports" | "/lab/ibm" | "/lab/finance" | "/lab/benchmark" | "/lab/history" | "/lab/snapshot";
+  to?: "/lab/circuit-builder" | "/lab/entanglement" | "/lab/qaoa" | "/lab/vqe" | "/lab/portfolio" | "/lab/arena" | "/lab/assistant" | "/lab/qml" | "/lab/reports" | "/lab/ibm" | "/lab/finance" | "/lab/benchmark" | "/lab/history" | "/lab/snapshot" | "/lab/qiskit";
 };
 
 export const LAB_MODULES: LabModule[] = [
@@ -82,5 +82,10 @@ export const LAB_MODULES: LabModule[] = [
     id: "snapshot", index: "C8", title: "Generate Research Snapshot", group: "command",
     summary: "Turn a saved quantum experiment into a branded, shareable PNG research card directly in the browser — no API key or paid service required.",
     topics: ["PNG export", "Research card", "Client-side", "Shareable results"], status: "available", to: "/lab/snapshot",
+  },
+  {
+    id: "qiskit", index: "C9", title: "Qiskit Workflow Lab", group: "command",
+    summary: "Circuit → Transpile → Backend → Run → Result → Save: a Qiskit-style workflow simulated locally in the browser.",
+    topics: ["Transpiler", "rz · sx · x · cz", "Sampler", "Experiment History"], status: "available", to: "/lab/qiskit",
   },
 ];
