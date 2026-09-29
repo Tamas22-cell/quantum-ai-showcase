@@ -89,7 +89,7 @@ export function QiskitLab() {
         })}
       </ol>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-6 lg:grid-cols-2 [&>*]:min-w-0">
         <Panel title="1 · Circuit">
           <label className="block text-sm">
             <span className="text-muted-foreground">Preset circuit</span>
