@@ -1,9 +1,7 @@
-import { lazy, Suspense } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 
 import { LabShell } from "@/components/lab/lab-shell";
-
-const VariationalRiskLab = lazy(() => import("@/components/lab/variational-risk-lab").then((m) => ({ default: m.VariationalRiskLab })));
+import { VariationalRiskLab } from "@/components/lab/variational-risk-lab";
 
 export const Route = createFileRoute("/lab/finance/variational-risk")({
   head: () => ({
@@ -30,9 +28,7 @@ function Page() {
           run a seeded parameter optimization, inspect cost-function convergence, and compare the final variational risk estimate with a classical baseline.
         </p>
       </div>
-      <Suspense fallback={<div className="h-96 animate-pulse rounded-md border border-border bg-card" aria-label="Loading variational risk model" />}>
-        <VariationalRiskLab />
-      </Suspense>
+      <VariationalRiskLab />
     </LabShell>
   );
 }
