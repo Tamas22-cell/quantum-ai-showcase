@@ -15,3 +15,4 @@
 - [x] C4 — Live Quantum Finance Lab (/lab/finance): demo + CSV modes, provider interface (live data not configured), QAOA + classical baselines, PDF report, 15 tests.
 - [x] C5 — Research Report Generator (/lab/reports): client-side jsPDF reports for all 7 labs, 13 tests.
 - [x] Python Research Lab (/lab/python, Pyodide worker, presets, history save, Python card + C10).
+- [x] Blockchain Research Lab (/lab/blockchain, C11, Blockchain card link, history save).
