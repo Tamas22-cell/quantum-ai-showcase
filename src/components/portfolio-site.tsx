@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   ArrowDown,
+  ArrowRight,
   ArrowUpRight,
   Atom,
   Blocks,
@@ -11,12 +12,16 @@ import {
   CircleDashed,
   Code2,
   Cpu,
+  Database,
+  FileText,
   Github,
   LineChart,
   Linkedin,
   Menu,
   Network,
   Orbit,
+  ScanSearch,
+  Search,
   ShieldCheck,
   X,
 } from "lucide-react";
@@ -30,12 +35,25 @@ const projectIcons = [ShieldCheck, Network, Orbit];
 const researchIcons = [Orbit, Atom, Braces, Cpu];
 const disciplineIcons = [BrainCircuit, Code2, Blocks, LineChart, Atom];
 
+/** Agentic pipeline shown in the AI Multi-Agent Research System section. */
+const pipelineSteps = [
+  { label: "Research Question", icon: Search, endpoint: true },
+  { label: "Planner Agent", icon: BrainCircuit, endpoint: false },
+  { label: "Data Agent", icon: Database, endpoint: false },
+  { label: "Market Agent", icon: LineChart, endpoint: false },
+  { label: "Risk Agent", icon: ShieldCheck, endpoint: false },
+  { label: "Critic Agent", icon: ScanSearch, endpoint: false },
+  { label: "Final Synthesis", icon: FileText, endpoint: true },
+];
+
+const agentCapabilities = ["Python", "Multi-agent AI", "Market Analysis", "News / Sentiment", "Risk Analysis", "LLM orchestration"];
+
 /**
  * Honest capability map: each discipline links only to items already present
  * on this page (project titles / research codes). No proficiency scores.
  */
 const disciplineLinks: Record<string, string[]> = {
-  "AI agents": ["AgentTrust", "AI Financial Research Platform"],
+  "AI agents": ["AgentTrust", "AI Financial Research Platform", "AI Multi-Agent Research System"],
   Python: ["AI Financial Research Platform", "Qiskit workflows"],
   Blockchain: ["AgentTrust"],
   "Quantitative finance": ["AI Financial Research Platform", "Quantum Portfolio Lab"],
@@ -209,12 +227,31 @@ export function PortfolioSite() {
               </div>
             </div>
             <div className="reveal-up mt-16 grid max-w-4xl grid-cols-2 overflow-hidden rounded-md border border-border bg-background/60 backdrop-blur-sm sm:grid-cols-3 lg:grid-cols-5 [animation-delay:200ms]">
-              {portfolio.disciplines.map((item, index) => (
-                <div key={item} className="min-w-0 border-b border-r border-border px-4 py-4 last:border-r-0">
-                  <span className="font-mono text-[10px] text-primary">0{index + 1}</span>
-                  <p className="mt-2 text-xs text-foreground/80">{item}</p>
-                </div>
-              ))}
+              {portfolio.disciplines.map((item, index) => {
+                const cell = (
+                  <>
+                    <span className="font-mono text-[10px] text-primary">0{index + 1}</span>
+                    <p className="mt-2 text-xs text-foreground/80">{item}</p>
+                  </>
+                );
+                if (item === "AI agents") {
+                  return (
+                    <a
+                      key={item}
+                      href="#ai-agents"
+                      aria-label="AI agents — jump to the AI Multi-Agent Research System section"
+                      className={`group min-w-0 border-b border-r border-border px-4 py-4 transition-colors last:border-r-0 hover:bg-signal-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${focusRing}`}
+                    >
+                      {cell}
+                    </a>
+                  );
+                }
+                return (
+                  <div key={item} className="min-w-0 border-b border-r border-border px-4 py-4 last:border-r-0">
+                    {cell}
+                  </div>
+                );
+              })}
             </div>
           </div>
         </section>
@@ -300,6 +337,77 @@ export function PortfolioSite() {
                   </article>
                 );
               })}
+            </div>
+          </div>
+        </section>
+
+        {/* AI MULTI-AGENT RESEARCH SYSTEM */}
+        <section id="ai-agents" className="border-b border-border px-5 py-24 sm:px-8 lg:py-32">
+          <div className="mx-auto max-w-7xl">
+            <SectionHeading
+              index="AI"
+              title="AI Multi-Agent Research System"
+              copy="A deployed multi-agent financial research system: specialised agents plan the work, gather and analyse market and news data, stress-test risk, and critique each other before a final synthesis is produced."
+            />
+            <div className="card-interactive group relative overflow-hidden rounded-md border border-border bg-card p-6 sm:p-10">
+              <div className="signal-line absolute inset-x-0 top-0 h-px" aria-hidden="true" />
+              <p className="font-mono text-[10px] uppercase tracking-wider text-primary">Deployed system · agentic workflow</p>
+              <p className="mt-3 max-w-2xl text-sm leading-7 text-muted-foreground">
+                Given a research question, the Planner decomposes it into tasks. The Data and Market agents collect and analyse
+                market and news/sentiment data, the Risk agent stress-tests the findings, and the Critic challenges them before
+                the Final Synthesis is written.
+              </p>
+
+              {/* Workflow pipeline: horizontal on desktop, stacked on mobile */}
+              <div className="mt-10 flex flex-col items-stretch gap-1.5 md:flex-row md:items-center" role="img" aria-label="Workflow: Research Question flows through Planner, Data, Market, Risk and Critic agents to a Final Synthesis">
+                {pipelineSteps.map((step, i) => {
+                  const Icon = step.icon;
+                  return (
+                    <Fragment key={step.label}>
+                      <div
+                        className={`flex min-w-0 flex-1 items-center gap-3 rounded-md border px-4 py-3 md:flex-col md:items-center md:gap-2 md:px-2 md:py-4 md:text-center ${
+                          step.endpoint ? "border-primary/40 bg-signal-soft" : "border-border bg-background"
+                        }`}
+                      >
+                        <span className={`grid size-9 shrink-0 place-items-center rounded-sm border ${step.endpoint ? "border-primary/50 text-primary" : "border-border text-primary/80"}`}>
+                          <Icon className="size-4" aria-hidden="true" />
+                        </span>
+                        <p className={`min-w-0 font-mono text-[11px] uppercase tracking-wider md:text-[10px] ${step.endpoint ? "text-primary" : "text-foreground/85"}`}>
+                          {step.label}
+                        </p>
+                      </div>
+                      {i < pipelineSteps.length - 1 ? (
+                        <ArrowRight aria-hidden="true" className="mx-auto size-4 shrink-0 rotate-90 text-primary/60 md:rotate-0" />
+                      ) : null}
+                    </Fragment>
+                  );
+                })}
+              </div>
+
+              {/* Capability chips */}
+              <div className="mt-8 flex flex-wrap gap-2" aria-label="System capabilities">
+                {agentCapabilities.map((cap) => (
+                  <span key={cap} className="rounded-sm border border-border bg-surface px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                    {cap}
+                  </span>
+                ))}
+              </div>
+
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Button asChild variant="signal">
+                  <a
+                    href="https://ai-multi-agent-financial-research-p.vercel.app"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Open the live AI Multi-Agent Research System (opens in a new tab)"
+                  >
+                    Open live project <ArrowUpRight aria-hidden="true" />
+                  </a>
+                </Button>
+                <Button asChild variant="signalOutline">
+                  <a href="#projects">See project details <ArrowDown aria-hidden="true" /></a>
+                </Button>
+              </div>
             </div>
           </div>
         </section>
