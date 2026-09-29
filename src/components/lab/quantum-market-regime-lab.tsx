@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Play } from "lucide-react";
+import { Activity, Play } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Panel } from "@/components/lab/charts";
@@ -14,22 +14,32 @@ export function QuantumMarketRegimeLab() {
   const [epochs, setEpochs] = useState(30);
   const [seed, setSeed] = useState(21);
   const [running, setRunning] = useState(false);
+  const [status, setStatus] = useState("Ready to run.");
   const [result, setResult] = useState<Result | null>(null);
 
   async function run() {
-    setRunning(true); setResult(null);
-    await new Promise((r) => setTimeout(r, 120));
-    const random = rng(seed + depth * 41 + epochs);
-    const classicalAcc = 0.66 + random() * 0.08;
-    const quantumAcc = Math.min(0.88, classicalAcc + 0.015 + depth * 0.009 + (random() - 0.5) * 0.025);
-    const a = 0.22 + random() * 0.2, b = 0.25 + random() * 0.2;
-    const probs = [a, b, Math.max(0.05, 1 - a - b)];
-    const s = probs.reduce((x, y) => x + y, 0);
-    const norm = probs.map((p) => p / s);
-    const matrix = [[26, 3, 1], [4, 21, 5], [1, 4, 25]];
-    const losses = Array.from({ length: 18 }, (_, i) => 0.72 * Math.exp(-i / (4.8 + depth)) + 0.18 + (random() - 0.5) * 0.018);
-    setResult({ quantumAcc, classicalAcc, probs: norm, matrix, losses });
-    setRunning(false);
+    if (running) return;
+    setRunning(true);
+    setStatus("QML experiment started…");
+    setResult(null);
+    try {
+      await new Promise<void>((resolve) => setTimeout(resolve, 700));
+      const random = rng(seed + depth * 41 + epochs);
+      const classicalAcc = 0.66 + random() * 0.08;
+      const quantumAcc = Math.min(0.88, classicalAcc + 0.015 + depth * 0.009 + (random() - 0.5) * 0.025);
+      const a = 0.22 + random() * 0.2, b = 0.25 + random() * 0.2;
+      const probs = [a, b, Math.max(0.05, 1 - a - b)];
+      const s = probs.reduce((x, y) => x + y, 0);
+      const norm = probs.map((p) => p / s);
+      const matrix = [[26, 3, 1], [4, 21, 5], [1, 4, 25]];
+      const losses = Array.from({ length: 18 }, (_, i) => 0.72 * Math.exp(-i / (4.8 + depth)) + 0.18 + (random() - 0.5) * 0.018);
+      setResult({ quantumAcc, classicalAcc, probs: norm, matrix, losses });
+      setStatus("Complete — classification results are shown below.");
+    } catch (error) {
+      setStatus(error instanceof Error ? `Run failed: ${error.message}` : "Run failed.");
+    } finally {
+      setRunning(false);
+    }
   }
 
   return <div className="space-y-6">
@@ -40,7 +50,11 @@ export function QuantumMarketRegimeLab() {
           <label className="block text-xs text-muted-foreground">Variational depth: <span className="font-mono text-foreground">{depth}</span><input className="mt-2 w-full accent-primary" type="range" min={1} max={5} value={depth} onChange={(e) => setDepth(Number(e.target.value))} /></label>
           <label className="block text-xs text-muted-foreground">Training epochs: <span className="font-mono text-foreground">{epochs}</span><input className="mt-2 w-full accent-primary" type="range" min={10} max={60} step={5} value={epochs} onChange={(e) => setEpochs(Number(e.target.value))} /></label>
           <label className="block text-xs text-muted-foreground">Seed<input className="mt-2 h-9 w-full rounded-sm border border-border bg-background px-2 font-mono text-xs" type="number" value={seed} onChange={(e) => setSeed(Math.max(0, Number(e.target.value) || 0))} /></label>
-          <Button type="button" onClick={run} disabled={running}><Play className="size-4" />{running ? "Training…" : "Run QML Experiment"}</Button>
+          <Button type="button" onClick={() => void run()} disabled={running} aria-busy={running}>
+            {running ? <Activity className="size-4 animate-pulse" /> : <Play className="size-4" />}
+            {running ? "Training QML model…" : "Run QML Experiment"}
+          </Button>
+          <p className="min-h-5 text-xs text-muted-foreground" aria-live="polite">{status}</p>
         </div>
       </Panel>
       <Panel title="02 · Feature map">
