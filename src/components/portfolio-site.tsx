@@ -276,8 +276,8 @@ export function PortfolioSite() {
                 <div className="signal-line absolute inset-x-8 top-10 hidden h-px opacity-40 lg:block" aria-hidden="true" />
                 {portfolio.disciplines.map((item, i) => {
                   const Icon = disciplineIcons[i] ?? Cpu;
-                  return (
-                    <div key={item} className="card-interactive group relative rounded-md border border-border bg-card p-5">
+                  const card = (
+                    <>
                       <span className="relative grid size-10 place-items-center rounded-full border border-primary/40 bg-background text-primary transition-shadow group-hover:shadow-[var(--shadow-signal)]">
                         <Icon className="size-4" aria-hidden="true" />
                       </span>
@@ -289,7 +289,18 @@ export function PortfolioSite() {
                           </li>
                         ))}
                       </ul>
-                    </div>
+                      {item === "Python" && (
+                        <span className="mt-4 inline-flex items-center gap-1 font-mono text-[10px] uppercase text-primary">
+                          Open Python Research Lab <ArrowRight className="size-3" aria-hidden="true" />
+                        </span>
+                      )}
+                    </>
+                  );
+                  const cardClass = "card-interactive group relative rounded-md border border-border bg-card p-5";
+                  return item === "Python" ? (
+                    <Link key={item} to="/lab/python" aria-label="Python — open the Python Research Lab" className={`${cardClass} block ${focusRing}`}>{card}</Link>
+                  ) : (
+                    <div key={item} className={cardClass}>{card}</div>
                   );
                 })}
               </div>

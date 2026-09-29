@@ -1,0 +1,1 @@
+- Python lab runs Pyodide from CDN in an inline Blob Web Worker, booted only on /lab/python — keeps site bundle light and allows timeout/stop via terminate().

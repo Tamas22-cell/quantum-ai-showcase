@@ -7,7 +7,7 @@ export type LabModule = {
   topics: string[];
   status: "available" | "in-development";
   group: "core" | "command";
-  to?: "/lab/circuit-builder" | "/lab/entanglement" | "/lab/qaoa" | "/lab/vqe" | "/lab/portfolio" | "/lab/arena" | "/lab/assistant" | "/lab/qml" | "/lab/reports" | "/lab/ibm" | "/lab/finance" | "/lab/benchmark" | "/lab/history" | "/lab/snapshot" | "/lab/qiskit";
+  to?: "/lab/circuit-builder" | "/lab/entanglement" | "/lab/qaoa" | "/lab/vqe" | "/lab/portfolio" | "/lab/arena" | "/lab/assistant" | "/lab/qml" | "/lab/reports" | "/lab/ibm" | "/lab/finance" | "/lab/benchmark" | "/lab/history" | "/lab/snapshot" | "/lab/qiskit" | "/lab/python";
 };
 
 export const LAB_MODULES: LabModule[] = [
@@ -87,5 +87,10 @@ export const LAB_MODULES: LabModule[] = [
     id: "qiskit", index: "C9", title: "Qiskit Workflow Lab", group: "command",
     summary: "Circuit → Transpile → Backend → Run → Result → Save: a Qiskit-style workflow simulated locally in the browser.",
     topics: ["Transpiler", "rz · sx · x · cz", "Sampler", "Experiment History"], status: "available", to: "/lab/qiskit",
+  },
+  {
+    id: "python", index: "C10", title: "Python Research Lab", group: "command",
+    summary: "Run real Python (Pyodide / WebAssembly) in the browser with quant-finance, statistics and quantum/AI presets; save runs to Experiment History.",
+    topics: ["Pyodide", "Web Worker", "Seeded presets", "Experiment History"], status: "available", to: "/lab/python",
   },
 ];
