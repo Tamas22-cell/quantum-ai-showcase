@@ -121,7 +121,7 @@ function MessageView({ m }: { m: Msg }) {
     <div className="max-w-[95%] space-y-3">
       <div className="rounded-md border border-border px-3 py-2 text-sm leading-6">
         <span className={`mb-1 flex items-center gap-1 font-mono text-[9px] uppercase ${m.source === "ai" ? "text-primary" : "text-amber"}`}>
-          {m.source === "ai" ? <><Sparkles className="size-3" aria-hidden="true" />AI-generated explanation · not experimentally verified</> : <><Bot className="size-3" aria-hidden="true" />Scripted response ·, not AI</>}
+          {m.source === "ai" ? <><Sparkles className="size-3" aria-hidden="true" />AI-generated explanation · not experimentally verified</> : <><Bot className="size-3" aria-hidden="true" />Scripted response · not AI</>}
         </span>
         <p className="whitespace-pre-wrap">{m.content}</p>
       </div>
