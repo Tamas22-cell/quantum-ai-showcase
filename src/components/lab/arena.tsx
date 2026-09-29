@@ -219,7 +219,7 @@ export function Arena() {
                 <dt className="text-muted-foreground">run at</dt><dd>{result.createdAt}</dd>
               </dl>
               <p className="mt-3 text-[11px] leading-5 text-muted-foreground">
-                Simulator results only. Small instances are solved instantly by exhaustive search; this arena illustrates algorithm behaviour and does not demonstrate quantum advantage. Real hardware adds noise, limited connectivity and shot costs not modelled here.
+                Simulator results only. Small instances are solved instantly by exhaustive search; this arena illustrates algorithm behaviour and does not show quantum advantage. Real hardware adds noise, limited connectivity and shot costs not modelled here.
               </p>
             </Panel>
           </>

@@ -249,7 +249,7 @@ export function QaoaLab() {
             <li>Exact statevector simulation of 2ⁿ amplitudes; limited to {MAX_CUT_NODES} nodes. No noise, decoherence or gate errors.</li>
             <li>Probabilities are exact, not sampled; real devices estimate ⟨C⟩ from finite shots.</li>
             <li>Nelder–Mead may find local optima; results depend on seed, restarts and iterations.</li>
-            <li>For graphs this small, exhaustive search is exact and faster. Nothing here demonstrates quantum advantage.</li>
+            <li>For graphs this small, exhaustive search is exact and faster. Nothing here shows quantum advantage.</li>
           </ul>
         </Panel>
       </div>

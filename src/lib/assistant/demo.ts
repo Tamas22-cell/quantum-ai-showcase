@@ -23,7 +23,7 @@ const CIRCUITS: Record<string, { text: string; circuit: unknown }> = {
     ] },
   },
   invalid: {
-    text: "Demo of a rejected proposal: this draft uses an unsupported Toffoli gate and a qubit index that does not exist, so validation blocks it.",
+    text: "Example of a rejected proposal: this draft uses an unsupported Toffoli gate and a qubit index that does not exist, so validation blocks it.",
     circuit: { numQubits: 2, ops: [{ gate: "CCX", qubits: [0, 1, 2] }, { gate: "H", qubits: [7] }] },
   },
 };
@@ -31,7 +31,7 @@ const CIRCUITS: Record<string, { text: string; circuit: unknown }> = {
 const EXPLAIN: Record<string, string> = {
   qaoa: "QAOA alternates a cost unitary e^{−iγC} (encoding the objective, e.g. Max-Cut) with a mixer e^{−iβB}. A classical optimiser tunes (γ, β) to maximise ⟨C⟩. On small instances a classical computer simulates it exactly; no quantum advantage is implied.",
   vqe: "VQE prepares a parameterised ansatz |ψ(θ)⟩, measures ⟨ψ|H|ψ⟩, and a classical optimiser minimises it. By the variational principle the result upper-bounds the ground-state energy.",
-  default: "In this scripted demo I can outline QAOA, VQE, Max-Cut, statevectors and measurement. Switch to Live AI for open-ended answers.",
+  default: "In scripted mode I can outline QAOA, VQE, Max-Cut, statevectors and measurement. Switch to Live AI for open-ended answers.",
 };
 
 export function demoReply(mode: AssistantMode, question: string): AssistantReply {

@@ -242,14 +242,14 @@ export function FinanceLab() {
       {/* ---------------- Data source ---------------- */}
       <Panel title="1 · Market data source" aside={<Tag kind="market" />}>
         <div className="flex flex-wrap gap-2" role="tablist" aria-label="Data mode">
-          {([["demo", "Demo / synthetic", Database], ["csv", "CSV upload", Upload], ["live", "Live provider", Radio]] as const).map(([m, label, Icon]) => (
+          {([["demo", "Synthetic (seeded)", Database], ["csv", "CSV upload", Upload], ["live", "Live provider", Radio]] as const).map(([m, label, Icon]) => (
             <Button key={m} role="tab" aria-selected={mode === m} variant={mode === m ? "default" : "outline"} size="sm" onClick={() => switchMode(m)}><Icon className="h-3.5 w-3.5" />{label}</Button>
           ))}
         </div>
 
         {mode === "demo" && (
           <div className="mt-4 grid gap-3 sm:grid-cols-[160px_1fr] sm:items-end">
-            <label className="text-xs text-muted-foreground">Demo seed
+            <label className="text-xs text-muted-foreground">Synthetic seed
               <input type="number" className={field} value={demoSeed} onChange={(e) => { const v = Math.trunc(Number(e.target.value)); if (Number.isFinite(v) && v >= 0 && v < 2 ** 31) { setDemoSeed(v); setResult(null); } }} />
             </label>
             <p className="text-xs leading-6 text-muted-foreground">Seeded one-factor GBM prices on a synthetic weekday calendar. Symbols prefixed <span className="font-mono">SYN-</span> are fictional — this is not market data.</p>
@@ -283,7 +283,7 @@ export function FinanceLab() {
             {!provider ? <p className="text-xs text-muted-foreground"><Loader2 className="mr-1 inline h-3 w-3 animate-spin" />Checking provider configuration…</p> : !provider.configured ? (
               <div className="rounded-sm border border-amber/40 bg-surface p-3 text-xs leading-6">
                 <p className="font-mono uppercase text-amber">Live data not configured</p>
-                <p className="mt-1 text-muted-foreground">No market-data provider is connected, and nothing paid has been enabled. Demo and CSV modes remain fully usable. To enable live data later, a provider URL and API key are stored as server-side secrets:</p>
+                <p className="mt-1 text-muted-foreground">No market-data provider is connected, and nothing paid has been enabled. Synthetic and CSV modes remain fully usable. To enable live data later, a provider URL and API key are stored as server-side secrets:</p>
                 <ul className="mt-2 space-y-1 font-mono text-[11px] text-muted-foreground">
                   {provider.providers.map((p) => <li key={p.kind}>{p.label}: {p.missing.join(" + ")}</li>)}
                 </ul>

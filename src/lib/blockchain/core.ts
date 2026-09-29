@@ -93,7 +93,7 @@ export async function generateDemoWallet(): Promise<DemoWallet> {
   const raw = await crypto.subtle.exportKey("raw", pair.publicKey);
   const publicHex = bytesToHex(raw);
   // Demo address: first 20 bytes of SHA-256(pubkey) — illustrative, not a real chain format.
-  const address = "0xdemo" + (await sha256Hex(publicHex)).slice(0, 36);
+  const address = "0xsim" + (await sha256Hex(publicHex)).slice(0, 36);
   return { publicKey: pair.publicKey, privateKey: pair.privateKey, publicHex, address };
 }
 

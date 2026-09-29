@@ -65,7 +65,7 @@ const pillars = [
   {
     icon: Gauge,
     title: "Comparable metrics",
-    text: "Each module exposes a measurable objective instead of a visual-only demo.",
+    text: "Each module exposes a measurable objective instead of a visual-only illustration.",
   },
   {
     icon: Repeat2,

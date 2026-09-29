@@ -72,7 +72,7 @@ export const SOURCES: Record<ReportModuleId, { name: string; route: string; fiel
   },
   finance: {
     name: "Live Quantum Finance Lab", route: "/lab/finance",
-    fields: [{ key: "assets", label: "Demo assets", kind: "int", min: 2, max: 8 }, { key: "range", label: "Time range", kind: "select", options: RANGES.map((r) => ({ value: r.id, label: r.label })) }, { key: "k", label: "Select K", kind: "int", min: 1, max: 7 }, { key: "riskAversion", label: "Risk aversion q", kind: "number", min: 0, max: 100, step: 0.5 }, { key: "penalty", label: "Penalty A", kind: "number", min: 0.1, max: 100, step: 0.1 }, { key: "p", label: "QAOA depth p", kind: "int", min: 1, max: 4 }, seedField],
+    fields: [{ key: "assets", label: "Synthetic assets", kind: "int", min: 2, max: 8 }, { key: "range", label: "Time range", kind: "select", options: RANGES.map((r) => ({ value: r.id, label: r.label })) }, { key: "k", label: "Select K", kind: "int", min: 1, max: 7 }, { key: "riskAversion", label: "Risk aversion q", kind: "number", min: 0, max: 100, step: 0.5 }, { key: "penalty", label: "Penalty A", kind: "number", min: 0.1, max: 100, step: 0.1 }, { key: "p", label: "QAOA depth p", kind: "int", min: 1, max: 4 }, seedField],
     defaults: { assets: 5, range: "1y", k: 2, riskAversion: 2, penalty: 1, p: 2, seed: 42 },
   },
 };

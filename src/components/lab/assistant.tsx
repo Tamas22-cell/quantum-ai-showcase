@@ -16,7 +16,7 @@ type Msg = ChatTurn & { id: number; mode: AssistantMode; source?: "ai" | "demo";
 const EXAMPLES: Record<AssistantMode, string[]> = {
   "explain-algorithm": ["How does QAOA approach Max-Cut?", "Explain VQE and the variational principle.", "Why does H·Z·H equal X?"],
   "explain-results": ["My Bell circuit gave 00: 514, 11: 510 out of 1024 shots. Is that consistent?", "Why is QAOA p=1 below the exhaustive optimum in the Arena?"],
-  "draft-circuit": ["Draft a Bell state circuit.", "Draft a 3-qubit GHZ circuit.", "Draft one QAOA layer for a single Max-Cut edge.", "Draft an invalid Toffoli circuit (validation demo)."],
+  "draft-circuit": ["Draft a Bell state circuit.", "Draft a 3-qubit GHZ circuit.", "Draft one QAOA layer for a single Max-Cut edge.", "Draft an invalid Toffoli circuit (validation example)."],
 };
 
 export function ResearchAssistant() {
@@ -63,7 +63,7 @@ export function ResearchAssistant() {
           {messages.length === 0 ? (
             <p className="text-sm text-muted-foreground">Ask a question or pick an example. Circuits proposed by the assistant are validated by the simulation engine before they can be loaded.</p>
           ) : messages.map((m) => <MessageView key={m.id} m={m} />)}
-          {busy ? <p className="flex items-center gap-2 font-mono text-xs text-primary"><Loader2 className="size-4 animate-spin" aria-hidden="true" />Generating scripted demo reply…</p> : null}
+          {busy ? <p className="flex items-center gap-2 font-mono text-xs text-primary"><Loader2 className="size-4 animate-spin" aria-hidden="true" />Generating scripted reply…</p> : null}
         </div>
 
         {mode === "explain-results" ? (
@@ -84,7 +84,7 @@ export function ResearchAssistant() {
 
       <aside className="space-y-4">
         <Panel title="Response engine">
-          <p className="text-xs text-muted-foreground"><strong className="text-foreground">Demo mode</strong> — local scripted research replies, no external AI service and no usage cost.</p>
+          <p className="text-xs text-muted-foreground"><strong className="text-foreground">Scripted mode</strong> — local scripted research replies, no external AI service and no usage cost.</p>
         </Panel>
         <Panel title="Example prompts">
           <ul className="space-y-2">
@@ -97,7 +97,7 @@ export function ResearchAssistant() {
         <Panel title="Provenance legend">
           <ul className="space-y-1.5 text-[11px] text-muted-foreground">
             <li><span className="text-primary">AI explanation</span> — generated text, unverified.</li>
-            <li><span className="text-amber">Demo</span> — scripted, not AI.</li>
+            <li><span className="text-amber">Scripted</span> — scripted, not AI.</li>
             <li><span className="text-emerald">Quantum simulation</span> — exact classical statevector simulation.</li>
             <li><span className="text-foreground">Hardware results</span> — none; no quantum hardware is connected.</li>
           </ul>
@@ -121,7 +121,7 @@ function MessageView({ m }: { m: Msg }) {
     <div className="max-w-[95%] space-y-3">
       <div className="rounded-md border border-border px-3 py-2 text-sm leading-6">
         <span className={`mb-1 flex items-center gap-1 font-mono text-[9px] uppercase ${m.source === "ai" ? "text-primary" : "text-amber"}`}>
-          {m.source === "ai" ? <><Sparkles className="size-3" aria-hidden="true" />AI-generated explanation · not experimentally verified</> : <><Bot className="size-3" aria-hidden="true" />Demo response · scripted, not AI</>}
+          {m.source === "ai" ? <><Sparkles className="size-3" aria-hidden="true" />AI-generated explanation · not experimentally verified</> : <><Bot className="size-3" aria-hidden="true" />Scripted response · not AI</>}
         </span>
         <p className="whitespace-pre-wrap">{m.content}</p>
       </div>
