@@ -258,6 +258,44 @@ export function PortfolioSite() {
         </section>
 
 
+
+        {/* RESEARCH SYSTEM MAP */}
+        <section className="border-b border-border px-5 py-8 sm:px-8 lg:py-10">
+          <div className="mx-auto max-w-7xl">
+            <div className="grid gap-4 rounded-xl border border-border bg-background/55 p-5 backdrop-blur-sm sm:p-6 lg:grid-cols-[0.7fr_1.3fr] lg:items-center">
+              <div>
+                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-primary">Research system map</p>
+                <h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">From intelligence to quantum decision systems</h2>
+                <p className="mt-3 max-w-xl text-sm leading-7 text-muted-foreground">
+                  A visual map of the research stack connecting autonomous AI, financial computation and quantum methods.
+                </p>
+              </div>
+
+              <div className="relative grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="signal-line absolute left-8 right-8 top-1/2 hidden h-px -translate-y-1/2 opacity-40 lg:block" aria-hidden="true" />
+                {[
+                  ["01", "AI Agents", "Plan · reason · coordinate", BrainCircuit],
+                  ["02", "Quant Finance", "Risk · data · optimization", LineChart],
+                  ["03", "Quantum Layer", "QAOA · VQE · QML", Atom],
+                  ["04", "Decision Systems", "Compare · validate · report", ScanSearch],
+                ].map(([index, title, copy, Icon]) => {
+                  const ResearchIcon = Icon as typeof BrainCircuit;
+                  return (
+                    <div key={String(title)} className="relative z-10 rounded-lg border border-border bg-surface/90 p-4 transition-colors hover:border-primary/40 hover:bg-signal-soft">
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="font-mono text-[10px] text-primary">{index}</span>
+                        <ResearchIcon className="size-4 text-primary" aria-hidden="true" />
+                      </div>
+                      <h3 className="mt-5 text-sm font-semibold text-foreground">{title}</h3>
+                      <p className="mt-1 font-mono text-[9px] uppercase tracking-wider text-muted-foreground">{copy}</p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* FEATURED INTERACTIVE PROJECT */}
         <section className="border-b border-border px-5 py-10 sm:px-8 lg:py-14">
           <div className="mx-auto max-w-7xl">
