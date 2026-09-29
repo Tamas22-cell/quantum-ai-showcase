@@ -91,6 +91,7 @@ export const portfolio = {
       code: "HYBRID",
       title: "Hybrid Algorithms",
       description: "Investigating where classical and quantum methods can be composed into practical research workflows.",
+      href: "/lab/arena",
     },
   ],
   certifications: [
