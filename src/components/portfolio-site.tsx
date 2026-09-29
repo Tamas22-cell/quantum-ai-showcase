@@ -114,6 +114,7 @@ const sectionIds = portfolio.navigation.map((n) => n.href.slice(1));
 export function PortfolioSite() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [researchPulse, setResearchPulse] = useState(false);
   const active = useActiveSection(sectionIds);
 
   useEffect(() => {
@@ -252,6 +253,93 @@ export function PortfolioSite() {
                   </div>
                 );
               })}
+            </div>
+          </div>
+        </section>
+
+
+        {/* FEATURED INTERACTIVE PROJECT */}
+        <section className="border-b border-border px-5 py-10 sm:px-8 lg:py-14">
+          <div className="mx-auto max-w-7xl">
+            <div className="relative overflow-hidden rounded-xl border border-primary/25 bg-[linear-gradient(135deg,color-mix(in_oklab,var(--color-primary)_10%,var(--color-background)),var(--color-surface))] p-6 shadow-[0_0_80px_color-mix(in_oklab,var(--color-primary)_8%,transparent)] sm:p-8 lg:p-10">
+              <div className="absolute -right-20 -top-20 size-64 rounded-full border border-primary/15" aria-hidden="true" />
+              <div className="absolute -right-8 -top-8 size-40 rounded-full border border-primary/20" aria-hidden="true" />
+              <div className="grid items-center gap-8 lg:grid-cols-[1.05fr_0.95fr]">
+                <div className="relative z-10">
+                  <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-signal-soft px-3 py-1 font-mono text-[10px] uppercase tracking-wider text-primary">
+                    <span className="signal-pulse size-1.5 rounded-full bg-primary" />
+                    New interactive project
+                  </div>
+                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">AI × Quantum Systems / Project 2026</p>
+                  <h2 className="mt-3 max-w-2xl text-3xl font-semibold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
+                    Quantum AI <span className="text-gradient-signal">Research Navigator</span>
+                  </h2>
+                  <p className="mt-5 max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base">
+                    An interactive research concept that connects agentic AI, quantum optimization, QML and hybrid decision systems into one visual research pulse.
+                  </p>
+                  <div className="mt-6 flex flex-wrap gap-2">
+                    {["AI Agents", "QAOA", "QML", "Hybrid Systems"].map((item) => (
+                      <span key={item} className="rounded-full border border-border bg-background/55 px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider text-foreground/80">
+                        {item}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="mt-7 flex flex-wrap gap-3">
+                    <Button
+                      type="button"
+                      variant="signal"
+                      size="lg"
+                      onClick={() => setResearchPulse(true)}
+                    >
+                      Run research pulse <Orbit aria-hidden="true" />
+                    </Button>
+                    <Button asChild variant="signalOutline" size="lg">
+                      <a href="#quantum-lab">Open Quantum Lab <ArrowRight aria-hidden="true" /></a>
+                    </Button>
+                  </div>
+                  <p className="mt-4 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                    Local interactive simulation · research visualization · no quantum advantage claim
+                  </p>
+                </div>
+
+                <div className="relative min-h-[300px] rounded-lg border border-border bg-background/45 p-5 backdrop-blur-sm">
+                  <div className="absolute inset-0 overflow-hidden rounded-lg" aria-hidden="true">
+                    <div className="absolute left-1/2 top-1/2 size-48 -translate-x-1/2 -translate-y-1/2 rounded-full border border-primary/20" />
+                    <div className="absolute left-1/2 top-1/2 size-32 -translate-x-1/2 -translate-y-1/2 rounded-full border border-primary/30" />
+                    <div className="absolute left-1/2 top-1/2 size-16 -translate-x-1/2 -translate-y-1/2 rounded-full border border-primary/45 bg-signal-soft shadow-[0_0_45px_color-mix(in_oklab,var(--color-primary)_25%,transparent)]" />
+                  </div>
+                  <div className="relative z-10 flex h-full min-h-[260px] flex-col justify-between">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="font-mono text-[10px] uppercase tracking-wider text-primary">Research field</p>
+                        <p className="mt-1 text-sm text-foreground">Hybrid intelligence topology</p>
+                      </div>
+                      <Atom className={"size-7 text-primary " + (researchPulse ? "animate-spin" : "")} aria-hidden="true" />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      {[
+                        ["Agent coordination", researchPulse ? "84%" : "—"],
+                        ["Quantum optimization", researchPulse ? "72%" : "—"],
+                        ["QML signal", researchPulse ? "79%" : "—"],
+                        ["Hybrid confidence", researchPulse ? "81%" : "—"],
+                      ].map(([label, value]) => (
+                        <div key={label} className="rounded-md border border-border bg-surface/80 p-3">
+                          <p className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground">{label}</p>
+                          <p className="mt-2 text-2xl font-semibold text-foreground">{value}</p>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="flex items-center justify-between gap-3 border-t border-border pt-4 font-mono text-[10px] uppercase tracking-wider">
+                      <span className={researchPulse ? "text-primary" : "text-muted-foreground"}>
+                        {researchPulse ? "Pulse complete" : "Awaiting pulse"}
+                      </span>
+                      <span className="text-muted-foreground">Simulation / v1.0</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </section>
