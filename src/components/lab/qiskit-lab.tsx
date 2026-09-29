@@ -155,7 +155,7 @@ export function QiskitLab() {
         {result ? (
           <>
             <Histogram
-              bars={result.rows.map((r) => ({ label: r.bits, value: result.backend === "sampler" ? r.count / result.shots : r.p, expected: result.backend === "sampler" ? r.p : undefined }))}
+              bars={result.rows.map((r) => (result.backend === "sampler" ? { label: r.bits, value: r.count / result.shots, expected: r.p } : { label: r.bits, value: r.p }))}
               valueFormat={(v) => v.toFixed(3)} ariaLabel="Measurement results by bitstring" />
             <div className="mt-4 overflow-x-auto">
               <table className="w-full text-left font-mono text-xs">
