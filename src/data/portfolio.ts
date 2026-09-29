@@ -74,6 +74,7 @@ export const portfolio = {
       code: "QAOA",
       title: "Quantum Approximate Optimization",
       description: "Studying variational approaches to combinatorial optimization and portfolio construction.",
+      href: "/lab/qaoa",
     },
     {
       code: "VQE",
