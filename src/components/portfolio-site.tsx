@@ -289,6 +289,11 @@ export function PortfolioSite() {
                           </li>
                         ))}
                       </ul>
+                      {item === "AI agents" && (
+                        <span className="mt-4 inline-flex items-center gap-1 font-mono text-[10px] uppercase text-primary">
+                          Open AI Multi-Agent Research System <ArrowRight className="size-3" aria-hidden="true" />
+                        </span>
+                      )}
                       {item === "Python" && (
                         <span className="mt-4 inline-flex items-center gap-1 font-mono text-[10px] uppercase text-primary">
                           Open Python Research Lab <ArrowRight className="size-3" aria-hidden="true" />
@@ -312,6 +317,9 @@ export function PortfolioSite() {
                     </>
                   );
                   const cardClass = "card-interactive group relative rounded-md border border-border bg-card p-5";
+                  if (item === "AI agents") {
+                    return <a key={item} href="#ai-agents" aria-label="AI agents — open the AI Multi-Agent Research System" className={`${cardClass} block ${focusRing}`}>{card}</a>;
+                  }
                   if (item === "Python") {
                     return <Link key={item} to="/lab/python" aria-label="Python — open the Python Research Lab" className={`${cardClass} block ${focusRing}`}>{card}</Link>;
                   }
