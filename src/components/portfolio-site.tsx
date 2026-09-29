@@ -317,6 +317,9 @@ export function PortfolioSite() {
                     </>
                   );
                   const cardClass = "card-interactive group relative rounded-md border border-border bg-card p-5";
+                  if (item === "AI agents") {
+                    return <a key={item} href="#ai-agents" aria-label="AI agents — open the AI Multi-Agent Research System" className={`${cardClass} block ${focusRing}`}>{card}</a>;
+                  }
                   if (item === "Python") {
                     return <Link key={item} to="/lab/python" aria-label="Python — open the Python Research Lab" className={`${cardClass} block ${focusRing}`}>{card}</Link>;
                   }
