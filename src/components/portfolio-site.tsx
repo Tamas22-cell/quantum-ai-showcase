@@ -341,6 +341,77 @@ export function PortfolioSite() {
           </div>
         </section>
 
+        {/* AI MULTI-AGENT RESEARCH SYSTEM */}
+        <section id="ai-agents" className="border-b border-border px-5 py-24 sm:px-8 lg:py-32">
+          <div className="mx-auto max-w-7xl">
+            <SectionHeading
+              index="AI"
+              title="AI Multi-Agent Research System"
+              copy="A deployed multi-agent financial research system: specialised agents plan the work, gather and analyse market and news data, stress-test risk, and critique each other before a final synthesis is produced."
+            />
+            <div className="card-interactive group relative overflow-hidden rounded-md border border-border bg-card p-6 sm:p-10">
+              <div className="signal-line absolute inset-x-0 top-0 h-px" aria-hidden="true" />
+              <p className="font-mono text-[10px] uppercase tracking-wider text-primary">Deployed system · agentic workflow</p>
+              <p className="mt-3 max-w-2xl text-sm leading-7 text-muted-foreground">
+                Given a research question, the Planner decomposes it into tasks. The Data and Market agents collect and analyse
+                market and news/sentiment data, the Risk agent stress-tests the findings, and the Critic challenges them before
+                the Final Synthesis is written.
+              </p>
+
+              {/* Workflow pipeline: horizontal on desktop, stacked on mobile */}
+              <div className="mt-10 flex flex-col items-stretch gap-1.5 md:flex-row md:items-center" role="img" aria-label="Workflow: Research Question flows through Planner, Data, Market, Risk and Critic agents to a Final Synthesis">
+                {pipelineSteps.map((step, i) => {
+                  const Icon = step.icon;
+                  return (
+                    <Fragment key={step.label}>
+                      <div
+                        className={`flex min-w-0 flex-1 items-center gap-3 rounded-md border px-4 py-3 md:flex-col md:items-center md:gap-2 md:px-2 md:py-4 md:text-center ${
+                          step.endpoint ? "border-primary/40 bg-signal-soft" : "border-border bg-background"
+                        }`}
+                      >
+                        <span className={`grid size-9 shrink-0 place-items-center rounded-sm border ${step.endpoint ? "border-primary/50 text-primary" : "border-border text-primary/80"}`}>
+                          <Icon className="size-4" aria-hidden="true" />
+                        </span>
+                        <p className={`min-w-0 font-mono text-[11px] uppercase tracking-wider md:text-[10px] ${step.endpoint ? "text-primary" : "text-foreground/85"}`}>
+                          {step.label}
+                        </p>
+                      </div>
+                      {i < pipelineSteps.length - 1 ? (
+                        <ArrowRight aria-hidden="true" className="mx-auto size-4 shrink-0 rotate-90 text-primary/60 md:rotate-0" />
+                      ) : null}
+                    </Fragment>
+                  );
+                })}
+              </div>
+
+              {/* Capability chips */}
+              <div className="mt-8 flex flex-wrap gap-2" aria-label="System capabilities">
+                {agentCapabilities.map((cap) => (
+                  <span key={cap} className="rounded-sm border border-border bg-surface px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                    {cap}
+                  </span>
+                ))}
+              </div>
+
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Button asChild variant="signal">
+                  <a
+                    href="https://ai-multi-agent-financial-research-p.vercel.app"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Open the live AI Multi-Agent Research System (opens in a new tab)"
+                  >
+                    Open live project <ArrowUpRight aria-hidden="true" />
+                  </a>
+                </Button>
+                <Button asChild variant="signalOutline">
+                  <a href="#projects">See project details <ArrowDown aria-hidden="true" /></a>
+                </Button>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* RESEARCH */}
         <section id="research" className="border-y border-border px-5 py-24 sm:px-8 lg:py-32">
           <div className="mx-auto max-w-7xl">
