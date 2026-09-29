@@ -259,6 +259,49 @@ export function PortfolioSite() {
 
 
 
+
+        {/* RESEARCH HIGHLIGHTS */}
+        <section className="border-b border-border px-5 py-10 sm:px-8 lg:py-12">
+          <div className="mx-auto max-w-7xl">
+            <div className="mb-5 flex items-end justify-between gap-4">
+              <div>
+                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-primary">Research highlights</p>
+                <h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">Three active research directions</h2>
+              </div>
+              <span className="hidden font-mono text-[10px] uppercase tracking-wider text-muted-foreground sm:block">AI · Finance · Quantum</span>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-3">
+              <div className="group rounded-xl border border-border bg-surface/80 p-5 transition-all hover:-translate-y-1 hover:border-primary/40 hover:bg-signal-soft">
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-[10px] text-primary">01</span>
+                  <BrainCircuit className="size-5 text-primary" aria-hidden="true" />
+                </div>
+                <h3 className="mt-8 text-lg font-semibold text-foreground">Autonomous AI Systems</h3>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">Multi-agent coordination, financial research workflows and verifiable decision support.</p>
+              </div>
+
+              <div className="group rounded-xl border border-border bg-surface/80 p-5 transition-all hover:-translate-y-1 hover:border-primary/40 hover:bg-signal-soft">
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-[10px] text-primary">02</span>
+                  <LineChart className="size-5 text-primary" aria-hidden="true" />
+                </div>
+                <h3 className="mt-8 text-lg font-semibold text-foreground">Quantum Finance</h3>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">Portfolio optimization, stress testing and hybrid classical-quantum financial experiments.</p>
+              </div>
+
+              <div className="group rounded-xl border border-border bg-surface/80 p-5 transition-all hover:-translate-y-1 hover:border-primary/40 hover:bg-signal-soft">
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-[10px] text-primary">03</span>
+                  <Atom className="size-5 text-primary" aria-hidden="true" />
+                </div>
+                <h3 className="mt-8 text-lg font-semibold text-foreground">Quantum Algorithms</h3>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">QAOA, VQE and QML research focused on practical hybrid system design.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* FEATURED INTERACTIVE PROJECT */}
         <section className="border-b border-border px-5 py-10 sm:px-8 lg:py-14">
           <div className="mx-auto max-w-7xl">
