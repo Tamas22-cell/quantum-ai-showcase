@@ -37,15 +37,17 @@ export function StressLab() {
     abortRef.current?.abort();
     const ctrl = new AbortController();
     abortRef.current = ctrl;
-    setRunning(true); setError(null); setSaved(false);
+    setRunning(true); setError(null); setSaved(false); setResult(null);
     try {
+      // Yield before the CPU-heavy calculation so mobile browsers can paint the spinner/status immediately.
+      await new Promise<void>((resolve) => setTimeout(resolve, 0));
       const tickers = STRESS_ASSETS.map((a) => a.ticker).filter((t) => selected.includes(t));
       const r = await runStressTest({ tickers, weights: tickers.map((t) => weights[t] ?? 0), scenario, riskPref, k: Math.min(k, kMax), seed }, { signal: ctrl.signal });
-      setResult(r);
+      if (!ctrl.signal.aborted) setResult(r);
     } catch (e) {
       if (!ctrl.signal.aborted) setError(e instanceof Error ? e.message : "Stress test failed.");
     } finally {
-      setRunning(false);
+      if (abortRef.current === ctrl) setRunning(false);
     }
   }
 
@@ -127,13 +129,16 @@ export function StressLab() {
             </label>
           </div>
           <div className="mt-5 flex flex-wrap gap-2">
-            <Button type="button" onClick={run} disabled={running}>
+            <Button type="button" onClick={run} disabled={running} aria-busy={running}>
               {running ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : <Play className="size-4" aria-hidden="true" />}
               {running ? "Running stress test…" : "Run stress test"}
             </Button>
             <Button type="button" variant="outline" onClick={save} disabled={!result}>{saved ? "Saved to history" : "Save experiment"}</Button>
           </div>
-          {error ? <p role="alert" className="mt-3 text-xs text-destructive">{error}</p> : null}
+          <p className="mt-3 min-h-5 text-xs text-muted-foreground" aria-live="polite">
+            {running ? "Stress calculation started — running QAOA and risk metrics…" : result ? "Stress test complete. Results are shown below." : "Ready to run."}
+          </p>
+          {error ? <p role="alert" className="mt-1 text-xs text-destructive">{error}</p> : null}
         </Panel>
       </div>
 
