@@ -330,7 +330,6 @@ export function PortfolioSite() {
                       className="group grid cursor-pointer gap-4 rounded-md py-8 transition-colors hover:bg-surface/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background md:grid-cols-[8rem_minmax(0,0.8fr)_minmax(0,1fr)] md:items-center md:px-4"
                     >
                       {body}
-                      <ArrowUpRight aria-hidden="true" className="hidden size-4 text-primary md:absolute md:right-4 md:top-1/2 md:-translate-y-1/2 lg:block" />
                     </Link>
                   );
                 }
