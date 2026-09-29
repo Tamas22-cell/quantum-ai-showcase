@@ -7,7 +7,7 @@ export type LabModule = {
   topics: string[];
   status: "available" | "in-development";
   group: "core" | "command";
-  to?: "/lab/circuit-builder" | "/lab/entanglement" | "/lab/qaoa" | "/lab/vqe" | "/lab/portfolio" | "/lab/arena" | "/lab/assistant" | "/lab/qml" | "/lab/reports" | "/lab/ibm" | "/lab/finance" | "/lab/benchmark";
+  to?: "/lab/circuit-builder" | "/lab/entanglement" | "/lab/qaoa" | "/lab/vqe" | "/lab/portfolio" | "/lab/arena" | "/lab/assistant" | "/lab/qml" | "/lab/reports" | "/lab/ibm" | "/lab/finance" | "/lab/benchmark" | "/lab/history";
 };
 
 export const LAB_MODULES: LabModule[] = [
@@ -72,5 +72,10 @@ export const LAB_MODULES: LabModule[] = [
     id: "benchmark", index: "C6", title: "Quantum Benchmark Dashboard", group: "command",
     summary: "Research benchmark overview connecting QAOA, VQE, portfolio optimisation and quantum-vs-classical experiments with explicit classical references.",
     topics: ["Benchmarks", "QAOA", "VQE", "Classical baselines", "Reproducibility"], status: "available", to: "/lab/benchmark",
+  },
+  {
+    id: "history", index: "C7", title: "Experiment History", group: "command",
+    summary: "Save QAOA, VQE and portfolio experiment snapshots locally in the browser, review them later, and export the history as JSON or CSV.",
+    topics: ["Run history", "Local storage", "JSON / CSV", "Reproducibility"], status: "available", to: "/lab/history",
   },
 ];
