@@ -323,15 +323,17 @@ export function PortfolioSite() {
                   </>
                 );
                 if (href) {
+                  // Native anchor on purpose: a plain document navigation works even if the
+                  // client router bundle is stale or not hydrated, so rows are always clickable.
                   return (
-                    <Link
+                    <a
                       key={item.code}
-                      to={href}
+                      href={href}
                       aria-label={`${item.title} — open the interactive lab`}
-                      className="group grid cursor-pointer gap-4 rounded-md py-8 transition-colors hover:bg-surface/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background md:grid-cols-[8rem_minmax(0,0.8fr)_minmax(0,1fr)] md:items-center md:px-4"
+                      className="group relative z-10 grid cursor-pointer gap-4 rounded-md py-8 transition-colors hover:bg-surface/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background md:grid-cols-[8rem_minmax(0,0.8fr)_minmax(0,1fr)] md:items-center md:px-4"
                     >
                       {body}
-                    </Link>
+                    </a>
                   );
                 }
                 return (
