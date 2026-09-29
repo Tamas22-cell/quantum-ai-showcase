@@ -10,8 +10,10 @@ export default defineConfig({
     tsConfigPaths(),
     tailwindcss(),
     tanstackStart(),
-    // Emit to dist/ for the Lovable preview check; the Vercel preset still writes .vercel/output.
-    nitro({ output: { dir: "dist" } }),
+    // On Vercel, let the Vercel preset own its output (.vercel/output). Overriding
+    // output.dir there makes Vercel find no functions/static files and 404 every URL.
+    // Elsewhere (Lovable preview) emit to dist/.
+    nitro(process.env.VERCEL ? {} : { output: { dir: "dist" } }),
     viteReact(),
   ],
 });
