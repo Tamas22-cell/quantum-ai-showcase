@@ -17,7 +17,6 @@ import { Route as LabBenchmarkRouteImport } from './routes/lab.benchmark'
 import { Route as LabBlockchainRouteImport } from './routes/lab.blockchain'
 import { Route as LabCircuitBuilderRouteImport } from './routes/lab.circuit-builder'
 import { Route as LabEntanglementRouteImport } from './routes/lab.entanglement'
-import { Route as LabFinanceRouteImport } from './routes/lab.finance'
 import { Route as LabHistoryRouteImport } from './routes/lab.history'
 import { Route as LabIbmRouteImport } from './routes/lab.ibm'
 import { Route as LabPortfolioRouteImport } from './routes/lab.portfolio'
@@ -28,6 +27,7 @@ import { Route as LabQmlRouteImport } from './routes/lab.qml'
 import { Route as LabReportsRouteImport } from './routes/lab.reports'
 import { Route as LabSnapshotRouteImport } from './routes/lab.snapshot'
 import { Route as LabVqeRouteImport } from './routes/lab.vqe'
+import { Route as LabFinanceIndexRouteImport } from './routes/lab.finance.index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -67,11 +67,6 @@ const LabCircuitBuilderRoute = LabCircuitBuilderRouteImport.update({
 const LabEntanglementRoute = LabEntanglementRouteImport.update({
   id: '/lab/entanglement',
   path: '/lab/entanglement',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LabFinanceRoute = LabFinanceRouteImport.update({
-  id: '/lab/finance',
-  path: '/lab/finance',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LabHistoryRoute = LabHistoryRouteImport.update({
@@ -124,6 +119,11 @@ const LabVqeRoute = LabVqeRouteImport.update({
   path: '/lab/vqe',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LabFinanceIndexRoute = LabFinanceIndexRouteImport.update({
+  id: '/lab/finance/',
+  path: '/lab/finance/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -133,7 +133,6 @@ export interface FileRoutesByFullPath {
   '/lab/blockchain': typeof LabBlockchainRoute
   '/lab/circuit-builder': typeof LabCircuitBuilderRoute
   '/lab/entanglement': typeof LabEntanglementRoute
-  '/lab/finance': typeof LabFinanceRoute
   '/lab/history': typeof LabHistoryRoute
   '/lab/ibm': typeof LabIbmRoute
   '/lab/portfolio': typeof LabPortfolioRoute
@@ -145,6 +144,7 @@ export interface FileRoutesByFullPath {
   '/lab/snapshot': typeof LabSnapshotRoute
   '/lab/vqe': typeof LabVqeRoute
   '/lab/': typeof LabIndexRoute
+  '/lab/finance/': typeof LabFinanceIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -154,7 +154,6 @@ export interface FileRoutesByTo {
   '/lab/blockchain': typeof LabBlockchainRoute
   '/lab/circuit-builder': typeof LabCircuitBuilderRoute
   '/lab/entanglement': typeof LabEntanglementRoute
-  '/lab/finance': typeof LabFinanceRoute
   '/lab/history': typeof LabHistoryRoute
   '/lab/ibm': typeof LabIbmRoute
   '/lab/portfolio': typeof LabPortfolioRoute
@@ -166,6 +165,7 @@ export interface FileRoutesByTo {
   '/lab/snapshot': typeof LabSnapshotRoute
   '/lab/vqe': typeof LabVqeRoute
   '/lab': typeof LabIndexRoute
+  '/lab/finance': typeof LabFinanceIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -176,7 +176,6 @@ export interface FileRoutesById {
   '/lab/blockchain': typeof LabBlockchainRoute
   '/lab/circuit-builder': typeof LabCircuitBuilderRoute
   '/lab/entanglement': typeof LabEntanglementRoute
-  '/lab/finance': typeof LabFinanceRoute
   '/lab/history': typeof LabHistoryRoute
   '/lab/ibm': typeof LabIbmRoute
   '/lab/portfolio': typeof LabPortfolioRoute
@@ -188,6 +187,7 @@ export interface FileRoutesById {
   '/lab/snapshot': typeof LabSnapshotRoute
   '/lab/vqe': typeof LabVqeRoute
   '/lab/': typeof LabIndexRoute
+  '/lab/finance/': typeof LabFinanceIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -199,7 +199,6 @@ export interface FileRouteTypes {
     | '/lab/blockchain'
     | '/lab/circuit-builder'
     | '/lab/entanglement'
-    | '/lab/finance'
     | '/lab/history'
     | '/lab/ibm'
     | '/lab/portfolio'
@@ -211,6 +210,7 @@ export interface FileRouteTypes {
     | '/lab/snapshot'
     | '/lab/vqe'
     | '/lab/'
+    | '/lab/finance/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -220,7 +220,6 @@ export interface FileRouteTypes {
     | '/lab/blockchain'
     | '/lab/circuit-builder'
     | '/lab/entanglement'
-    | '/lab/finance'
     | '/lab/history'
     | '/lab/ibm'
     | '/lab/portfolio'
@@ -232,6 +231,7 @@ export interface FileRouteTypes {
     | '/lab/snapshot'
     | '/lab/vqe'
     | '/lab'
+    | '/lab/finance'
   id:
     | '__root__'
     | '/'
@@ -241,7 +241,6 @@ export interface FileRouteTypes {
     | '/lab/blockchain'
     | '/lab/circuit-builder'
     | '/lab/entanglement'
-    | '/lab/finance'
     | '/lab/history'
     | '/lab/ibm'
     | '/lab/portfolio'
@@ -253,6 +252,7 @@ export interface FileRouteTypes {
     | '/lab/snapshot'
     | '/lab/vqe'
     | '/lab/'
+    | '/lab/finance/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -263,7 +263,6 @@ export interface RootRouteChildren {
   LabBlockchainRoute: typeof LabBlockchainRoute
   LabCircuitBuilderRoute: typeof LabCircuitBuilderRoute
   LabEntanglementRoute: typeof LabEntanglementRoute
-  LabFinanceRoute: typeof LabFinanceRoute
   LabHistoryRoute: typeof LabHistoryRoute
   LabIbmRoute: typeof LabIbmRoute
   LabPortfolioRoute: typeof LabPortfolioRoute
@@ -275,6 +274,7 @@ export interface RootRouteChildren {
   LabSnapshotRoute: typeof LabSnapshotRoute
   LabVqeRoute: typeof LabVqeRoute
   LabIndexRoute: typeof LabIndexRoute
+  LabFinanceIndexRoute: typeof LabFinanceIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -333,13 +333,6 @@ declare module '@tanstack/react-router' {
       path: '/lab/entanglement'
       fullPath: '/lab/entanglement'
       preLoaderRoute: typeof LabEntanglementRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/lab/finance': {
-      id: '/lab/finance'
-      path: '/lab/finance'
-      fullPath: '/lab/finance'
-      preLoaderRoute: typeof LabFinanceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/lab/history': {
@@ -412,6 +405,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LabVqeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lab/finance/': {
+      id: '/lab/finance/'
+      path: '/lab/finance'
+      fullPath: '/lab/finance/'
+      preLoaderRoute: typeof LabFinanceIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -423,7 +423,6 @@ const rootRouteChildren: RootRouteChildren = {
   LabBlockchainRoute: LabBlockchainRoute,
   LabCircuitBuilderRoute: LabCircuitBuilderRoute,
   LabEntanglementRoute: LabEntanglementRoute,
-  LabFinanceRoute: LabFinanceRoute,
   LabHistoryRoute: LabHistoryRoute,
   LabIbmRoute: LabIbmRoute,
   LabPortfolioRoute: LabPortfolioRoute,
@@ -435,6 +434,7 @@ const rootRouteChildren: RootRouteChildren = {
   LabSnapshotRoute: LabSnapshotRoute,
   LabVqeRoute: LabVqeRoute,
   LabIndexRoute: LabIndexRoute,
+  LabFinanceIndexRoute: LabFinanceIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

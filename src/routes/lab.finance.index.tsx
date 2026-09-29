@@ -5,7 +5,7 @@ import { LabShell } from "@/components/lab/lab-shell";
 
 const FinanceLab = lazy(() => import("@/components/lab/finance-lab").then((m) => ({ default: m.FinanceLab })));
 
-export const Route = createFileRoute("/lab/finance")({
+export const Route = createFileRoute("/lab/finance/")({
   head: () => ({
     meta: [
       { title: "Live Quantum Finance Lab — Quantum AI Lab" },
