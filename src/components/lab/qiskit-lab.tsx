@@ -70,7 +70,7 @@ export function QiskitLab() {
       hardware: false,
     };
     const summary = `Qiskit Workflow Lab — ${preset.name}. Transpiled to {${tr.basis.join(", ")}} (level ${level}): ${tr.before.ops}→${tr.after.ops} gates, depth ${tr.before.depth}→${tr.after.depth}, fidelity ${fidelity.toFixed(6)}. ` +
-      `Backend: ${fields.backend}. Results: ${top.map((r) => `${r.bits}=${result.backend === "sampler" ? r.count : r.p.toFixed(4)}`).join(", ")}. Browser simulation — not IBM hardware.`;
+      `Backend: ${fields['backend']}. Results: ${top.map((r) => `${r.bits}=${result.backend === "sampler" ? r.count : r.p.toFixed(4)}`).join(", ")}. Browser simulation — not IBM hardware.`;
     saveExperimentSnapshot({ module: "Qiskit Workflow Lab", route: "/lab/qiskit", fields, summary });
     setSaved(true);
   }
