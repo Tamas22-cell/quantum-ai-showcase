@@ -36,7 +36,7 @@ function decompose(op: Op): Op[] {
     case "RX":
       // SX is already native; general RX(θ) = H·RZ(θ)·H
       return isSx(op) ? [op] : [...h(q), rz(q, op.theta!), ...h(q)];
-    case "RY": return [rz(q, -PI / 2), ...decompose({ gate: "RX", qubits: [q], theta: op.theta }), rz(q, PI / 2)];
+    case "RY": return [rz(q, -PI / 2), ...decompose({ gate: "RX", qubits: [q], theta: op.theta! }), rz(q, PI / 2)];
     case "CNOT": { const t = op.qubits[1]!; return [...h(t), { gate: "CZ", qubits: [q, t] }, ...h(t)]; }
     default: return [op]; // X, CZ, M are native
   }
