@@ -340,9 +340,22 @@ export function BlockchainLab() {
               <p className="mt-2 text-xs leading-6 text-muted-foreground">{d}</p>
             </section>
           ))}
-          <p className="text-xs text-muted-foreground md:col-span-2">Concise research summary for orientation, not a security assessment. The ECDSA demo above is exactly the kind of scheme Shor's algorithm targets.</p>
+          <p className="text-xs text-muted-foreground md:col-span-2">
+            Educational explainer, not a security assessment. No existing quantum computer can break the signatures or hashes used by real blockchains today;
+            the threat concerns future fault-tolerant machines. The ECDSA demo above is exactly the kind of scheme Shor's algorithm targets.
+          </p>
         </TabsContent>
       </Tabs>
+
+      <aside aria-label="Limitations and safety" className="rounded-md border border-dashed border-border-strong bg-surface p-4 text-xs leading-6 text-muted-foreground">
+        <p className="font-mono uppercase tracking-wider text-foreground">Limitations &amp; safety</p>
+        <ul className="mt-1 list-disc space-y-1 pl-5">
+          <li>Educational browser simulation — not connected to any real blockchain network; no network calls are made.</li>
+          <li>Transactions and analytics use synthetic, seeded data, not real chain data or investment information.</li>
+          <li>No wallet connection and no private-key custody: demo keys are generated in memory, never stored or uploaded, and vanish when you leave the page.</li>
+          <li>Mining difficulty is capped for responsiveness; timings are not representative of real networks.</li>
+        </ul>
+      </aside>
     </div>
   );
 }
