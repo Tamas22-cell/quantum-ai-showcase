@@ -311,14 +311,33 @@ export function PortfolioSite() {
             <div className="divide-y divide-border border-y border-border">
               {portfolio.research.map((item, index) => {
                 const Icon = researchIcons[index] ?? Cpu;
-                return (
-                  <article key={item.code} className="group grid gap-4 py-8 transition-colors hover:bg-surface/60 md:grid-cols-[8rem_minmax(0,0.8fr)_minmax(0,1fr)] md:items-center md:px-4">
+                const href = "href" in item && typeof item.href === "string" ? item.href : undefined;
+                const body = (
+                  <>
                     <div className="flex items-center gap-3 text-primary">
                       <span className="grid size-8 place-items-center rounded-sm border border-primary/30 bg-signal-soft"><Icon className="size-4" aria-hidden="true" /></span>
                       <span className="font-mono text-xs">{item.code}</span>
                     </div>
                     <h3 className="text-lg font-semibold transition-colors group-hover:text-primary">{item.title}</h3>
                     <p className="text-sm leading-7 text-muted-foreground">{item.description}</p>
+                  </>
+                );
+                if (href) {
+                  return (
+                    <Link
+                      key={item.code}
+                      to={href}
+                      aria-label={`${item.title} — open the interactive lab`}
+                      className="group grid cursor-pointer gap-4 rounded-md py-8 transition-colors hover:bg-surface/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background md:grid-cols-[8rem_minmax(0,0.8fr)_minmax(0,1fr)] md:items-center md:px-4"
+                    >
+                      {body}
+                      <ArrowUpRight aria-hidden="true" className="hidden size-4 text-primary md:absolute md:right-4 md:top-1/2 md:-translate-y-1/2 lg:block" />
+                    </Link>
+                  );
+                }
+                return (
+                  <article key={item.code} className="group grid gap-4 py-8 transition-colors hover:bg-surface/60 md:grid-cols-[8rem_minmax(0,0.8fr)_minmax(0,1fr)] md:items-center md:px-4">
+                    {body}
                   </article>
                 );
               })}
