@@ -13,7 +13,7 @@ export default defineConfig({
     // On Vercel, emit the Build Output API layout to .vercel/output, where Vercel looks for it.
     // Writing it to dist/ there made Vercel find no functions/static files and 404 every URL.
     // Elsewhere (Lovable preview) emit to dist/.
-    nitro({ output: { dir: process.env.VERCEL ? ".vercel/output" : "dist" } }),
+    nitro({ output: { dir: process.env["VERCEL"] ? ".vercel/output" : "dist" } }),
     viteReact(),
   ],
 });
