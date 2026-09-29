@@ -7,7 +7,7 @@ export type LabModule = {
   topics: string[];
   status: "available" | "in-development";
   group: "core" | "command";
-  to?: "/lab/circuit-builder" | "/lab/entanglement" | "/lab/qaoa" | "/lab/vqe" | "/lab/portfolio" | "/lab/arena" | "/lab/assistant" | "/lab/qml" | "/lab/reports" | "/lab/ibm" | "/lab/finance";
+  to?: "/lab/circuit-builder" | "/lab/entanglement" | "/lab/qaoa" | "/lab/vqe" | "/lab/portfolio" | "/lab/arena" | "/lab/assistant" | "/lab/qml" | "/lab/reports" | "/lab/ibm" | "/lab/finance" | "/lab/benchmark";
 };
 
 export const LAB_MODULES: LabModule[] = [
@@ -67,5 +67,10 @@ export const LAB_MODULES: LabModule[] = [
     id: "reports", index: "C5", title: "Research Report Generator", group: "command",
     summary: "Client-side PDF reports from seeded experiments in all all eight labs: configuration, charts, limitations and reproducibility settings.",
     topics: ["PDF", "Client-side", "Reproducibility"], status: "available", to: "/lab/reports",
+  },
+  {
+    id: "benchmark", index: "C6", title: "Quantum Benchmark Dashboard", group: "command",
+    summary: "Research benchmark overview connecting QAOA, VQE, portfolio optimisation and quantum-vs-classical experiments with explicit classical references.",
+    topics: ["Benchmarks", "QAOA", "VQE", "Classical baselines", "Reproducibility"], status: "available", to: "/lab/benchmark",
   },
 ];
