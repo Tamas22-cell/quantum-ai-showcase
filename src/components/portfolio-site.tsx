@@ -272,32 +272,44 @@ export function PortfolioSite() {
             </div>
 
             <div className="grid gap-4 md:grid-cols-3">
-              <div className="group rounded-xl border border-border bg-surface/80 p-5 transition-all hover:-translate-y-1 hover:border-primary/40 hover:bg-signal-soft">
+              <a href="#ai-agents" className={`group rounded-xl border border-border bg-surface/80 p-5 transition-all hover:-translate-y-1 hover:border-primary/50 hover:bg-signal-soft ${focusRing}`} aria-label="Open Autonomous AI Systems research">
                 <div className="flex items-center justify-between">
                   <span className="font-mono text-[10px] text-primary">01</span>
-                  <BrainCircuit className="size-5 text-primary" aria-hidden="true" />
+                  <div className="flex items-center gap-2 text-primary">
+                    <BrainCircuit className="size-5" aria-hidden="true" />
+                    <ArrowUpRight className="size-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden="true" />
+                  </div>
                 </div>
                 <h3 className="mt-8 text-lg font-semibold text-foreground">Autonomous AI Systems</h3>
                 <p className="mt-2 text-sm leading-6 text-muted-foreground">Multi-agent coordination, financial research workflows and verifiable decision support.</p>
-              </div>
+                <p className="mt-5 font-mono text-[10px] uppercase tracking-wider text-primary">Open AI research →</p>
+              </a>
 
-              <div className="group rounded-xl border border-border bg-surface/80 p-5 transition-all hover:-translate-y-1 hover:border-primary/40 hover:bg-signal-soft">
+              <Link to="/lab/finance" className={`group rounded-xl border border-border bg-surface/80 p-5 transition-all hover:-translate-y-1 hover:border-primary/50 hover:bg-signal-soft ${focusRing}`} aria-label="Open Quantum Finance Lab">
                 <div className="flex items-center justify-between">
                   <span className="font-mono text-[10px] text-primary">02</span>
-                  <LineChart className="size-5 text-primary" aria-hidden="true" />
+                  <div className="flex items-center gap-2 text-primary">
+                    <LineChart className="size-5" aria-hidden="true" />
+                    <ArrowUpRight className="size-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden="true" />
+                  </div>
                 </div>
                 <h3 className="mt-8 text-lg font-semibold text-foreground">Quantum Finance</h3>
                 <p className="mt-2 text-sm leading-6 text-muted-foreground">Portfolio optimization, stress testing and hybrid classical-quantum financial experiments.</p>
-              </div>
+                <p className="mt-5 font-mono text-[10px] uppercase tracking-wider text-primary">Open finance lab →</p>
+              </Link>
 
-              <div className="group rounded-xl border border-border bg-surface/80 p-5 transition-all hover:-translate-y-1 hover:border-primary/40 hover:bg-signal-soft">
+              <Link to="/lab" className={`group rounded-xl border border-border bg-surface/80 p-5 transition-all hover:-translate-y-1 hover:border-primary/50 hover:bg-signal-soft ${focusRing}`} aria-label="Open Quantum Algorithms Lab">
                 <div className="flex items-center justify-between">
                   <span className="font-mono text-[10px] text-primary">03</span>
-                  <Atom className="size-5 text-primary" aria-hidden="true" />
+                  <div className="flex items-center gap-2 text-primary">
+                    <Atom className="size-5" aria-hidden="true" />
+                    <ArrowUpRight className="size-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden="true" />
+                  </div>
                 </div>
                 <h3 className="mt-8 text-lg font-semibold text-foreground">Quantum Algorithms</h3>
                 <p className="mt-2 text-sm leading-6 text-muted-foreground">QAOA, VQE and QML research focused on practical hybrid system design.</p>
-              </div>
+                <p className="mt-5 font-mono text-[10px] uppercase tracking-wider text-primary">Open quantum lab →</p>
+              </Link>
             </div>
           </div>
         </section>
