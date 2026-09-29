@@ -289,6 +289,11 @@ export function PortfolioSite() {
                           </li>
                         ))}
                       </ul>
+                      {item === "AI agents" && (
+                        <span className="mt-4 inline-flex items-center gap-1 font-mono text-[10px] uppercase text-primary">
+                          Open AI Multi-Agent Research System <ArrowRight className="size-3" aria-hidden="true" />
+                        </span>
+                      )}
                       {item === "Python" && (
                         <span className="mt-4 inline-flex items-center gap-1 font-mono text-[10px] uppercase text-primary">
                           Open Python Research Lab <ArrowRight className="size-3" aria-hidden="true" />
