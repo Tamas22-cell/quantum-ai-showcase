@@ -7,7 +7,7 @@ export type LabModule = {
   topics: string[];
   status: "available" | "in-development";
   group: "core" | "command";
-  to?: "/lab/circuit-builder" | "/lab/entanglement" | "/lab/qaoa" | "/lab/vqe" | "/lab/portfolio" | "/lab/arena" | "/lab/assistant" | "/lab/qml" | "/lab/reports" | "/lab/ibm" | "/lab/finance" | "/lab/benchmark" | "/lab/history";
+  to?: "/lab/circuit-builder" | "/lab/entanglement" | "/lab/qaoa" | "/lab/vqe" | "/lab/portfolio" | "/lab/arena" | "/lab/assistant" | "/lab/qml" | "/lab/reports" | "/lab/ibm" | "/lab/finance" | "/lab/benchmark" | "/lab/history" | "/lab/snapshot";
 };
 
 export const LAB_MODULES: LabModule[] = [
@@ -77,5 +77,10 @@ export const LAB_MODULES: LabModule[] = [
     id: "history", index: "C7", title: "Experiment History", group: "command",
     summary: "Save QAOA, VQE and portfolio experiment snapshots locally in the browser, review them later, and export the history as JSON or CSV.",
     topics: ["Run history", "Local storage", "JSON / CSV", "Reproducibility"], status: "available", to: "/lab/history",
+  },
+  {
+    id: "snapshot", index: "C8", title: "Generate Research Snapshot", group: "command",
+    summary: "Turn a saved quantum experiment into a branded, shareable PNG research card directly in the browser — no API key or paid service required.",
+    topics: ["PNG export", "Research card", "Client-side", "Shareable results"], status: "available", to: "/lab/snapshot",
   },
 ];
