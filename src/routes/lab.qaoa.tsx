@@ -1,6 +1,7 @@
 import { lazy, Suspense } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 
+import { ExperimentSnapshotButton } from "@/components/lab/experiment-snapshot-button";
 import { LabShell } from "@/components/lab/lab-shell";
 
 const QaoaLab = lazy(() => import("@/components/lab/qaoa-lab").then((m) => ({ default: m.QaoaLab })));
@@ -29,6 +30,7 @@ function Page() {
           Build a small weighted Max-Cut graph, inspect the cost and mixer Hamiltonians, tune γ and β by hand or with seeded classical optimisation,
           and compare the result to the exact optimum. Everything runs as an ideal noiseless classical simulation in your browser.
         </p>
+        <div className="mt-4"><ExperimentSnapshotButton module="QAOA Optimization Lab" route="/lab/qaoa" /></div>
       </div>
       <Suspense fallback={<div className="h-96 animate-pulse rounded-md border border-border bg-card" aria-label="Loading QAOA lab" />}>
         <QaoaLab />
