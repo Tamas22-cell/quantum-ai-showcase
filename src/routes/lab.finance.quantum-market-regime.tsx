@@ -1,9 +1,7 @@
-import { lazy, Suspense } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 
 import { LabShell } from "@/components/lab/lab-shell";
-
-const QuantumMarketRegimeLab = lazy(() => import("@/components/lab/quantum-market-regime-lab").then((m) => ({ default: m.QuantumMarketRegimeLab })));
+import { QuantumMarketRegimeLab } from "@/components/lab/quantum-market-regime-lab";
 
 export const Route = createFileRoute("/lab/finance/quantum-market-regime")({
   head: () => ({
@@ -30,9 +28,7 @@ function Page() {
           then compare its seeded test accuracy against a classical baseline.
         </p>
       </div>
-      <Suspense fallback={<div className="h-96 animate-pulse rounded-md border border-border bg-card" aria-label="Loading market regime classifier" />}>
-        <QuantumMarketRegimeLab />
-      </Suspense>
+      <QuantumMarketRegimeLab />
     </LabShell>
   );
 }
