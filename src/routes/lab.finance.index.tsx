@@ -22,19 +22,25 @@ export const Route = createFileRoute("/lab/finance/")({
 function Page() {
   return (
     <LabShell crumb="Finance">
-      <div className="mb-8 max-w-3xl">
+      <div className="mb-8 max-w-4xl">
         <span className="font-mono text-xs text-primary">COMMAND / C4</span>
         <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">Live Quantum Finance Lab</h1>
         <p className="mt-3 text-sm leading-7 text-muted-foreground">
           Load prices (seeded synthetic data, your own CSV, or an optional live provider), compute returns, covariance and correlation,
           then select a portfolio with the same QUBO/QAOA engine as the Portfolio Optimizer — side by side with classical baselines.
         </p>
-        <div className="mt-4 flex flex-wrap gap-2">
+        <div className="mt-4 grid gap-2 sm:grid-cols-2">
           <Link to="/lab/finance/stress" className="inline-flex items-center gap-2 rounded-sm border border-primary/50 bg-signal-soft px-3 py-2 font-mono text-[11px] uppercase text-primary hover:bg-primary/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
             01 · Quantum Portfolio Stress Lab →
           </Link>
           <Link to="/lab/finance/variational-risk" className="inline-flex items-center gap-2 rounded-sm border border-primary/50 bg-signal-soft px-3 py-2 font-mono text-[11px] uppercase text-primary hover:bg-primary/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
             02 · Variational Quantum Risk Model →
+          </Link>
+          <Link to="/lab/finance/quantum-market-regime" className="inline-flex items-center gap-2 rounded-sm border border-primary/50 bg-signal-soft px-3 py-2 font-mono text-[11px] uppercase text-primary hover:bg-primary/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+            03 · Quantum Market Regime Classifier →
+          </Link>
+          <Link to="/lab/finance/market-data-structure" className="inline-flex items-center gap-2 rounded-sm border border-primary/50 bg-signal-soft px-3 py-2 font-mono text-[11px] uppercase text-primary hover:bg-primary/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+            04 · Financial Market Data Structure Lab →
           </Link>
         </div>
       </div>
