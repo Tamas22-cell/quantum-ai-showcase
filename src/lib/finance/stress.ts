@@ -135,6 +135,8 @@ export function normaliseWeights(w: number[]): number[] {
 export type StressConfig = { tickers: string[]; weights: number[]; scenario: ScenarioId; riskPref: number; k: number; seed: number };
 export type StressResult = {
   config: StressConfig; universe: Universe;
+  /** Original weights evaluated under the Baseline regime — the pre-stress reference point. */
+  baseline: Metrics;
   original: { w: number[]; m: Metrics };
   classical: { w: number[]; m: Metrics };
   qaoa: { w: number[]; m: Metrics; selected: string[]; pOptimal: number; pFeasible: number; matchesExact: boolean; source: string };
@@ -175,6 +177,7 @@ export async function runStressTest(c: StressConfig, opts: { signal?: AbortSigna
 
   return {
     config: structuredClone(c), universe: u,
+    baseline: metrics(buildUniverse(c.tickers, getScenario("baseline")), wOrig, c.seed),
     original: { w: wOrig, m: metrics(u, wOrig, c.seed) },
     classical: { w: wClass, m: metrics(u, wClass, c.seed) },
     qaoa: { w: wQ, m: metrics(u, wQ, c.seed), selected: S.map((i) => u.assets[i]!.ticker), pOptimal: q.pOptimal, pFeasible: q.pFeasible, matchesExact: x === q.exact.assignment, source },
@@ -186,8 +189,10 @@ export function interpret(r: StressResult): string[] {
   const s = getScenario(r.config.scenario);
   const top = (w: number[]) => r.universe.assets.map((a, i) => ({ t: a.ticker, w: w[i]! })).sort((a, b) => b.w - a.w).filter((x) => x.w > 0.005).slice(0, 3).map((x) => `${x.t} ${(x.w * 100).toFixed(0)}%`).join(", ");
   const pct = (v: number) => `${(v * 100).toFixed(1)}%`;
+  const b = r.baseline, o = r.original.m;
   const lines = [
     `${s.label}: ${s.note}`,
+    `Stress impact on the original portfolio: return ${pct(b.ret)} → ${pct(o.ret)}, volatility ${pct(b.vol)} → ${pct(o.vol)}, simulated max drawdown ${pct(b.maxDrawdown)} → ${pct(o.maxDrawdown)}.`,
     `Original allocation: return ${pct(r.original.m.ret)}, volatility ${pct(r.original.m.vol)}, simulated max drawdown ${pct(r.original.m.maxDrawdown)}.`,
     `Classical mean-variance shifts toward ${top(r.classical.w)} (Sharpe ${r.classical.m.sharpe.toFixed(2)} vs ${r.original.m.sharpe.toFixed(2)} original).`,
     `QAOA-selected subset {${r.qaoa.selected.join(", ")}} → ${top(r.qaoa.w)} (Sharpe ${r.qaoa.m.sharpe.toFixed(2)}). ${r.qaoa.matchesExact ? "The selection matches the exhaustive QUBO optimum." : "The selection differs from the exhaustive QUBO optimum."}`,
