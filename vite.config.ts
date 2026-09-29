@@ -10,7 +10,8 @@ export default defineConfig({
     tsConfigPaths(),
     tailwindcss(),
     tanstackStart(),
-    nitro(),
+    // Emit to dist/ for the Lovable preview check; the Vercel preset still writes .vercel/output.
+    nitro({ output: { dir: "dist" } }),
     viteReact(),
   ],
 });
