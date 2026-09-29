@@ -51,7 +51,7 @@ export const LAB_MODULES: LabModule[] = [
   {
     id: "assistant", index: "C2", title: "Quantum AI Research Assistant", group: "command",
     summary: "Explains algorithms and drafts circuits that are validated by the engine before use in the Circuit Builder.",
-    topics: ["AI", "Validated circuits", "Demo mode"], status: "available", to: "/lab/assistant",
+    topics: ["AI", "Validated circuits", "Scripted mode"], status: "available", to: "/lab/assistant",
   },
   {
     id: "ibm", index: "C3", title: "IBM Quantum Cloud Integration", group: "command",
@@ -60,8 +60,8 @@ export const LAB_MODULES: LabModule[] = [
   },
   {
     id: "finance", index: "C4", title: "Live Quantum Finance Lab", group: "command",
-    summary: "Demo, CSV or optional live prices → returns, covariance, correlation → QUBO/QAOA portfolio selection vs equal-weight, min-variance and exhaustive baselines. Live data not configured.",
-    topics: ["Covariance", "QAOA", "Demo + CSV", "PDF report"], status: "available", to: "/lab/finance",
+    summary: "Synthetic, CSV or optional live prices → returns, covariance, correlation → QUBO/QAOA portfolio selection vs equal-weight, min-variance and exhaustive baselines. Live data not configured.",
+    topics: ["Covariance", "QAOA", "Synthetic + CSV", "PDF report"], status: "available", to: "/lab/finance",
   },
   {
     id: "reports", index: "C5", title: "Research Report Generator", group: "command",
@@ -95,7 +95,7 @@ export const LAB_MODULES: LabModule[] = [
   },
   {
     id: "blockchain", index: "C11", title: "Blockchain Research Lab", group: "command",
-    summary: "Block builder, proof-of-work mining, Merkle trees, ECDSA sign/verify with demo keys, sample on-chain analytics and a quantum-threat / post-quantum panel.",
+    summary: "Block builder, proof-of-work mining, Merkle trees, ECDSA sign/verify with ephemeral browser-only keys, sample on-chain analytics and a quantum-threat / post-quantum panel.",
     topics: ["SHA-256", "Merkle root", "ECDSA", "On-chain metrics", "Post-quantum"], status: "available", to: "/lab/blockchain",
   },
 ];
