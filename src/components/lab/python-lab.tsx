@@ -12,8 +12,8 @@ export function PythonLab() {
   const runnerRef = useRef<PyodideRunner | null>(null);
   const [runtime, setRuntime] = useState<RuntimeState>("loading");
   const [runtimeError, setRuntimeError] = useState<string | null>(null);
-  const [presetId, setPresetId] = useState(PYTHON_PRESETS[0].id);
-  const [code, setCode] = useState(PYTHON_PRESETS[0].code);
+  const [presetId, setPresetId] = useState(PYTHON_PRESETS[0]!.id);
+  const [code, setCode] = useState(PYTHON_PRESETS[0]!.code);
   const [running, setRunning] = useState(false);
   const [result, setResult] = useState<RunResult | null>(null);
   const [runError, setRunError] = useState<string | null>(null);
