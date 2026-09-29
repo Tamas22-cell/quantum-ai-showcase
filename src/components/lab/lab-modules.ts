@@ -7,7 +7,7 @@ export type LabModule = {
   topics: string[];
   status: "available" | "in-development";
   group: "core" | "command";
-  to?: "/lab/circuit-builder" | "/lab/entanglement" | "/lab/qaoa" | "/lab/vqe" | "/lab/portfolio" | "/lab/arena" | "/lab/assistant" | "/lab/qml" | "/lab/reports" | "/lab/ibm" | "/lab/finance" | "/lab/benchmark" | "/lab/history" | "/lab/snapshot" | "/lab/qiskit" | "/lab/python";
+  to?: "/lab/circuit-builder" | "/lab/entanglement" | "/lab/qaoa" | "/lab/vqe" | "/lab/portfolio" | "/lab/arena" | "/lab/assistant" | "/lab/qml" | "/lab/reports" | "/lab/ibm" | "/lab/finance" | "/lab/benchmark" | "/lab/history" | "/lab/snapshot" | "/lab/qiskit" | "/lab/python" | "/lab/blockchain";
 };
 
 export const LAB_MODULES: LabModule[] = [
@@ -92,5 +92,10 @@ export const LAB_MODULES: LabModule[] = [
     id: "python", index: "C10", title: "Python Research Lab", group: "command",
     summary: "Run real Python (Pyodide / WebAssembly) in the browser with quant-finance, statistics and quantum/AI presets; save runs to Experiment History.",
     topics: ["Pyodide", "Web Worker", "Seeded presets", "Experiment History"], status: "available", to: "/lab/python",
+  },
+  {
+    id: "blockchain", index: "C11", title: "Blockchain Research Lab", group: "command",
+    summary: "Block builder, proof-of-work mining, Merkle trees, ECDSA sign/verify with demo keys, sample on-chain analytics and a quantum-threat / post-quantum panel.",
+    topics: ["SHA-256", "Merkle root", "ECDSA", "On-chain metrics", "Post-quantum"], status: "available", to: "/lab/blockchain",
   },
 ];

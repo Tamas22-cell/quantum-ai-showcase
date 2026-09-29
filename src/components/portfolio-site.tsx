@@ -55,7 +55,7 @@ const agentCapabilities = ["Python", "Multi-agent AI", "Market Analysis", "News 
 const disciplineLinks: Record<string, string[]> = {
   "AI agents": ["AgentTrust", "AI Financial Research Platform", "AI Multi-Agent Research System"],
   Python: ["AI Financial Research Platform", "Qiskit workflows"],
-  Blockchain: ["AgentTrust"],
+  Blockchain: ["AgentTrust", "Blockchain Research Lab"],
   "Quantitative finance": ["AI Financial Research Platform", "Quantum Portfolio Lab"],
   "Quantum computing": ["QAOA", "VQE", "Hybrid algorithms"],
 };
