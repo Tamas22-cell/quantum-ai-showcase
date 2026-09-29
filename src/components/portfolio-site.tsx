@@ -319,6 +319,7 @@ export function PortfolioSite() {
                       <span className="font-mono text-xs">{item.code}</span>
                     </div>
                     <h3 className="text-lg font-semibold transition-colors group-hover:text-primary">{item.title} <ArrowUpRight aria-hidden="true" className="inline size-4 text-primary opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100" /></h3>
+                    <p className="text-sm leading-7 text-muted-foreground">{item.description}</p>
                   </>
                 );
                 if (href) {
