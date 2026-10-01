@@ -103,7 +103,7 @@ export function ResearchAssistant() {
         {
           id: nextId.current++,
           role: "assistant",
-          mode,
+          mode: reply.research ? "research" : mode,
           content: reply.answer,
           source: "ai",
           sources: reply.sources ?? [],
@@ -248,7 +248,7 @@ function MessageView({ m }: { m: Msg }) {
     if (!m.research) return [];
     const direct = m.sources ?? [];
     if (direct.length) return direct;
-    const urls = m.content.match(/https?:\\/\\/[^\\s)<>\\]]+/g) ?? [];
+    const urls = m.content.match(/https?:\\/\\/[^\\s)<>]+/g) ?? [];
     return Array.from(new Set(urls))
       .map((url) => ({ title: url.replace(/[.,;]+$/, ""), url: url.replace(/[.,;]+$/, "") }))
       .slice(0, 4);
