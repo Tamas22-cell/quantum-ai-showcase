@@ -8,20 +8,25 @@ type FearGreedResponse = {
   data?: Array<{ value?: string; value_classification?: string }>;
 };
 
-type BybitFundingResponse = {
-  retCode?: number;
-  retMsg?: string;
-  result?: {
-    list?: Array<{ fundingRate?: string; fundingRateTimestamp?: string }>;
-  };
+type OkxFundingResponse = {
+  code?: string;
+  msg?: string;
+  data?: Array<{
+    fundingRate?: string;
+    fundingTime?: string;
+    nextFundingTime?: string;
+  }>;
 };
 
-type BybitOpenInterestResponse = {
-  retCode?: number;
-  retMsg?: string;
-  result?: {
-    list?: Array<{ openInterest?: string; timestamp?: string }>;
-  };
+type OkxOpenInterestResponse = {
+  code?: string;
+  msg?: string;
+  data?: Array<{
+    oi?: string;
+    oiCcy?: string;
+    oiUsd?: string;
+    ts?: string;
+  }>;
 };
 
 type RequestError = Error & { status?: number; body?: string };
@@ -69,8 +74,8 @@ export const getCryptoIntelligence = createServerFn({ method: "GET" }).handler(a
   const [globalResult, fearResult, fundingResult, oiResult] = await Promise.allSettled([
     requestJson<CoinGeckoGlobalResponse>("https://api.coingecko.com/api/v3/global"),
     requestJson<FearGreedResponse>("https://api.alternative.me/fng/?limit=1"),
-    requestJson<BybitFundingResponse>("https://api.bybit.com/v5/market/funding/history?category=linear&symbol=BTCUSDT&limit=1"),
-    requestJson<BybitOpenInterestResponse>("https://api.bybit.com/v5/market/open-interest?category=linear&symbol=BTCUSDT&intervalTime=5min&limit=1"),
+    requestJson<OkxFundingResponse>("https://www.okx.com/api/v5/public/funding-rate?instId=BTC-USDT-SWAP"),
+    requestJson<OkxOpenInterestResponse>("https://www.okx.com/api/v5/public/open-interest?instType=SWAP&instId=BTC-USDT-SWAP"),
   ]);
 
   const btcDominance =
@@ -80,27 +85,29 @@ export const getCryptoIntelligence = createServerFn({ method: "GET" }).handler(a
   const fearGreed = finite(fearRow?.value);
 
   const fundingApiError =
-    fundingResult.status === "fulfilled" && fundingResult.value.retCode !== 0
-      ? `Bybit ${fundingResult.value.retCode}: ${fundingResult.value.retMsg ?? "unknown error"}`
+    fundingResult.status === "fulfilled" && fundingResult.value.code !== "0"
+      ? `OKX ${fundingResult.value.code ?? "error"}: ${fundingResult.value.msg ?? "unknown error"}`
       : rejectionMessage(fundingResult);
   const oiApiError =
-    oiResult.status === "fulfilled" && oiResult.value.retCode !== 0
-      ? `Bybit ${oiResult.value.retCode}: ${oiResult.value.retMsg ?? "unknown error"}`
+    oiResult.status === "fulfilled" && oiResult.value.code !== "0"
+      ? `OKX ${oiResult.value.code ?? "error"}: ${oiResult.value.msg ?? "unknown error"}`
       : rejectionMessage(oiResult);
 
   const fundingRow =
-    fundingResult.status === "fulfilled" && fundingResult.value.retCode === 0
-      ? fundingResult.value.result?.list?.[0]
+    fundingResult.status === "fulfilled" && fundingResult.value.code === "0"
+      ? fundingResult.value.data?.[0]
       : undefined;
   const fundingRate = finite(fundingRow?.fundingRate);
-  const fundingTimestamp = finite(fundingRow?.fundingRateTimestamp);
+  const fundingTimestamp = finite(fundingRow?.fundingTime);
+  const nextFundingTime = finite(fundingRow?.nextFundingTime ?? fundingRow?.fundingTime);
 
   const oiRow =
-    oiResult.status === "fulfilled" && oiResult.value.retCode === 0
-      ? oiResult.value.result?.list?.[0]
+    oiResult.status === "fulfilled" && oiResult.value.code === "0"
+      ? oiResult.value.data?.[0]
       : undefined;
-  const openInterest = finite(oiRow?.openInterest);
-  const openInterestTimestamp = finite(oiRow?.timestamp);
+  const openInterest = finite(oiRow?.oiCcy);
+  const openInterestUsd = finite(oiRow?.oiUsd);
+  const openInterestTimestamp = finite(oiRow?.ts);
 
   return {
     btcDominance,
@@ -108,7 +115,8 @@ export const getCryptoIntelligence = createServerFn({ method: "GET" }).handler(a
     fearGreedLabel: fearRow?.value_classification ?? null,
     fundingRatePercent: fundingRate == null ? null : fundingRate * 100,
     openInterest,
-    nextFundingTime: null,
+    openInterestUsd,
+    nextFundingTime,
     fundingTimestamp,
     openInterestTimestamp,
     derivativesError: [fundingApiError && `Funding: ${fundingApiError}`, oiApiError && `OI: ${oiApiError}`]
@@ -118,7 +126,7 @@ export const getCryptoIntelligence = createServerFn({ method: "GET" }).handler(a
     sources: {
       dominance: globalResult.status === "fulfilled" ? "CoinGecko" : null,
       sentiment: fearResult.status === "fulfilled" ? "Alternative.me" : null,
-      derivatives: fundingRate != null || openInterest != null ? "Bybit V5 · BTCUSDT perpetual" : null,
+      derivatives: fundingRate != null || openInterest != null ? "OKX · BTC-USDT-SWAP" : null,
     },
   };
 });
