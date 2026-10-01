@@ -108,6 +108,12 @@ export const portfolio = {
       verified: true,
       href: "https://courses.edx.org/certificates/bc2ee34632334473ac2ccec9a1207cc1",
     },
+    {
+      title: "QCST1x: Machine Learning for Semiconductor Quantum Devices",
+      detail: "DelftX / edX · Verified Certificate · Issued Oct 1, 2026 · Credential ID 94853a5f91cf4416bc459a5230d08fb4",
+      verified: true,
+      href: "https://courses.edx.org/certificates/94853a5f91cf4416bc459a5230d08fb4",
+    },
   ],
   social: [
     { label: "LinkedIn", href: "https://www.linkedin.com/in/tamas-nemeth-8820a6a5/", placeholder: false },
