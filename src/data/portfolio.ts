@@ -104,9 +104,9 @@ export const portfolio = {
     },
     {
       title: "Implementing AI Algorithms from Scratch",
-      detail: "CodeSignal / edX · Verified Certificate · Issued Oct 1, 2026",
+      detail: "CodeSignal / edX · Verified Certificate · Issued Oct 1, 2026 · Credential ID bc2ee34632334473ac2ccec9a1207cc1",
       verified: true,
-      href: "",
+      href: "https://courses.edx.org/certificates/bc2ee34632334473ac2ccec9a1207cc1",
     },
   ],
   social: [
