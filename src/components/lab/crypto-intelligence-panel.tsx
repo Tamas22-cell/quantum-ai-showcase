@@ -2,110 +2,28 @@ import { useEffect, useState } from "react";
 import { RefreshCw } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { getCryptoIntelligence } from "@/lib/crypto-intelligence.functions";
 
-type GlobalResponse = {
-  data?: {
-    bitcoin_percentage_of_market_cap?: number | string;
-  };
-  bitcoin_percentage_of_market_cap?: number | string;
-};
-
-type FearGreedResponse = {
-  data?: Array<{ value?: string; value_classification?: string }>;
-};
-
-type PremiumIndexResponse = {
-  lastFundingRate?: string;
-  nextFundingTime?: number;
-};
-
-type OpenInterestResponse = {
-  openInterest?: string;
-};
-
-const globalEndpoint = "https://api.alternative.me/v2/global/";
-const fearGreedEndpoint = "https://api.alternative.me/fng/?limit=1";
-const fundingEndpoint = "https://dapi.binance.com/dapi/v1/premiumIndex?symbol=BTCUSD_PERP";
-const openInterestEndpoint = "https://dapi.binance.com/dapi/v1/openInterest?symbol=BTCUSD_PERP";
-
-function toFiniteNumber(value: unknown): number | null {
-  const parsed = typeof value === "number" ? value : typeof value === "string" ? Number(value) : NaN;
-  return Number.isFinite(parsed) ? parsed : null;
-}
+type Intelligence = Awaited<ReturnType<typeof getCryptoIntelligence>>;
 
 function fmtPercent(value: number | null) {
   return value == null ? "—" : `${value.toFixed(2)}%`;
 }
 
 export function CryptoIntelligencePanel() {
-  const [dominance, setDominance] = useState<number | null>(null);
-  const [fearGreed, setFearGreed] = useState<number | null>(null);
-  const [fearGreedLabel, setFearGreedLabel] = useState("—");
-  const [fundingRate, setFundingRate] = useState<number | null>(null);
-  const [openInterest, setOpenInterest] = useState<number | null>(null);
-  const [nextFundingTime, setNextFundingTime] = useState<number | null>(null);
+  const [data, setData] = useState<Intelligence | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [updatedAt, setUpdatedAt] = useState<Date | null>(null);
 
   async function load() {
     setLoading(true);
     setError("");
-
-    const requestJson = async <T,>(url: string): Promise<T> => {
-      const response = await fetch(url, { headers: { accept: "application/json" } });
-      if (!response.ok) throw new Error(`Request failed (${response.status})`);
-      return (await response.json()) as T;
-    };
-
     try {
-      const [globalResult, fearResult, fundingResult, oiResult] = await Promise.allSettled([
-        requestJson<GlobalResponse>(globalEndpoint),
-        requestJson<FearGreedResponse>(fearGreedEndpoint),
-        requestJson<PremiumIndexResponse>(fundingEndpoint),
-        requestJson<OpenInterestResponse>(openInterestEndpoint),
-      ]);
-
-      let loaded = false;
-
-      if (globalResult.status === "fulfilled") {
-        const raw = globalResult.value.data?.bitcoin_percentage_of_market_cap ?? globalResult.value.bitcoin_percentage_of_market_cap;
-        const value = toFiniteNumber(raw);
-        if (value != null) {
-          setDominance(value);
-          loaded = true;
-        }
+      const result = await getCryptoIntelligence();
+      setData(result);
+      if (result.btcDominance == null && result.fundingRatePercent == null && result.openInterest == null) {
+        setError("Some market feeds are temporarily unavailable");
       }
-
-      if (fearResult.status === "fulfilled") {
-        const row = fearResult.value.data?.[0];
-        const value = toFiniteNumber(row?.value);
-        if (value != null) {
-          setFearGreed(value);
-          setFearGreedLabel(row?.value_classification || "—");
-          loaded = true;
-        }
-      }
-
-      if (fundingResult.status === "fulfilled") {
-        const value = toFiniteNumber(fundingResult.value.lastFundingRate);
-        if (value != null) {
-          setFundingRate(value * 100);
-          setNextFundingTime(toFiniteNumber(fundingResult.value.nextFundingTime));
-          loaded = true;
-        }
-      }
-
-      if (oiResult.status === "fulfilled") {
-        const value = toFiniteNumber(oiResult.value.openInterest);
-        if (value != null) {
-          setOpenInterest(value);
-          loaded = true;
-        }
-      }
-
-      if (!loaded) throw new Error("Intelligence data is temporarily unavailable");
-      setUpdatedAt(new Date());
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to load intelligence data");
     } finally {
@@ -119,13 +37,19 @@ export function CryptoIntelligencePanel() {
     return () => window.clearInterval(timer);
   }, []);
 
+  const dominance = data?.btcDominance ?? null;
+  const fearGreed = data?.fearGreed ?? null;
+  const fundingRate = data?.fundingRatePercent ?? null;
+  const openInterest = data?.openInterest ?? null;
+  const nextFundingTime = data?.nextFundingTime ?? null;
+
   return (
     <section className="mb-6 rounded-md border border-border bg-card p-4 sm:p-5" aria-labelledby="crypto-intelligence-heading">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <div className="font-mono text-[10px] uppercase tracking-wider text-primary">Market intelligence</div>
           <h2 id="crypto-intelligence-heading" className="mt-1 text-xl font-semibold tracking-tight">Crypto Market Signals</h2>
-          <p className="mt-1 text-xs text-muted-foreground">Market structure, sentiment and BTC derivatives research layer</p>
+          <p className="mt-1 text-xs text-muted-foreground">Server-side market structure, sentiment and BTC derivatives feeds</p>
         </div>
         <Button type="button" variant="outline" size="sm" onClick={() => void load()} disabled={loading}>
           <RefreshCw className={`size-4 ${loading ? "animate-spin" : ""}`} aria-hidden="true" />
@@ -138,19 +62,19 @@ export function CryptoIntelligencePanel() {
       <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <article className="rounded-md border border-border bg-background p-4">
           <div className="font-mono text-xs text-primary">BTC DOMINANCE</div>
-          <div className="mt-3 font-mono text-2xl font-semibold tabular-nums">{loading && dominance == null ? "Loading…" : fmtPercent(dominance)}</div>
+          <div className="mt-3 font-mono text-2xl font-semibold tabular-nums">{loading && !data ? "Loading…" : fmtPercent(dominance)}</div>
           <p className="mt-2 text-xs text-muted-foreground">Bitcoin share of total crypto market cap.</p>
-          <div className="mt-3 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Source: Alternative.me</div>
+          <div className="mt-3 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Source: CoinGecko · server feed</div>
         </article>
 
         <article className="rounded-md border border-border bg-background p-4">
           <div className="font-mono text-xs text-primary">FEAR &amp; GREED</div>
           <div className="mt-3 flex items-baseline gap-2">
-            <span className="font-mono text-2xl font-semibold tabular-nums">{loading && fearGreed == null ? "Loading…" : fearGreed ?? "—"}</span>
+            <span className="font-mono text-2xl font-semibold tabular-nums">{loading && !data ? "Loading…" : fearGreed ?? "—"}</span>
             {fearGreed != null ? <span className="text-xs text-muted-foreground">/ 100</span> : null}
           </div>
-          <p className="mt-2 text-xs text-muted-foreground">{fearGreedLabel} · Bitcoin market sentiment index.</p>
-          <div className="mt-3 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Source: Alternative.me</div>
+          <p className="mt-2 text-xs text-muted-foreground">{data?.fearGreedLabel ?? "—"} · Bitcoin market sentiment index.</p>
+          <div className="mt-3 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Source: Alternative.me · server feed</div>
         </article>
 
         <article className="rounded-md border border-border bg-background p-4">
@@ -163,7 +87,7 @@ export function CryptoIntelligencePanel() {
         <article className="rounded-md border border-border bg-background p-4">
           <div className="font-mono text-xs text-primary">BTC FUNDING / OPEN INTEREST</div>
           <div className="mt-3 font-mono text-xl font-semibold tabular-nums">
-            {loading && fundingRate == null ? "Loading…" : fundingRate == null ? "—" : `${fundingRate >= 0 ? "+" : ""}${fundingRate.toFixed(4)}%`}
+            {loading && !data ? "Loading…" : fundingRate == null ? "—" : `${fundingRate >= 0 ? "+" : ""}${fundingRate.toFixed(4)}%`}
           </div>
           <p className="mt-2 text-xs text-muted-foreground">Latest BTCUSD perpetual funding rate.</p>
           <div className="mt-3 text-xs">
@@ -171,12 +95,12 @@ export function CryptoIntelligencePanel() {
             <span className="font-mono">{openInterest == null ? "—" : `${openInterest.toLocaleString("en-US")} contracts`}</span>
           </div>
           {nextFundingTime ? <div className="mt-2 text-[10px] text-muted-foreground">Next funding {new Date(nextFundingTime).toLocaleString()}</div> : null}
-          <div className="mt-3 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Source: Binance COIN-M Futures · BTCUSD_PERP</div>
+          <div className="mt-3 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Source: Binance COIN-M Futures · server feed</div>
         </article>
       </div>
 
       <div className="mt-3 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-        {updatedAt ? `Last update ${updatedAt.toLocaleTimeString()} · auto refresh 5 min` : "Connecting to intelligence feeds…"}
+        {data?.updatedAt ? `Last update ${new Date(data.updatedAt).toLocaleTimeString()} · auto refresh 5 min` : "Connecting to server feeds…"}
       </div>
     </section>
   );
