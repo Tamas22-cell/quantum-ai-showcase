@@ -47,27 +47,50 @@ type SourceRef = { title: string; url: string };
 
 function extractSources(body: unknown): SourceRef[] {
   if (!body || typeof body !== "object") return [];
-  const output = (body as {
-    output?: Array<{
-      content?: Array<{
-        annotations?: Array<{ type?: string; url?: string; title?: string }>;
-      }>;
-    }>;
-  }).output;
-  if (!Array.isArray(output)) return [];
 
   const seen = new Set<string>();
   const sources: SourceRef[] = [];
-  for (const item of output) {
-    for (const part of item.content ?? []) {
-      for (const annotation of part.annotations ?? []) {
-        if (annotation.type !== "url_citation" || !annotation.url || seen.has(annotation.url)) continue;
-        seen.add(annotation.url);
-        sources.push({ url: annotation.url, title: annotation.title || annotation.url });
+
+  const visit = (value: unknown) => {
+    if (!value || typeof value !== "object" || sources.length >= 4) return;
+
+    if (Array.isArray(value)) {
+      for (const item of value) visit(item);
+      return;
+    }
+
+    const record = value as Record<string, unknown>;
+
+    const annotations = record.annotations;
+    if (Array.isArray(annotations)) {
+      for (const annotationValue of annotations) {
+        if (!annotationValue || typeof annotationValue !== "object") continue;
+        const annotation = annotationValue as Record<string, unknown>;
+        if (
+          annotation.type === "url_citation" &&
+          typeof annotation.url === "string" &&
+          !seen.has(annotation.url)
+        ) {
+          seen.add(annotation.url);
+          sources.push({
+            url: annotation.url,
+            title: typeof annotation.title === "string" && annotation.title.trim()
+              ? annotation.title
+              : annotation.url,
+          });
+          if (sources.length >= 4) return;
+        }
       }
     }
-  }
-  return sources.slice(0, 4);
+
+    for (const child of Object.values(record)) {
+      visit(child);
+      if (sources.length >= 4) return;
+    }
+  };
+
+  visit(body);
+  return sources;
 }
 
 function extractOutputText(body: unknown): string {
@@ -163,6 +186,7 @@ export const askAIResearchAssistant = createServerFn({ method: "POST" })
       answer,
       source: "ai" as const,
       research: isResearch,
+      sources,
       circuitRaw,
     };
   });
