@@ -30,6 +30,7 @@ import { Button } from "@/components/ui/button";
 import { portfolio } from "@/data/portfolio";
 import { QuantumLab } from "@/components/quantum-lab";
 import { QuantumField } from "@/components/quantum-field";
+import { AIResearchAssistant } from "@/components/ai-research-assistant";
 
 const projectIcons = [ShieldCheck, Network, Orbit];
 const researchIcons = [Orbit, Atom, Braces, Cpu];
@@ -195,6 +196,8 @@ export function PortfolioSite() {
           </nav>
         ) : null}
       </header>
+
+      <AIResearchAssistant />
 
       <main id="main">
         {/* HERO */}
