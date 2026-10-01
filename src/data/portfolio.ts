@@ -23,6 +23,7 @@ export const portfolio = {
     { label: "Projects", href: "#projects" },
     { label: "Research", href: "#research" },
     { label: "Quantum Lab", href: "#quantum-lab" },
+    { label: "Crypto Intelligence", href: "/lab/crypto-intelligence" },
     { label: "Credentials", href: "#certifications" },
     { label: "Contact", href: "#contact" },
   ],
