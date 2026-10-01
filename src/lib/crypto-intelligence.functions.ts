@@ -10,6 +10,7 @@ type FearGreedResponse = {
 
 type BybitFundingResponse = {
   retCode?: number;
+  retMsg?: string;
   result?: {
     list?: Array<{ fundingRate?: string; fundingRateTimestamp?: string }>;
   };
@@ -17,10 +18,13 @@ type BybitFundingResponse = {
 
 type BybitOpenInterestResponse = {
   retCode?: number;
+  retMsg?: string;
   result?: {
     list?: Array<{ openInterest?: string; timestamp?: string }>;
   };
 };
+
+type RequestError = Error & { status?: number; body?: string };
 
 async function requestJson<T>(url: string): Promise<T> {
   const response = await fetch(url, {
@@ -29,13 +33,36 @@ async function requestJson<T>(url: string): Promise<T> {
       "user-agent": "quantum-ai-showcase/1.0",
     },
   });
-  if (!response.ok) throw new Error(`${new URL(url).hostname} returned ${response.status}`);
-  return (await response.json()) as T;
+
+  const text = await response.text();
+  if (!response.ok) {
+    const error = new Error(`${new URL(url).hostname} HTTP ${response.status}`) as RequestError;
+    error.status = response.status;
+    error.body = text.slice(0, 180).replace(/\s+/g, " ").trim();
+    throw error;
+  }
+
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    const error = new Error(`${new URL(url).hostname} returned invalid JSON`) as RequestError;
+    error.status = response.status;
+    error.body = text.slice(0, 180).replace(/\s+/g, " ").trim();
+    throw error;
+  }
 }
 
 function finite(value: unknown): number | null {
   const number = typeof value === "number" ? value : typeof value === "string" ? Number(value) : NaN;
   return Number.isFinite(number) ? number : null;
+}
+
+function rejectionMessage(result: PromiseSettledResult<unknown>) {
+  if (result.status !== "rejected") return null;
+  const error = result.reason as RequestError;
+  const status = error?.status ? `HTTP ${error.status}` : "request failed";
+  const body = error?.body ? ` · ${error.body}` : "";
+  return `${status}${body}`;
 }
 
 export const getCryptoIntelligence = createServerFn({ method: "GET" }).handler(async () => {
@@ -51,6 +78,15 @@ export const getCryptoIntelligence = createServerFn({ method: "GET" }).handler(a
 
   const fearRow = fearResult.status === "fulfilled" ? fearResult.value.data?.[0] : undefined;
   const fearGreed = finite(fearRow?.value);
+
+  const fundingApiError =
+    fundingResult.status === "fulfilled" && fundingResult.value.retCode !== 0
+      ? `Bybit ${fundingResult.value.retCode}: ${fundingResult.value.retMsg ?? "unknown error"}`
+      : rejectionMessage(fundingResult);
+  const oiApiError =
+    oiResult.status === "fulfilled" && oiResult.value.retCode !== 0
+      ? `Bybit ${oiResult.value.retCode}: ${oiResult.value.retMsg ?? "unknown error"}`
+      : rejectionMessage(oiResult);
 
   const fundingRow =
     fundingResult.status === "fulfilled" && fundingResult.value.retCode === 0
@@ -75,6 +111,9 @@ export const getCryptoIntelligence = createServerFn({ method: "GET" }).handler(a
     nextFundingTime: null,
     fundingTimestamp,
     openInterestTimestamp,
+    derivativesError: [fundingApiError && `Funding: ${fundingApiError}`, oiApiError && `OI: ${oiApiError}`]
+      .filter(Boolean)
+      .join(" | ") || null,
     updatedAt: new Date().toISOString(),
     sources: {
       dominance: globalResult.status === "fulfilled" ? "CoinGecko" : null,
