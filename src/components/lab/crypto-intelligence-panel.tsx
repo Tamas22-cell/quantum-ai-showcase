@@ -93,6 +93,11 @@ export function CryptoIntelligencePanel() {
             <span className="text-muted-foreground">Open interest </span>
             <span className="font-mono">{openInterest == null ? "—" : `${openInterest.toLocaleString("en-US", { maximumFractionDigits: 2 })} BTC`}</span>
           </div>
+          {data?.derivativesError ? (
+            <div className="mt-3 break-words rounded-sm border border-destructive/30 bg-destructive/5 p-2 font-mono text-[10px] leading-4 text-destructive">
+              API diagnostic: {data.derivativesError}
+            </div>
+          ) : null}
           <div className="mt-3 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Source: Bybit V5 · BTCUSDT perpetual · server feed</div>
         </article>
       </div>
