@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Activity, Bot, ChartNoAxesCombined, Coins, Gauge, Network } from "lucide-react";
 import { LabShell } from "@/components/lab/lab-shell";
 import { BitcoinNetworkActivityPanel } from "@/components/lab/bitcoin-network-activity-panel";
+import { OnchainIntelligencePanel } from "@/components/lab/onchain-intelligence-panel";
 
 export const Route = createFileRoute("/lab/crypto-intelligence")({
   head: () => ({ meta: [
@@ -14,7 +15,7 @@ export const Route = createFileRoute("/lab/crypto-intelligence")({
 
 const modules = [
   { icon: Activity, title: "Bitcoin Network Activity", text: "Mempool, transaction fees, block production and network throughput.", status: "LIVE", href: "#network-activity" },
-  { icon: Network, title: "On-chain Intelligence", text: "Exchange flows, active-address and valuation signals with source transparency.", status: "PLANNED", href: "#on-chain" },
+  { icon: Network, title: "On-chain Intelligence", text: "Public-chain transaction, block and Lightning signals with source transparency.", status: "LIVE", href: "#on-chain" },
   { icon: Coins, title: "Mining Revenue Dashboard", text: "Block subsidy, fee revenue, hashprice and miner-economics research.", status: "PLANNED", href: "#mining-revenue" },
   { icon: ChartNoAxesCombined, title: "BTC Market + Network", text: "Interactive overlays for price, hashrate, difficulty and derivatives data.", status: "PLANNED", href: "#market-network" },
   { icon: Gauge, title: "Network Health Score", text: "Explainable component score built from measurable Bitcoin network signals.", status: "PLANNED", href: "#health-score" },
@@ -27,6 +28,7 @@ function Page() {
     <section className="rounded-md border border-border bg-card p-4 sm:p-5"><div className="font-mono text-[10px] uppercase tracking-wider text-primary">Research architecture</div><h2 className="mt-1 text-xl font-semibold">Six intelligence modules</h2><div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">{modules.map(({icon:Icon,title,text,status,href}) => <a key={title} href={href} className="group rounded-md border border-border bg-background p-4 transition hover:border-primary/60 hover:bg-signal-soft"><div className="flex items-start justify-between gap-3"><Icon className="size-5 text-primary"/><span className={`font-mono text-[9px] uppercase tracking-wider ${status === "LIVE" ? "text-primary" : "text-muted-foreground"}`}>{status}</span></div><h3 className="mt-4 font-semibold group-hover:text-primary">{title}</h3><p className="mt-2 text-xs leading-5 text-muted-foreground">{text}</p><div className="mt-3 font-mono text-[10px] uppercase text-primary">Open module ↓</div></a>)}</div></section>
     <div className="my-4 rounded-md border border-primary/30 bg-signal-soft p-4 text-xs leading-6 text-muted-foreground"><span className="font-mono text-primary">BUILD ORDER:</span> Network Activity → On-chain → Mining Revenue → Market/Network Chart → Health Score → AI Analyst. Live values will only be shown when backed by a real data source.</div>
     <BitcoinNetworkActivityPanel />
-    <div id="on-chain"/><div id="mining-revenue"/><div id="market-network"/><div id="health-score"/><div id="ai-analyst"/>
+    <OnchainIntelligencePanel />
+    <div id="mining-revenue"/><div id="market-network"/><div id="health-score"/><div id="ai-analyst"/>
   </LabShell>;
 }
