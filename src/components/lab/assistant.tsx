@@ -104,7 +104,7 @@ export function ResearchAssistant() {
           mode,
           content: reply.answer,
           source: "ai",
-          circuitRaw: null,
+          circuitRaw: reply.circuitRaw ?? null,
         },
       ]);
     } catch (e) {
