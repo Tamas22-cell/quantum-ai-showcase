@@ -141,7 +141,8 @@ export const askAIResearchAssistant = createServerFn({ method: "POST" })
 
     if (!answer) throw new Error("OpenAI returned an empty response.");
 
-    if (isResearch && sources.length > 0 && !/\bSources\b/i.test(answer)) {
+    if (isResearch && sources.length > 0) {
+      answer = answer.replace(/\n?\s*Sources(?:\s*&\s*References)?[\s\S]*$/i, "").trimEnd();
       answer += "\n\nSources\n" + sources
         .map((source, index) => `${index + 1}. ${source.title} — ${source.url}`)
         .join("\n");
