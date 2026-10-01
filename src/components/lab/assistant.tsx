@@ -17,6 +17,7 @@ type Msg = ChatTurn & {
   source?: "ai" | "demo";
   circuitRaw?: string | null;
   sources?: Array<{ title: string; url: string }>;
+  research?: boolean;
   error?: boolean;
 };
 
@@ -106,6 +107,7 @@ export function ResearchAssistant() {
           content: reply.answer,
           source: "ai",
           sources: reply.sources ?? [],
+          research: reply.research ?? mode === "research",
           circuitRaw: reply.circuitRaw ?? null,
         },
       ]);
