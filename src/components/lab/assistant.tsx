@@ -244,6 +244,15 @@ export function ResearchAssistant() {
 }
 
 function MessageView({ m }: { m: Msg }) {
+  const visibleSources = useMemo(() => {
+    if (!m.research) return [];
+    const direct = m.sources ?? [];
+    if (direct.length) return direct;
+    const urls = m.content.match(/https?:\\/\\/[^\\s)<>\\]]+/g) ?? [];
+    return Array.from(new Set(urls))
+      .map((url) => ({ title: url.replace(/[.,;]+$/, ""), url: url.replace(/[.,;]+$/, "") }))
+      .slice(0, 4);
+  }, [m.research, m.sources, m.content]);
   if (m.role === "user") {
     return (
       <div className="ml-auto max-w-[85%] rounded-md border border-border bg-surface px-3 py-2 text-sm">
@@ -275,11 +284,11 @@ function MessageView({ m }: { m: Msg }) {
         </span>
         <p className="whitespace-pre-wrap">{m.content}</p>
       </div>
-      {m.mode === "research" && m.sources?.length ? (
+      {m.mode === "research" && visibleSources.length ? (
         <div className="rounded-md border border-primary/30 bg-surface px-3 py-3">
           <p className="mb-2 font-mono text-[10px] uppercase tracking-wide text-primary">Sources</p>
           <ol className="space-y-2 text-xs">
-            {m.sources.map((source, index) => (
+            {visibleSources.map((source, index) => (
               <li key={source.url} className="flex gap-2">
                 <span className="shrink-0 font-mono text-muted-foreground">{index + 1}.</span>
                 <a
@@ -295,7 +304,7 @@ function MessageView({ m }: { m: Msg }) {
           </ol>
         </div>
       ) : null}
-      {m.mode === "research" && !m.sources?.length ? (
+      {m.mode === "research" && !visibleSources.length ? (
         <div className="rounded-md border border-amber/30 px-3 py-2 text-xs text-muted-foreground">
           No web sources were returned for this research response.
         </div>
