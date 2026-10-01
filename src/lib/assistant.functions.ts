@@ -113,9 +113,21 @@ export const askAIResearchAssistant = createServerFn({ method: "POST" })
 
     if (!answer) throw new Error("OpenAI returned an empty response.");
 
+    const circuitMatch = answer.match(/\\`\\`\\`json\\s*([\\s\\S]*?)\\s*\\`\\`\\`/i);
+    let circuitRaw: string | null = null;
+    if (data.mode === "draft-circuit" && circuitMatch) {
+      try {
+        const parsed = JSON.parse(circuitMatch[1]);
+        if (parsed && typeof parsed === "object") circuitRaw = JSON.stringify(parsed);
+      } catch {
+        circuitRaw = null;
+      }
+    }
+
     return {
       answer,
       source: "ai" as const,
       research: isResearch,
+      circuitRaw,
     };
   });
