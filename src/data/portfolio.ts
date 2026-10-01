@@ -102,6 +102,12 @@ export const portfolio = {
       verified: true,
       href: "https://courses.edx.org/certificates/c7a7a5d0baf54375b6b2523afbdbb856",
     },
+    {
+      title: "Implementing AI Algorithms from Scratch",
+      detail: "CodeSignal / edX · Verified Certificate · Issued Oct 1, 2026",
+      verified: true,
+      href: "",
+    },
   ],
   social: [
     { label: "LinkedIn", href: "https://www.linkedin.com/in/tamas-nemeth-8820a6a5/", placeholder: false },
