@@ -23,7 +23,6 @@ Portfolio context:
 - Quantum Finance Lab: hybrid quantum-classical finance research covering QAOA, VQE, QML, Qiskit, and quantitative market analysis.
 - Quantum Portfolio Optimizer: hybrid portfolio optimization using real market data, QUBO formulation, QAOA, and Qiskit.
 - Research topics: QAOA, VQE, Qiskit workflows, hybrid quantum-classical algorithms.
-- Credentials: Development and Applications of Germanium Quantum Technologies (DelftX / edX, verified, Sep 2026); Implementing AI Algorithms from Scratch (CodeSignal / edX, verified, Oct 1 2026).
 
 General rules:
 - Answer in clear, concise English.
@@ -33,14 +32,10 @@ General rules:
 `;
 
 const MODE_INSTRUCTIONS: Record<AssistantMode, string> = {
-  "explain-algorithm":
-    "Explain quantum-computing algorithms accurately and practically. Focus on QAOA, VQE, Max-Cut, QML, circuits, optimisation and hybrid quantum-classical workflows.",
-  "explain-results":
-    "Interpret supplied experiment data carefully. Explain probabilities, shot noise, sampling error and ideal classical simulation. Do not claim quantum-hardware results unless the user provides them.",
-  "draft-circuit":
-    "Help design small quantum circuits. Explain the circuit clearly. If proposing a circuit, append a JSON object in a fenced json block with exactly this shape: {\"numQubits\":2,\"ops\":[{\"gate\":\"H\",\"qubits\":[0]}]}. Supported gates are H, X, Y, Z, RX, RY, RZ and CNOT. Never invent unsupported gates or invalid qubit indices.",
-  research:
-    "Act as a research assistant. Use current web sources when answering research questions. Prefer primary sources and authoritative technical documentation such as arXiv papers, IBM Quantum documentation, official OpenAI documentation, university research pages and official project documentation. Explain what the sources support and flag uncertainty. End every research answer with a short 'Sources' section containing 2-4 direct URLs to the sources you actually used.",
+  "explain-algorithm": "Explain quantum-computing algorithms accurately and practically. Focus on QAOA, VQE, Max-Cut, QML, circuits, optimisation and hybrid quantum-classical workflows.",
+  "explain-results": "Interpret supplied experiment data carefully. Explain probabilities, shot noise, sampling error and ideal classical simulation. Do not claim quantum-hardware results unless the user provides them.",
+  "draft-circuit": "Help design small quantum circuits. Explain the circuit clearly. If proposing a circuit, append a JSON object in a fenced json block with exactly this shape: {\"numQubits\":2,\"ops\":[{\"gate\":\"H\",\"qubits\":[0]}]}. Supported gates are H, X, Y, Z, RX, RY, RZ and CNOT.",
+  research: "Act as a research assistant. Use current web sources. Prefer primary sources such as arXiv, IBM Quantum documentation, university research pages and official project documentation. Every research answer MUST end with a Sources section containing 2-4 direct URLs to sources actually used. Never invent URLs.",
 };
 
 type SourceRef = { title: string; url: string };
@@ -53,30 +48,31 @@ function extractSources(body: unknown): SourceRef[] {
 
   const visit = (value: unknown) => {
     if (!value || typeof value !== "object" || sources.length >= 4) return;
-
     if (Array.isArray(value)) {
       for (const item of value) visit(item);
       return;
     }
 
     const record = value as Record<string, unknown>;
-
     const annotations = record.annotations;
+
     if (Array.isArray(annotations)) {
-      for (const annotationValue of annotations) {
-        if (!annotationValue || typeof annotationValue !== "object") continue;
-        const annotation = annotationValue as Record<string, unknown>;
+      for (const item of annotations) {
+        if (!item || typeof item !== "object") continue;
+        const annotation = item as Record<string, unknown>;
         if (
           annotation.type === "url_citation" &&
           typeof annotation.url === "string" &&
+          annotation.url.startsWith("http") &&
           !seen.has(annotation.url)
         ) {
           seen.add(annotation.url);
           sources.push({
             url: annotation.url,
-            title: typeof annotation.title === "string" && annotation.title.trim()
-              ? annotation.title
-              : annotation.url,
+            title:
+              typeof annotation.title === "string" && annotation.title.trim()
+                ? annotation.title
+                : annotation.url,
           });
           if (sources.length >= 4) return;
         }
@@ -91,6 +87,20 @@ function extractSources(body: unknown): SourceRef[] {
 
   visit(body);
   return sources;
+}
+
+function extractUrlsFromText(text: string): SourceRef[] {
+  const urls = text.match(/https?:\/\/[^\s)<>]+/g) ?? [];
+  const seen = new Set<string>();
+  return urls
+    .map((url) => url.replace(/[.,;]+$/, ""))
+    .filter((url) => {
+      if (seen.has(url)) return false;
+      seen.add(url);
+      return true;
+    })
+    .slice(0, 4)
+    .map((url) => ({ title: url, url }));
 }
 
 function extractOutputText(body: unknown): string {
@@ -129,7 +139,16 @@ export const askAIResearchAssistant = createServerFn({ method: "POST" })
       { role: "user" as const, content: data.question },
     ];
 
-    const isResearch = data.mode === "research";
+    // Research-looking questions automatically use web search even if
+    // the visitor forgot to switch the UI tab to Research mode.
+    const researchIntent =
+      /\b(latest|recent|research|paper|papers|sources|2026|newest|current)\b/i.test(data.question);
+    const isResearch = data.mode === "research" || researchIntent;
+
+    const researchInstruction = isResearch
+      ? `\n\nRESEARCH REQUIREMENT:
+Use web search for this request. Return 2-4 source URLs in a final "Sources" section. Use only URLs actually returned/used by web search.\n`
+      : "";
 
     const response = await fetch("https://api.openai.com/v1/responses", {
       method: "POST",
@@ -139,10 +158,10 @@ export const askAIResearchAssistant = createServerFn({ method: "POST" })
       },
       body: JSON.stringify({
         model: "gpt-5.6-luna",
-        instructions: `${PORTFOLIO_CONTEXT}\n\nMode:\n${MODE_INSTRUCTIONS[data.mode]}`,
+        instructions: `${PORTFOLIO_CONTEXT}\n\nMode:\n${MODE_INSTRUCTIONS[data.mode]}${researchInstruction}`,
         input,
         ...(isResearch ? { tools: [{ type: "web_search" }] } : {}),
-        max_output_tokens: isResearch ? 1200 : 700,
+        max_output_tokens: isResearch ? 1400 : 700,
       }),
       signal: AbortSignal.timeout(45_000),
     });
@@ -152,34 +171,23 @@ export const askAIResearchAssistant = createServerFn({ method: "POST" })
       try {
         const body = (await response.json()) as { error?: { message?: unknown } };
         detail = typeof body.error?.message === "string" ? body.error.message : "";
-      } catch {
-        // Keep provider errors private if the response is not JSON.
-      }
+      } catch {}
       throw new Error(detail || `OpenAI request failed (${response.status}).`);
     }
 
     const payload = await response.json();
     let answer = extractOutputText(payload);
-    const sources = isResearch ? extractSources(payload) : [];
+    let sources = isResearch ? extractSources(payload) : [];
 
     if (!answer) throw new Error("OpenAI returned an empty response.");
 
-    if (isResearch && sources.length > 0) {
-      answer = answer.replace(/\n?\s*Sources(?:\s*&\s*References)?[\s\S]*$/i, "").trimEnd();
-      answer += "\n\nSources\n" + sources
-        .map((source, index) => `${index + 1}. ${source.title} — ${source.url}`)
-        .join("\n");
+    // Fallback if the provider exposes direct URLs in text but not annotations.
+    if (isResearch && sources.length === 0) {
+      sources = extractUrlsFromText(answer);
     }
 
-    const circuitMatch = answer.match(/\\`\\`\\`json\\s*([\\s\\S]*?)\\s*\\`\\`\\`/i);
-    let circuitRaw: string | null = null;
-    if (data.mode === "draft-circuit" && circuitMatch) {
-      try {
-        const parsed = JSON.parse(circuitMatch[1]);
-        if (parsed && typeof parsed === "object") circuitRaw = JSON.stringify(parsed);
-      } catch {
-        circuitRaw = null;
-      }
+    if (isResearch && sources.length > 0) {
+      answer = answer.replace(/\n?\s*Sources(?:\s*&\s*References)?[\s\S]*$/i, "").trimEnd();
     }
 
     return {
@@ -187,6 +195,6 @@ export const askAIResearchAssistant = createServerFn({ method: "POST" })
       source: "ai" as const,
       research: isResearch,
       sources,
-      circuitRaw,
+      circuitRaw: null,
     };
   });
