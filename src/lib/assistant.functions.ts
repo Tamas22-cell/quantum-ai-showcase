@@ -190,11 +190,24 @@ Use web search for this request. Return 2-4 source URLs in a final "Sources" sec
       answer = answer.replace(/\n?\s*Sources(?:\s*&\s*References)?[\s\S]*$/i, "").trimEnd();
     }
 
+    let circuitRaw: string | null = null;
+    if (data.mode === "draft-circuit") {
+      const circuitMatch = answer.match(/\`\`\`json\s*([\s\S]*?)\s*\`\`\`/i);
+      if (circuitMatch) {
+        try {
+          const parsed = JSON.parse(circuitMatch[1]);
+          if (parsed && typeof parsed === "object") circuitRaw = JSON.stringify(parsed);
+        } catch {
+          circuitRaw = null;
+        }
+      }
+    }
+
     return {
       answer,
       source: "ai" as const,
       research: isResearch,
       sources,
-      circuitRaw: null,
+      circuitRaw,
     };
   });
