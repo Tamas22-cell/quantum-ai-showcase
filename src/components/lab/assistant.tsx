@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { AlertTriangle, Bot, CheckCircle2, Download, Loader2, Send, Sparkles, Trash2, XCircle } from "lucide-react";
+import { AlertTriangle, Bot, CheckCircle2, FileText, Loader2, Send, Sparkles, Trash2, XCircle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { askAIResearchAssistant } from "@/lib/assistant.functions";
+import { exportAssistantResearchReport } from "@/lib/assistant/pdf";
 import { parseProposal } from "@/lib/assistant/proposal";
 import { writeTransfer } from "@/lib/assistant/transfer";
 import { MODE_LABEL, type AssistantMode, type ChatTurn } from "@/lib/assistant/types";
@@ -18,6 +19,7 @@ type Msg = ChatTurn & {
   circuitRaw?: string | null;
   sources?: Array<{ title: string; url: string }>;
   research?: boolean;
+  question?: string;
   error?: boolean;
 };
 
@@ -108,6 +110,7 @@ export function ResearchAssistant() {
           source: "ai",
           sources: reply.sources ?? [],
           research: reply.research ?? mode === "research",
+          question: q,
           circuitRaw: reply.circuitRaw ?? null,
         },
       ]);
@@ -243,38 +246,6 @@ export function ResearchAssistant() {
   );
 }
 
-function exportResearchReport(m: Msg) {
-  if (typeof window === "undefined") return;
-  const sources = m.sources ?? [];
-  const sourceLines = sources.length
-    ? sources.map((s, i) => `${i + 1}. ${s.title} — ${s.url}`).join("\\n")
-    : "No source links were returned.";
-  const report = [
-    "QUANTUM AI RESEARCH REPORT",
-    "===========================",
-    `Date: ${new Date().toLocaleString()}`,
-    `Mode: ${MODE_LABEL[m.mode]}`,
-    "",
-    "RESEARCH RESULT",
-    "---------------",
-    m.content,
-    "",
-    "SOURCES",
-    "-------",
-    sourceLines,
-  ].join("\\n");
-
-  const blob = new Blob([report], { type: "text/plain;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `quantum-research-${new Date().toISOString().slice(0, 10)}.txt`;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
-}
-
 function MessageView({ m }: { m: Msg }) {
   const visibleSources = useMemo(() => {
     if (!m.research) return [];
@@ -285,6 +256,17 @@ function MessageView({ m }: { m: Msg }) {
       .map((url) => ({ title: url.replace(/[.,;]+$/, ""), url: url.replace(/[.,;]+$/, "") }))
       .slice(0, 4);
   }, [m.research, m.sources, m.content]);
+
+  const exportReport = () => {
+    if (!m.research) return;
+    exportAssistantResearchReport({
+      topic: m.question?.trim() || "Quantum AI Research Report",
+      answer: m.content,
+      sources: visibleSources,
+      generatedAt: new Date().toISOString(),
+    });
+  };
+
   if (m.role === "user") {
     return (
       <div className="ml-auto max-w-[85%] rounded-md border border-border bg-surface px-3 py-2 text-sm">
@@ -316,6 +298,7 @@ function MessageView({ m }: { m: Msg }) {
         </span>
         <p className="whitespace-pre-wrap">{m.content}</p>
       </div>
+
       {m.mode === "research" && visibleSources.length ? (
         <div className="rounded-md border border-primary/30 bg-surface px-3 py-3">
           <p className="mb-2 font-mono text-[10px] uppercase tracking-wide text-primary">Sources</p>
@@ -334,18 +317,33 @@ function MessageView({ m }: { m: Msg }) {
               </li>
             ))}
           </ol>
+          <Button
+            type="button"
+            variant="signalOutline"
+            size="sm"
+            className="mt-3"
+            onClick={exportReport}
+          >
+            <FileText aria-hidden="true" />Export Research Report
+          </Button>
         </div>
       ) : null}
+
       {m.mode === "research" && !visibleSources.length ? (
         <div className="rounded-md border border-amber/30 px-3 py-2 text-xs text-muted-foreground">
-          No web sources were returned for this research response.
+          <p>No web sources were returned for this research response.</p>
+          <Button
+            type="button"
+            variant="signalOutline"
+            size="sm"
+            className="mt-3"
+            onClick={exportReport}
+          >
+            <FileText aria-hidden="true" />Export Research Report
+          </Button>
         </div>
       ) : null}
-      {m.mode === "research" ? (
-        <Button variant="signalOutline" size="sm" onClick={() => exportResearchReport(m)}>
-          <Download aria-hidden="true" />Export Research Report
-        </Button>
-      ) : null}
+
       {m.circuitRaw ? <ProposalCard raw={m.circuitRaw} /> : null}
     </div>
   );
