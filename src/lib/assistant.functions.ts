@@ -43,6 +43,33 @@ const MODE_INSTRUCTIONS: Record<AssistantMode, string> = {
     "Act as a research assistant. Use current web sources when answering research questions. Prefer primary sources and authoritative technical documentation such as arXiv papers, IBM Quantum documentation, official OpenAI documentation, university research pages and official project documentation. Explain what the sources support and flag uncertainty. End every research answer with a short 'Sources' section containing 2-4 direct URLs to the sources you actually used.",
 };
 
+type SourceRef = { title: string; url: string };
+
+function extractSources(body: unknown): SourceRef[] {
+  if (!body || typeof body !== "object") return [];
+  const output = (body as {
+    output?: Array<{
+      content?: Array<{
+        annotations?: Array<{ type?: string; url?: string; title?: string }>;
+      }>;
+    }>;
+  }).output;
+  if (!Array.isArray(output)) return [];
+
+  const seen = new Set<string>();
+  const sources: SourceRef[] = [];
+  for (const item of output) {
+    for (const part of item.content ?? []) {
+      for (const annotation of part.annotations ?? []) {
+        if (annotation.type !== "url_citation" || !annotation.url || seen.has(annotation.url)) continue;
+        seen.add(annotation.url);
+        sources.push({ url: annotation.url, title: annotation.title || annotation.url });
+      }
+    }
+  }
+  return sources.slice(0, 4);
+}
+
 function extractOutputText(body: unknown): string {
   if (!body || typeof body !== "object") return "";
 
@@ -109,9 +136,16 @@ export const askAIResearchAssistant = createServerFn({ method: "POST" })
     }
 
     const payload = await response.json();
-    const answer = extractOutputText(payload);
+    let answer = extractOutputText(payload);
+    const sources = isResearch ? extractSources(payload) : [];
 
     if (!answer) throw new Error("OpenAI returned an empty response.");
+
+    if (isResearch && sources.length > 0 && !/\bSources\b/i.test(answer)) {
+      answer += "\n\nSources\n" + sources
+        .map((source, index) => `${index + 1}. ${source.title} — ${source.url}`)
+        .join("\n");
+    }
 
     const circuitMatch = answer.match(/\\`\\`\\`json\\s*([\\s\\S]*?)\\s*\\`\\`\\`/i);
     let circuitRaw: string | null = null;
