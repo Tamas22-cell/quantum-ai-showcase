@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { AlertTriangle, Bot, CheckCircle2, Loader2, Send, Sparkles, Trash2, XCircle } from "lucide-react";
+import { AlertTriangle, Bot, CheckCircle2, Download, Loader2, Send, Sparkles, Trash2, XCircle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { askAIResearchAssistant } from "@/lib/assistant.functions";
@@ -243,6 +243,38 @@ export function ResearchAssistant() {
   );
 }
 
+function exportResearchReport(m: Msg) {
+  if (typeof window === "undefined") return;
+  const sources = m.sources ?? [];
+  const sourceLines = sources.length
+    ? sources.map((s, i) => `${i + 1}. ${s.title} — ${s.url}`).join("\\n")
+    : "No source links were returned.";
+  const report = [
+    "QUANTUM AI RESEARCH REPORT",
+    "===========================",
+    `Date: ${new Date().toLocaleString()}`,
+    `Mode: ${MODE_LABEL[m.mode]}`,
+    "",
+    "RESEARCH RESULT",
+    "---------------",
+    m.content,
+    "",
+    "SOURCES",
+    "-------",
+    sourceLines,
+  ].join("\\n");
+
+  const blob = new Blob([report], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `quantum-research-${new Date().toISOString().slice(0, 10)}.txt`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
 function MessageView({ m }: { m: Msg }) {
   const visibleSources = useMemo(() => {
     if (!m.research) return [];
@@ -308,6 +340,11 @@ function MessageView({ m }: { m: Msg }) {
         <div className="rounded-md border border-amber/30 px-3 py-2 text-xs text-muted-foreground">
           No web sources were returned for this research response.
         </div>
+      ) : null}
+      {m.mode === "research" ? (
+        <Button variant="signalOutline" size="sm" onClick={() => exportResearchReport(m)}>
+          <Download aria-hidden="true" />Export Research Report
+        </Button>
       ) : null}
       {m.circuitRaw ? <ProposalCard raw={m.circuitRaw} /> : null}
     </div>
