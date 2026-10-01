@@ -3,6 +3,7 @@ import { Activity, Bot, ChartNoAxesCombined, Coins, Gauge, Network } from "lucid
 import { LabShell } from "@/components/lab/lab-shell";
 import { BitcoinNetworkActivityPanel } from "@/components/lab/bitcoin-network-activity-panel";
 import { OnchainIntelligencePanel } from "@/components/lab/onchain-intelligence-panel";
+import { MiningRevenuePanel } from "@/components/lab/mining-revenue-panel";
 
 export const Route = createFileRoute("/lab/crypto-intelligence")({
   head: () => ({ meta: [
@@ -16,7 +17,7 @@ export const Route = createFileRoute("/lab/crypto-intelligence")({
 const modules = [
   { icon: Activity, title: "Bitcoin Network Activity", text: "Mempool, transaction fees, block production and network throughput.", status: "LIVE", href: "#network-activity" },
   { icon: Network, title: "On-chain Intelligence", text: "Public-chain transaction, block and Lightning signals with source transparency.", status: "LIVE", href: "#on-chain" },
-  { icon: Coins, title: "Mining Revenue Dashboard", text: "Block subsidy, fee revenue, hashprice and miner-economics research.", status: "PLANNED", href: "#mining-revenue" },
+  { icon: Coins, title: "Mining Revenue Dashboard", text: "Block subsidy, fee revenue and miner-economics research from recent blocks.", status: "LIVE", href: "#mining-revenue" },
   { icon: ChartNoAxesCombined, title: "BTC Market + Network", text: "Interactive overlays for price, hashrate, difficulty and derivatives data.", status: "PLANNED", href: "#market-network" },
   { icon: Gauge, title: "Network Health Score", text: "Explainable component score built from measurable Bitcoin network signals.", status: "PLANNED", href: "#health-score" },
   { icon: Bot, title: "AI Blockchain Analyst", text: "Evidence-linked summaries generated from the live research feeds on this page.", status: "PLANNED", href: "#ai-analyst" },
@@ -29,6 +30,7 @@ function Page() {
     <div className="my-4 rounded-md border border-primary/30 bg-signal-soft p-4 text-xs leading-6 text-muted-foreground"><span className="font-mono text-primary">BUILD ORDER:</span> Network Activity → On-chain → Mining Revenue → Market/Network Chart → Health Score → AI Analyst. Live values will only be shown when backed by a real data source.</div>
     <BitcoinNetworkActivityPanel />
     <OnchainIntelligencePanel />
-    <div id="mining-revenue"/><div id="market-network"/><div id="health-score"/><div id="ai-analyst"/>
+    <MiningRevenuePanel />
+    <div id="market-network"/><div id="health-score"/><div id="ai-analyst"/>
   </LabShell>;
 }
