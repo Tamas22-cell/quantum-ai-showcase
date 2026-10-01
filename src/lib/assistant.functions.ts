@@ -43,6 +43,22 @@ export const askAIResearchAssistant = createServerFn({ method: "POST" })
     });
 
     if (!response.ok) throw new Error("OpenAI request failed.");
-    const payload = (await response.json()) as { output_text?: string };
-    return { answer: payload.output_text?.trim() || "I couldn't generate an answer right now." };
+    const payload = (await response.json()) as {
+      output_text?: string;
+      output?: Array<{
+        type?: string;
+        content?: Array<{ type?: string; text?: string }>;
+      }>;
+    };
+
+    const answer =
+      payload.output_text?.trim() ||
+      payload.output
+        ?.flatMap((item) => item.content ?? [])
+        .map((part) => part.text ?? "")
+        .filter(Boolean)
+        .join("\n")
+        .trim();
+
+    return { answer: answer || "I couldn't generate an answer right now." };
   });
