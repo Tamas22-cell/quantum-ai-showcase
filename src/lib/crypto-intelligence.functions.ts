@@ -8,13 +8,18 @@ type FearGreedResponse = {
   data?: Array<{ value?: string; value_classification?: string }>;
 };
 
-type PremiumIndexResponse = {
-  lastFundingRate?: string;
-  nextFundingTime?: number;
+type BybitFundingResponse = {
+  retCode?: number;
+  result?: {
+    list?: Array<{ fundingRate?: string; fundingRateTimestamp?: string }>;
+  };
 };
 
-type OpenInterestResponse = {
-  openInterest?: string;
+type BybitOpenInterestResponse = {
+  retCode?: number;
+  result?: {
+    list?: Array<{ openInterest?: string; timestamp?: string }>;
+  };
 };
 
 async function requestJson<T>(url: string): Promise<T> {
@@ -37,8 +42,8 @@ export const getCryptoIntelligence = createServerFn({ method: "GET" }).handler(a
   const [globalResult, fearResult, fundingResult, oiResult] = await Promise.allSettled([
     requestJson<CoinGeckoGlobalResponse>("https://api.coingecko.com/api/v3/global"),
     requestJson<FearGreedResponse>("https://api.alternative.me/fng/?limit=1"),
-    requestJson<PremiumIndexResponse>("https://dapi.binance.com/dapi/v1/premiumIndex?symbol=BTCUSD_PERP"),
-    requestJson<OpenInterestResponse>("https://dapi.binance.com/dapi/v1/openInterest?symbol=BTCUSD_PERP"),
+    requestJson<BybitFundingResponse>("https://api.bybit.com/v5/market/funding/history?category=linear&symbol=BTCUSDT&limit=1"),
+    requestJson<BybitOpenInterestResponse>("https://api.bybit.com/v5/market/open-interest?category=linear&symbol=BTCUSDT&intervalTime=5min&limit=1"),
   ]);
 
   const btcDominance =
@@ -47,13 +52,19 @@ export const getCryptoIntelligence = createServerFn({ method: "GET" }).handler(a
   const fearRow = fearResult.status === "fulfilled" ? fearResult.value.data?.[0] : undefined;
   const fearGreed = finite(fearRow?.value);
 
-  const fundingRate =
-    fundingResult.status === "fulfilled" ? finite(fundingResult.value.lastFundingRate) : null;
-  const nextFundingTime =
-    fundingResult.status === "fulfilled" ? finite(fundingResult.value.nextFundingTime) : null;
+  const fundingRow =
+    fundingResult.status === "fulfilled" && fundingResult.value.retCode === 0
+      ? fundingResult.value.result?.list?.[0]
+      : undefined;
+  const fundingRate = finite(fundingRow?.fundingRate);
+  const fundingTimestamp = finite(fundingRow?.fundingRateTimestamp);
 
-  const openInterest =
-    oiResult.status === "fulfilled" ? finite(oiResult.value.openInterest) : null;
+  const oiRow =
+    oiResult.status === "fulfilled" && oiResult.value.retCode === 0
+      ? oiResult.value.result?.list?.[0]
+      : undefined;
+  const openInterest = finite(oiRow?.openInterest);
+  const openInterestTimestamp = finite(oiRow?.timestamp);
 
   return {
     btcDominance,
@@ -61,13 +72,14 @@ export const getCryptoIntelligence = createServerFn({ method: "GET" }).handler(a
     fearGreedLabel: fearRow?.value_classification ?? null,
     fundingRatePercent: fundingRate == null ? null : fundingRate * 100,
     openInterest,
-    nextFundingTime,
+    nextFundingTime: null,
+    fundingTimestamp,
+    openInterestTimestamp,
     updatedAt: new Date().toISOString(),
     sources: {
       dominance: globalResult.status === "fulfilled" ? "CoinGecko" : null,
       sentiment: fearResult.status === "fulfilled" ? "Alternative.me" : null,
-      derivatives:
-        fundingResult.status === "fulfilled" || oiResult.status === "fulfilled" ? "Binance COIN-M Futures" : null,
+      derivatives: fundingRate != null || openInterest != null ? "Bybit V5 · BTCUSDT perpetual" : null,
     },
   };
 });
