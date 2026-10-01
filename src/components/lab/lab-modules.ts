@@ -7,7 +7,7 @@ export type LabModule = {
   topics: string[];
   status: "available" | "in-development";
   group: "core" | "command";
-  to?: "/lab/circuit-builder" | "/lab/entanglement" | "/lab/qaoa" | "/lab/vqe" | "/lab/portfolio" | "/lab/arena" | "/lab/assistant" | "/lab/qml" | "/lab/reports" | "/lab/ibm" | "/lab/finance" | "/lab/benchmark" | "/lab/history" | "/lab/snapshot" | "/lab/qiskit" | "/lab/python" | "/lab/blockchain";
+  to?: "/lab/circuit-builder" | "/lab/entanglement" | "/lab/qaoa" | "/lab/vqe" | "/lab/portfolio" | "/lab/arena" | "/lab/assistant" | "/lab/qml" | "/lab/reports" | "/lab/ibm" | "/lab/finance" | "/lab/benchmark" | "/lab/history" | "/lab/snapshot" | "/lab/qiskit" | "/lab/python" | "/lab/blockchain" | "/lab/crypto-intelligence";
 };
 
 export const LAB_MODULES: LabModule[] = [
@@ -97,5 +97,10 @@ export const LAB_MODULES: LabModule[] = [
     id: "blockchain", index: "C11", title: "Blockchain Research Lab", group: "command",
     summary: "Block builder, proof-of-work mining, Merkle trees, ECDSA sign/verify with ephemeral browser-only keys, sample on-chain analytics and a quantum-threat / post-quantum panel.",
     topics: ["SHA-256", "Merkle root", "ECDSA", "On-chain metrics", "Post-quantum"], status: "available", to: "/lab/blockchain",
+  },
+  {
+    id: "crypto-intelligence", index: "C12", title: "Crypto Intelligence", group: "command",
+    summary: "Dedicated Bitcoin and crypto research workspace for network activity, on-chain intelligence, mining revenue, market/network charts, transparent health scoring and AI-assisted analysis.",
+    topics: ["Bitcoin network", "On-chain", "Mining revenue", "Market intelligence", "AI analyst"], status: "available", to: "/lab/crypto-intelligence",
   },
 ];
