@@ -41,7 +41,6 @@ export function CryptoIntelligencePanel() {
   const fearGreed = data?.fearGreed ?? null;
   const fundingRate = data?.fundingRatePercent ?? null;
   const openInterest = data?.openInterest ?? null;
-  const nextFundingTime = data?.nextFundingTime ?? null;
 
   return (
     <section className="mb-6 rounded-md border border-border bg-card p-4 sm:p-5" aria-labelledby="crypto-intelligence-heading">
@@ -89,13 +88,12 @@ export function CryptoIntelligencePanel() {
           <div className="mt-3 font-mono text-xl font-semibold tabular-nums">
             {loading && !data ? "Loading…" : fundingRate == null ? "—" : `${fundingRate >= 0 ? "+" : ""}${fundingRate.toFixed(4)}%`}
           </div>
-          <p className="mt-2 text-xs text-muted-foreground">Latest BTCUSD perpetual funding rate.</p>
+          <p className="mt-2 text-xs text-muted-foreground">Latest settled BTCUSDT perpetual funding rate.</p>
           <div className="mt-3 text-xs">
             <span className="text-muted-foreground">Open interest </span>
-            <span className="font-mono">{openInterest == null ? "—" : `${openInterest.toLocaleString("en-US")} contracts`}</span>
+            <span className="font-mono">{openInterest == null ? "—" : `${openInterest.toLocaleString("en-US", { maximumFractionDigits: 2 })} BTC`}</span>
           </div>
-          {nextFundingTime ? <div className="mt-2 text-[10px] text-muted-foreground">Next funding {new Date(nextFundingTime).toLocaleString()}</div> : null}
-          <div className="mt-3 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Source: Binance COIN-M Futures · server feed</div>
+          <div className="mt-3 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Source: Bybit V5 · BTCUSDT perpetual · server feed</div>
         </article>
       </div>
 
