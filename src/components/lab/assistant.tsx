@@ -16,6 +16,7 @@ type Msg = ChatTurn & {
   mode: AssistantMode;
   source?: "ai" | "demo";
   circuitRaw?: string | null;
+  sources?: Array<{ title: string; url: string }>;
   error?: boolean;
 };
 
@@ -104,6 +105,7 @@ export function ResearchAssistant() {
           mode,
           content: reply.answer,
           source: "ai",
+          sources: reply.sources ?? [],
           circuitRaw: reply.circuitRaw ?? null,
         },
       ]);
@@ -271,6 +273,31 @@ function MessageView({ m }: { m: Msg }) {
         </span>
         <p className="whitespace-pre-wrap">{m.content}</p>
       </div>
+      {m.mode === "research" && m.sources?.length ? (
+        <div className="rounded-md border border-primary/30 bg-surface px-3 py-3">
+          <p className="mb-2 font-mono text-[10px] uppercase tracking-wide text-primary">Sources</p>
+          <ol className="space-y-2 text-xs">
+            {m.sources.map((source, index) => (
+              <li key={source.url} className="flex gap-2">
+                <span className="shrink-0 font-mono text-muted-foreground">{index + 1}.</span>
+                <a
+                  href={source.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="min-w-0 break-all text-primary underline-offset-2 hover:underline"
+                >
+                  {source.title}
+                </a>
+              </li>
+            ))}
+          </ol>
+        </div>
+      ) : null}
+      {m.mode === "research" && !m.sources?.length ? (
+        <div className="rounded-md border border-amber/30 px-3 py-2 text-xs text-muted-foreground">
+          No web sources were returned for this research response.
+        </div>
+      ) : null}
       {m.circuitRaw ? <ProposalCard raw={m.circuitRaw} /> : null}
     </div>
   );
