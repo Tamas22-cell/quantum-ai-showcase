@@ -31,7 +31,7 @@ function Page() {
           Compose a circuit from the gate palette. The statevector is recomputed exactly after every edit; shot sampling draws from that exact distribution with a seeded random generator.
         </p>
       </div>
-      <div className="mb-5">
+      <div className="mb-5" data-feature="bloch-sphere">
         <BlochSphereVisualizer />
       </div>
       <Suspense fallback={<div className="h-96 animate-pulse rounded-md border border-border bg-card" aria-label="Loading simulator" />}>
