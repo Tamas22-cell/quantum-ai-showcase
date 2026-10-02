@@ -48,7 +48,7 @@ export const getWhaleFlow = createServerFn({ method: "GET" }).handler(async () =
     const pages: TxDetail[] = [];
     for (let start = 0; start < MAX_BLOCK_TXS; start += 25) {
       try {
-        const batch = await mempoolJson<TxDetail[]>(`/v1/block/${block.id}/txs/${start}`);
+        const batch = await mempoolJson<TxDetail[]>(`/block/${block.id}/txs/${start}`);
         pages.push(...batch);
         if (batch.length < 25) break;
       } catch { break; }
