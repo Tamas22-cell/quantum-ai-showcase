@@ -1,10 +1,12 @@
 import { createServerFn } from "@tanstack/react-start";
 
+type RecentTx = { txid?: string; fee?: number; vsize?: number; value?: number };
 type TxOutput = { value?: number };
-type RecentTx = { txid?: string; fee?: number; vsize?: number; value?: number; outputs?: TxOutput[] };
+type TxDetail = { txid?: string; fee?: number; weight?: number; vout?: TxOutput[] };
 type PriceResponse = { USD?: number };
 
 const WHALE_THRESHOLD_BTC = 10;
+const DETAIL_SAMPLE_SIZE = 10;
 
 async function mempoolJson<T>(path: string): Promise<T> {
   const r = await fetch(`https://mempool.space/api${path}`, {
@@ -14,33 +16,33 @@ async function mempoolJson<T>(path: string): Promise<T> {
   return r.json() as Promise<T>;
 }
 
-function txValueSats(t: RecentTx) {
-  if (Array.isArray(t.outputs)) {
-    return t.outputs.reduce((sum, output) => sum + (typeof output.value === "number" ? output.value : 0), 0);
-  }
-  return typeof t.value === "number" ? t.value : 0;
-}
-
 export const getWhaleFlow = createServerFn({ method: "GET" }).handler(async () => {
-  const [txResult, priceResult] = await Promise.allSettled([
+  const [recentResult, priceResult] = await Promise.allSettled([
     mempoolJson<RecentTx[]>("/mempool/recent"),
     mempoolJson<PriceResponse>("/v1/prices"),
   ]);
 
-  const txs = txResult.status === "fulfilled" ? txResult.value : [];
+  const recent = recentResult.status === "fulfilled" ? recentResult.value : [];
   const btcUsd = priceResult.status === "fulfilled" && typeof priceResult.value.USD === "number"
     ? priceResult.value.USD
     : null;
 
-  const mapped = txs.map((t) => {
-    const valueBtc = txValueSats(t) / 100_000_000;
-    return {
+  const txids = recent.map((t) => t.txid).filter((id): id is string => Boolean(id)).slice(0, DETAIL_SAMPLE_SIZE);
+  const details = await Promise.allSettled(txids.map((id) => mempoolJson<TxDetail>(`/tx/${id}`)));
+
+  const mapped = details.flatMap((result) => {
+    if (result.status !== "fulfilled") return [];
+    const t = result.value;
+    const valueSats = (t.vout ?? []).reduce((sum, output) => sum + (typeof output.value === "number" ? output.value : 0), 0);
+    const valueBtc = valueSats / 100_000_000;
+    const vsize = typeof t.weight === "number" && t.weight > 0 ? t.weight / 4 : null;
+    return [{
       txid: t.txid ?? "",
       valueBtc,
       valueUsd: btcUsd == null ? null : valueBtc * btcUsd,
-      feeRate: t.fee && t.vsize ? t.fee / t.vsize : null,
+      feeRate: typeof t.fee === "number" && vsize ? t.fee / vsize : null,
       isWhale: valueBtc >= WHALE_THRESHOLD_BTC,
-    };
+    }];
   });
 
   const ranked = [...mapped].sort((a, b) => b.valueBtc - a.valueBtc);
@@ -59,6 +61,6 @@ export const getWhaleFlow = createServerFn({ method: "GET" }).handler(async () =
     btcUsd,
     largest: ranked.slice(0, 6),
     updatedAt: new Date().toISOString(),
-    methodology: "Large-transfer detector over the latest public Bitcoin mempool transaction sample. Transaction value is calculated from transaction outputs. It does not classify exchange wallets and must not be interpreted as exchange inflow/outflow.",
+    methodology: "Large-transfer detector over detailed public Bitcoin mempool transactions. Output values are read from each transaction's vout data. It does not classify exchange wallets and must not be interpreted as exchange inflow/outflow.",
   };
 });
