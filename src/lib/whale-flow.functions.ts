@@ -1,67 +1,70 @@
 import { createServerFn } from "@tanstack/react-start";
 
-type RecentTx = {
-  txid?: string;
-  fee?: number;
-  vsize?: number;
-  value?: number;
-};
+type RecentTx = { txid?: string; fee?: number; vsize?: number; value?: number };
+type Block = { id?: string; height?: number };
+type TxOutput = { value?: number };
+type TxDetail = { txid?: string; fee?: number; weight?: number; vout?: TxOutput[] };
 type PriceResponse = { USD?: number };
 
 const WHALE_THRESHOLD_BTC = 10;
+const BLOCK_COUNT = 2;
+const MAX_BLOCK_TXS = 120;
 
 async function mempoolJson<T>(path: string): Promise<T> {
   const r = await fetch(`https://mempool.space/api${path}`, {
-    headers: {
-      accept: "application/json",
-      "user-agent": "quantum-ai-showcase/1.0",
-    },
+    headers: { accept: "application/json", "user-agent": "quantum-ai-showcase/1.0" },
   });
   if (!r.ok) throw new Error(`mempool.space returned ${r.status}`);
   return r.json() as Promise<T>;
 }
 
+function mapTx(t: RecentTx | TxDetail, btcUsd: number | null) {
+  let sats: number | null = null;
+  if ("value" in t && typeof t.value === "number") sats = t.value;
+  if ("vout" in t && Array.isArray(t.vout)) {
+    sats = t.vout.reduce((sum, output) => sum + (typeof output.value === "number" ? output.value : 0), 0);
+  }
+  if (!t.txid || sats == null || sats <= 0) return null;
+  const valueBtc = sats / 100_000_000;
+  const vsize = "vsize" in t && typeof t.vsize === "number" ? t.vsize : ("weight" in t && typeof t.weight === "number" ? t.weight / 4 : null);
+  const feeRate = typeof t.fee === "number" && vsize && vsize > 0 ? t.fee / vsize : null;
+  return { txid: t.txid, valueBtc, valueUsd: btcUsd == null ? null : valueBtc * btcUsd, feeRate, isWhale: valueBtc >= WHALE_THRESHOLD_BTC };
+}
+
 export const getWhaleFlow = createServerFn({ method: "GET" }).handler(async () => {
-  const [recentResult, priceResult] = await Promise.allSettled([
+  const [recentResult, priceResult, blocksResult] = await Promise.allSettled([
     mempoolJson<RecentTx[]>("/mempool/recent"),
     mempoolJson<PriceResponse>("/v1/prices"),
+    mempoolJson<Block[]>("/v1/blocks"),
   ]);
 
-  if (recentResult.status !== "fulfilled") {
-    throw new Error("Unable to load recent Bitcoin mempool transactions");
-  }
+  const btcUsd = priceResult.status === "fulfilled" && typeof priceResult.value.USD === "number" ? priceResult.value.USD : null;
+  const recent = recentResult.status === "fulfilled" ? recentResult.value : [];
+  const recentMapped = recent.map(t => mapTx(t, btcUsd)).filter((t): t is NonNullable<ReturnType<typeof mapTx>> => t !== null);
 
-  const recent = recentResult.value;
-  const btcUsd =
-    priceResult.status === "fulfilled" && typeof priceResult.value.USD === "number"
-      ? priceResult.value.USD
-      : null;
+  const blocks = blocksResult.status === "fulfilled" ? blocksResult.value.slice(0, BLOCK_COUNT) : [];
+  const blockTxResults = await Promise.allSettled(blocks.map(async block => {
+    if (!block.id) return [] as TxDetail[];
+    const pages: TxDetail[] = [];
+    for (let start = 0; start < MAX_BLOCK_TXS; start += 25) {
+      try {
+        const batch = await mempoolJson<TxDetail[]>(`/v1/block/${block.id}/txs/${start}`);
+        pages.push(...batch);
+        if (batch.length < 25) break;
+      } catch { break; }
+    }
+    return pages;
+  }));
 
-  // /mempool/recent already exposes each transaction's transferred output value
-  // in satoshis. Using it directly avoids a burst of per-TX detail requests that
-  // can be rate-limited and previously caused an empty sample / all-zero metrics.
-  const mapped = recent.flatMap((t) => {
-    if (!t.txid || typeof t.value !== "number" || t.value <= 0) return [];
+  const blockMapped = blockTxResults.flatMap(r => r.status === "fulfilled" ? r.value : []).map(t => mapTx(t, btcUsd)).filter((t): t is NonNullable<ReturnType<typeof mapTx>> => t !== null);
+  const unique = new Map<string, NonNullable<ReturnType<typeof mapTx>>>();
+  [...recentMapped, ...blockMapped].forEach(t => unique.set(t.txid, t));
+  const mapped = [...unique.values()];
 
-    const valueBtc = t.value / 100_000_000;
-    const feeRate =
-      typeof t.fee === "number" && typeof t.vsize === "number" && t.vsize > 0
-        ? t.fee / t.vsize
-        : null;
-
-    return [
-      {
-        txid: t.txid,
-        valueBtc,
-        valueUsd: btcUsd == null ? null : valueBtc * btcUsd,
-        feeRate,
-        isWhale: valueBtc >= WHALE_THRESHOLD_BTC,
-      },
-    ];
-  });
+  if (!mapped.length) throw new Error("Unable to load Bitcoin transaction sample");
 
   const ranked = [...mapped].sort((a, b) => b.valueBtc - a.valueBtc);
-  const whales = ranked.filter((t) => t.isWhale);
+  const whales = ranked.filter(t => t.isWhale);
   const whaleVolumeBtc = whales.reduce((sum, t) => sum + t.valueBtc, 0);
   const totalSampleBtc = mapped.reduce((sum, t) => sum + t.valueBtc, 0);
 
@@ -72,12 +75,10 @@ export const getWhaleFlow = createServerFn({ method: "GET" }).handler(async () =
     whaleVolumeBtc,
     whaleVolumeUsd: btcUsd == null ? null : whaleVolumeBtc * btcUsd,
     totalSampleBtc,
-    whaleSharePct:
-      totalSampleBtc > 0 ? (whaleVolumeBtc / totalSampleBtc) * 100 : null,
+    whaleSharePct: totalSampleBtc > 0 ? (whaleVolumeBtc / totalSampleBtc) * 100 : null,
     btcUsd,
     largest: ranked.slice(0, 6),
     updatedAt: new Date().toISOString(),
-    methodology:
-      "Large-transfer detector over the latest public Bitcoin mempool sample. Transfer values come directly from mempool.space recent-transaction output totals. It does not classify exchange wallets and must not be interpreted as exchange inflow/outflow.",
+    methodology: `Large-transfer detector using the live mempool plus up to ${BLOCK_COUNT} recent Bitcoin blocks. The ≥${WHALE_THRESHOLD_BTC} BTC threshold is applied to transaction output totals. Exchange wallets are not attributed.`,
   };
 });
