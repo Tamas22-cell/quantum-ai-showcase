@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { getMiningPools } from "@/lib/mining-pools.functions";
 
 type Pool = { name: string; share: number; blocks: number };
 
