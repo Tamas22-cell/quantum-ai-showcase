@@ -14,7 +14,7 @@ export function ExchangeFlowPanel() {
           <div className="mt-1 flex min-w-0 flex-wrap items-center gap-2 sm:gap-3">
             <h2 className="min-w-0 break-words text-xl font-semibold">Exchange Flow Intelligence</h2>
             <span className="shrink-0 rounded-sm border border-amber-500/40 bg-amber-500/5 px-2 py-1 font-mono text-[9px] uppercase tracking-wider text-amber-500">
-              SOURCE REQUIRED
+              ATTRIBUTION PENDING
             </span>
           </div>
           <p className="mt-2 max-w-3xl break-words text-xs leading-5 text-muted-foreground">
@@ -29,7 +29,7 @@ export function ExchangeFlowPanel() {
               <ShieldCheck className="size-4 text-amber-500" aria-hidden="true" />
             </div>
             <div className="min-w-0 flex-1">
-              <h3 className="break-words text-sm font-semibold">No verified exchange attribution data</h3>
+              <h3 className="break-words text-sm font-semibold">Exchange attribution source pending</h3>
               <p className="mt-1 break-words text-xs leading-5 text-muted-foreground">
                 This module will remain in research mode until a provider with labeled exchange-wallet
                 clusters is connected. The dashboard will not estimate or infer exchange flows.
