@@ -9,7 +9,7 @@ export const getMiningPools = createServerFn({ method: "GET" }).handler(async ()
   if (!r.ok) throw new Error(`mempool.space returned ${r.status}`);
   const data = await r.json();
   const rows = Array.isArray(data) ? data : Array.isArray(data?.pools) ? data.pools : [];
-  const totalBlocks = rows.reduce((sum: number, p: any) => sum + Number(p.blockCount ?? p.blocksFound ?? p.blocks ?? 0), 0);
+  const totalBlocks = Number(data?.blockCount) || rows.reduce((sum: number, p: any) => sum + Number(p.blockCount ?? p.blocksFound ?? p.blocks ?? 0), 0);
   return rows.slice(0, 8).map((p: any) => ({
     name: p.name ?? p.slug ?? p.poolName ?? "Unknown pool",
     blocks: Number(p.blockCount ?? p.blocksFound ?? p.blocks ?? 0),
