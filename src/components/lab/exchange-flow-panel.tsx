@@ -8,9 +8,9 @@ export function ExchangeFlowPanel() {
     >
       <div className="min-w-0">
         <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-primary">
-          EXCHANGE FLOW
+          LIVE MINING NETWORK
         </div>
-        <h2 className="mt-1 text-xl font-semibold">Exchange Flow Intelligence</h2>
+        <h2 className="mt-1 text-xl font-semibold">Bitcoin Mining Pool Distribution</h2>
         <p className="mt-1 max-w-3xl text-xs leading-5 text-muted-foreground">
           Exchange inflow, outflow and net-flow research. Values are displayed only when the required
           exchange-wallet data feed is available.
@@ -20,28 +20,28 @@ export function ExchangeFlowPanel() {
       <div className="mt-4 grid w-full grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
         <FlowMetric
           icon={ArrowDownToLine}
-          label="Exchange Inflow"
-          description="BTC moving into exchange wallets"
+          label="Blocks Mined"
+          description="Recent blocks found by known pools"
         />
         <FlowMetric
           icon={ArrowUpFromLine}
-          label="Exchange Outflow"
-          description="BTC moving out of exchange wallets"
+          label="Pool Share"
+          description="Share of blocks found"
         />
         <FlowMetric
           icon={Minus}
-          label="Net Flow"
-          description="Inflow minus outflow"
+          label="Top Pool"
+          description="Highest block share"
         />
       </div>
 
       <div className="mt-3 grid w-full grid-cols-1 gap-3 lg:grid-cols-2">
         <div className="min-w-0 rounded-md border border-border bg-background p-4">
           <div className="font-mono text-[10px] uppercase tracking-wider text-primary">
-            MARKET INTERPRETATION
+            NETWORK INTERPRETATION
           </div>
           <p className="mt-2 text-xs leading-5 text-muted-foreground">
-            Awaiting exchange-flow data. No market signal is generated while this feed is unavailable.
+            Mining-pool distribution is calculated from recent public Bitcoin blocks.
           </p>
         </div>
 
