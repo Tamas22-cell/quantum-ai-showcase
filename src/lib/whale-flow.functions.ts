@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 
-type RecentTx = { txid?: string; fee?: number; vsize?: number; value?: number };
+type TxOutput = { value?: number };
+type RecentTx = { txid?: string; fee?: number; vsize?: number; value?: number; outputs?: TxOutput[] };
 type PriceResponse = { USD?: number };
 
 const WHALE_THRESHOLD_BTC = 10;
@@ -11,6 +12,13 @@ async function mempoolJson<T>(path: string): Promise<T> {
   });
   if (!r.ok) throw new Error(`mempool.space returned ${r.status}`);
   return r.json() as Promise<T>;
+}
+
+function txValueSats(t: RecentTx) {
+  if (Array.isArray(t.outputs)) {
+    return t.outputs.reduce((sum, output) => sum + (typeof output.value === "number" ? output.value : 0), 0);
+  }
+  return typeof t.value === "number" ? t.value : 0;
 }
 
 export const getWhaleFlow = createServerFn({ method: "GET" }).handler(async () => {
@@ -25,7 +33,7 @@ export const getWhaleFlow = createServerFn({ method: "GET" }).handler(async () =
     : null;
 
   const mapped = txs.map((t) => {
-    const valueBtc = typeof t.value === "number" ? t.value / 100_000_000 : 0;
+    const valueBtc = txValueSats(t) / 100_000_000;
     return {
       txid: t.txid ?? "",
       valueBtc,
@@ -35,7 +43,8 @@ export const getWhaleFlow = createServerFn({ method: "GET" }).handler(async () =
     };
   });
 
-  const whales = mapped.filter((t) => t.isWhale).sort((a, b) => b.valueBtc - a.valueBtc);
+  const ranked = [...mapped].sort((a, b) => b.valueBtc - a.valueBtc);
+  const whales = ranked.filter((t) => t.isWhale);
   const whaleVolumeBtc = whales.reduce((sum, t) => sum + t.valueBtc, 0);
   const totalSampleBtc = mapped.reduce((sum, t) => sum + t.valueBtc, 0);
 
@@ -48,8 +57,8 @@ export const getWhaleFlow = createServerFn({ method: "GET" }).handler(async () =
     totalSampleBtc,
     whaleSharePct: totalSampleBtc > 0 ? (whaleVolumeBtc / totalSampleBtc) * 100 : null,
     btcUsd,
-    largest: whales.slice(0, 6),
+    largest: ranked.slice(0, 6),
     updatedAt: new Date().toISOString(),
-    methodology: "Large-transfer detector over the latest public Bitcoin mempool transaction sample. It does not classify exchange wallets and must not be interpreted as exchange inflow/outflow.",
+    methodology: "Large-transfer detector over the latest public Bitcoin mempool transaction sample. Transaction value is calculated from transaction outputs. It does not classify exchange wallets and must not be interpreted as exchange inflow/outflow.",
   };
 });
