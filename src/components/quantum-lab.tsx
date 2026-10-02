@@ -1,242 +1,134 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-/** Complex number helpers for single-qubit state simulation. */
-type C = { re: number; im: number };
-const c = (re: number, im = 0): C => ({ re, im });
-const add = (a: C, b: C): C => c(a.re + b.re, a.im + b.im);
-const mul = (a: C, b: C): C => c(a.re * b.re - a.im * b.im, a.re * b.im + a.im * b.re);
-const abs2 = (a: C) => a.re * a.re + a.im * a.im;
+type Basis = "X" | "Y" | "Z";
+type Vec = { x: number; y: number; z: number };
 
-type State = [C, C];
-type Gate = "H" | "X" | "Y" | "Z";
-const S = Math.SQRT1_2;
+const PRESETS: { label: string; ket: string; v: Vec }[] = [
+  { label: "|0⟩", ket: "|0⟩", v: { x: 0, y: 0, z: 1 } },
+  { label: "|1⟩", ket: "|1⟩", v: { x: 0, y: 0, z: -1 } },
+  { label: "|+⟩", ket: "(|0⟩ + |1⟩)/√2", v: { x: 1, y: 0, z: 0 } },
+  { label: "|−⟩", ket: "(|0⟩ − |1⟩)/√2", v: { x: -1, y: 0, z: 0 } },
+  { label: "|+i⟩", ket: "(|0⟩ + i|1⟩)/√2", v: { x: 0, y: 1, z: 0 } },
+  { label: "|−i⟩", ket: "(|0⟩ − i|1⟩)/√2", v: { x: 0, y: -1, z: 0 } },
+];
 
-/** 2x2 unitary matrices for each gate. */
-const GATES: Record<Gate, [[C, C], [C, C]]> = {
-  H: [[c(S), c(S)], [c(S), c(-S)]],
-  X: [[c(0), c(1)], [c(1), c(0)]],
-  Y: [[c(0), c(0, -1)], [c(0, 1), c(0)]],
-  Z: [[c(1), c(0)], [c(0), c(-1)]],
-};
-const GATE_INFO: Record<Gate, string> = {
-  H: "Hadamard — creates superposition",
-  X: "Pauli-X — bit flip (π about X)",
-  Y: "Pauli-Y — π rotation about Y",
-  Z: "Pauli-Z — phase flip (π about Z)",
+const axis: Record<Basis, Vec> = {
+  X: { x: 1, y: 0, z: 0 },
+  Y: { x: 0, y: 1, z: 0 },
+  Z: { x: 0, y: 0, z: 1 },
 };
 
-const apply = (g: Gate, [a, b]: State): State => {
-  const m = GATES[g];
-  return [add(mul(m[0][0], a), mul(m[0][1], b)), add(mul(m[1][0], a), mul(m[1][1], b))];
-};
+function dot(a: Vec, b: Vec) {
+  return a.x * b.x + a.y * b.y + a.z * b.z;
+}
 
-/** Bloch vector from amplitudes (global phase invariant). */
-const bloch = ([a, b]: State) => {
-  const ab = mul(c(a.re, -a.im), b);
-  return { x: 2 * ab.re, y: 2 * ab.im, z: abs2(a) - abs2(b) };
-};
-
-const fmt = (z: C) => {
-  const r = (v: number) => (Math.abs(v) < 1e-9 ? 0 : v).toFixed(3);
-  if (Math.abs(z.im) < 1e-9) return r(z.re);
-  if (Math.abs(z.re) < 1e-9) return `${r(z.im)}i`;
-  return `${r(z.re)} ${z.im < 0 ? "−" : "+"} ${Math.abs(z.im).toFixed(3)}i`;
-};
-
-const INITIAL: State = [c(1), c(0)];
-const SIZE = 320;
-const R = 120;
-
-/** Interactive Bloch sphere rendered as a rotatable orthographic SVG projection. */
-function BlochSphere({ v }: { v: { x: number; y: number; z: number } }) {
-  const [rot, setRot] = useState({ yaw: -0.6, pitch: 0.35 });
-  const drag = useRef<{ x: number; y: number } | null>(null);
-  // Render the projected sphere client-side only: trig floats differ between server and browser.
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-
-  // Physics convention (z up) -> screen: rotate by yaw about z, then pitch about screen x.
-  const project = useCallback(
-    (x: number, y: number, z: number) => {
-      const cy = Math.cos(rot.yaw), sy = Math.sin(rot.yaw);
-      const x1 = x * cy - y * sy;
-      const y1 = x * sy + y * cy; // depth axis before pitch
-      const cp = Math.cos(rot.pitch), sp = Math.sin(rot.pitch);
-      const depth = y1 * cp - z * sp;
-      const up = y1 * sp + z * cp;
-      // Round to avoid SSR/client float mismatches during hydration.
-      return { sx: Math.round((SIZE / 2 + x1 * R) * 100) / 100, sy: Math.round((SIZE / 2 - up * R) * 100) / 100, d: depth };
-    },
-    [rot],
-  );
-
-  const circle = (fn: (t: number) => [number, number, number]) => {
-    const pts = Array.from({ length: 73 }, (_, i) => project(...fn((i / 72) * Math.PI * 2)));
-    const back: string[] = [], front: string[] = [];
-    for (let i = 1; i < pts.length; i++) {
-      const a = pts[i - 1]!, b = pts[i]!;
-      const seg = `M${a.sx},${a.sy}L${b.sx},${b.sy}`;
-      (b.d > 0 ? back : front).push(seg);
-    }
-    return { back: back.join(""), front: front.join("") };
+function project(v: Vec) {
+  const cx = 160, cy = 160, r = 112;
+  return {
+    x: cx + r * (0.86 * v.x - 0.5 * v.y),
+    y: cy + r * (0.34 * v.x + 0.58 * v.y - v.z),
   };
+}
 
-  const rings = [
-    circle((t) => [Math.cos(t), Math.sin(t), 0]),
-    circle((t) => [Math.cos(t), 0, Math.sin(t)]),
-    circle((t) => [0, Math.cos(t), Math.sin(t)]),
-  ];
-  const axes: { p: [number, number, number]; label: string }[] = [
-    { p: [0, 0, 1], label: "|0⟩" }, { p: [0, 0, -1], label: "|1⟩" },
-    { p: [1, 0, 0], label: "+x" }, { p: [0, 1, 0], label: "+y" },
-  ];
-  const o = project(0, 0, 0);
-  const tip = project(v.x, v.y, v.z);
-
-  const onDown = (e: React.PointerEvent) => {
-    (e.target as Element).setPointerCapture?.(e.pointerId);
-    drag.current = { x: e.clientX, y: e.clientY };
-  };
-  const onMove = (e: React.PointerEvent) => {
-    if (!drag.current) return;
-    const dx = e.clientX - drag.current.x, dy = e.clientY - drag.current.y;
-    drag.current = { x: e.clientX, y: e.clientY };
-    setRot((r) => ({ yaw: r.yaw - dx * 0.01, pitch: Math.max(-1.4, Math.min(1.4, r.pitch + dy * 0.01)) }));
-  };
-
-  if (!mounted) return <div className="aspect-square w-full max-w-[420px]" aria-hidden="true" />;
+function MeasurementSphere({ state, basis }: { state: Vec; basis: Basis }) {
+  const p = project(state);
+  const a = project(axis[basis]);
+  const n = project({ x: -axis[basis].x, y: -axis[basis].y, z: -axis[basis].z });
   return (
-    <svg
-      viewBox={`0 0 ${SIZE} ${SIZE}`}
-      className="h-auto w-full max-w-[420px] cursor-grab touch-none select-none active:cursor-grabbing"
-      role="img"
-      aria-label={`Bloch sphere. State vector x ${v.x.toFixed(2)}, y ${v.y.toFixed(2)}, z ${v.z.toFixed(2)}. Drag to rotate.`}
-      onPointerDown={onDown}
-      onPointerMove={onMove}
-      onPointerUp={() => (drag.current = null)}
-      onPointerCancel={() => (drag.current = null)}
-      tabIndex={0}
-      onKeyDown={(e) => {
-        // Arrow keys rotate the sphere for keyboard users.
-        const k: Record<string, [number, number]> = { ArrowLeft: [0.15, 0], ArrowRight: [-0.15, 0], ArrowUp: [0, -0.15], ArrowDown: [0, 0.15] };
-        const d = k[e.key];
-        if (!d) return;
-        e.preventDefault();
-        setRot((r) => ({ yaw: r.yaw + d[0], pitch: Math.max(-1.4, Math.min(1.4, r.pitch + d[1])) }));
-      }}
-      focusable="true"
-      style={{ outline: "none" }}
-    >
+    <svg viewBox="0 0 320 320" className="h-auto w-full max-w-[420px]" role="img" aria-label={`Quantum state measured in the ${basis} basis`}>
       <defs>
-        <radialGradient id="bloch-fill" cx="40%" cy="35%">
-          <stop offset="0%" stopColor="var(--primary)" stopOpacity="0.18" />
-          <stop offset="100%" stopColor="var(--primary)" stopOpacity="0.02" />
+        <radialGradient id="measurementGlow" cx="42%" cy="34%" r="70%">
+          <stop offset="0" stopColor="var(--primary)" stopOpacity=".18" />
+          <stop offset="1" stopColor="var(--primary)" stopOpacity=".02" />
         </radialGradient>
       </defs>
-      <circle cx={SIZE / 2} cy={SIZE / 2} r={R} fill="url(#bloch-fill)" stroke="var(--primary)" strokeOpacity="0.45" />
-      {rings.map((r, i) => <path key={`b${i}`} d={r.back} stroke="var(--primary)" strokeOpacity="0.15" strokeDasharray="3 4" fill="none" />)}
-      {rings.map((r, i) => <path key={`f${i}`} d={r.front} stroke="var(--primary)" strokeOpacity="0.4" fill="none" />)}
-      {axes.map(({ p, label }) => {
-        const a = project(...p);
-        const l = project(p[0] * 1.2, p[1] * 1.2, p[2] * 1.2);
-        return (
-          <g key={label}>
-            <line x1={o.sx} y1={o.sy} x2={a.sx} y2={a.sy} stroke="var(--muted-foreground)" strokeOpacity="0.4" />
-            <text x={l.sx} y={l.sy} fill="var(--muted-foreground)" fontSize="11" fontFamily="IBM Plex Mono, monospace" textAnchor="middle" dominantBaseline="middle">{label}</text>
-          </g>
-        );
-      })}
-      <line x1={o.sx} y1={o.sy} x2={tip.sx} y2={tip.sy} stroke="var(--primary)" strokeWidth="3" strokeLinecap="round" style={{ transition: "all 400ms ease" }} />
-      <circle cx={tip.sx} cy={tip.sy} r="7" fill="var(--primary)" style={{ transition: "all 400ms ease", filter: "drop-shadow(0 0 6px var(--primary))" }} />
-      <circle cx={o.sx} cy={o.sy} r="2.5" fill="var(--foreground)" />
+      <circle cx="160" cy="160" r="112" fill="url(#measurementGlow)" stroke="var(--primary)" strokeOpacity=".55" strokeWidth="1.5" />
+      <ellipse cx="160" cy="160" rx="112" ry="42" fill="none" stroke="var(--primary)" strokeOpacity=".25" strokeDasharray="4 5" />
+      <ellipse cx="160" cy="160" rx="42" ry="112" fill="none" stroke="var(--primary)" strokeOpacity=".2" strokeDasharray="4 5" transform="rotate(-30 160 160)" />
+      <line x1={n.x} y1={n.y} x2={a.x} y2={a.y} stroke="var(--muted-foreground)" strokeOpacity=".65" strokeWidth="2" strokeDasharray="5 5" />
+      <text x={a.x + 5} y={a.y - 7} fill="var(--primary)" fontSize="11">+{basis}</text>
+      <text x={n.x + 5} y={n.y + 14} fill="var(--muted-foreground)" fontSize="11">−{basis}</text>
+      <line x1="160" y1="160" x2={p.x} y2={p.y} stroke="var(--primary)" strokeWidth="3" />
+      <circle cx={p.x} cy={p.y} r="7" fill="var(--primary)" style={{ filter: "drop-shadow(0 0 6px var(--primary))" }} />
+      <circle cx="160" cy="160" r="3" fill="var(--foreground)" />
     </svg>
   );
 }
 
 export function QuantumLab() {
-  const [state, setState] = useState<State>(INITIAL);
-  const [circuit, setCircuit] = useState<Gate[]>([]);
-  const [shots, setShots] = useState<{ zero: number; one: number } | null>(null);
+  const [preset, setPreset] = useState(2);
+  const [basis, setBasis] = useState<Basis>("Z");
+  const [shots, setShots] = useState<{ plus: number; minus: number } | null>(null);
+  const state = PRESETS[preset]!;
+  const expectation = dot(state.v, axis[basis]);
+  const pPlus = (1 + expectation) / 2;
+  const pMinus = 1 - pPlus;
 
-  const v = useMemo(() => bloch(state), [state]);
-  const p0 = abs2(state[0]), p1 = abs2(state[1]);
-
-  const addGate = (g: Gate) => {
-    setState((s) => apply(g, s));
-    setCircuit((cc) => [...cc, g].slice(-24));
-    setShots(null);
-  };
-  const reset = () => { setState(INITIAL); setCircuit([]); setShots(null); };
-  /** Sample 1000 simulated measurements in the computational basis. */
   const measure = () => {
-    let zero = 0;
-    for (let i = 0; i < 1000; i++) if (Math.random() < p0) zero++;
-    setShots({ zero, one: 1000 - zero });
+    let plus = 0;
+    for (let i = 0; i < 1000; i++) if (Math.random() < pPlus) plus++;
+    setShots({ plus, minus: 1000 - plus });
   };
+
+  const resultLabel = useMemo(() => {
+    if (!shots) return "Ready to measure";
+    return `${basis}+ ${shots.plus} · ${basis}− ${shots.minus}`;
+  }, [basis, shots]);
 
   return (
     <div className="grid gap-6 overflow-hidden rounded-lg border border-border bg-card/80 p-4 shadow-[0_30px_80px_-40px_oklch(0.82_0.145_192/0.35)] backdrop-blur-sm sm:p-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-8">
-      <div className="flex flex-col items-center rounded-md border border-border bg-background/70 p-5 focus-within:border-primary/60">
+      <div className="flex flex-col items-center rounded-md border border-border bg-background/70 p-5">
         <div className="mb-2 flex w-full items-center justify-between font-mono text-[10px] uppercase text-muted-foreground">
-          <span className="flex items-center gap-2"><span className="signal-pulse size-1.5 rounded-full bg-primary" aria-hidden="true" />Bloch sphere</span>
-          <span>1 qubit · local simulation</span>
+          <span className="flex items-center gap-2"><span className="signal-pulse size-1.5 rounded-full bg-primary" />Quantum measurement</span>
+          <span>{basis}-basis · 1 qubit</span>
         </div>
-        <BlochSphere v={v} />
-        <p className="mt-2 text-center font-mono text-xs text-muted-foreground">Drag or use arrow keys to rotate · Bloch vector ({v.x.toFixed(2)}, {v.y.toFixed(2)}, {v.z.toFixed(2)})</p>
+        <MeasurementSphere state={state.v} basis={basis} />
+        <p className="mt-2 text-center font-mono text-xs text-muted-foreground">State vector versus the selected measurement axis</p>
       </div>
 
-      <div className="flex min-w-0 flex-col gap-6">
+      <div className="flex min-w-0 flex-col gap-5">
         <div>
-          <h3 className="font-mono text-xs uppercase text-primary">Gates</h3>
-          <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {(Object.keys(GATES) as Gate[]).map((g) => (
-              <Button key={g} variant="signalOutline" className="h-auto flex-col gap-1 py-3 hover:bg-signal-soft" onClick={() => addGate(g)} title={GATE_INFO[g]} aria-label={`Apply ${GATE_INFO[g]}`}>
-                <span className="font-mono text-xl">{g}</span>
-                <span className="text-[10px] font-normal text-muted-foreground">{GATE_INFO[g].split(" — ")[0]}</span>
-              </Button>
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <h3 className="font-mono text-xs uppercase text-primary">Circuit</h3>
-          <div className="mt-3 flex min-h-14 items-center gap-2 overflow-x-auto rounded-md border border-border bg-surface px-3 py-2 font-mono text-sm" aria-live="polite">
-            <span className="shrink-0 text-muted-foreground">|0⟩</span>
-            <span className="h-px w-4 shrink-0 bg-primary/50" />
-            {circuit.length === 0 ? <span className="text-muted-foreground">apply a gate…</span> : circuit.map((g, i) => (
-              <span key={i} className="flex shrink-0 items-center gap-2">
-                <span className="grid size-8 place-items-center rounded border border-primary/60 text-primary">{g}</span>
-                <span className="h-px w-3 bg-primary/50" />
-              </span>
-            ))}
+          <h3 className="font-mono text-xs uppercase text-primary">Prepare state</h3>
+          <div className="mt-3 grid grid-cols-3 gap-2">
+            {PRESETS.map((s, i) => <Button key={s.label} variant={preset === i ? "signal" : "signalOutline"} onClick={() => { setPreset(i); setShots(null); }}>{s.label}</Button>)}
           </div>
         </div>
 
         <div className="rounded-md border border-border bg-surface p-4 font-mono text-sm">
-          <h3 className="text-xs uppercase text-primary">State vector</h3>
-          <p className="mt-2 break-words text-foreground">|ψ⟩ = ({fmt(state[0])})|0⟩ + ({fmt(state[1])})|1⟩</p>
+          <h3 className="text-xs uppercase text-primary">Prepared state</h3>
+          <p className="mt-2 text-foreground">|ψ⟩ = {state.ket}</p>
+        </div>
+
+        <div>
+          <h3 className="font-mono text-xs uppercase text-primary">Choose measurement basis</h3>
+          <div className="mt-3 grid grid-cols-3 gap-2">
+            {(["X", "Y", "Z"] as Basis[]).map((b) => <Button key={b} variant={basis === b ? "signal" : "signalOutline"} onClick={() => { setBasis(b); setShots(null); }}>{b} basis</Button>)}
+          </div>
         </div>
 
         <div>
           <h3 className="font-mono text-xs uppercase text-primary">Measurement probabilities</h3>
-          {[["|0⟩", p0, shots?.zero], ["|1⟩", p1, shots?.one]].map(([label, p, n]) => (
+          {[[`${basis}+`, pPlus, shots?.plus], [`${basis}−`, pMinus, shots?.minus]].map(([label, p, n]) => (
             <div key={label as string} className="mt-3">
               <div className="flex justify-between font-mono text-xs text-muted-foreground">
-                <span>P({label as string})</span>
-                <span>{((p as number) * 100).toFixed(1)}%{n !== undefined ? ` · ${n}/1000 shots` : ""}</span>
+                <span>P({label as string})</span><span>{((p as number) * 100).toFixed(1)}%{n !== undefined ? ` · ${n}/1000 shots` : ""}</span>
               </div>
-              <div className="mt-1 h-2 overflow-hidden rounded-full bg-muted">
-                <div className="h-full bg-primary transition-all duration-500" style={{ width: `${(p as number) * 100}%` }} />
-              </div>
+              <div className="mt-1 h-2 overflow-hidden rounded-full bg-muted"><div className="h-full bg-primary transition-all duration-500" style={{ width: `${(p as number) * 100}%` }} /></div>
             </div>
           ))}
         </div>
 
+        <div className="rounded-md border border-border bg-surface p-4">
+          <div className="font-mono text-[10px] uppercase text-muted-foreground">Measurement result</div>
+          <div className="mt-1 font-mono text-sm text-primary">{resultLabel}</div>
+          <div className="mt-2 text-xs leading-5 text-muted-foreground">Expectation ⟨σ{basis.toLowerCase()}⟩ = {expectation.toFixed(2)}. The selected basis changes what information the measurement extracts from the same prepared qubit.</div>
+        </div>
+
         <div className="flex flex-wrap gap-3">
           <Button variant="signal" onClick={measure}>Measure ×1000</Button>
-          <Button variant="signalOutline" onClick={reset}><RotateCcw className="size-4" aria-hidden="true" />Reset</Button>
+          <Button variant="ghost" onClick={() => { setPreset(2); setBasis("Z"); setShots(null); }}><RotateCcw className="mr-2 size-4" />Reset</Button>
         </div>
       </div>
     </div>
