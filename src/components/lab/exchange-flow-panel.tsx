@@ -38,7 +38,7 @@ export function ExchangeFlowPanel() {
           </div>
         </div>
 
-        <div className="grid w-full min-w-0 grid-cols-1 gap-3 md:grid-cols-3">
+        <div className="grid w-full min-w-0 grid-cols-1 gap-3 xl:grid-cols-3">
           <FlowMetric
             icon={ArrowDownToLine}
             label="Exchange Inflow"
