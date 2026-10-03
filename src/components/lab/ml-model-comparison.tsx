@@ -130,8 +130,9 @@ export function MlModelComparison() {
   const [maxDepth, setMaxDepth] = useState(3);
   const [runId, setRunId] = useState(0);
 
+  const activeSeed = seed + runId * 9973;
   const result = useMemo(() => {
-    const data = makeData(samples, noise, seed);
+    const data = makeData(samples, noise, activeSeed);
     const split = Math.floor(data.length * 0.75);
     const train = data.slice(0, split);
     const test = data.slice(split);
@@ -143,7 +144,7 @@ export function MlModelComparison() {
       { name: `Decision Tree (depth ${maxDepth})`, ...metrics(test, (p) => predictTree(tree, p)) },
     ];
     return { rows, train: train.length, test: test.length };
-  }, [samples, noise, seed, k, maxDepth, runId]);
+  }, [samples, noise, activeSeed, k, maxDepth]);
 
   return (
     <section className="rounded-md border border-border bg-card p-4 sm:p-5">
@@ -163,7 +164,8 @@ export function MlModelComparison() {
         <label className="font-mono text-[10px] uppercase text-muted-foreground">k-NN k<input className={`${field} mt-1`} type="number" min={1} max={31} step={2} value={k} onChange={(e) => setK(Math.max(1, Number(e.target.value) | 1))} /></label>
         <label className="font-mono text-[10px] uppercase text-muted-foreground">Tree depth<input className={`${field} mt-1`} type="number" min={1} max={7} value={maxDepth} onChange={(e) => setMaxDepth(Number(e.target.value))} /></label>
       </div>
-      <Button type="button" variant="signal" className="mt-3" onClick={() => setRunId((x) => x + 1)}>Run comparison</Button>
+      <Button type="button" variant="signal" className="mt-3" onClick={() => setRunId((x) => x + 1)}>Run comparison #{runId + 1}</Button>
+      <div className="mt-2 font-mono text-[10px] text-muted-foreground">active run seed {activeSeed} · each RUN generates a fresh comparison dataset</div>
 
       <div className="mt-5 overflow-x-auto rounded-sm border border-border">
         <table className="min-w-[720px] w-full border-collapse font-mono text-[11px]">
