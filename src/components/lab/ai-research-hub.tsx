@@ -13,6 +13,7 @@ const aiAreas = [
     description: "Neural-network experiments with dense architectures, representation learning, optimisation, regularisation and training diagnostics.",
     topics: ["Neural networks", "Backpropagation", "Optimizers", "Regularisation"],
     status: "CORE",
+    href: "/lab/ai/deep-learning",
   },
   {
     code: "NLP",
@@ -20,6 +21,7 @@ const aiAreas = [
     description: "Language-model workflows spanning embeddings, prompt design, structured outputs, retrieval and evaluation of generated answers.",
     topics: ["LLMs", "Embeddings", "Structured output", "Evaluation"],
     status: "RESEARCH",
+    href: "/lab/ai/nlp-llm",
   },
   {
     code: "RAG",
@@ -27,6 +29,7 @@ const aiAreas = [
     description: "Document ingestion, chunking, vector retrieval, reranking and grounded generation with explicit source-aware evaluation.",
     topics: ["Vector search", "Chunking", "Reranking", "Grounding"],
     status: "RESEARCH",
+    href: "/lab/ai/rag",
   },
   {
     code: "AGENTS",
@@ -42,6 +45,7 @@ const aiAreas = [
     description: "Image classification, feature extraction and multimodal model experiments with reproducible preprocessing and metrics.",
     topics: ["Image classification", "CNNs", "Multimodal", "Metrics"],
     status: "ROADMAP",
+    href: "/lab/ai/computer-vision",
   },
   {
     code: "RL",
@@ -49,6 +53,7 @@ const aiAreas = [
     description: "Sequential decision-making research with policies, rewards, exploration strategies and benchmark environments.",
     topics: ["Policies", "Rewards", "Exploration", "Q-learning"],
     status: "ROADMAP",
+    href: "/lab/ai/reinforcement-learning",
   },
   {
     code: "TS",
@@ -56,6 +61,7 @@ const aiAreas = [
     description: "Feature-rich time-series modelling with walk-forward validation, baseline comparison and leakage-aware evaluation.",
     topics: ["Forecasting", "Walk-forward", "Features", "Backtesting"],
     status: "RESEARCH",
+    href: "/lab/ai/time-series",
   },
   {
     code: "XAI",
@@ -63,6 +69,7 @@ const aiAreas = [
     description: "Model interpretation and error analysis using feature importance, local explanations and transparent benchmark reporting.",
     topics: ["SHAP-style analysis", "Feature importance", "Error analysis", "Interpretability"],
     status: "RESEARCH",
+    href: "/lab/ai/explainable-ai",
   },
   {
     code: "MLOPS",
@@ -70,6 +77,7 @@ const aiAreas = [
     description: "Reproducible experiments, dataset/version tracking, testable pipelines, observability and model-quality evaluation.",
     topics: ["Experiment tracking", "Testing", "Monitoring", "Evals"],
     status: "ENGINEERING",
+    href: "/lab/ai/mlops-evaluation",
   },
 ] as const;
 
@@ -140,11 +148,10 @@ export function AiResearchHub() {
                     </span>
                   ))}
                 </div>
-                {"href" in area ? <div className="mt-4 font-mono text-[10px] font-semibold text-primary">OPEN LAB →</div> : null}
+                <div className="mt-4 font-mono text-[10px] font-semibold text-primary">OPEN LAB →</div>
               </article>
             );
 
-            if (!("href" in area)) return <div key={area.code}>{card}</div>;
             const external = area.href.startsWith("http");
             return (
               <a key={area.code} href={area.href} target={external ? "_blank" : undefined} rel={external ? "noreferrer" : undefined} className="block">
@@ -156,11 +163,10 @@ export function AiResearchHub() {
       </section>
 
       <section className="rounded-md border border-primary/30 bg-primary/5 p-4 sm:p-5">
-        <div className="font-mono text-xs uppercase tracking-[0.18em] text-primary">Build Order</div>
-        <h2 className="mt-2 text-xl font-semibold text-foreground">Next interactive AI labs</h2>
+        <div className="font-mono text-xs uppercase tracking-[0.18em] text-primary">Interactive AI Stack</div>
+        <h2 className="mt-2 text-xl font-semibold text-foreground">Nine interactive AI labs + deployed multi-agent system</h2>
         <p className="mt-2 text-xs leading-5 text-muted-foreground">
-          Machine Learning is now interactive. Next: time-series forecasting, RAG retrieval/evaluation,
-          and agent orchestration benchmarks. Each lab should expose datasets, parameters, metrics and reproducible results rather than static claims.
+          Machine Learning, Deep Learning, NLP/LLM evaluation, RAG, Computer Vision, Reinforcement Learning, Time-Series, Explainable AI and MLOps now expose interactive experiments. The Multi-Agent module links to the deployed financial research platform.
         </p>
       </section>
     </div>
