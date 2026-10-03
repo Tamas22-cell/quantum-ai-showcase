@@ -5,7 +5,6 @@ import {
   ComputerVisionLab,
   ExplainableAiLab,
   MlOpsEvaluationLab,
-  NlpLlmLab,
   RagLab,
   ReinforcementLearningLab,
   TimeSeriesLab,
@@ -15,6 +14,7 @@ import { LabShell } from "@/components/lab/lab-shell";
 import { LAB_MODULES } from "@/components/lab/lab-modules";
 import { MachineLearningLab } from "@/components/lab/machine-learning-lab";
 import { MlModelComparison } from "@/components/lab/ml-model-comparison";
+import { NlpLlmLab } from "@/components/lab/nlp-llm-lab";
 
 export const Route = createFileRoute("/lab/")({
   head: () => ({
