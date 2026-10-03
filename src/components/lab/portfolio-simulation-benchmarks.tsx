@@ -1,4 +1,4 @@
-// Deployment refresh marker: benchmark-v4-mitigation
+// Deployment refresh marker: benchmark-v5-ibm-hardware
 export function PortfolioSimulationBenchmarks() {
   const rows = [
     {
@@ -41,14 +41,24 @@ export function PortfolioSimulationBenchmarks() {
       status: "MITIGATED",
       statusClass: "border-primary/40 text-primary",
     },
+    {
+      method: "IBM Hardware QAOA",
+      engine: "IBM Quantum QPU",
+      noise: "Real device noise",
+      shots: "2048",
+      objective: "After hardware run",
+      runtime: "After hardware run",
+      status: "HARDWARE READY",
+      statusClass: "border-emerald/40 text-emerald",
+    },
   ];
 
   return (
     <section className="mt-6 rounded-md border border-border bg-card p-4 sm:p-5">
       <div className="font-mono text-xs uppercase tracking-[0.18em] text-primary">Quantum Simulation Benchmarks</div>
-      <h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">Classical vs Ideal vs Noisy vs Mitigated QAOA</h2>
+      <h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">Classical vs Ideal vs Noisy vs Mitigated vs IBM Hardware</h2>
       <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
-        The portfolio QUBO is evaluated through four comparable paths: an exact classical reference, a reproducible ideal QAOA simulator, a shot-based noisy QAOA run and a readout-error-mitigated QAOA path.
+        The portfolio QUBO now has a five-stage benchmark pipeline: exact classical reference, ideal QAOA, noisy QAOA, readout-mitigated QAOA and a hardware-ready IBM Quantum execution path.
       </p>
 
       <div className="mt-5 grid grid-cols-1 gap-3 md:hidden">
@@ -87,7 +97,7 @@ export function PortfolioSimulationBenchmarks() {
       </div>
 
       <div className="mt-5 hidden overflow-x-auto rounded-sm border border-border md:block">
-        <table className="min-w-[820px] w-full border-collapse font-mono text-[11px]">
+        <table className="min-w-[920px] w-full border-collapse font-mono text-[11px]">
           <thead className="bg-surface text-muted-foreground">
             <tr>
               <th className="border-b border-border p-3 text-left">Method</th>
@@ -116,7 +126,7 @@ export function PortfolioSimulationBenchmarks() {
       </div>
 
       <p className="mt-3 text-[11px] leading-5 text-muted-foreground">
-        Benchmark values are not hard-coded: objective values, selected assets and runtimes come from the executable scripts or the interactive lab, so the comparison remains reproducible instead of presenting fabricated results.
+        Simulator benchmark values are produced by executable code. The IBM Hardware row is intentionally marked hardware-ready until a real QPU job is submitted and measured; no hardware result is fabricated.
       </p>
 
       <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -164,10 +174,25 @@ export function PortfolioSimulationBenchmarks() {
           </div>
           <a className="mt-4 inline-block font-mono text-xs font-semibold text-primary hover:underline" href="https://github.com/Tamas22-cell/QuantumPortfolioOptimizer/blob/main/qaoa_error_mitigation.py" target="_blank" rel="noreferrer">VIEW MITIGATION SOURCE →</a>
         </article>
+
+        <article className="rounded-sm border border-emerald/30 bg-emerald/5 p-4 md:col-span-2">
+          <span className="inline-flex rounded-full border border-emerald/40 px-2 py-1 font-mono text-[10px] font-semibold text-emerald">HARDWARE READY</span>
+          <h3 className="mt-3 text-lg font-semibold text-foreground">IBM Quantum Hardware Execution</h3>
+          <p className="mt-2 max-w-3xl text-xs leading-5 text-muted-foreground">
+            The hardware runner selects the least-busy operational IBM QPU, converts the constrained portfolio model to a QUBO/Ising Hamiltonian, builds a p=1 QAOA circuit, transpiles it at optimization level 3 and submits the ISA circuit through the IBM Sampler primitive. A real hardware result will only be shown after an authenticated QPU job is executed.
+          </p>
+          <div className="mt-4 grid grid-cols-2 gap-2 font-mono text-[10px] sm:grid-cols-4">
+            <div className="rounded-sm border border-border p-2"><div className="text-foreground">Real QPU</div><div className="text-muted-foreground">least-busy backend</div></div>
+            <div className="rounded-sm border border-border p-2"><div className="text-foreground">Opt level 3</div><div className="text-muted-foreground">ISA transpilation</div></div>
+            <div className="rounded-sm border border-border p-2"><div className="text-foreground">2048 shots</div><div className="text-muted-foreground">hardware sampling</div></div>
+            <div className="rounded-sm border border-border p-2"><div className="text-foreground">Metrics</div><div className="text-muted-foreground">depth · ops · job ID</div></div>
+          </div>
+          <a className="mt-4 inline-block font-mono text-xs font-semibold text-primary hover:underline" href="https://github.com/Tamas22-cell/QuantumPortfolioOptimizer/blob/main/qaoa_ibm_hardware.py" target="_blank" rel="noreferrer">VIEW HARDWARE SOURCE →</a>
+        </article>
       </div>
 
       <div className="mt-4 rounded-sm border border-primary/30 bg-primary/5 p-3 text-xs leading-5 text-muted-foreground">
-        Next benchmark step: run the same portfolio instance on IBM Quantum hardware and compare hardware output with ideal, noisy and readout-mitigated simulation results.
+        Next step: execute the hardware runner with an IBM Quantum account, capture backend name, job ID, circuit depth, gate counts, sampled portfolio and objective gap, then publish those measured values here.
       </div>
     </section>
   );
