@@ -1,4 +1,4 @@
-// Deployment refresh marker: benchmark-v3-mobile
+// Deployment refresh marker: benchmark-v4-mitigation
 export function PortfolioSimulationBenchmarks() {
   const rows = [
     {
@@ -31,14 +31,24 @@ export function PortfolioSimulationBenchmarks() {
       status: "NOISY",
       statusClass: "border-amber/40 text-amber",
     },
+    {
+      method: "Mitigated QAOA",
+      engine: "Aer + mitigation",
+      noise: "Readout corrected",
+      shots: "2048",
+      objective: "Mitigated result",
+      runtime: "Printed by script",
+      status: "MITIGATED",
+      statusClass: "border-primary/40 text-primary",
+    },
   ];
 
   return (
     <section className="mt-6 rounded-md border border-border bg-card p-4 sm:p-5">
       <div className="font-mono text-xs uppercase tracking-[0.18em] text-primary">Quantum Simulation Benchmarks</div>
-      <h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">Classical vs Ideal QAOA vs Noisy QAOA</h2>
+      <h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">Classical vs Ideal vs Noisy vs Mitigated QAOA</h2>
       <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
-        The portfolio QUBO is now evaluated through three comparable paths: an exact classical reference, a reproducible ideal QAOA simulator and a shot-based noisy QAOA simulator.
+        The portfolio QUBO is evaluated through four comparable paths: an exact classical reference, a reproducible ideal QAOA simulator, a shot-based noisy QAOA run and a readout-error-mitigated QAOA path.
       </p>
 
       <div className="mt-5 grid grid-cols-1 gap-3 md:hidden">
@@ -77,7 +87,7 @@ export function PortfolioSimulationBenchmarks() {
       </div>
 
       <div className="mt-5 hidden overflow-x-auto rounded-sm border border-border md:block">
-        <table className="min-w-[760px] w-full border-collapse font-mono text-[11px]">
+        <table className="min-w-[820px] w-full border-collapse font-mono text-[11px]">
           <thead className="bg-surface text-muted-foreground">
             <tr>
               <th className="border-b border-border p-3 text-left">Method</th>
@@ -139,10 +149,25 @@ export function PortfolioSimulationBenchmarks() {
           </div>
           <a className="mt-4 inline-block font-mono text-xs font-semibold text-primary hover:underline" href="https://github.com/Tamas22-cell/QuantumPortfolioOptimizer/blob/main/qaoa_noisy_simulator.py" target="_blank" rel="noreferrer">VIEW SOURCE →</a>
         </article>
+
+        <article className="rounded-sm border border-primary/30 bg-primary/5 p-4 md:col-span-2">
+          <span className="inline-flex rounded-full border border-primary/40 px-2 py-1 font-mono text-[10px] font-semibold text-primary">MITIGATED</span>
+          <h3 className="mt-3 text-lg font-semibold text-foreground">Readout Error Mitigation</h3>
+          <p className="mt-2 max-w-3xl text-xs leading-5 text-muted-foreground">
+            The noisy QAOA sample distribution is corrected with the pseudo-inverse of the readout assignment matrix. This targets measurement error only; depolarizing gate noise intentionally remains so the mitigation claim stays precise.
+          </p>
+          <div className="mt-4 grid grid-cols-2 gap-2 font-mono text-[10px] sm:grid-cols-4">
+            <div className="rounded-sm border border-border p-2"><div className="text-foreground">2048 shots</div><div className="text-muted-foreground">same noisy budget</div></div>
+            <div className="rounded-sm border border-border p-2"><div className="text-foreground">2% readout</div><div className="text-muted-foreground">assignment model</div></div>
+            <div className="rounded-sm border border-border p-2"><div className="text-foreground">Pseudo-inverse</div><div className="text-muted-foreground">matrix correction</div></div>
+            <div className="rounded-sm border border-border p-2"><div className="text-foreground">Gate noise</div><div className="text-muted-foreground">still present</div></div>
+          </div>
+          <a className="mt-4 inline-block font-mono text-xs font-semibold text-primary hover:underline" href="https://github.com/Tamas22-cell/QuantumPortfolioOptimizer/blob/main/qaoa_error_mitigation.py" target="_blank" rel="noreferrer">VIEW MITIGATION SOURCE →</a>
+        </article>
       </div>
 
       <div className="mt-4 rounded-sm border border-primary/30 bg-primary/5 p-3 text-xs leading-5 text-muted-foreground">
-        Next benchmark step: add error mitigation, then compare simulator results with IBM Quantum hardware execution under the same portfolio instance and seed.
+        Next benchmark step: run the same portfolio instance on IBM Quantum hardware and compare hardware output with ideal, noisy and readout-mitigated simulation results.
       </div>
     </section>
   );
