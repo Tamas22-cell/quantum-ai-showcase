@@ -3,7 +3,6 @@ import { ArrowDown, ArrowUpRight, BrainCircuit, FlaskConical } from "lucide-reac
 
 import {
   ComputerVisionLab,
-  DeepLearningLab,
   ExplainableAiLab,
   MlOpsEvaluationLab,
   NlpLlmLab,
@@ -11,6 +10,7 @@ import {
   ReinforcementLearningLab,
   TimeSeriesLab,
 } from "@/components/lab/applied-ai-labs";
+import { DeepLearningLab } from "@/components/lab/deep-learning-lab";
 import { LabShell } from "@/components/lab/lab-shell";
 import { LAB_MODULES } from "@/components/lab/lab-modules";
 import { MachineLearningLab } from "@/components/lab/machine-learning-lab";
