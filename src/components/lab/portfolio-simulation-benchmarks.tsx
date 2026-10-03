@@ -1,10 +1,76 @@
 export function PortfolioSimulationBenchmarks() {
+  const rows = [
+    {
+      method: "Classical exact",
+      engine: "Exhaustive baseline",
+      noise: "None",
+      shots: "n/a",
+      objective: "Exact reference",
+      runtime: "Measured in lab",
+      status: "REFERENCE",
+      statusClass: "border-emerald/40 text-emerald",
+    },
+    {
+      method: "Ideal QAOA",
+      engine: "Qiskit simulator",
+      noise: "Noise-free",
+      shots: "statevector",
+      objective: "QAOA result",
+      runtime: "Printed by script",
+      status: "IDEAL",
+      statusClass: "border-primary/40 text-primary",
+    },
+    {
+      method: "Noisy QAOA",
+      engine: "Aer noise model",
+      noise: "Gate + readout",
+      shots: "2048",
+      objective: "Noisy QAOA result",
+      runtime: "Printed by script",
+      status: "NOISY",
+      statusClass: "border-amber/40 text-amber",
+    },
+  ];
+
   return (
     <section className="mt-6 rounded-md border border-border bg-card p-5">
       <div className="font-mono text-xs uppercase tracking-[0.18em] text-primary">Quantum Simulation Benchmarks</div>
-      <h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">Ideal vs Noisy QAOA Simulator</h2>
+      <h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">Classical vs Ideal QAOA vs Noisy QAOA</h2>
       <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
-        Two executable Qiskit simulation paths now benchmark the same portfolio QUBO: a reproducible ideal run and a shot-based noisy run.
+        The portfolio QUBO is now evaluated through three comparable paths: an exact classical reference, a reproducible ideal QAOA simulator and a shot-based noisy QAOA simulator.
+      </p>
+
+      <div className="mt-5 overflow-x-auto rounded-sm border border-border">
+        <table className="min-w-[760px] w-full border-collapse font-mono text-[11px]">
+          <thead className="bg-surface text-muted-foreground">
+            <tr>
+              <th className="border-b border-border p-3 text-left">Method</th>
+              <th className="border-b border-border p-3 text-left">Engine</th>
+              <th className="border-b border-border p-3 text-left">Noise</th>
+              <th className="border-b border-border p-3 text-left">Shots</th>
+              <th className="border-b border-border p-3 text-left">Objective</th>
+              <th className="border-b border-border p-3 text-left">Runtime</th>
+              <th className="border-b border-border p-3 text-left">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row) => (
+              <tr key={row.method} className="border-b border-border last:border-b-0">
+                <td className="p-3 text-foreground">{row.method}</td>
+                <td className="p-3 text-muted-foreground">{row.engine}</td>
+                <td className="p-3 text-muted-foreground">{row.noise}</td>
+                <td className="p-3 text-muted-foreground">{row.shots}</td>
+                <td className="p-3 text-muted-foreground">{row.objective}</td>
+                <td className="p-3 text-muted-foreground">{row.runtime}</td>
+                <td className="p-3"><span className={`inline-flex rounded-full border px-2 py-1 text-[10px] font-semibold ${row.statusClass}`}>{row.status}</span></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <p className="mt-3 text-[11px] leading-5 text-muted-foreground">
+        Benchmark values are not hard-coded: objective values, selected assets and runtimes come from the executable scripts or the interactive lab, so the comparison remains reproducible instead of presenting fabricated results.
       </p>
 
       <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -40,7 +106,7 @@ export function PortfolioSimulationBenchmarks() {
       </div>
 
       <div className="mt-4 rounded-sm border border-primary/30 bg-primary/5 p-3 text-xs leading-5 text-muted-foreground">
-        Next benchmark step: classical optimizer vs ideal QAOA vs noisy QAOA, followed by error mitigation and IBM Quantum hardware execution.
+        Next benchmark step: add error mitigation, then compare simulator results with IBM Quantum hardware execution under the same portfolio instance and seed.
       </div>
     </section>
   );
