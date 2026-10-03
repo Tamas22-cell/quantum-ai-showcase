@@ -1,3 +1,4 @@
+// Deployment refresh marker: benchmark-v2
 export function PortfolioSimulationBenchmarks() {
   const rows = [
     {
