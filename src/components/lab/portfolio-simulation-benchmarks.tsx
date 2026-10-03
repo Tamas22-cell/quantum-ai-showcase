@@ -1,4 +1,4 @@
-// Deployment refresh marker: benchmark-v5-ibm-hardware
+// Deployment refresh marker: benchmark-v6-consistency
 export function PortfolioSimulationBenchmarks() {
   const rows = [
     {
@@ -58,7 +58,7 @@ export function PortfolioSimulationBenchmarks() {
       <div className="font-mono text-xs uppercase tracking-[0.18em] text-primary">Quantum Simulation Benchmarks</div>
       <h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">Classical vs Ideal vs Noisy vs Mitigated vs IBM Hardware</h2>
       <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
-        The portfolio QUBO now has a five-stage benchmark pipeline: exact classical reference, ideal QAOA, noisy QAOA, readout-mitigated QAOA and a hardware-ready IBM Quantum execution path.
+        The portfolio QUBO now has a five-stage benchmark pipeline: exact classical reference, ideal QAOA, noisy QAOA, readout-mitigated QAOA and a hardware-ready IBM Quantum execution path. Shot-based benchmark paths use 2048 shots.
       </p>
 
       <div className="mt-5 grid grid-cols-1 gap-3 md:hidden">
@@ -71,26 +71,11 @@ export function PortfolioSimulationBenchmarks() {
               </span>
             </div>
             <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 font-mono text-[11px]">
-              <div>
-                <dt className="text-muted-foreground">Engine</dt>
-                <dd className="mt-1 text-foreground">{row.engine}</dd>
-              </div>
-              <div>
-                <dt className="text-muted-foreground">Noise</dt>
-                <dd className="mt-1 text-foreground">{row.noise}</dd>
-              </div>
-              <div>
-                <dt className="text-muted-foreground">Shots</dt>
-                <dd className="mt-1 text-foreground">{row.shots}</dd>
-              </div>
-              <div>
-                <dt className="text-muted-foreground">Objective</dt>
-                <dd className="mt-1 text-foreground">{row.objective}</dd>
-              </div>
-              <div className="col-span-2">
-                <dt className="text-muted-foreground">Runtime</dt>
-                <dd className="mt-1 text-foreground">{row.runtime}</dd>
-              </div>
+              <div><dt className="text-muted-foreground">Engine</dt><dd className="mt-1 text-foreground">{row.engine}</dd></div>
+              <div><dt className="text-muted-foreground">Noise</dt><dd className="mt-1 text-foreground">{row.noise}</dd></div>
+              <div><dt className="text-muted-foreground">Shots</dt><dd className="mt-1 text-foreground">{row.shots}</dd></div>
+              <div><dt className="text-muted-foreground">Objective</dt><dd className="mt-1 text-foreground">{row.objective}</dd></div>
+              <div className="col-span-2"><dt className="text-muted-foreground">Runtime</dt><dd className="mt-1 text-foreground">{row.runtime}</dd></div>
             </dl>
           </article>
         ))}
@@ -133,9 +118,7 @@ export function PortfolioSimulationBenchmarks() {
         <article className="rounded-sm border border-border bg-surface p-4">
           <span className="inline-flex rounded-full border border-emerald/40 px-2 py-1 font-mono text-[10px] font-semibold text-emerald">IDEAL</span>
           <h3 className="mt-3 text-lg font-semibold text-foreground">Ideal QAOA Simulator</h3>
-          <p className="mt-2 text-xs leading-5 text-muted-foreground">
-            Noise-free QAOA portfolio optimisation with a fixed seed for reproducible baseline experiments.
-          </p>
+          <p className="mt-2 text-xs leading-5 text-muted-foreground">Noise-free QAOA portfolio optimisation with a fixed seed for reproducible baseline experiments.</p>
           <div className="mt-4 grid grid-cols-2 gap-2 font-mono text-[10px]">
             <div className="rounded-sm border border-border p-2"><div className="text-foreground">Seed 42</div><div className="text-muted-foreground">reproducible run</div></div>
             <div className="rounded-sm border border-border p-2"><div className="text-foreground">QAOA reps 1</div><div className="text-muted-foreground">baseline depth</div></div>
@@ -148,9 +131,7 @@ export function PortfolioSimulationBenchmarks() {
         <article className="rounded-sm border border-border bg-surface p-4">
           <span className="inline-flex rounded-full border border-amber/40 px-2 py-1 font-mono text-[10px] font-semibold text-amber">NOISY</span>
           <h3 className="mt-3 text-lg font-semibold text-foreground">Noisy QAOA Simulator</h3>
-          <p className="mt-2 text-xs leading-5 text-muted-foreground">
-            Shot-based simulation with depolarizing and readout noise as the benchmark layer before mitigation and hardware execution.
-          </p>
+          <p className="mt-2 text-xs leading-5 text-muted-foreground">Shot-based simulation with depolarizing and readout noise as the benchmark layer before mitigation and hardware execution.</p>
           <div className="mt-4 grid grid-cols-2 gap-2 font-mono text-[10px]">
             <div className="rounded-sm border border-border p-2"><div className="text-foreground">2048 shots</div><div className="text-muted-foreground">sampling budget</div></div>
             <div className="rounded-sm border border-border p-2"><div className="text-foreground">Seed 42</div><div className="text-muted-foreground">reproducible run</div></div>
@@ -163,9 +144,7 @@ export function PortfolioSimulationBenchmarks() {
         <article className="rounded-sm border border-primary/30 bg-primary/5 p-4 md:col-span-2">
           <span className="inline-flex rounded-full border border-primary/40 px-2 py-1 font-mono text-[10px] font-semibold text-primary">MITIGATED</span>
           <h3 className="mt-3 text-lg font-semibold text-foreground">Readout Error Mitigation</h3>
-          <p className="mt-2 max-w-3xl text-xs leading-5 text-muted-foreground">
-            The noisy QAOA sample distribution is corrected with the pseudo-inverse of the readout assignment matrix. This targets measurement error only; depolarizing gate noise intentionally remains so the mitigation claim stays precise.
-          </p>
+          <p className="mt-2 max-w-3xl text-xs leading-5 text-muted-foreground">The noisy QAOA sample distribution is corrected with the pseudo-inverse of the readout assignment matrix. This targets measurement error only; depolarizing gate noise intentionally remains so the mitigation claim stays precise.</p>
           <div className="mt-4 grid grid-cols-2 gap-2 font-mono text-[10px] sm:grid-cols-4">
             <div className="rounded-sm border border-border p-2"><div className="text-foreground">2048 shots</div><div className="text-muted-foreground">same noisy budget</div></div>
             <div className="rounded-sm border border-border p-2"><div className="text-foreground">2% readout</div><div className="text-muted-foreground">assignment model</div></div>
@@ -181,8 +160,9 @@ export function PortfolioSimulationBenchmarks() {
           <p className="mt-2 max-w-3xl text-xs leading-5 text-muted-foreground">
             The hardware runner selects the least-busy operational IBM QPU, converts the constrained portfolio model to a QUBO/Ising Hamiltonian, builds a p=1 QAOA circuit, transpiles it at optimization level 3 and submits the ISA circuit through the IBM Sampler primitive. A real hardware result will only be shown after an authenticated QPU job is executed.
           </p>
-          <div className="mt-4 grid grid-cols-2 gap-2 font-mono text-[10px] sm:grid-cols-4">
+          <div className="mt-4 grid grid-cols-2 gap-2 font-mono text-[10px] sm:grid-cols-5">
             <div className="rounded-sm border border-border p-2"><div className="text-foreground">Real QPU</div><div className="text-muted-foreground">least-busy backend</div></div>
+            <div className="rounded-sm border border-border p-2"><div className="text-foreground">QAOA p=1</div><div className="text-muted-foreground">hardware depth</div></div>
             <div className="rounded-sm border border-border p-2"><div className="text-foreground">Opt level 3</div><div className="text-muted-foreground">ISA transpilation</div></div>
             <div className="rounded-sm border border-border p-2"><div className="text-foreground">2048 shots</div><div className="text-muted-foreground">hardware sampling</div></div>
             <div className="rounded-sm border border-border p-2"><div className="text-foreground">Metrics</div><div className="text-muted-foreground">depth · ops · job ID</div></div>
@@ -192,7 +172,7 @@ export function PortfolioSimulationBenchmarks() {
       </div>
 
       <div className="mt-4 rounded-sm border border-primary/30 bg-primary/5 p-3 text-xs leading-5 text-muted-foreground">
-        Next step: execute the hardware runner with an IBM Quantum account, capture backend name, job ID, circuit depth, gate counts, sampled portfolio and objective gap, then publish those measured values here.
+        Interactive lab default: p=2. Hardware runner: p=1 to keep the real-device circuit shallower. Shot-based benchmark paths use 2048 shots. Next step: run the IBM hardware job and publish measured backend, depth, gate counts, job ID and objective gap.
       </div>
     </section>
   );
