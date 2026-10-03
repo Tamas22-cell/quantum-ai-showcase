@@ -5,6 +5,7 @@ const aiAreas = [
     description: "Supervised and unsupervised learning workflows covering classification, regression, clustering, feature engineering and model evaluation.",
     topics: ["Classification", "Regression", "Clustering", "Feature engineering"],
     status: "CORE",
+    href: "/lab/ai/machine-learning",
   },
   {
     code: "DL",
@@ -139,16 +140,16 @@ export function AiResearchHub() {
                     </span>
                   ))}
                 </div>
-                {"href" in area ? <div className="mt-4 font-mono text-[10px] font-semibold text-primary">OPEN LIVE PROJECT →</div> : null}
+                {"href" in area ? <div className="mt-4 font-mono text-[10px] font-semibold text-primary">OPEN LAB →</div> : null}
               </article>
             );
 
-            return "href" in area ? (
-              <a key={area.code} href={area.href} target="_blank" rel="noreferrer" className="block">
+            if (!("href" in area)) return <div key={area.code}>{card}</div>;
+            const external = area.href.startsWith("http");
+            return (
+              <a key={area.code} href={area.href} target={external ? "_blank" : undefined} rel={external ? "noreferrer" : undefined} className="block">
                 {card}
               </a>
-            ) : (
-              <div key={area.code}>{card}</div>
             );
           })}
         </div>
@@ -158,7 +159,7 @@ export function AiResearchHub() {
         <div className="font-mono text-xs uppercase tracking-[0.18em] text-primary">Build Order</div>
         <h2 className="mt-2 text-xl font-semibold text-foreground">Next interactive AI labs</h2>
         <p className="mt-2 text-xs leading-5 text-muted-foreground">
-          First: a classical Machine Learning benchmark lab with classification and regression. Then: time-series forecasting, RAG retrieval/evaluation,
+          Machine Learning is now interactive. Next: time-series forecasting, RAG retrieval/evaluation,
           and agent orchestration benchmarks. Each lab should expose datasets, parameters, metrics and reproducible results rather than static claims.
         </p>
       </section>
