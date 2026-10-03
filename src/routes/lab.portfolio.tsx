@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { ExperimentSnapshotButton } from "@/components/lab/experiment-snapshot-button";
 import { LabShell } from "@/components/lab/lab-shell";
+import { PortfolioSimulationBenchmarks } from "@/components/lab/portfolio-simulation-benchmarks";
 
 const PortfolioLab = lazy(() => import("@/components/lab/portfolio-lab").then((m) => ({ default: m.PortfolioLab })));
 
@@ -35,6 +36,7 @@ function Page() {
       <Suspense fallback={<div className="h-96 animate-pulse rounded-md border border-border bg-card" aria-label="Loading portfolio optimizer" />}>
         <PortfolioLab />
       </Suspense>
+      <PortfolioSimulationBenchmarks />
     </LabShell>
   );
 }
