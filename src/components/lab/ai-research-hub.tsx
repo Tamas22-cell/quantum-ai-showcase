@@ -101,22 +101,28 @@ export function AiResearchHub() {
         </p>
 
         <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <div className="rounded-sm border border-border bg-surface p-3">
-            <div className="font-mono text-xl font-semibold text-foreground">10</div>
-            <div className="mt-1 font-mono text-[10px] uppercase text-muted-foreground">AI domains</div>
-          </div>
-          <div className="rounded-sm border border-border bg-surface p-3">
-            <div className="font-mono text-xl font-semibold text-foreground">ML → LLM</div>
-            <div className="mt-1 font-mono text-[10px] uppercase text-muted-foreground">full stack</div>
-          </div>
-          <div className="rounded-sm border border-border bg-surface p-3">
-            <div className="font-mono text-xl font-semibold text-foreground">Agents</div>
-            <div className="mt-1 font-mono text-[10px] uppercase text-muted-foreground">tool workflows</div>
-          </div>
-          <div className="rounded-sm border border-border bg-surface p-3">
-            <div className="font-mono text-xl font-semibold text-foreground">Evals</div>
-            <div className="mt-1 font-mono text-[10px] uppercase text-muted-foreground">measured quality</div>
-          </div>
+          <div className="rounded-sm border border-border bg-surface p-3"><div className="font-mono text-xl font-semibold text-foreground">10</div><div className="mt-1 font-mono text-[10px] uppercase text-muted-foreground">AI domains</div></div>
+          <div className="rounded-sm border border-border bg-surface p-3"><div className="font-mono text-xl font-semibold text-foreground">ML → LLM</div><div className="mt-1 font-mono text-[10px] uppercase text-muted-foreground">full stack</div></div>
+          <div className="rounded-sm border border-border bg-surface p-3"><div className="font-mono text-xl font-semibold text-foreground">Agents</div><div className="mt-1 font-mono text-[10px] uppercase text-muted-foreground">tool workflows</div></div>
+          <div className="rounded-sm border border-border bg-surface p-3"><div className="font-mono text-xl font-semibold text-foreground">Evals</div><div className="mt-1 font-mono text-[10px] uppercase text-muted-foreground">measured quality</div></div>
+        </div>
+      </section>
+
+      <section className="rounded-md border border-primary/30 bg-primary/5 p-4 sm:p-5">
+        <div className="font-mono text-xs uppercase tracking-[0.18em] text-primary">Interactive AI Labs</div>
+        <h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">Open a lab</h2>
+        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {aiAreas.filter((area) => area.code !== "AGENTS").map((area) => (
+            <a
+              key={area.code}
+              href={area.href}
+              className="rounded-md border border-border bg-card p-4 transition-colors hover:border-primary/60 hover:bg-surface"
+            >
+              <div className="font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">{area.code}</div>
+              <div className="mt-2 text-base font-semibold text-foreground">{area.title}</div>
+              <div className="mt-3 font-mono text-[10px] font-semibold text-primary">OPEN LAB →</div>
+            </a>
+          ))}
         </div>
       </section>
 
@@ -143,9 +149,7 @@ export function AiResearchHub() {
                 <p className="mt-2 text-xs leading-5 text-muted-foreground">{area.description}</p>
                 <div className="mt-4 flex flex-wrap gap-1.5">
                   {area.topics.map((topic) => (
-                    <span key={topic} className="rounded-sm border border-border bg-surface px-2 py-1 font-mono text-[9px] text-muted-foreground">
-                      {topic}
-                    </span>
+                    <span key={topic} className="rounded-sm border border-border bg-surface px-2 py-1 font-mono text-[9px] text-muted-foreground">{topic}</span>
                   ))}
                 </div>
                 <div className="mt-4 font-mono text-[10px] font-semibold text-primary">OPEN LAB →</div>
@@ -163,10 +167,10 @@ export function AiResearchHub() {
       </section>
 
       <section className="rounded-md border border-primary/30 bg-primary/5 p-4 sm:p-5">
-        <div className="font-mono text-xs uppercase tracking-[0.18em] text-primary">Interactive AI Stack</div>
-        <h2 className="mt-2 text-xl font-semibold text-foreground">Nine interactive AI labs + deployed multi-agent system</h2>
+        <div className="font-mono text-xs uppercase tracking-[0.18em] text-primary">Build Order</div>
+        <h2 className="mt-2 text-xl font-semibold text-foreground">Interactive AI research stack</h2>
         <p className="mt-2 text-xs leading-5 text-muted-foreground">
-          Machine Learning, Deep Learning, NLP/LLM evaluation, RAG, Computer Vision, Reinforcement Learning, Time-Series, Explainable AI and MLOps now expose interactive experiments. The Multi-Agent module links to the deployed financial research platform.
+          Machine Learning, Deep Learning, NLP & LLM, RAG, Computer Vision, Reinforcement Learning, Time-Series, Explainable AI and MLOps are now exposed as dedicated lab entry points. Multi-Agent AI remains linked to the deployed agent platform.
         </p>
       </section>
     </div>
