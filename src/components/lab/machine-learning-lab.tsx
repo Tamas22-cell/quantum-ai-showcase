@@ -96,7 +96,8 @@ export function MachineLearningLab() {
   const [epochs, setEpochs] = useState(250);
   const [runId, setRunId] = useState(0);
 
-  const data = useMemo(() => makeData(task, samples, noise, seed), [task, samples, noise, seed, runId]);
+  const activeSeed = seed + runId * 9973;
+  const data = useMemo(() => makeData(task, samples, noise, activeSeed), [task, samples, noise, activeSeed]);
   const split = Math.max(10, Math.floor(data.length * 0.75));
   const train = data.slice(0, split);
   const test = data.slice(split);
@@ -153,10 +154,10 @@ export function MachineLearningLab() {
               {task === "classification" ? <label className="font-mono text-[10px] uppercase text-muted-foreground">Learning rate<input type="number" min={0.01} max={2} step={0.05} value={learningRate} onChange={(e) => setLearningRate(Number(e.target.value))} className={`${field} mt-1`} /></label> : null}
               {task === "classification" ? <label className="col-span-2 font-mono text-[10px] uppercase text-muted-foreground">Epochs<input type="number" min={20} max={2000} step={10} value={epochs} onChange={(e) => setEpochs(Number(e.target.value))} className={`${field} mt-1`} /></label> : null}
             </div>
-            <Button type="button" variant="signal" className="w-full" onClick={() => setRunId((x) => x + 1)}>Run experiment</Button>
+            <Button type="button" variant="signal" className="w-full" onClick={() => setRunId((x) => x + 1)}>Run experiment #{runId + 1}</Button>
           </div>
           <div className="mt-4 rounded-sm border border-border bg-surface p-3 text-[11px] leading-5 text-muted-foreground">
-            Deterministic synthetic data · 75/25 train/test split · all training runs locally in the browser. No external model API.
+            Browser-local training · 75/25 train/test split · active run seed {activeSeed}. Each RUN generates a fresh deterministic dataset.
           </div>
         </div>
 
