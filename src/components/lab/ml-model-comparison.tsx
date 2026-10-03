@@ -128,11 +128,10 @@ export function MlModelComparison() {
   const [seed, setSeed] = useState(42);
   const [k, setK] = useState(7);
   const [maxDepth, setMaxDepth] = useState(3);
-  const [runId, setRunId] = useState(0);
+  const [runId, setRunId] = useState(1);
 
-  const activeSeed = seed + runId * 9973;
   const result = useMemo(() => {
-    const data = makeData(samples, noise, activeSeed);
+    const data = makeData(samples, noise, seed);
     const split = Math.floor(data.length * 0.75);
     const train = data.slice(0, split);
     const test = data.slice(split);
@@ -144,7 +143,12 @@ export function MlModelComparison() {
       { name: `Decision Tree (depth ${maxDepth})`, ...metrics(test, (p) => predictTree(tree, p)) },
     ];
     return { rows, train: train.length, test: test.length };
-  }, [samples, noise, activeSeed, k, maxDepth]);
+  }, [samples, noise, seed, k, maxDepth]);
+
+  const runComparison = () => {
+    setSeed((current) => current + 137);
+    setRunId((current) => current + 1);
+  };
 
   return (
     <section className="rounded-md border border-border bg-card p-4 sm:p-5">
@@ -152,7 +156,7 @@ export function MlModelComparison() {
       <div className="mt-2 flex flex-wrap items-end justify-between gap-3">
         <div>
           <h2 className="text-2xl font-semibold tracking-tight text-foreground">Logistic Regression vs k-NN vs Decision Tree</h2>
-          <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">All three models use the same deterministic dataset and identical 75/25 hold-out split, so Accuracy, Precision, Recall and F1 are directly comparable.</p>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">Run the same held-out dataset through three classifiers and compare Accuracy, Precision, Recall and F1.</p>
         </div>
         <div className="font-mono text-[10px] text-muted-foreground">train {result.train} · test {result.test}</div>
       </div>
@@ -164,8 +168,11 @@ export function MlModelComparison() {
         <label className="font-mono text-[10px] uppercase text-muted-foreground">k-NN k<input className={`${field} mt-1`} type="number" min={1} max={31} step={2} value={k} onChange={(e) => setK(Math.max(1, Number(e.target.value) | 1))} /></label>
         <label className="font-mono text-[10px] uppercase text-muted-foreground">Tree depth<input className={`${field} mt-1`} type="number" min={1} max={7} value={maxDepth} onChange={(e) => setMaxDepth(Number(e.target.value))} /></label>
       </div>
-      <Button type="button" variant="signal" className="mt-3" onClick={() => setRunId((x) => x + 1)}>Run comparison #{runId + 1}</Button>
-      <div className="mt-2 font-mono text-[10px] text-muted-foreground">active run seed {activeSeed} · each RUN generates a fresh comparison dataset</div>
+
+      <div className="mt-4 flex flex-wrap items-center gap-3">
+        <Button type="button" variant="signal" onClick={runComparison}>RUN COMPARISON</Button>
+        <div className="rounded-sm border border-primary/30 bg-primary/5 px-3 py-2 font-mono text-[10px] uppercase text-primary">Run #{runId} complete · seed {seed}</div>
+      </div>
 
       <div className="mt-5 overflow-x-auto rounded-sm border border-border">
         <table className="min-w-[720px] w-full border-collapse font-mono text-[11px]">
@@ -178,7 +185,7 @@ export function MlModelComparison() {
         </table>
       </div>
 
-      <p className="mt-3 text-[11px] leading-5 text-muted-foreground">Educational browser benchmark. Metrics are measured on held-out synthetic data; no claim is made that one model is universally superior.</p>
+      <p className="mt-3 text-[11px] leading-5 text-muted-foreground">Educational browser benchmark. Each RUN changes the seed and rebuilds the dataset, models and held-out metrics.</p>
     </section>
   );
 }
