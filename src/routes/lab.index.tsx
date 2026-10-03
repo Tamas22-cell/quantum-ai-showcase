@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowUpRight, BrainCircuit, FlaskConical } from "lucide-react";
+import { ArrowDown, ArrowUpRight, BrainCircuit, FlaskConical } from "lucide-react";
 
 import {
   ComputerVisionLab,
@@ -29,6 +29,19 @@ export const Route = createFileRoute("/lab/")({
   }),
   component: LabDashboard,
 });
+
+const AI_LABS = [
+  ["Machine Learning", "#ai-machine-learning"],
+  ["Model Comparison", "#ai-model-comparison"],
+  ["Deep Learning", "#ai-deep-learning"],
+  ["NLP & LLM", "#ai-nlp-llm"],
+  ["RAG", "#ai-rag"],
+  ["Computer Vision", "#ai-computer-vision"],
+  ["Reinforcement Learning", "#ai-reinforcement-learning"],
+  ["Time-Series", "#ai-time-series"],
+  ["Explainable AI", "#ai-explainable"],
+  ["MLOps", "#ai-mlops"],
+] as const;
 
 function LabDashboard() {
   return (
@@ -77,21 +90,29 @@ function LabDashboard() {
         <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-[0.18em] text-primary"><BrainCircuit className="size-4" aria-hidden="true" />AI Research Labs</div>
         <h2 className="mt-2 text-3xl font-semibold tracking-tight text-foreground">Interactive Artificial Intelligence</h2>
         <p className="mt-3 max-w-3xl text-sm leading-7 text-muted-foreground">
-          Machine learning, deep learning, NLP/LLM evaluation, retrieval-augmented generation, computer vision, reinforcement learning, forecasting, explainability and MLOps — directly on this page.
+          Choose a lab below. Every card is now clickable and jumps directly to the interactive controls for that experiment.
         </p>
+        <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {AI_LABS.map(([title, href]) => (
+            <a key={href} href={href} className="card-interactive flex items-center justify-between rounded-md border border-border bg-card p-4 font-mono text-xs font-semibold text-foreground hover:border-primary/50 hover:text-primary">
+              <span>{title}</span>
+              <ArrowDown className="size-4" aria-hidden="true" />
+            </a>
+          ))}
+        </div>
       </section>
 
-      <div className="space-y-6">
-        <MachineLearningLab />
-        <MlModelComparison />
-        <DeepLearningLab />
-        <NlpLlmLab />
-        <RagLab />
-        <ComputerVisionLab />
-        <ReinforcementLearningLab />
-        <TimeSeriesLab />
-        <ExplainableAiLab />
-        <MlOpsEvaluationLab />
+      <div className="space-y-8">
+        <section id="ai-machine-learning" className="scroll-mt-24"><MachineLearningLab /></section>
+        <section id="ai-model-comparison" className="scroll-mt-24"><MlModelComparison /></section>
+        <section id="ai-deep-learning" className="scroll-mt-24"><DeepLearningLab /></section>
+        <section id="ai-nlp-llm" className="scroll-mt-24"><NlpLlmLab /></section>
+        <section id="ai-rag" className="scroll-mt-24"><RagLab /></section>
+        <section id="ai-computer-vision" className="scroll-mt-24"><ComputerVisionLab /></section>
+        <section id="ai-reinforcement-learning" className="scroll-mt-24"><ReinforcementLearningLab /></section>
+        <section id="ai-time-series" className="scroll-mt-24"><TimeSeriesLab /></section>
+        <section id="ai-explainable" className="scroll-mt-24"><ExplainableAiLab /></section>
+        <section id="ai-mlops" className="scroll-mt-24"><MlOpsEvaluationLab /></section>
       </div>
     </LabShell>
   );
