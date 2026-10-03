@@ -1,4 +1,4 @@
-// Deployment refresh marker: benchmark-v2
+// Deployment refresh marker: benchmark-v3-mobile
 export function PortfolioSimulationBenchmarks() {
   const rows = [
     {
@@ -34,14 +34,49 @@ export function PortfolioSimulationBenchmarks() {
   ];
 
   return (
-    <section className="mt-6 rounded-md border border-border bg-card p-5">
+    <section className="mt-6 rounded-md border border-border bg-card p-4 sm:p-5">
       <div className="font-mono text-xs uppercase tracking-[0.18em] text-primary">Quantum Simulation Benchmarks</div>
       <h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">Classical vs Ideal QAOA vs Noisy QAOA</h2>
       <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
         The portfolio QUBO is now evaluated through three comparable paths: an exact classical reference, a reproducible ideal QAOA simulator and a shot-based noisy QAOA simulator.
       </p>
 
-      <div className="mt-5 overflow-x-auto rounded-sm border border-border">
+      <div className="mt-5 grid grid-cols-1 gap-3 md:hidden">
+        {rows.map((row) => (
+          <article key={row.method} className="rounded-sm border border-border bg-surface p-4">
+            <div className="flex items-start justify-between gap-3">
+              <h3 className="font-mono text-sm font-semibold text-foreground">{row.method}</h3>
+              <span className={`inline-flex shrink-0 rounded-full border px-2 py-1 font-mono text-[10px] font-semibold ${row.statusClass}`}>
+                {row.status}
+              </span>
+            </div>
+            <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 font-mono text-[11px]">
+              <div>
+                <dt className="text-muted-foreground">Engine</dt>
+                <dd className="mt-1 text-foreground">{row.engine}</dd>
+              </div>
+              <div>
+                <dt className="text-muted-foreground">Noise</dt>
+                <dd className="mt-1 text-foreground">{row.noise}</dd>
+              </div>
+              <div>
+                <dt className="text-muted-foreground">Shots</dt>
+                <dd className="mt-1 text-foreground">{row.shots}</dd>
+              </div>
+              <div>
+                <dt className="text-muted-foreground">Objective</dt>
+                <dd className="mt-1 text-foreground">{row.objective}</dd>
+              </div>
+              <div className="col-span-2">
+                <dt className="text-muted-foreground">Runtime</dt>
+                <dd className="mt-1 text-foreground">{row.runtime}</dd>
+              </div>
+            </dl>
+          </article>
+        ))}
+      </div>
+
+      <div className="mt-5 hidden overflow-x-auto rounded-sm border border-border md:block">
         <table className="min-w-[760px] w-full border-collapse font-mono text-[11px]">
           <thead className="bg-surface text-muted-foreground">
             <tr>
