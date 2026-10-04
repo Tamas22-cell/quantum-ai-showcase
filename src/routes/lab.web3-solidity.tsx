@@ -12,12 +12,12 @@ export const Route = createFileRoute("/lab/web3-solidity")({
       {
         name: "description",
         content:
-          "Interactive Web3 lab with real Solidity compilation, wallet-free sandbox execution, live Sepolia telemetry and optional wallet connection.",
+          "Interactive Web3 lab with real Solidity compilation, ABI explorer, generated function controls, wallet-free sandbox execution and live Sepolia telemetry.",
       },
       { property: "og:title", content: "Web3 & Solidity Lab — Quantum AI Lab" },
       {
         property: "og:description",
-        content: "Edit and compile real Solidity source into ABI and EVM bytecode, then explore it in an interactive sandbox.",
+        content: "Compile Solidity into ABI and bytecode, inspect functions and interact with them through an ABI-driven sandbox.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -49,9 +49,24 @@ type EthereumProvider = {
   request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
 };
 
+type AbiParameter = {
+  name?: string;
+  type?: string;
+  indexed?: boolean;
+};
+
+type AbiEntry = {
+  type?: string;
+  name?: string;
+  stateMutability?: string;
+  inputs?: AbiParameter[];
+  outputs?: AbiParameter[];
+};
+
 type SandboxTx = {
   hash: string;
   type: "deploy" | "write" | "read";
+  label: string;
   status: "confirmed";
   gas: number;
   time: string;
@@ -60,13 +75,6 @@ type SandboxTx = {
 type SandboxEvent = {
   name: string;
   detail: string;
-  time: string;
-};
-
-type StoredRecord = {
-  id: string;
-  key: string;
-  value: string;
   time: string;
 };
 
@@ -113,18 +121,25 @@ async function publicRpc(method: string, params: unknown[] = []) {
   throw lastError instanceof Error ? lastError : new Error("Public Sepolia RPC unavailable");
 }
 
-async function sha256(value: string) {
-  const bytes = new TextEncoder().encode(value);
-  const digest = await crypto.subtle.digest("SHA-256", bytes);
-  return `0x${Array.from(new Uint8Array(digest))
-    .map((byte) => byte.toString(16).padStart(2, "0"))
-    .join("")}`;
-}
-
 function randomHash() {
   let out = "";
   for (let i = 0; i < 64; i += 1) out += Math.floor(Math.random() * 16).toString(16);
   return `0x${out}`;
+}
+
+function defaultArgument(type = "") {
+  if (type === "bool") return "true";
+  if (type.startsWith("uint") || type.startsWith("int")) return "42";
+  if (type === "address") return "0x0000000000000000000000000000000000000001";
+  if (type.startsWith("bytes32")) return `0x${"0".repeat(64)}`;
+  if (type.startsWith("bytes")) return "0x";
+  if (type.includes("[]")) return "[]";
+  return "QAOA portfolio run";
+}
+
+function functionSignature(entry: AbiEntry) {
+  const inputs = (entry.inputs ?? []).map((input) => input.type || "unknown").join(", ");
+  return `${entry.name || "function"}(${inputs})`;
 }
 
 function Web3SolidityLab() {
@@ -132,7 +147,7 @@ function Web3SolidityLab() {
   const [compileStatus, setCompileStatus] = useState("Ready to compile");
   const [compilerVersion, setCompilerVersion] = useState("—");
   const [contractName, setContractName] = useState("—");
-  const [abi, setAbi] = useState("[]");
+  const [abiEntries, setAbiEntries] = useState<AbiEntry[]>([]);
   const [bytecode, setBytecode] = useState("");
   const [compileMessages, setCompileMessages] = useState<string[]>([]);
 
@@ -142,24 +157,24 @@ function Web3SolidityLab() {
   const [networkStatus, setNetworkStatus] = useState("Sepolia · public RPC");
 
   const [sandboxContract, setSandboxContract] = useState("");
-  const [sandboxValue, setSandboxValue] = useState("42");
-  const [sandboxStoredValue, setSandboxStoredValue] = useState("—");
   const [sandboxGas, setSandboxGas] = useState("—");
   const [sandboxTxs, setSandboxTxs] = useState<SandboxTx[]>([]);
   const [sandboxEvents, setSandboxEvents] = useState<SandboxEvent[]>([
     { name: "SANDBOX_READY", detail: "Wallet-free Web3 engine initialized", time: new Date().toLocaleTimeString() },
   ]);
 
+  const [functionArgs, setFunctionArgs] = useState<Record<string, string[]>>({});
+  const [functionResults, setFunctionResults] = useState<Record<string, string>>( {} );
+  const [sandboxStorage, setSandboxStorage] = useState<Record<string, string>>({});
+
   const [wallet, setWallet] = useState("");
   const [walletStatus, setWalletStatus] = useState("Optional · not connected");
   const [chainStatus, setChainStatus] = useState("Wallet actions inactive");
 
-  const [recordKey, setRecordKey] = useState("experiment-001");
-  const [recordValue, setRecordValue] = useState("QAOA portfolio run");
-  const [records, setRecords] = useState<StoredRecord[]>([]);
-
-  const sandboxReady = useMemo(() => Boolean(sandboxContract), [sandboxContract]);
   const compiledReady = Boolean(bytecode);
+  const sandboxReady = Boolean(sandboxContract);
+  const functions = useMemo(() => abiEntries.filter((entry) => entry.type === "function"), [abiEntries]);
+  const events = useMemo(() => abiEntries.filter((entry) => entry.type === "event"), [abiEntries]);
 
   function getProvider() {
     const provider = (window as typeof window & { ethereum?: EthereumProvider }).ethereum;
@@ -171,14 +186,14 @@ function Web3SolidityLab() {
     setSandboxEvents((current) => [
       { name, detail, time: new Date().toLocaleTimeString() },
       ...current,
-    ].slice(0, 10));
+    ].slice(0, 12));
   }
 
-  function pushTx(type: SandboxTx["type"], hash: string, gas: number) {
+  function pushTx(type: SandboxTx["type"], label: string, gas: number) {
     setSandboxTxs((current) => [
-      { hash, type, status: "confirmed", gas, time: new Date().toLocaleTimeString() },
+      { hash: randomHash(), type, label, status: "confirmed", gas, time: new Date().toLocaleTimeString() },
       ...current,
-    ].slice(0, 10));
+    ].slice(0, 12));
   }
 
   async function refreshNetwork() {
@@ -207,6 +222,9 @@ function Web3SolidityLab() {
     setCompileStatus("Compiling with solc…");
     setCompileMessages([]);
     setBytecode("");
+    setAbiEntries([]);
+    setFunctionArgs({});
+    setFunctionResults({});
     try {
       const result = await compileSolidity({ data: { source } });
       setCompilerVersion(result.compilerVersion);
@@ -215,12 +233,23 @@ function Web3SolidityLab() {
         setCompileMessages([...result.errors, ...result.warnings]);
         return;
       }
+
+      const parsedAbi = result.abi as AbiEntry[];
       setContractName(result.contractName);
-      setAbi(JSON.stringify(result.abi, null, 2));
+      setAbiEntries(parsedAbi);
       setBytecode(result.bytecode);
       setCompileMessages(result.warnings);
       setCompileStatus("Compiled successfully");
-      pushEvent("SOLIDITY_COMPILED", `${result.contractName} → ABI + ${result.bytecode.length / 2 - 1} byte bytecode`);
+
+      const defaults: Record<string, string[]> = {};
+      parsedAbi
+        .filter((entry) => entry.type === "function")
+        .forEach((entry, index) => {
+          const key = `${entry.name || "function"}-${index}`;
+          defaults[key] = (entry.inputs ?? []).map((input) => defaultArgument(input.type));
+        });
+      setFunctionArgs(defaults);
+      pushEvent("SOLIDITY_COMPILED", `${result.contractName} → ABI + ${Math.max(0, result.bytecode.length / 2 - 1)} byte bytecode`);
     } catch (error) {
       setCompileStatus("Compilation request failed");
       setCompileMessages([error instanceof Error ? error.message : "Compiler request failed"]);
@@ -240,36 +269,64 @@ function Web3SolidityLab() {
       return;
     }
     const address = `0x${randomHash().slice(2, 42)}`;
-    const hash = randomHash();
     const gas = Math.max(91_000, Math.round(bytecode.length * 6.7)) + Math.floor(Math.random() * 4_000);
     setSandboxContract(address);
-    setSandboxStoredValue("0");
     setSandboxGas(gas.toLocaleString());
-    pushTx("deploy", hash, gas);
-    pushEvent("CONTRACT_DEPLOYED", `${contractName} ${short(address)} deployed in SANDBOX from compiled bytecode`);
+    setSandboxStorage({});
+    setFunctionResults({});
+    pushTx("deploy", contractName, gas);
+    pushEvent("CONTRACT_DEPLOYED", `${contractName} ${short(address)} deployed in ABI SANDBOX`);
   }
 
-  function writeSandbox() {
-    if (!sandboxReady) {
-      pushEvent("ACTION_BLOCKED", "Compile and deploy the SANDBOX contract first");
-      return;
-    }
-    const gas = 43_000 + Math.floor(Math.random() * 4_000);
-    const hash = randomHash();
-    setSandboxStoredValue(sandboxValue || "0");
-    setSandboxGas(gas.toLocaleString());
-    pushTx("write", hash, gas);
-    pushEvent("VALUE_STORED", `Stored value ${sandboxValue || "0"}`);
+  function updateFunctionArg(key: string, index: number, value: string) {
+    setFunctionArgs((current) => {
+      const next = [...(current[key] ?? [])];
+      next[index] = value;
+      return { ...current, [key]: next };
+    });
   }
 
-  function readSandbox() {
+  function executeFunction(entry: AbiEntry, key: string) {
     if (!sandboxReady) {
-      pushEvent("ACTION_BLOCKED", "Compile and deploy the SANDBOX contract first");
+      pushEvent("ACTION_BLOCKED", "Deploy the compiled contract in SANDBOX first");
       return;
     }
-    const hash = randomHash();
-    pushTx("read", hash, 0);
-    pushEvent("VALUE_READ", `Read value ${sandboxStoredValue}`);
+
+    const args = functionArgs[key] ?? [];
+    const signature = functionSignature(entry);
+    const isRead = entry.stateMutability === "view" || entry.stateMutability === "pure";
+
+    if (entry.name === "store" && args.length >= 2) {
+      const storageKey = args[0] || `0x${"0".repeat(64)}`;
+      const value = args[1] || "";
+      setSandboxStorage((current) => ({ ...current, [storageKey]: value }));
+      setFunctionResults((current) => ({ ...current, [key]: `tx confirmed · stored \"${value}\"` }));
+      pushTx("write", signature, 44_000 + Math.floor(Math.random() * 3_000));
+      pushEvent("RecordStored", `${short(storageKey)} → ${value}`);
+      return;
+    }
+
+    if (entry.name === "records" && args.length >= 1) {
+      const value = sandboxStorage[args[0]] ?? "";
+      setFunctionResults((current) => ({ ...current, [key]: value || "(empty string)" }));
+      pushTx("read", signature, 0);
+      pushEvent("CALL", `${signature} → ${value || "empty"}`);
+      return;
+    }
+
+    if (isRead) {
+      const outputTypes = (entry.outputs ?? []).map((output) => output.type || "value").join(", ") || "no return value";
+      const result = `SANDBOX result (${outputTypes})`;
+      setFunctionResults((current) => ({ ...current, [key]: result }));
+      pushTx("read", signature, 0);
+      pushEvent("CALL", `${signature} executed`);
+      return;
+    }
+
+    const gas = 38_000 + Math.floor(Math.random() * 12_000);
+    setFunctionResults((current) => ({ ...current, [key]: `tx confirmed · ${gas.toLocaleString()} gas` }));
+    pushTx("write", signature, gas);
+    pushEvent("FUNCTION_CALL", `${signature}(${args.join(", ")})`);
   }
 
   async function connectWallet() {
@@ -296,16 +353,6 @@ function Web3SolidityLab() {
     }
   }
 
-  async function storeRegistryRecord() {
-    const key = recordKey.trim();
-    const value = recordValue.trim();
-    if (!key || !value) return;
-    const id = await sha256(key);
-    const next = { id, key, value, time: new Date().toLocaleTimeString() };
-    setRecords((current) => [next, ...current.filter((item) => item.id !== id)]);
-    pushEvent("RecordStored", `${key} → ${value}`);
-  }
-
   return (
     <LabShell crumb="Web3 & Solidity">
       <div className="mb-8 max-w-3xl">
@@ -318,26 +365,19 @@ function Web3SolidityLab() {
         </div>
         <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">Web3 & Solidity Lab</h1>
         <p className="mt-3 text-sm leading-7 text-muted-foreground">
-          Edit real Solidity source, compile it server-side with solc into ABI and EVM bytecode, then use the compiled artifact in the wallet-free sandbox.
+          Solidity Editor → real solc compilation → ABI explorer → automatically generated function controls → wallet-free contract sandbox.
         </p>
       </div>
 
       <section className="mb-8 rounded-md border border-violet-500/50 bg-violet-500/5 p-5 sm:p-6">
         <div className="font-mono text-xs uppercase tracking-wider text-violet-400">1 · Real Solidity compiler</div>
         <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-2xl font-semibold">Solidity Editor → Compile → ABI + Bytecode</h2>
+          <h2 className="text-2xl font-semibold">Solidity Editor → Compile</h2>
           <span className="rounded-full border border-violet-500/40 bg-violet-500/10 px-3 py-1 font-mono text-[10px] uppercase text-violet-300">solc server compiler</span>
         </div>
-        <p className="mt-2 text-sm leading-6 text-muted-foreground">
-          This is real compilation, not a visual simulation. Edit the contract and press Compile Solidity.
-        </p>
+        <p className="mt-2 text-sm leading-6 text-muted-foreground">Edit the Solidity source. Compilation produces the real ABI and EVM bytecode used by the sections below.</p>
 
-        <textarea
-          value={source}
-          onChange={(event) => setSource(event.target.value)}
-          spellCheck={false}
-          className="mt-5 min-h-[360px] w-full rounded-md border border-border bg-background p-4 font-mono text-xs leading-6 text-foreground outline-none focus:border-violet-500/60"
-        />
+        <textarea value={source} onChange={(event) => setSource(event.target.value)} spellCheck={false} className="mt-5 min-h-[360px] w-full rounded-md border border-border bg-background p-4 font-mono text-xs leading-6 text-foreground outline-none focus:border-violet-500/60" />
 
         <div className="mt-4 flex flex-wrap items-center gap-3">
           <button type="button" onClick={() => void compileSource()} className="rounded-md border border-violet-500/60 bg-violet-500/10 px-5 py-2.5 font-mono text-xs font-semibold text-violet-300 hover:bg-violet-500/15">Compile Solidity</button>
@@ -351,36 +391,111 @@ function Web3SolidityLab() {
         </div>
 
         {compileMessages.length > 0 ? <div className="mt-4 rounded-md border border-border bg-background p-4"><div className="font-mono text-[10px] uppercase text-muted-foreground">Compiler messages</div><div className="mt-3 space-y-2">{compileMessages.map((message, index) => <pre key={index} className="whitespace-pre-wrap break-words font-mono text-[10px] leading-5 text-muted-foreground">{message}</pre>)}</div></div> : null}
-
-        {compiledReady ? <div className="mt-4 grid gap-4 lg:grid-cols-2"><div className="rounded-md border border-border bg-background p-4"><div className="font-mono text-[10px] uppercase text-muted-foreground">ABI</div><pre className="mt-3 max-h-72 overflow-auto whitespace-pre-wrap break-all font-mono text-[10px] leading-5">{abi}</pre></div><div className="rounded-md border border-border bg-background p-4"><div className="font-mono text-[10px] uppercase text-muted-foreground">EVM bytecode</div><pre className="mt-3 max-h-72 overflow-auto whitespace-pre-wrap break-all font-mono text-[10px] leading-5">{bytecode}</pre></div></div> : null}
       </section>
+
+      {compiledReady ? (
+        <section className="mb-8 rounded-md border border-cyan-500/40 bg-cyan-500/5 p-5 sm:p-6">
+          <div className="font-mono text-xs uppercase tracking-wider text-cyan-400">2 · ABI explorer</div>
+          <h2 className="mt-2 text-2xl font-semibold">Contract Interface</h2>
+          <p className="mt-2 text-sm text-muted-foreground">Generated automatically from the compiled ABI. Functions, parameters, mutability and events are shown separately.</p>
+
+          <div className="mt-5 grid gap-4 lg:grid-cols-2">
+            <div className="rounded-md border border-border bg-card p-4">
+              <div className="font-mono text-[10px] uppercase text-muted-foreground">Functions · {functions.length}</div>
+              <div className="mt-3 space-y-2">
+                {functions.map((entry, index) => (
+                  <div key={`${entry.name}-${index}`} className="rounded-md border border-border bg-background p-3">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <code className="font-mono text-xs font-semibold text-cyan-300">{functionSignature(entry)}</code>
+                      <span className="rounded-full border border-border px-2 py-0.5 font-mono text-[9px] uppercase text-muted-foreground">{entry.stateMutability || "nonpayable"}</span>
+                    </div>
+                    {(entry.outputs ?? []).length > 0 ? <div className="mt-2 font-mono text-[10px] text-muted-foreground">returns {(entry.outputs ?? []).map((output) => output.type).join(", ")}</div> : null}
+                  </div>
+                ))}
+                {functions.length === 0 ? <p className="text-sm text-muted-foreground">No public/external functions in ABI.</p> : null}
+              </div>
+            </div>
+
+            <div className="rounded-md border border-border bg-card p-4">
+              <div className="font-mono text-[10px] uppercase text-muted-foreground">Events · {events.length}</div>
+              <div className="mt-3 space-y-2">
+                {events.map((entry, index) => (
+                  <div key={`${entry.name}-${index}`} className="rounded-md border border-border bg-background p-3">
+                    <code className="font-mono text-xs font-semibold text-amber-300">{entry.name}({(entry.inputs ?? []).map((input) => `${input.type}${input.indexed ? " indexed" : ""}`).join(", ")})</code>
+                  </div>
+                ))}
+                {events.length === 0 ? <p className="text-sm text-muted-foreground">No events in ABI.</p> : null}
+              </div>
+            </div>
+          </div>
+
+          <details className="mt-4 rounded-md border border-border bg-background p-4">
+            <summary className="cursor-pointer font-mono text-xs text-muted-foreground">Raw ABI JSON</summary>
+            <pre className="mt-3 max-h-72 overflow-auto whitespace-pre-wrap break-all font-mono text-[10px] leading-5">{JSON.stringify(abiEntries, null, 2)}</pre>
+          </details>
+        </section>
+      ) : null}
 
       <section className="mb-8 rounded-md border border-emerald-500/50 bg-emerald-500/5 p-5 sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <div className="font-mono text-xs uppercase tracking-wider text-emerald-400">2 · Compiled artifact sandbox</div>
-            <h2 className="mt-2 text-2xl font-semibold">Deploy + Write + Read</h2>
+            <div className="font-mono text-xs uppercase tracking-wider text-emerald-400">3 · ABI-driven contract sandbox</div>
+            <h2 className="mt-2 text-2xl font-semibold">Deploy + Automatic Function Interaction</h2>
           </div>
           <span className="rounded-full border border-emerald-500/40 bg-emerald-500/10 px-3 py-1 font-mono text-[10px] font-semibold uppercase text-emerald-400">No wallet required</span>
         </div>
-        <p className="mt-2 max-w-4xl text-sm leading-6 text-muted-foreground">Compile first. The sandbox deployment uses the compiled artifact metadata, while execution remains a clearly labelled browser simulation and broadcasts no blockchain transaction.</p>
+        <p className="mt-2 max-w-4xl text-sm leading-6 text-muted-foreground">After compilation, inputs and buttons below are generated from the ABI. Calls execute inside the labelled browser SANDBOX; they do not broadcast real Ethereum transactions.</p>
 
-        <div className="mt-5 grid gap-4 xl:grid-cols-3">
-          <div className="rounded-md border border-border bg-card p-4">
-            <div className="font-mono text-[10px] uppercase text-muted-foreground">Deploy compiled contract</div>
-            <div className="mt-3 flex flex-wrap gap-2"><button type="button" onClick={estimateSandboxDeployGas} className="rounded-md border border-border bg-background px-4 py-2 font-mono text-xs font-semibold hover:border-primary/50">Estimate Gas</button><button type="button" onClick={deploySandbox} className="rounded-md border border-emerald-500/50 bg-emerald-500/10 px-4 py-2 font-mono text-xs font-semibold text-emerald-400 hover:bg-emerald-500/15">Deploy SANDBOX</button></div>
-            <p className="mt-3 font-mono text-xs text-muted-foreground">Gas: <span className="text-foreground">{sandboxGas}</span></p>
-            <p className="mt-2 break-all font-mono text-xs text-muted-foreground">Contract: <span className="text-foreground">{sandboxContract || "Not deployed"}</span></p>
+        <div className="mt-5 rounded-md border border-border bg-card p-4">
+          <div className="font-mono text-[10px] uppercase text-muted-foreground">Deploy compiled artifact</div>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button type="button" onClick={estimateSandboxDeployGas} className="rounded-md border border-border bg-background px-4 py-2 font-mono text-xs font-semibold hover:border-primary/50">Estimate Gas</button>
+            <button type="button" onClick={deploySandbox} className="rounded-md border border-emerald-500/50 bg-emerald-500/10 px-4 py-2 font-mono text-xs font-semibold text-emerald-400 hover:bg-emerald-500/15">Deploy ABI SANDBOX</button>
           </div>
-
-          <div className="rounded-md border border-border bg-card p-4"><div className="font-mono text-[10px] uppercase text-muted-foreground">Write</div><label className="mt-3 block text-xs text-muted-foreground">Integer value<input value={sandboxValue} onChange={(event) => setSandboxValue(event.target.value)} inputMode="numeric" className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 font-mono text-xs outline-none focus:border-primary" /></label><button type="button" onClick={writeSandbox} className="mt-3 rounded-md border border-primary/50 bg-primary/10 px-4 py-2 font-mono text-xs font-semibold text-primary hover:bg-primary/15">Write Value</button></div>
-          <div className="rounded-md border border-border bg-card p-4"><div className="font-mono text-[10px] uppercase text-muted-foreground">Read</div><button type="button" onClick={readSandbox} className="mt-3 rounded-md border border-border bg-background px-4 py-2 font-mono text-xs font-semibold hover:border-primary/50">Read Value</button><div className="mt-4 rounded-md border border-border bg-background p-4 text-center"><div className="font-mono text-[10px] uppercase text-muted-foreground">Stored value</div><div className="mt-2 font-mono text-3xl font-semibold text-primary">{sandboxStoredValue}</div></div></div>
+          <p className="mt-3 font-mono text-xs text-muted-foreground">Gas: <span className="text-foreground">{sandboxGas}</span></p>
+          <p className="mt-2 break-all font-mono text-xs text-muted-foreground">Contract: <span className="text-foreground">{sandboxContract || "Not deployed"}</span></p>
         </div>
+
+        {functions.length > 0 ? (
+          <div className="mt-4 grid gap-4 lg:grid-cols-2">
+            {functions.map((entry, index) => {
+              const key = `${entry.name || "function"}-${index}`;
+              const isRead = entry.stateMutability === "view" || entry.stateMutability === "pure";
+              return (
+                <div key={key} className="rounded-md border border-border bg-card p-4">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <code className="font-mono text-xs font-semibold text-foreground">{functionSignature(entry)}</code>
+                    <span className={`rounded-full border px-2 py-0.5 font-mono text-[9px] uppercase ${isRead ? "border-cyan-500/40 text-cyan-300" : "border-amber-500/40 text-amber-300"}`}>{isRead ? "READ" : "WRITE"}</span>
+                  </div>
+
+                  <div className="mt-3 space-y-2">
+                    {(entry.inputs ?? []).map((input, inputIndex) => (
+                      <label key={`${key}-${inputIndex}`} className="block text-xs text-muted-foreground">
+                        {input.name || `arg${inputIndex}`} · {input.type}
+                        <input value={functionArgs[key]?.[inputIndex] ?? ""} onChange={(event) => updateFunctionArg(key, inputIndex, event.target.value)} className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 font-mono text-xs text-foreground outline-none focus:border-primary" />
+                      </label>
+                    ))}
+                  </div>
+
+                  <button type="button" onClick={() => executeFunction(entry, key)} className={`mt-3 rounded-md border px-4 py-2 font-mono text-xs font-semibold ${isRead ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-300" : "border-amber-500/50 bg-amber-500/10 text-amber-300"}`}>{isRead ? "Call Function" : "Send SANDBOX Tx"}</button>
+
+                  {functionResults[key] ? <div className="mt-3 rounded-md border border-border bg-background p-3 font-mono text-xs text-emerald-300">{functionResults[key]}</div> : null}
+                </div>
+              );
+            })}
+          </div>
+        ) : <p className="mt-4 text-sm text-muted-foreground">Compile a Solidity contract to generate function controls.</p>}
       </section>
 
       <section className="mb-8 grid gap-4 lg:grid-cols-2">
-        <div className="rounded-md border border-border bg-card p-5"><div className="flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-primary"><Zap className="size-4" />SANDBOX transaction history</div>{sandboxTxs.length === 0 ? <p className="mt-3 text-sm text-muted-foreground">No sandbox transactions yet.</p> : <div className="mt-4 space-y-2">{sandboxTxs.map((tx) => <div key={tx.hash} className="rounded-md border border-border bg-background p-3"><div className="flex items-center justify-between gap-3"><span className="font-mono text-xs font-semibold uppercase">{tx.type}</span><span className="font-mono text-[10px] text-emerald-400">CONFIRMED</span></div><div className="mt-1 break-all font-mono text-[10px] text-muted-foreground">{tx.hash}</div><div className="mt-1 font-mono text-[10px] text-muted-foreground">gas: {tx.gas.toLocaleString()} · {tx.time}</div></div>)}</div>}</div>
-        <div className="rounded-md border border-border bg-card p-5"><div className="flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-primary"><Activity className="size-4" />Event log</div><div className="mt-4 space-y-3">{sandboxEvents.map((event, index) => <div key={`${event.time}-${index}`} className="relative border-l border-primary/30 pl-4"><span className="absolute -left-1 top-1.5 size-2 rounded-full bg-primary shadow-[0_0_12px_currentColor]" /><div className="font-mono text-[10px] uppercase text-primary">{event.name}</div><div className="mt-1 text-xs">{event.detail}</div><div className="mt-1 font-mono text-[9px] text-muted-foreground">{event.time}</div></div>)}</div></div>
+        <div className="rounded-md border border-border bg-card p-5">
+          <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-primary"><Zap className="size-4" />SANDBOX transaction history</div>
+          {sandboxTxs.length === 0 ? <p className="mt-3 text-sm text-muted-foreground">No sandbox transactions yet.</p> : <div className="mt-4 space-y-2">{sandboxTxs.map((tx) => <div key={tx.hash} className="rounded-md border border-border bg-background p-3"><div className="flex items-center justify-between gap-3"><span className="font-mono text-xs font-semibold uppercase">{tx.type} · {tx.label}</span><span className="font-mono text-[10px] text-emerald-400">CONFIRMED</span></div><div className="mt-1 break-all font-mono text-[10px] text-muted-foreground">{tx.hash}</div><div className="mt-1 font-mono text-[10px] text-muted-foreground">gas: {tx.gas.toLocaleString()} · {tx.time}</div></div>)}</div>}
+        </div>
+        <div className="rounded-md border border-border bg-card p-5">
+          <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-primary"><Activity className="size-4" />Decoded event / activity log</div>
+          <div className="mt-4 space-y-3">{sandboxEvents.map((event, index) => <div key={`${event.time}-${index}`} className="relative border-l border-primary/30 pl-4"><span className="absolute -left-1 top-1.5 size-2 rounded-full bg-primary shadow-[0_0_12px_currentColor]" /><div className="font-mono text-[10px] uppercase text-primary">{event.name}</div><div className="mt-1 text-xs">{event.detail}</div><div className="mt-1 font-mono text-[9px] text-muted-foreground">{event.time}</div></div>)}</div>
+        </div>
       </section>
 
       <section className="mb-8 overflow-hidden rounded-md border border-primary/40 bg-card">
@@ -388,11 +503,19 @@ function Web3SolidityLab() {
         <div className="grid gap-px bg-border md:grid-cols-3"><div className="bg-card p-5"><div className="flex items-center gap-2 font-mono text-[10px] uppercase text-muted-foreground"><Activity className="size-4 text-emerald-400" />Network</div><div className="mt-2 text-lg font-semibold">{networkStatus}</div><div className="mt-1 font-mono text-[10px] text-muted-foreground">updated {lastRefresh}</div></div><div className="bg-card p-5"><div className="flex items-center gap-2 font-mono text-[10px] uppercase text-muted-foreground"><Blocks className="size-4 text-primary" />Latest block</div><div className="mt-2 font-mono text-xl font-semibold">#{liveBlock}</div></div><div className="bg-card p-5"><div className="flex items-center gap-2 font-mono text-[10px] uppercase text-muted-foreground"><Fuel className="size-4 text-amber-400" />Gas price</div><div className="mt-2 text-xl font-semibold">{liveGas} <span className="text-xs text-muted-foreground">Gwei</span></div></div></div>
       </section>
 
-      <section className="mb-8 rounded-md border border-primary/40 bg-primary/5 p-5 sm:p-6"><div className="font-mono text-xs uppercase tracking-wider text-primary">Research Registry</div><h2 className="mt-2 text-xl font-semibold">Browser-local Solidity logic demo</h2><div className="mt-4 grid gap-3 sm:grid-cols-2"><label className="text-xs text-muted-foreground">Record key<input value={recordKey} onChange={(event) => setRecordKey(event.target.value)} className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 font-mono text-xs outline-none focus:border-primary" /></label><label className="text-xs text-muted-foreground">Record value<input value={recordValue} onChange={(event) => setRecordValue(event.target.value)} className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 font-mono text-xs outline-none focus:border-primary" /></label></div><button type="button" onClick={() => void storeRegistryRecord()} className="mt-3 rounded-md border border-emerald-500/50 bg-emerald-500/10 px-4 py-2 font-mono text-xs font-semibold text-emerald-400">Store Record</button>{records.length > 0 ? <div className="mt-4 space-y-2">{records.map((record) => <div key={record.id} className="rounded-md border border-border bg-card p-3"><div className="font-mono text-xs font-semibold">{record.key} → {record.value}</div><div className="mt-1 break-all font-mono text-[10px] text-muted-foreground">{record.id} · {record.time}</div></div>)}</div> : null}</section>
+      <section className="mb-8 rounded-md border border-border bg-card p-5 sm:p-6">
+        <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-muted-foreground"><WalletCards className="size-4" />Optional real wallet mode</div>
+        <h2 className="mt-2 text-xl font-semibold">Connect an EVM Wallet</h2>
+        <p className="mt-2 text-sm text-muted-foreground">Only needed for future real signed deployment. Compilation, ABI inspection and SANDBOX interaction work without a wallet.</p>
+        <div className="mt-4 flex flex-wrap gap-2"><button type="button" onClick={connectWallet} className="rounded-md border border-primary/50 bg-primary/10 px-4 py-2 font-mono text-xs font-semibold text-primary">Connect Wallet</button><button type="button" onClick={switchToSepolia} className="rounded-md border border-border bg-background px-4 py-2 font-mono text-xs font-semibold">Switch to Sepolia</button></div>
+        <p className="mt-3 break-all font-mono text-xs text-muted-foreground">{walletStatus}</p><p className="mt-1 break-all font-mono text-xs text-muted-foreground">{chainStatus}</p>{wallet ? <p className="mt-1 break-all font-mono text-xs text-emerald-400">Wallet: {wallet}</p> : null}
+      </section>
 
-      <section className="mb-8 rounded-md border border-border bg-card p-5 sm:p-6"><div className="flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-muted-foreground"><WalletCards className="size-4" />Optional real wallet mode</div><h2 className="mt-2 text-xl font-semibold">Connect an EVM Wallet</h2><p className="mt-2 text-sm text-muted-foreground">Only needed for future real signed deployment. Compilation above works without a wallet.</p><div className="mt-4 flex flex-wrap gap-2"><button type="button" onClick={connectWallet} className="rounded-md border border-primary/50 bg-primary/10 px-4 py-2 font-mono text-xs font-semibold text-primary">Connect Wallet</button><button type="button" onClick={switchToSepolia} className="rounded-md border border-border bg-background px-4 py-2 font-mono text-xs font-semibold">Switch to Sepolia</button></div><p className="mt-3 break-all font-mono text-xs text-muted-foreground">{walletStatus}</p><p className="mt-1 break-all font-mono text-xs text-muted-foreground">{chainStatus}</p>{wallet ? <p className="mt-1 break-all font-mono text-xs text-emerald-400">Wallet: {wallet}</p> : null}</section>
-
-      <section className="grid gap-4 md:grid-cols-3"><article className="rounded-md border border-border bg-card p-5"><Braces className="size-5 text-primary" /><h2 className="mt-4 text-lg font-semibold">Solidity</h2><p className="mt-2 text-sm text-muted-foreground">Real solc compilation to ABI and EVM bytecode.</p></article><article className="rounded-md border border-border bg-card p-5"><Activity className="size-5 text-primary" /><h2 className="mt-4 text-lg font-semibold">EVM</h2><p className="mt-2 text-sm text-muted-foreground">Compiled artifacts, gas, deployment and state interaction.</p></article><article className="rounded-md border border-border bg-card p-5"><ShieldCheck className="size-5 text-primary" /><h2 className="mt-4 text-lg font-semibold">Security</h2><p className="mt-2 text-sm text-muted-foreground">Server-side compiler, no private key storage and sandbox-first workflow.</p></article></section>
+      <section className="grid gap-4 md:grid-cols-3">
+        <article className="rounded-md border border-border bg-card p-5"><Braces className="size-5 text-primary" /><h2 className="mt-4 text-lg font-semibold">Solidity</h2><p className="mt-2 text-sm text-muted-foreground">Real solc compilation, ABI explorer and generated contract controls.</p></article>
+        <article className="rounded-md border border-border bg-card p-5"><Activity className="size-5 text-primary" /><h2 className="mt-4 text-lg font-semibold">EVM</h2><p className="mt-2 text-sm text-muted-foreground">Compiled bytecode, ABI-driven calls, gas and sandbox transactions.</p></article>
+        <article className="rounded-md border border-border bg-card p-5"><ShieldCheck className="size-5 text-primary" /><h2 className="mt-4 text-lg font-semibold">Security</h2><p className="mt-2 text-sm text-muted-foreground">Server-side compilation, no private-key storage and sandbox-first workflow.</p></article>
+      </section>
     </LabShell>
   );
 }
