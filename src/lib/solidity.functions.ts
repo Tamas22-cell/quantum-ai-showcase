@@ -33,8 +33,10 @@ export const compileSolidity = createServerFn({ method: "POST" })
     let compilerVersion = "solc";
 
     try {
-      const module = await import("solc");
-      const solc = ((module as { default?: unknown }).default ?? module) as unknown as SolcLike;
+      const { createRequire } = await import("node:module");
+      const require = createRequire(import.meta.url);
+      const loaded = require("solc") as SolcLike | { default?: SolcLike };
+      const solc = ("default" in loaded && loaded.default ? loaded.default : loaded) as SolcLike;
 
       if (typeof solc?.compile !== "function" || typeof solc?.version !== "function") {
         throw new Error("Solidity compiler API is unavailable on the server.");
