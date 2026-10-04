@@ -3,14 +3,22 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Activity, Blocks, Braces, Fuel, Radio, ShieldCheck, WalletCards, Zap } from "lucide-react";
 
 import { LabShell } from "@/components/lab/lab-shell";
+import { compileSolidity } from "@/lib/solidity.functions";
 
 export const Route = createFileRoute("/lab/web3-solidity")({
   head: () => ({
     meta: [
       { title: "Web3 & Solidity Lab — Quantum AI Lab" },
-      { name: "description", content: "Wallet-free Web3 sandbox with live Sepolia telemetry and optional wallet mode." },
+      {
+        name: "description",
+        content:
+          "Interactive Web3 lab with real Solidity compilation, wallet-free sandbox execution, live Sepolia telemetry and optional wallet connection.",
+      },
       { property: "og:title", content: "Web3 & Solidity Lab — Quantum AI Lab" },
-      { property: "og:description", content: "Interactive wallet-free smart-contract sandbox with live Sepolia telemetry." },
+      {
+        property: "og:description",
+        content: "Edit and compile real Solidity source into ABI and EVM bytecode, then explore it in an interactive sandbox.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -19,9 +27,12 @@ export const Route = createFileRoute("/lab/web3-solidity")({
 });
 
 const SEPOLIA_CHAIN_ID = "0xaa36a7";
-const PUBLIC_SEPOLIA_RPCS = ["https://ethereum-sepolia-rpc.publicnode.com", "https://rpc.sepolia.org"];
+const PUBLIC_SEPOLIA_RPCS = [
+  "https://ethereum-sepolia-rpc.publicnode.com",
+  "https://rpc.sepolia.org",
+];
 
-const sampleContract = `// SPDX-License-Identifier: MIT
+const defaultSource = `// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
 contract ResearchRegistry {
@@ -34,10 +45,30 @@ contract ResearchRegistry {
     }
 }`;
 
-type EthereumProvider = { request: (args: { method: string; params?: unknown[] }) => Promise<unknown> };
-type SandboxTx = { hash: string; type: "deploy" | "write" | "read"; gas: number; time: string };
-type SandboxEvent = { name: string; detail: string; time: string };
-type StoredRecord = { id: string; key: string; value: string; time: string };
+type EthereumProvider = {
+  request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
+};
+
+type SandboxTx = {
+  hash: string;
+  type: "deploy" | "write" | "read";
+  status: "confirmed";
+  gas: number;
+  time: string;
+};
+
+type SandboxEvent = {
+  name: string;
+  detail: string;
+  time: string;
+};
+
+type StoredRecord = {
+  id: string;
+  key: string;
+  value: string;
+  time: string;
+};
 
 function short(value: string) {
   return value.length > 14 ? `${value.slice(0, 8)}…${value.slice(-6)}` : value;
@@ -45,12 +76,20 @@ function short(value: string) {
 
 function hexToDecimal(value?: string) {
   if (!value) return "—";
-  try { return BigInt(value).toString(10); } catch { return value; }
+  try {
+    return BigInt(value).toString(10);
+  } catch {
+    return value;
+  }
 }
 
 function weiHexToGwei(value?: string) {
   if (!value) return "—";
-  try { return (Number(BigInt(value)) / 1_000_000_000).toFixed(2); } catch { return "—"; }
+  try {
+    return (Number(BigInt(value)) / 1_000_000_000).toFixed(2);
+  } catch {
+    return "—";
+  }
 }
 
 async function publicRpc(method: string, params: unknown[] = []) {
@@ -67,7 +106,9 @@ async function publicRpc(method: string, params: unknown[] = []) {
       if (body.error) throw new Error(body.error.message || "RPC error");
       if (typeof body.result !== "string") throw new Error("RPC returned no result");
       return body.result;
-    } catch (error) { lastError = error; }
+    } catch (error) {
+      lastError = error;
+    }
   }
   throw lastError instanceof Error ? lastError : new Error("Public Sepolia RPC unavailable");
 }
@@ -75,7 +116,9 @@ async function publicRpc(method: string, params: unknown[] = []) {
 async function sha256(value: string) {
   const bytes = new TextEncoder().encode(value);
   const digest = await crypto.subtle.digest("SHA-256", bytes);
-  return `0x${Array.from(new Uint8Array(digest)).map((byte) => byte.toString(16).padStart(2, "0")).join("")}`;
+  return `0x${Array.from(new Uint8Array(digest))
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("")}`;
 }
 
 function randomHash() {
@@ -85,6 +128,14 @@ function randomHash() {
 }
 
 function Web3SolidityLab() {
+  const [source, setSource] = useState(defaultSource);
+  const [compileStatus, setCompileStatus] = useState("Ready to compile");
+  const [compilerVersion, setCompilerVersion] = useState("—");
+  const [contractName, setContractName] = useState("—");
+  const [abi, setAbi] = useState("[]");
+  const [bytecode, setBytecode] = useState("");
+  const [compileMessages, setCompileMessages] = useState<string[]>([]);
+
   const [liveBlock, setLiveBlock] = useState("—");
   const [liveGas, setLiveGas] = useState("—");
   const [lastRefresh, setLastRefresh] = useState("—");
@@ -108,18 +159,34 @@ function Web3SolidityLab() {
   const [records, setRecords] = useState<StoredRecord[]>([]);
 
   const sandboxReady = useMemo(() => Boolean(sandboxContract), [sandboxContract]);
+  const compiledReady = Boolean(bytecode);
 
-  function pushEvent(name: string, detail: string) {
-    setSandboxEvents((current) => [{ name, detail, time: new Date().toLocaleTimeString() }, ...current].slice(0, 10));
+  function getProvider() {
+    const provider = (window as typeof window & { ethereum?: EthereumProvider }).ethereum;
+    if (!provider) throw new Error("No injected EVM wallet found in this browser.");
+    return provider;
   }
 
-  function pushTx(type: SandboxTx["type"], gas: number) {
-    setSandboxTxs((current) => [{ hash: randomHash(), type, gas, time: new Date().toLocaleTimeString() }, ...current].slice(0, 10));
+  function pushEvent(name: string, detail: string) {
+    setSandboxEvents((current) => [
+      { name, detail, time: new Date().toLocaleTimeString() },
+      ...current,
+    ].slice(0, 10));
+  }
+
+  function pushTx(type: SandboxTx["type"], hash: string, gas: number) {
+    setSandboxTxs((current) => [
+      { hash, type, status: "confirmed", gas, time: new Date().toLocaleTimeString() },
+      ...current,
+    ].slice(0, 10));
   }
 
   async function refreshNetwork() {
     try {
-      const [blockNumber, gasPrice] = await Promise.all([publicRpc("eth_blockNumber"), publicRpc("eth_gasPrice")]);
+      const [blockNumber, gasPrice] = await Promise.all([
+        publicRpc("eth_blockNumber"),
+        publicRpc("eth_gasPrice"),
+      ]);
       setLiveBlock(hexToDecimal(blockNumber));
       setLiveGas(weiHexToGwei(gasPrice));
       setLastRefresh(new Date().toLocaleTimeString());
@@ -136,41 +203,73 @@ function Web3SolidityLab() {
     return () => window.clearInterval(timer);
   }, []);
 
+  async function compileSource() {
+    setCompileStatus("Compiling with solc…");
+    setCompileMessages([]);
+    setBytecode("");
+    try {
+      const result = await compileSolidity({ data: { source } });
+      setCompilerVersion(result.compilerVersion);
+      if (!result.ok) {
+        setCompileStatus("Compilation failed");
+        setCompileMessages([...result.errors, ...result.warnings]);
+        return;
+      }
+      setContractName(result.contractName);
+      setAbi(JSON.stringify(result.abi, null, 2));
+      setBytecode(result.bytecode);
+      setCompileMessages(result.warnings);
+      setCompileStatus("Compiled successfully");
+      pushEvent("SOLIDITY_COMPILED", `${result.contractName} → ABI + ${result.bytecode.length / 2 - 1} byte bytecode`);
+    } catch (error) {
+      setCompileStatus("Compilation request failed");
+      setCompileMessages([error instanceof Error ? error.message : "Compiler request failed"]);
+    }
+  }
+
   function estimateSandboxDeployGas() {
-    const estimate = 87_000 + Math.floor(Math.random() * 8_000);
+    const base = compiledReady ? Math.max(87_000, Math.round(bytecode.length * 6.5)) : 87_000;
+    const estimate = base + Math.floor(Math.random() * 6_000);
     setSandboxGas(estimate.toLocaleString());
     pushEvent("GAS_ESTIMATE", `Sandbox deploy estimate: ${estimate.toLocaleString()} gas`);
   }
 
   function deploySandbox() {
+    if (!compiledReady) {
+      pushEvent("ACTION_BLOCKED", "Compile the Solidity contract first");
+      return;
+    }
     const address = `0x${randomHash().slice(2, 42)}`;
-    const gas = 91_000 + Math.floor(Math.random() * 5_000);
+    const hash = randomHash();
+    const gas = Math.max(91_000, Math.round(bytecode.length * 6.7)) + Math.floor(Math.random() * 4_000);
     setSandboxContract(address);
     setSandboxStoredValue("0");
     setSandboxGas(gas.toLocaleString());
-    pushTx("deploy", gas);
-    pushEvent("CONTRACT_DEPLOYED", `${short(address)} deployed in SANDBOX`);
+    pushTx("deploy", hash, gas);
+    pushEvent("CONTRACT_DEPLOYED", `${contractName} ${short(address)} deployed in SANDBOX from compiled bytecode`);
   }
 
   function writeSandbox() {
-    if (!sandboxReady) return pushEvent("ACTION_BLOCKED", "Deploy the SANDBOX contract first");
+    if (!sandboxReady) {
+      pushEvent("ACTION_BLOCKED", "Compile and deploy the SANDBOX contract first");
+      return;
+    }
     const gas = 43_000 + Math.floor(Math.random() * 4_000);
+    const hash = randomHash();
     setSandboxStoredValue(sandboxValue || "0");
     setSandboxGas(gas.toLocaleString());
-    pushTx("write", gas);
+    pushTx("write", hash, gas);
     pushEvent("VALUE_STORED", `Stored value ${sandboxValue || "0"}`);
   }
 
   function readSandbox() {
-    if (!sandboxReady) return pushEvent("ACTION_BLOCKED", "Deploy the SANDBOX contract first");
-    pushTx("read", 0);
+    if (!sandboxReady) {
+      pushEvent("ACTION_BLOCKED", "Compile and deploy the SANDBOX contract first");
+      return;
+    }
+    const hash = randomHash();
+    pushTx("read", hash, 0);
     pushEvent("VALUE_READ", `Read value ${sandboxStoredValue}`);
-  }
-
-  function getProvider() {
-    const provider = (window as typeof window & { ethereum?: EthereumProvider }).ethereum;
-    if (!provider) throw new Error("No injected EVM wallet found in this browser.");
-    return provider;
   }
 
   async function connectWallet() {
@@ -202,42 +301,80 @@ function Web3SolidityLab() {
     const value = recordValue.trim();
     if (!key || !value) return;
     const id = await sha256(key);
-    setRecords((current) => [{ id, key, value, time: new Date().toLocaleTimeString() }, ...current.filter((item) => item.id !== id)]);
+    const next = { id, key, value, time: new Date().toLocaleTimeString() };
+    setRecords((current) => [next, ...current.filter((item) => item.id !== id)]);
     pushEvent("RecordStored", `${key} → ${value}`);
   }
 
   return (
     <LabShell crumb="Web3 & Solidity">
       <div className="mb-8 max-w-3xl">
-        <div className="flex items-center gap-2 font-mono text-xs text-primary"><span className="relative flex size-2"><span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-70" /><span className="relative inline-flex size-2 rounded-full bg-emerald-400" /></span>LAB / C13 · LIVE</div>
+        <div className="flex items-center gap-2 font-mono text-xs text-primary">
+          <span className="relative flex size-2">
+            <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-70" />
+            <span className="relative inline-flex size-2 rounded-full bg-emerald-400" />
+          </span>
+          LAB / C13 · LIVE
+        </div>
         <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">Web3 & Solidity Lab</h1>
-        <p className="mt-3 text-sm leading-7 text-muted-foreground">The working wallet-free SANDBOX comes first. Live Sepolia telemetry and optional wallet tools are below it.</p>
+        <p className="mt-3 text-sm leading-7 text-muted-foreground">
+          Edit real Solidity source, compile it server-side with solc into ABI and EVM bytecode, then use the compiled artifact in the wallet-free sandbox.
+        </p>
       </div>
 
-      <section className="mb-8 rounded-md border-2 border-emerald-500/60 bg-emerald-500/5 p-5 sm:p-6">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div><div className="font-mono text-xs uppercase tracking-wider text-emerald-400">START HERE · WORKS WITHOUT WALLET</div><h2 className="mt-2 text-2xl font-semibold">Web3 Smart Contract SANDBOX</h2></div>
-          <span className="rounded-full border border-emerald-500/40 bg-emerald-500/10 px-3 py-1 font-mono text-[10px] font-semibold uppercase text-emerald-400">WORKING</span>
+      <section className="mb-8 rounded-md border border-violet-500/50 bg-violet-500/5 p-5 sm:p-6">
+        <div className="font-mono text-xs uppercase tracking-wider text-violet-400">1 · Real Solidity compiler</div>
+        <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-2xl font-semibold">Solidity Editor → Compile → ABI + Bytecode</h2>
+          <span className="rounded-full border border-violet-500/40 bg-violet-500/10 px-3 py-1 font-mono text-[10px] uppercase text-violet-300">solc server compiler</span>
         </div>
-        <p className="mt-2 max-w-4xl text-sm leading-6 text-muted-foreground">Use this first. Every button below works locally, with no MetaMask, no test ETH and no blockchain fee.</p>
+        <p className="mt-2 text-sm leading-6 text-muted-foreground">
+          This is real compilation, not a visual simulation. Edit the contract and press Compile Solidity.
+        </p>
+
+        <textarea
+          value={source}
+          onChange={(event) => setSource(event.target.value)}
+          spellCheck={false}
+          className="mt-5 min-h-[360px] w-full rounded-md border border-border bg-background p-4 font-mono text-xs leading-6 text-foreground outline-none focus:border-violet-500/60"
+        />
+
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <button type="button" onClick={() => void compileSource()} className="rounded-md border border-violet-500/60 bg-violet-500/10 px-5 py-2.5 font-mono text-xs font-semibold text-violet-300 hover:bg-violet-500/15">Compile Solidity</button>
+          <span className={`font-mono text-xs ${compiledReady ? "text-emerald-400" : "text-muted-foreground"}`}>{compileStatus}</span>
+        </div>
+
+        <div className="mt-5 grid gap-4 lg:grid-cols-3">
+          <div className="rounded-md border border-border bg-card p-4"><div className="font-mono text-[10px] uppercase text-muted-foreground">Compiler</div><div className="mt-2 break-all font-mono text-xs">{compilerVersion}</div></div>
+          <div className="rounded-md border border-border bg-card p-4"><div className="font-mono text-[10px] uppercase text-muted-foreground">Contract</div><div className="mt-2 font-mono text-sm font-semibold">{contractName}</div></div>
+          <div className="rounded-md border border-border bg-card p-4"><div className="font-mono text-[10px] uppercase text-muted-foreground">Bytecode</div><div className="mt-2 font-mono text-sm font-semibold">{bytecode ? `${Math.max(0, bytecode.length / 2 - 1).toLocaleString()} bytes` : "—"}</div></div>
+        </div>
+
+        {compileMessages.length > 0 ? <div className="mt-4 rounded-md border border-border bg-background p-4"><div className="font-mono text-[10px] uppercase text-muted-foreground">Compiler messages</div><div className="mt-3 space-y-2">{compileMessages.map((message, index) => <pre key={index} className="whitespace-pre-wrap break-words font-mono text-[10px] leading-5 text-muted-foreground">{message}</pre>)}</div></div> : null}
+
+        {compiledReady ? <div className="mt-4 grid gap-4 lg:grid-cols-2"><div className="rounded-md border border-border bg-background p-4"><div className="font-mono text-[10px] uppercase text-muted-foreground">ABI</div><pre className="mt-3 max-h-72 overflow-auto whitespace-pre-wrap break-all font-mono text-[10px] leading-5">{abi}</pre></div><div className="rounded-md border border-border bg-background p-4"><div className="font-mono text-[10px] uppercase text-muted-foreground">EVM bytecode</div><pre className="mt-3 max-h-72 overflow-auto whitespace-pre-wrap break-all font-mono text-[10px] leading-5">{bytecode}</pre></div></div> : null}
+      </section>
+
+      <section className="mb-8 rounded-md border border-emerald-500/50 bg-emerald-500/5 p-5 sm:p-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <div className="font-mono text-xs uppercase tracking-wider text-emerald-400">2 · Compiled artifact sandbox</div>
+            <h2 className="mt-2 text-2xl font-semibold">Deploy + Write + Read</h2>
+          </div>
+          <span className="rounded-full border border-emerald-500/40 bg-emerald-500/10 px-3 py-1 font-mono text-[10px] font-semibold uppercase text-emerald-400">No wallet required</span>
+        </div>
+        <p className="mt-2 max-w-4xl text-sm leading-6 text-muted-foreground">Compile first. The sandbox deployment uses the compiled artifact metadata, while execution remains a clearly labelled browser simulation and broadcasts no blockchain transaction.</p>
 
         <div className="mt-5 grid gap-4 xl:grid-cols-3">
           <div className="rounded-md border border-border bg-card p-4">
-            <div className="font-mono text-[10px] uppercase text-muted-foreground">1 · Deploy</div>
+            <div className="font-mono text-[10px] uppercase text-muted-foreground">Deploy compiled contract</div>
             <div className="mt-3 flex flex-wrap gap-2"><button type="button" onClick={estimateSandboxDeployGas} className="rounded-md border border-border bg-background px-4 py-2 font-mono text-xs font-semibold hover:border-primary/50">Estimate Gas</button><button type="button" onClick={deploySandbox} className="rounded-md border border-emerald-500/50 bg-emerald-500/10 px-4 py-2 font-mono text-xs font-semibold text-emerald-400 hover:bg-emerald-500/15">Deploy SANDBOX</button></div>
             <p className="mt-3 font-mono text-xs text-muted-foreground">Gas: <span className="text-foreground">{sandboxGas}</span></p>
             <p className="mt-2 break-all font-mono text-xs text-muted-foreground">Contract: <span className="text-foreground">{sandboxContract || "Not deployed"}</span></p>
           </div>
-          <div className="rounded-md border border-border bg-card p-4">
-            <div className="font-mono text-[10px] uppercase text-muted-foreground">2 · Write</div>
-            <label className="mt-3 block text-xs text-muted-foreground">Integer value<input value={sandboxValue} onChange={(event) => setSandboxValue(event.target.value)} inputMode="numeric" className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 font-mono text-xs outline-none focus:border-primary" /></label>
-            <button type="button" onClick={writeSandbox} className="mt-3 rounded-md border border-primary/50 bg-primary/10 px-4 py-2 font-mono text-xs font-semibold text-primary hover:bg-primary/15">Write Value</button>
-          </div>
-          <div className="rounded-md border border-border bg-card p-4">
-            <div className="font-mono text-[10px] uppercase text-muted-foreground">3 · Read</div>
-            <button type="button" onClick={readSandbox} className="mt-3 rounded-md border border-border bg-background px-4 py-2 font-mono text-xs font-semibold hover:border-primary/50">Read Value</button>
-            <div className="mt-4 rounded-md border border-border bg-background p-4 text-center"><div className="font-mono text-[10px] uppercase text-muted-foreground">Stored value</div><div className="mt-2 font-mono text-3xl font-semibold text-primary">{sandboxStoredValue}</div></div>
-          </div>
+
+          <div className="rounded-md border border-border bg-card p-4"><div className="font-mono text-[10px] uppercase text-muted-foreground">Write</div><label className="mt-3 block text-xs text-muted-foreground">Integer value<input value={sandboxValue} onChange={(event) => setSandboxValue(event.target.value)} inputMode="numeric" className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 font-mono text-xs outline-none focus:border-primary" /></label><button type="button" onClick={writeSandbox} className="mt-3 rounded-md border border-primary/50 bg-primary/10 px-4 py-2 font-mono text-xs font-semibold text-primary hover:bg-primary/15">Write Value</button></div>
+          <div className="rounded-md border border-border bg-card p-4"><div className="font-mono text-[10px] uppercase text-muted-foreground">Read</div><button type="button" onClick={readSandbox} className="mt-3 rounded-md border border-border bg-background px-4 py-2 font-mono text-xs font-semibold hover:border-primary/50">Read Value</button><div className="mt-4 rounded-md border border-border bg-background p-4 text-center"><div className="font-mono text-[10px] uppercase text-muted-foreground">Stored value</div><div className="mt-2 font-mono text-3xl font-semibold text-primary">{sandboxStoredValue}</div></div></div>
         </div>
       </section>
 
@@ -247,22 +384,15 @@ function Web3SolidityLab() {
       </section>
 
       <section className="mb-8 overflow-hidden rounded-md border border-primary/40 bg-card">
-        <div className="flex items-center justify-between border-b border-border bg-primary/5 px-5 py-3"><div className="flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-primary"><Radio className="size-4 animate-pulse" /> Live Sepolia network</div><button type="button" onClick={() => void refreshNetwork()} className="rounded-md border border-border bg-background px-3 py-1.5 font-mono text-[10px] uppercase text-muted-foreground hover:border-primary/50 hover:text-primary">Refresh</button></div>
+        <div className="flex items-center justify-between border-b border-border bg-primary/5 px-5 py-3"><div className="flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-primary"><Radio className="size-4 animate-pulse" />Live Sepolia network</div><button type="button" onClick={() => void refreshNetwork()} className="rounded-md border border-border bg-background px-3 py-1.5 font-mono text-[10px] uppercase text-muted-foreground hover:border-primary/50 hover:text-primary">Refresh</button></div>
         <div className="grid gap-px bg-border md:grid-cols-3"><div className="bg-card p-5"><div className="flex items-center gap-2 font-mono text-[10px] uppercase text-muted-foreground"><Activity className="size-4 text-emerald-400" />Network</div><div className="mt-2 text-lg font-semibold">{networkStatus}</div><div className="mt-1 font-mono text-[10px] text-muted-foreground">updated {lastRefresh}</div></div><div className="bg-card p-5"><div className="flex items-center gap-2 font-mono text-[10px] uppercase text-muted-foreground"><Blocks className="size-4 text-primary" />Latest block</div><div className="mt-2 font-mono text-xl font-semibold">#{liveBlock}</div></div><div className="bg-card p-5"><div className="flex items-center gap-2 font-mono text-[10px] uppercase text-muted-foreground"><Fuel className="size-4 text-amber-400" />Gas price</div><div className="mt-2 text-xl font-semibold">{liveGas} <span className="text-xs text-muted-foreground">Gwei</span></div></div></div>
       </section>
 
-      <section className="mb-8 rounded-md border border-primary/40 bg-primary/5 p-5 sm:p-6">
-        <div className="font-mono text-xs uppercase tracking-wider text-primary">Research Registry</div><h2 className="mt-2 text-xl font-semibold">Browser-local Solidity logic demo</h2>
-        <div className="mt-4 grid gap-3 sm:grid-cols-2"><label className="text-xs text-muted-foreground">Record key<input value={recordKey} onChange={(event) => setRecordKey(event.target.value)} className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 font-mono text-xs outline-none focus:border-primary" /></label><label className="text-xs text-muted-foreground">Record value<input value={recordValue} onChange={(event) => setRecordValue(event.target.value)} className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 font-mono text-xs outline-none focus:border-primary" /></label></div>
-        <button type="button" onClick={() => void storeRegistryRecord()} className="mt-3 rounded-md border border-emerald-500/50 bg-emerald-500/10 px-4 py-2 font-mono text-xs font-semibold text-emerald-400">Store Record</button>
-        {records.length > 0 ? <div className="mt-4 space-y-2">{records.map((record) => <div key={record.id} className="rounded-md border border-border bg-card p-3"><div className="font-mono text-xs font-semibold">{record.key} → {record.value}</div><div className="mt-1 break-all font-mono text-[10px] text-muted-foreground">{record.id} · {record.time}</div></div>)}</div> : null}
-      </section>
+      <section className="mb-8 rounded-md border border-primary/40 bg-primary/5 p-5 sm:p-6"><div className="font-mono text-xs uppercase tracking-wider text-primary">Research Registry</div><h2 className="mt-2 text-xl font-semibold">Browser-local Solidity logic demo</h2><div className="mt-4 grid gap-3 sm:grid-cols-2"><label className="text-xs text-muted-foreground">Record key<input value={recordKey} onChange={(event) => setRecordKey(event.target.value)} className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 font-mono text-xs outline-none focus:border-primary" /></label><label className="text-xs text-muted-foreground">Record value<input value={recordValue} onChange={(event) => setRecordValue(event.target.value)} className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 font-mono text-xs outline-none focus:border-primary" /></label></div><button type="button" onClick={() => void storeRegistryRecord()} className="mt-3 rounded-md border border-emerald-500/50 bg-emerald-500/10 px-4 py-2 font-mono text-xs font-semibold text-emerald-400">Store Record</button>{records.length > 0 ? <div className="mt-4 space-y-2">{records.map((record) => <div key={record.id} className="rounded-md border border-border bg-card p-3"><div className="font-mono text-xs font-semibold">{record.key} → {record.value}</div><div className="mt-1 break-all font-mono text-[10px] text-muted-foreground">{record.id} · {record.time}</div></div>)}</div> : null}</section>
 
-      <section className="mb-8 rounded-md border border-border bg-card p-5 sm:p-6"><div className="flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-muted-foreground"><WalletCards className="size-4" />Optional wallet mode</div><h2 className="mt-2 text-xl font-semibold">Connect an EVM Wallet</h2><p className="mt-2 text-sm text-muted-foreground">Optional only. The working SANDBOX above does not depend on it.</p><div className="mt-4 flex flex-wrap gap-2"><button type="button" onClick={connectWallet} className="rounded-md border border-primary/50 bg-primary/10 px-4 py-2 font-mono text-xs font-semibold text-primary">Connect Wallet</button><button type="button" onClick={switchToSepolia} className="rounded-md border border-border bg-background px-4 py-2 font-mono text-xs font-semibold">Switch to Sepolia</button></div><p className="mt-3 break-all font-mono text-xs text-muted-foreground">{walletStatus}</p><p className="mt-1 break-all font-mono text-xs text-muted-foreground">{chainStatus}</p>{wallet ? <p className="mt-1 break-all font-mono text-xs text-emerald-400">Wallet: {wallet}</p> : null}</section>
+      <section className="mb-8 rounded-md border border-border bg-card p-5 sm:p-6"><div className="flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-muted-foreground"><WalletCards className="size-4" />Optional real wallet mode</div><h2 className="mt-2 text-xl font-semibold">Connect an EVM Wallet</h2><p className="mt-2 text-sm text-muted-foreground">Only needed for future real signed deployment. Compilation above works without a wallet.</p><div className="mt-4 flex flex-wrap gap-2"><button type="button" onClick={connectWallet} className="rounded-md border border-primary/50 bg-primary/10 px-4 py-2 font-mono text-xs font-semibold text-primary">Connect Wallet</button><button type="button" onClick={switchToSepolia} className="rounded-md border border-border bg-background px-4 py-2 font-mono text-xs font-semibold">Switch to Sepolia</button></div><p className="mt-3 break-all font-mono text-xs text-muted-foreground">{walletStatus}</p><p className="mt-1 break-all font-mono text-xs text-muted-foreground">{chainStatus}</p>{wallet ? <p className="mt-1 break-all font-mono text-xs text-emerald-400">Wallet: {wallet}</p> : null}</section>
 
-      <section className="grid gap-4 md:grid-cols-3"><article className="rounded-md border border-border bg-card p-5"><Braces className="size-5 text-primary" /><h2 className="mt-4 text-lg font-semibold">Solidity</h2><p className="mt-2 text-sm text-muted-foreground">Contracts, storage, events and mappings.</p></article><article className="rounded-md border border-border bg-card p-5"><Activity className="size-5 text-primary" /><h2 className="mt-4 text-lg font-semibold">EVM</h2><p className="mt-2 text-sm text-muted-foreground">Gas, transactions, deployment and state interaction.</p></article><article className="rounded-md border border-border bg-card p-5"><ShieldCheck className="size-5 text-primary" /><h2 className="mt-4 text-lg font-semibold">Security</h2><p className="mt-2 text-sm text-muted-foreground">Safe patterns and testnet-first workflows.</p></article></section>
-
-      <section className="mt-8 rounded-md border border-border bg-card p-5 sm:p-6"><div className="font-mono text-xs uppercase tracking-wider text-primary">Solidity example</div><h2 className="mt-2 text-2xl font-semibold">Research Registry Smart Contract</h2><pre className="mt-5 overflow-x-auto rounded-md border border-border bg-background p-4 text-xs leading-6"><code>{sampleContract}</code></pre></section>
+      <section className="grid gap-4 md:grid-cols-3"><article className="rounded-md border border-border bg-card p-5"><Braces className="size-5 text-primary" /><h2 className="mt-4 text-lg font-semibold">Solidity</h2><p className="mt-2 text-sm text-muted-foreground">Real solc compilation to ABI and EVM bytecode.</p></article><article className="rounded-md border border-border bg-card p-5"><Activity className="size-5 text-primary" /><h2 className="mt-4 text-lg font-semibold">EVM</h2><p className="mt-2 text-sm text-muted-foreground">Compiled artifacts, gas, deployment and state interaction.</p></article><article className="rounded-md border border-border bg-card p-5"><ShieldCheck className="size-5 text-primary" /><h2 className="mt-4 text-lg font-semibold">Security</h2><p className="mt-2 text-sm text-muted-foreground">Server-side compiler, no private key storage and sandbox-first workflow.</p></article></section>
     </LabShell>
   );
 }
