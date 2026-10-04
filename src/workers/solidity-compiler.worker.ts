@@ -1,7 +1,7 @@
-import wrapper from "solc/wrapper";
-// solc ships soljson.js without TypeScript declarations, but Vite can bundle it into this worker.
+import * as wrapperNamespace from "solc/wrapper";
+// solc ships soljson.js without TypeScript declarations; Vite bundles it into this worker.
 // @ts-expect-error no declaration file for solc/soljson.js
-import soljson from "solc/soljson.js";
+import * as soljsonNamespace from "solc/soljson.js";
 
 type CompileRequest = {
   source: string;
@@ -24,21 +24,38 @@ type CompilerResult =
       warnings: string[];
     };
 
-const workerScope = self as DedicatedWorkerGlobalScope & typeof globalThis;
+type WrapperFn = (soljson: any) => {
+  version: () => string;
+  compile: (input: string) => string;
+};
 
-let compiler: ReturnType<typeof wrapper> | null = null;
+const workerScope = self as DedicatedWorkerGlobalScope & typeof globalThis;
+let compiler: ReturnType<WrapperFn> | null = null;
+
+function unwrapDefault<T = any>(value: any): T {
+  return (value?.default ?? value) as T;
+}
 
 function ensureCompiler() {
   if (compiler) return compiler;
 
-  const candidate = (soljson as unknown) as Parameters<typeof wrapper>[0];
-  compiler = wrapper(candidate);
+  const wrapper = unwrapDefault<WrapperFn>(wrapperNamespace);
+  const soljson = unwrapDefault<any>(soljsonNamespace);
 
-  if (typeof compiler.version !== "function" || typeof compiler.compile !== "function") {
-    compiler = null;
-    throw new Error("Bundled Solidity compiler API is unavailable.");
+  if (typeof wrapper !== "function") {
+    throw new Error("Solidity wrapper module did not load as a function.");
   }
 
+  if (!soljson || typeof soljson.cwrap !== "function") {
+    throw new Error("Bundled soljson module is missing the Emscripten cwrap API.");
+  }
+
+  const loaded = wrapper(soljson);
+  if (typeof loaded?.version !== "function" || typeof loaded?.compile !== "function") {
+    throw new Error("Bundled Solidity compiler API is unavailable after wrapper initialization.");
+  }
+
+  compiler = loaded;
   return compiler;
 }
 
