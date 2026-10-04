@@ -1,11 +1,3 @@
-import { createRequire } from "node:module";
-import { createServerFn } from "@tanstack/react-start";
-import { z } from "zod";
-
-const CompileInput = z.object({
-  source: z.string().min(1).max(40_000),
-});
-
 export type SolidityCompileResult =
   | {
       ok: true;
@@ -23,107 +15,82 @@ export type SolidityCompileResult =
       warnings: string[];
     };
 
-type SolcLike = {
-  version: () => string;
-  compile: (input: string) => string;
+type CompileArgs = {
+  data: {
+    source: string;
+  };
 };
 
-function loadCompiler(): SolcLike {
-  const require = createRequire(import.meta.url);
-  const loaded = require("solc") as { default?: unknown } | SolcLike;
-  const candidate = ((loaded as { default?: unknown }).default ?? loaded) as Partial<SolcLike>;
+export async function compileSolidity({ data }: CompileArgs): Promise<SolidityCompileResult> {
+  const source = data.source.trim();
 
-  if (typeof candidate.version !== "function" || typeof candidate.compile !== "function") {
-    throw new Error("The Solidity compiler module loaded, but its compile API is unavailable.");
+  if (!source) {
+    return {
+      ok: false,
+      compilerVersion: "solc 0.8.30",
+      errors: ["Solidity source is empty."],
+      warnings: [],
+    };
   }
 
-  return candidate as SolcLike;
-}
+  if (source.length > 40_000) {
+    return {
+      ok: false,
+      compilerVersion: "solc 0.8.30",
+      errors: ["Solidity source is too large for this lab."],
+      warnings: [],
+    };
+  }
 
-export const compileSolidity = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => CompileInput.parse(input))
-  .handler(async ({ data }): Promise<SolidityCompileResult> => {
-    let compilerVersion = "solc unavailable";
+  if (typeof Worker === "undefined") {
+    return {
+      ok: false,
+      compilerVersion: "solc 0.8.30",
+      errors: ["Browser Web Workers are unavailable in this environment."],
+      warnings: [],
+    };
+  }
 
-    try {
-      const solc = loadCompiler();
-      compilerVersion = solc.version();
+  return await new Promise<SolidityCompileResult>((resolve) => {
+    const worker = new Worker(
+      new URL("../workers/solidity-compiler.worker.ts", import.meta.url),
+    );
 
-      const input = {
-        language: "Solidity",
-        sources: {
-          "Contract.sol": {
-            content: data.source,
-          },
-        },
-        settings: {
-          optimizer: {
-            enabled: true,
-            runs: 200,
-          },
-          outputSelection: {
-            "*": {
-              "*": ["abi", "evm.bytecode.object", "evm.deployedBytecode.object"],
-            },
-          },
-        },
-      };
-
-      const rawOutput = solc.compile(JSON.stringify(input));
-      const output = JSON.parse(rawOutput) as any;
-
-      const diagnostics = Array.isArray(output?.errors) ? output.errors : [];
-      const errors = diagnostics
-        .filter((item: any) => item?.severity === "error")
-        .map((item: any) => item?.formattedMessage || item?.message || "Compilation error");
-      const warnings = diagnostics
-        .filter((item: any) => item?.severity !== "error")
-        .map((item: any) => item?.formattedMessage || item?.message || "Compiler warning");
-
-      if (errors.length) {
-        return { ok: false, compilerVersion, errors, warnings };
-      }
-
-      const contracts = output?.contracts?.["Contract.sol"] ?? {};
-      const names = Object.keys(contracts);
-      if (!names.length) {
-        return {
-          ok: false,
-          compilerVersion,
-          errors: ["No Solidity contract was produced."],
-          warnings,
-        };
-      }
-
-      const contractName = names[0];
-      const compiled = contracts[contractName];
-      const bytecodeObject = compiled?.evm?.bytecode?.object ?? "";
-      const deployedBytecodeObject = compiled?.evm?.deployedBytecode?.object ?? "";
-
-      if (!bytecodeObject) {
-        return {
-          ok: false,
-          compilerVersion,
-          errors: ["Compilation completed, but no deployable bytecode was produced."],
-          warnings,
-        };
-      }
-
-      return {
-        ok: true,
-        compilerVersion,
-        contractName,
-        abi: Array.isArray(compiled?.abi) ? compiled.abi : [],
-        bytecode: `0x${bytecodeObject}`,
-        deployedBytecode: deployedBytecodeObject ? `0x${deployedBytecodeObject}` : "0x",
-        warnings,
-      };
-    } catch (error) {
-      return {
+    const timeout = window.setTimeout(() => {
+      worker.terminate();
+      resolve({
         ok: false,
-        compilerVersion,
-        errors: [error instanceof Error ? error.message : "Solidity compiler failed on the server."],
+        compilerVersion: "solc 0.8.30",
+        errors: ["Compilation timed out. Try again."],
         warnings: [],
-      };
-    }
+      });
+    }, 30_000);
+
+    worker.addEventListener(
+      "message",
+      (event: MessageEvent<SolidityCompileResult>) => {
+        window.clearTimeout(timeout);
+        worker.terminate();
+        resolve(event.data);
+      },
+      { once: true },
+    );
+
+    worker.addEventListener(
+      "error",
+      (event) => {
+        window.clearTimeout(timeout);
+        worker.terminate();
+        resolve({
+          ok: false,
+          compilerVersion: "solc 0.8.30",
+          errors: [event.message || "The browser Solidity compiler worker failed."],
+          warnings: [],
+        });
+      },
+      { once: true },
+    );
+
+    worker.postMessage({ source });
   });
+}
