@@ -7,7 +7,7 @@ export type LabModule = {
   topics: string[];
   status: "available" | "in-development";
   group: "core" | "command";
-  to?: "/lab/circuit-builder" | "/lab/entanglement" | "/lab/qaoa" | "/lab/vqe" | "/lab/portfolio" | "/lab/arena" | "/lab/assistant" | "/lab/qml" | "/lab/reports" | "/lab/ibm" | "/lab/finance" | "/lab/benchmark" | "/lab/history" | "/lab/snapshot" | "/lab/qiskit" | "/lab/python" | "/lab/blockchain" | "/lab/crypto-intelligence";
+  to?: "/lab/circuit-builder" | "/lab/entanglement" | "/lab/qaoa" | "/lab/vqe" | "/lab/portfolio" | "/lab/arena" | "/lab/assistant" | "/lab/qml" | "/lab/reports" | "/lab/ibm" | "/lab/finance" | "/lab/benchmark" | "/lab/history" | "/lab/snapshot" | "/lab/qiskit" | "/lab/python" | "/lab/blockchain" | "/lab/crypto-intelligence" | "/lab/web3-solidity";
 };
 
 export const LAB_MODULES: LabModule[] = [
@@ -102,5 +102,10 @@ export const LAB_MODULES: LabModule[] = [
     id: "crypto-intelligence", index: "C12", title: "Crypto Intelligence", group: "command",
     summary: "Dedicated Bitcoin and crypto research workspace for network activity, on-chain intelligence, mining revenue, market/network charts, transparent health scoring and AI-assisted analysis.",
     topics: ["Bitcoin network", "On-chain", "Mining revenue", "Market intelligence", "AI analyst"], status: "available", to: "/lab/crypto-intelligence",
+  },
+  {
+    id: "web3-solidity", index: "C13", title: "Web3 & Solidity Lab", group: "command",
+    summary: "Developer-focused Web3 workspace covering Solidity smart contracts, EVM architecture, wallet connectivity, dApp integration, testing, deployment and contract security.",
+    topics: ["Solidity", "EVM", "Smart contracts", "Wallets", "dApps", "Security"], status: "available", to: "/lab/web3-solidity",
   },
 ];
