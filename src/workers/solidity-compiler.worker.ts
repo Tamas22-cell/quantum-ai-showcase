@@ -1,7 +1,6 @@
-import * as wrapperNamespace from "solc/wrapper";
-// solc ships soljson.js without TypeScript declarations; Vite bundles it into this worker.
-// @ts-expect-error no declaration file for solc/soljson.js
-import * as soljsonNamespace from "solc/soljson.js";
+import wrapper from "solc/wrapper";
+
+const SOLJSON_URL = "https://binaries.soliditylang.org/bin/soljson-v0.8.30+commit.73712a01.js";
 
 type CompileRequest = {
   source: string;
@@ -24,55 +23,49 @@ type CompilerResult =
       warnings: string[];
     };
 
-type WrapperFn = (soljson: any) => {
-  version: () => string;
-  compile: (input: string) => string;
+type SolcModule = {
+  cwrap: (...args: any[]) => any;
 };
 
-const workerScope = self as DedicatedWorkerGlobalScope & typeof globalThis;
-let compiler: ReturnType<WrapperFn> | null = null;
+type WorkerGlobal = typeof self & {
+  Module?: SolcModule;
+};
 
-function unwrapDefault<T = any>(value: any): T {
-  return (value?.default ?? value) as T;
-}
+const scope = self as WorkerGlobal;
+let compiler: ReturnType<typeof wrapper> | null = null;
 
-function ensureCompiler() {
+function getCompiler() {
   if (compiler) return compiler;
 
-  const wrapper = unwrapDefault<WrapperFn>(wrapperNamespace);
-  const soljson = unwrapDefault<any>(soljsonNamespace);
+  importScripts(SOLJSON_URL);
 
-  if (typeof wrapper !== "function") {
-    throw new Error("Solidity wrapper module did not load as a function.");
+  if (!scope.Module || typeof scope.Module.cwrap !== "function") {
+    throw new Error("Official Solidity compiler binary did not initialize.");
   }
 
-  if (!soljson || typeof soljson.cwrap !== "function") {
-    throw new Error("Bundled soljson module is missing the Emscripten cwrap API.");
-  }
-
-  const loaded = wrapper(soljson);
-  if (typeof loaded?.version !== "function" || typeof loaded?.compile !== "function") {
-    throw new Error("Bundled Solidity compiler API is unavailable after wrapper initialization.");
-  }
-
-  compiler = loaded;
+  compiler = wrapper(scope.Module as any);
   return compiler;
 }
 
 function compileSource(source: string): CompilerResult {
-  let compilerVersion = "solc bundled";
+  let compilerVersion = "solc 0.8.30";
 
   try {
-    const solc = ensureCompiler();
+    const solc = getCompiler();
     compilerVersion = solc.version();
 
     const input = {
       language: "Solidity",
       sources: {
-        "Contract.sol": { content: source },
+        "Contract.sol": {
+          content: source,
+        },
       },
       settings: {
-        optimizer: { enabled: true, runs: 200 },
+        optimizer: {
+          enabled: true,
+          runs: 200,
+        },
         outputSelection: {
           "*": {
             "*": ["abi", "evm.bytecode.object", "evm.deployedBytecode.object"],
@@ -83,18 +76,28 @@ function compileSource(source: string): CompilerResult {
 
     const output = JSON.parse(solc.compile(JSON.stringify(input)));
     const diagnostics = Array.isArray(output?.errors) ? output.errors : [];
+
     const errors = diagnostics
       .filter((item: any) => item?.severity === "error")
       .map((item: any) => item?.formattedMessage || item?.message || "Compilation error");
+
     const warnings = diagnostics
       .filter((item: any) => item?.severity !== "error")
       .map((item: any) => item?.formattedMessage || item?.message || "Compiler warning");
 
-    if (errors.length) return { ok: false, compilerVersion, errors, warnings };
+    if (errors.length) {
+      return {
+        ok: false,
+        compilerVersion,
+        errors,
+        warnings,
+      };
+    }
 
     const contracts = output?.contracts?.["Contract.sol"] ?? {};
-    const names = Object.keys(contracts);
-    if (!names.length) {
+    const contractNames = Object.keys(contracts);
+
+    if (!contractNames.length) {
       return {
         ok: false,
         compilerVersion,
@@ -103,7 +106,7 @@ function compileSource(source: string): CompilerResult {
       };
     }
 
-    const contractName = names[0];
+    const contractName = contractNames[0];
     const compiled = contracts[contractName];
     const bytecodeObject = compiled?.evm?.bytecode?.object ?? "";
     const deployedBytecodeObject = compiled?.evm?.deployedBytecode?.object ?? "";
@@ -130,25 +133,26 @@ function compileSource(source: string): CompilerResult {
     return {
       ok: false,
       compilerVersion,
-      errors: [error instanceof Error ? error.message : "Bundled browser Solidity compiler failed."],
+      errors: [error instanceof Error ? error.message : "Solidity compiler failed in browser worker."],
       warnings: [],
     };
   }
 }
 
-workerScope.addEventListener("message", (event: MessageEvent<CompileRequest>) => {
+scope.addEventListener("message", (event: MessageEvent<CompileRequest>) => {
   const source = event.data?.source?.trim();
+
   if (!source) {
-    workerScope.postMessage({
+    scope.postMessage({
       ok: false,
-      compilerVersion: "solc bundled",
+      compilerVersion: "solc 0.8.30",
       errors: ["Solidity source is empty."],
       warnings: [],
     } satisfies CompilerResult);
     return;
   }
 
-  workerScope.postMessage(compileSource(source));
+  scope.postMessage(compileSource(source));
 });
 
 export {};
