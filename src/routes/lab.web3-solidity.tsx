@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Braces, Code2, Database, ExternalLink, ShieldCheck, WalletCards } from "lucide-react";
+import { Activity, Blocks, Braces, Code2, Database, ExternalLink, Fuel, Radio, ShieldCheck, WalletCards, Zap } from "lucide-react";
 
 import { LabShell } from "@/components/lab/lab-shell";
 
@@ -11,12 +11,12 @@ export const Route = createFileRoute("/lab/web3-solidity")({
       {
         name: "description",
         content:
-          "Interactive Web3 and Solidity research lab with wallet connection, gas estimation, Sepolia deployment, transaction history and on-chain read/write actions.",
+          "Interactive Web3 and Solidity research lab with live network pulse, wallet connection, gas estimation, Sepolia deployment, transaction history and on-chain read/write actions.",
       },
       { property: "og:title", content: "Web3 & Solidity Lab — Quantum AI Lab" },
       {
         property: "og:description",
-        content: "Connect an EVM wallet, estimate gas, deploy a Sepolia contract and inspect transaction activity.",
+        content: "Live EVM network pulse, wallet activity, Sepolia smart-contract deployment and transaction monitoring.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -91,6 +91,12 @@ type TxHistoryItem = {
   time: string;
 };
 
+type FeedItem = {
+  label: string;
+  detail: string;
+  time: string;
+};
+
 function shortAddress(value: string) {
   return value.length > 12 ? `${value.slice(0, 6)}…${value.slice(-4)}` : value;
 }
@@ -101,6 +107,17 @@ function hexToDecimal(value?: string) {
     return BigInt(value).toString(10);
   } catch {
     return value;
+  }
+}
+
+function weiHexToGwei(value?: string) {
+  if (!value) return "—";
+  try {
+    const wei = BigInt(value);
+    const whole = Number(wei) / 1_000_000_000;
+    return whole.toFixed(2);
+  } catch {
+    return "—";
   }
 }
 
@@ -148,15 +165,53 @@ function Web3SolidityLab() {
   const [eventLogs, setEventLogs] = useState<RpcLog[]>([]);
   const [txHistory, setTxHistory] = useState<TxHistoryItem[]>([]);
 
+  const [liveBlock, setLiveBlock] = useState("—");
+  const [liveGas, setLiveGas] = useState("—");
+  const [liveChain, setLiveChain] = useState("No wallet provider");
+  const [lastRefresh, setLastRefresh] = useState("—");
+  const [feed, setFeed] = useState<FeedItem[]>([
+    { label: "LAB READY", detail: "Web3 engine initialized", time: new Date().toLocaleTimeString() },
+  ]);
+
   function getProvider() {
     const provider = (window as typeof window & { ethereum?: EthereumProvider }).ethereum;
     if (!provider) throw new Error("No injected EVM wallet detected. Install MetaMask or another compatible wallet.");
     return provider;
   }
 
+  function pushFeed(label: string, detail: string) {
+    setFeed((current) => [
+      { label, detail, time: new Date().toLocaleTimeString() },
+      ...current,
+    ].slice(0, 8));
+  }
+
   function addHistory(item: TxHistoryItem) {
     setTxHistory((current) => [item, ...current.filter((entry) => entry.hash !== item.hash)]);
   }
+
+  async function refreshNetworkPulse() {
+    try {
+      const provider = getProvider();
+      const [chainId, blockNumber, gasPrice] = await Promise.all([
+        provider.request({ method: "eth_chainId" }) as Promise<string>,
+        provider.request({ method: "eth_blockNumber" }) as Promise<string>,
+        provider.request({ method: "eth_gasPrice" }) as Promise<string>,
+      ]);
+      setLiveChain(chainId === SEPOLIA_CHAIN_ID ? "Sepolia" : `Chain ${parseInt(chainId, 16)}`);
+      setLiveBlock(hexToDecimal(blockNumber));
+      setLiveGas(weiHexToGwei(gasPrice));
+      setLastRefresh(new Date().toLocaleTimeString());
+    } catch {
+      setLiveChain("Wallet provider unavailable");
+    }
+  }
+
+  useEffect(() => {
+    void refreshNetworkPulse();
+    const timer = window.setInterval(() => void refreshNetworkPulse(), 12000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   async function connectWallet() {
     try {
@@ -167,6 +222,8 @@ function Web3SolidityLab() {
       setWalletStatus(account ? `Connected: ${shortAddress(account)}` : "No account returned");
       const chainId = (await provider.request({ method: "eth_chainId" })) as string;
       setChainStatus(chainId === SEPOLIA_CHAIN_ID ? "Sepolia connected" : `Current chain: ${chainId}`);
+      pushFeed("WALLET", account ? `Connected ${shortAddress(account)}` : "No account returned");
+      await refreshNetworkPulse();
     } catch (error) {
       setWalletStatus(error instanceof Error ? error.message : "Wallet connection failed");
     }
@@ -177,6 +234,8 @@ function Web3SolidityLab() {
       const provider = getProvider();
       await provider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: SEPOLIA_CHAIN_ID }] });
       setChainStatus("Sepolia connected");
+      pushFeed("NETWORK", "Switched to Sepolia testnet");
+      await refreshNetworkPulse();
     } catch (error) {
       setChainStatus(error instanceof Error ? error.message : "Could not switch network");
     }
@@ -190,8 +249,10 @@ function Web3SolidityLab() {
         method: "eth_estimateGas",
         params: [{ from: wallet, data: EVM_STORAGE_INIT_CODE }],
       })) as string;
-      setDeployGas(hexToDecimal(estimate));
-      setOnchainStatus(`Deploy gas estimate: ${hexToDecimal(estimate)}`);
+      const value = hexToDecimal(estimate);
+      setDeployGas(value);
+      setOnchainStatus(`Deploy gas estimate: ${value}`);
+      pushFeed("GAS", `Deploy estimate ${value}`);
     } catch (error) {
       setOnchainStatus(error instanceof Error ? error.message : "Gas estimation failed");
     }
@@ -206,8 +267,10 @@ function Web3SolidityLab() {
         method: "eth_estimateGas",
         params: [{ from: wallet, to: contractAddress, data: toWordHex(onchainValue) }],
       })) as string;
-      setWriteGas(hexToDecimal(estimate));
-      setOnchainStatus(`Write gas estimate: ${hexToDecimal(estimate)}`);
+      const value = hexToDecimal(estimate);
+      setWriteGas(value);
+      setOnchainStatus(`Write gas estimate: ${value}`);
+      pushFeed("GAS", `Write estimate ${value}`);
     } catch (error) {
       setOnchainStatus(error instanceof Error ? error.message : "Gas estimation failed");
     }
@@ -226,6 +289,7 @@ function Web3SolidityLab() {
       })) as string;
       setDeployTx(txHash);
       addHistory({ type: "deploy", hash: txHash, status: "submitted", time: new Date().toLocaleTimeString() });
+      pushFeed("DEPLOY", `Submitted ${shortAddress(txHash)}`);
       setOnchainStatus("Deployment submitted. Waiting for confirmation…");
       const receipt = await waitForReceipt(provider, txHash);
       if (!receipt.contractAddress) throw new Error("Transaction confirmed but no contract address was returned.");
@@ -239,6 +303,8 @@ function Web3SolidityLab() {
         time: new Date().toLocaleTimeString(),
       });
       setOnchainStatus(`Contract deployed: ${shortAddress(receipt.contractAddress)}`);
+      pushFeed("CONFIRMED", `Contract ${shortAddress(receipt.contractAddress)}`);
+      await refreshNetworkPulse();
     } catch (error) {
       setOnchainStatus(error instanceof Error ? error.message : "Deployment failed");
     }
@@ -259,6 +325,7 @@ function Web3SolidityLab() {
       })) as string;
       setWriteTx(txHash);
       addHistory({ type: "write", hash: txHash, status: "submitted", time: new Date().toLocaleTimeString() });
+      pushFeed("WRITE", `Submitted value ${onchainValue}`);
       const receipt = await waitForReceipt(provider, txHash);
       setEventLogs(receipt.logs ?? []);
       addHistory({
@@ -269,6 +336,8 @@ function Web3SolidityLab() {
         time: new Date().toLocaleTimeString(),
       });
       setOnchainStatus(`Stored ${onchainValue} on Sepolia.`);
+      pushFeed("CONFIRMED", `Stored ${onchainValue} on-chain`);
+      await refreshNetworkPulse();
     } catch (error) {
       setOnchainStatus(error instanceof Error ? error.message : "Write failed");
     }
@@ -282,8 +351,10 @@ function Web3SolidityLab() {
         method: "eth_call",
         params: [{ to: contractAddress, data: "0x" }, "latest"],
       })) as string;
-      setReadValue(BigInt(result || "0x0").toString(10));
+      const value = BigInt(result || "0x0").toString(10);
+      setReadValue(value);
       setOnchainStatus("Read completed from Sepolia.");
+      pushFeed("READ", `On-chain value ${value}`);
     } catch (error) {
       setOnchainStatus(error instanceof Error ? error.message : "Read failed");
     }
@@ -305,147 +376,149 @@ function Web3SolidityLab() {
     };
     setRecords((current) => [next, ...current.filter((item) => item.id !== id)]);
     setLastEvent(`RecordStored(${id.slice(0, 12)}…, \"${cleanValue}\")`);
+    pushFeed("LOCAL EVENT", `${cleanKey} → ${cleanValue}`);
   }
 
   return (
     <LabShell crumb="Web3 & Solidity">
-      <div className="mb-10 max-w-3xl">
-        <span className="font-mono text-xs text-primary">LAB / C13</span>
+      <div className="mb-8 max-w-3xl">
+        <div className="flex items-center gap-2 font-mono text-xs text-primary">
+          <span className="relative flex size-2">
+            <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-70" />
+            <span className="relative inline-flex size-2 rounded-full bg-emerald-400" />
+          </span>
+          LAB / C13 · LIVE
+        </div>
         <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">Web3 & Solidity Lab</h1>
         <p className="mt-3 text-sm leading-7 text-muted-foreground">
-          Developer-focused Web3 workspace covering Solidity smart contracts, EVM execution,
-          wallet connectivity, dApp architecture, testing, deployment and smart-contract security.
+          Live EVM workspace for wallet connectivity, network telemetry, smart-contract deployment,
+          gas analysis, transaction tracking and on-chain interaction.
         </p>
       </div>
 
-      <section className="mb-8 rounded-md border border-emerald-500/40 bg-emerald-500/5 p-5 sm:p-6">
-        <div className="font-mono text-xs uppercase tracking-wider text-emerald-400">Real Sepolia testnet demo</div>
-        <h2 className="mt-2 text-2xl font-semibold">Deploy + Write + Read On-Chain</h2>
-        <p className="mt-2 max-w-4xl text-sm leading-6 text-muted-foreground">
-          This section sends real testnet transactions through your injected EVM wallet. It uses Sepolia only. Deployment and writes require Sepolia test ETH and your explicit wallet confirmation; no private key is stored by this site.
-        </p>
-
-        <div className="mt-5 grid gap-4 lg:grid-cols-3">
-          <div className="rounded-md border border-border bg-card p-4">
-            <div className="font-mono text-[10px] uppercase text-muted-foreground">1 · Wallet / network</div>
-            <button type="button" onClick={connectWallet} className="mt-3 rounded-md border border-primary/50 bg-primary/10 px-4 py-2 font-mono text-xs font-semibold text-primary hover:bg-primary/15">
-              {wallet ? "Reconnect Wallet" : "Connect Wallet"}
-            </button>
-            <button type="button" onClick={switchToSepolia} className="ml-2 mt-3 rounded-md border border-border bg-background px-4 py-2 font-mono text-xs font-semibold text-foreground hover:border-primary/50">
-              Switch to Sepolia
-            </button>
-            <p className="mt-3 break-all font-mono text-xs text-muted-foreground">{walletStatus}</p>
-            <p className="mt-1 break-all font-mono text-xs text-muted-foreground">{chainStatus}</p>
+      <section className="mb-8 overflow-hidden rounded-md border border-primary/40 bg-card">
+        <div className="flex items-center justify-between border-b border-border bg-primary/5 px-5 py-3">
+          <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-primary">
+            <Radio className="size-4 animate-pulse" aria-hidden="true" /> Live network pulse
           </div>
-
-          <div className="rounded-md border border-border bg-card p-4">
-            <div className="font-mono text-[10px] uppercase text-muted-foreground">2 · Deploy contract</div>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <button type="button" onClick={estimateDeployGas} className="rounded-md border border-border bg-background px-4 py-2 font-mono text-xs font-semibold text-foreground hover:border-primary/50">Estimate Gas</button>
-              <button type="button" onClick={deploySepoliaContract} className="rounded-md border border-emerald-500/50 bg-emerald-500/10 px-4 py-2 font-mono text-xs font-semibold text-emerald-400 hover:bg-emerald-500/15">Deploy to Sepolia</button>
-            </div>
-            <p className="mt-3 font-mono text-xs text-muted-foreground">Estimated gas: <span className="text-foreground">{deployGas}</span></p>
-            <p className="mt-2 break-all font-mono text-xs text-muted-foreground">Contract: {contractAddress || "Not deployed"}</p>
-            {contractAddress ? <a className="mt-2 inline-block font-mono text-xs text-primary underline" href={`https://sepolia.etherscan.io/address/${contractAddress}`} target="_blank" rel="noreferrer">Open contract on Etherscan</a> : null}
-          </div>
-
-          <div className="rounded-md border border-border bg-card p-4">
-            <div className="font-mono text-[10px] uppercase text-muted-foreground">3 · Contract interaction</div>
-            <label className="mt-3 block text-xs text-muted-foreground">
-              Integer value
-              <input value={onchainValue} onChange={(event) => setOnchainValue(event.target.value)} inputMode="numeric" className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 font-mono text-xs text-foreground outline-none focus:border-primary" />
-            </label>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <button type="button" onClick={estimateWriteGas} className="rounded-md border border-border bg-background px-4 py-2 font-mono text-xs font-semibold text-foreground hover:border-primary/50">Estimate Gas</button>
-              <button type="button" onClick={writeSepoliaValue} className="rounded-md border border-primary/50 bg-primary/10 px-4 py-2 font-mono text-xs font-semibold text-primary hover:bg-primary/15">Write On-Chain</button>
-              <button type="button" onClick={readSepoliaValue} className="rounded-md border border-border bg-background px-4 py-2 font-mono text-xs font-semibold text-foreground hover:border-primary/50">Read On-Chain</button>
-            </div>
-            <p className="mt-3 font-mono text-xs text-muted-foreground">Estimated gas: <span className="text-foreground">{writeGas}</span></p>
-            <p className="mt-1 font-mono text-xs text-muted-foreground">Current value: <span className="text-foreground">{readValue}</span></p>
-          </div>
+          <button type="button" onClick={() => void refreshNetworkPulse()} className="rounded-md border border-border bg-background px-3 py-1.5 font-mono text-[10px] uppercase text-muted-foreground hover:border-primary/50 hover:text-primary">Refresh</button>
         </div>
-
-        <div className="mt-4 rounded-md border border-border bg-card p-4">
-          <div className="font-mono text-[10px] uppercase text-muted-foreground">Sepolia activity</div>
-          <p className="mt-2 break-all font-mono text-xs text-muted-foreground">Status: {onchainStatus}</p>
-          {deployTx ? <p className="mt-1 break-all font-mono text-xs text-muted-foreground">Deploy tx: <a className="text-primary underline" href={`https://sepolia.etherscan.io/tx/${deployTx}`} target="_blank" rel="noreferrer">{deployTx}</a></p> : null}
-          {writeTx ? <p className="mt-1 break-all font-mono text-xs text-muted-foreground">Write tx: <a className="text-primary underline" href={`https://sepolia.etherscan.io/tx/${writeTx}`} target="_blank" rel="noreferrer">{writeTx}</a></p> : null}
-        </div>
-
-        <div className="mt-4 grid gap-4 lg:grid-cols-2">
-          <div className="rounded-md border border-border bg-card p-4">
-            <div className="font-mono text-[10px] uppercase text-muted-foreground">Transaction history</div>
-            {txHistory.length === 0 ? (
-              <p className="mt-3 text-sm text-muted-foreground">No testnet transactions yet.</p>
-            ) : (
-              <div className="mt-3 space-y-2">
-                {txHistory.map((tx) => (
-                  <div key={`${tx.type}-${tx.hash}`} className="rounded-md border border-border bg-background p-3">
-                    <div className="flex items-center justify-between gap-3">
-                      <span className="font-mono text-xs font-semibold uppercase text-foreground">{tx.type}</span>
-                      <span className="font-mono text-[10px] uppercase text-muted-foreground">{tx.status}</span>
-                    </div>
-                    <a className="mt-1 block break-all font-mono text-[10px] text-primary underline" href={`https://sepolia.etherscan.io/tx/${tx.hash}`} target="_blank" rel="noreferrer">{tx.hash}</a>
-                    <div className="mt-1 font-mono text-[10px] text-muted-foreground">gas used: {tx.gasUsed || "pending"} · {tx.time}</div>
-                  </div>
-                ))}
-              </div>
-            )}
+        <div className="grid gap-px bg-border sm:grid-cols-2 lg:grid-cols-4">
+          <div className="bg-card p-5">
+            <div className="flex items-center gap-2 font-mono text-[10px] uppercase text-muted-foreground"><Activity className="size-4 text-emerald-400" />Network</div>
+            <div className="mt-2 text-xl font-semibold">{liveChain}</div>
+            <div className="mt-1 font-mono text-[10px] text-muted-foreground">updated {lastRefresh}</div>
           </div>
-
-          <div className="rounded-md border border-border bg-card p-4">
-            <div className="font-mono text-[10px] uppercase text-muted-foreground">Event / receipt logs</div>
-            {eventLogs.length === 0 ? (
-              <p className="mt-3 text-sm text-muted-foreground">No logs emitted by the minimal demo contract yet. Receipt logs will appear here when present.</p>
-            ) : (
-              <div className="mt-3 space-y-2">
-                {eventLogs.map((log, index) => (
-                  <div key={`${log.transactionHash || "log"}-${index}`} className="rounded-md border border-border bg-background p-3">
-                    <div className="break-all font-mono text-[10px] text-muted-foreground">address: {log.address || "—"}</div>
-                    <div className="mt-1 break-all font-mono text-[10px] text-muted-foreground">data: {log.data || "0x"}</div>
-                    <div className="mt-1 break-all font-mono text-[10px] text-muted-foreground">topics: {(log.topics || []).join(", ") || "none"}</div>
-                  </div>
-                ))}
-              </div>
-            )}
+          <div className="bg-card p-5">
+            <div className="flex items-center gap-2 font-mono text-[10px] uppercase text-muted-foreground"><Blocks className="size-4 text-primary" />Latest block</div>
+            <div className="mt-2 font-mono text-xl font-semibold">#{liveBlock}</div>
+            <div className="mt-1 h-1 overflow-hidden rounded-full bg-background"><div className="h-full w-2/3 animate-pulse rounded-full bg-primary" /></div>
+          </div>
+          <div className="bg-card p-5">
+            <div className="flex items-center gap-2 font-mono text-[10px] uppercase text-muted-foreground"><Fuel className="size-4 text-amber-400" />Gas price</div>
+            <div className="mt-2 text-xl font-semibold">{liveGas} <span className="text-xs text-muted-foreground">Gwei</span></div>
+            <div className="mt-1 font-mono text-[10px] text-muted-foreground">wallet RPC estimate</div>
+          </div>
+          <div className="bg-card p-5">
+            <div className="flex items-center gap-2 font-mono text-[10px] uppercase text-muted-foreground"><WalletCards className="size-4 text-primary" />Wallet</div>
+            <div className="mt-2 font-mono text-xl font-semibold">{wallet ? shortAddress(wallet) : "OFFLINE"}</div>
+            <div className="mt-1 font-mono text-[10px] text-muted-foreground">{wallet ? "ready to sign" : "connect to activate"}</div>
           </div>
         </div>
       </section>
 
-      <section className="mb-8 rounded-md border border-primary/40 bg-primary/5 p-5 sm:p-6">
-        <div className="font-mono text-xs uppercase tracking-wider text-primary">Browser-local contract simulator</div>
-        <h2 className="mt-2 text-2xl font-semibold">Research Registry Simulator</h2>
-        <p className="mt-2 text-sm leading-6 text-muted-foreground">
-          This second demo is local and gas-free. Use it to test registry logic even if you do not have Sepolia test ETH.
-        </p>
+      <div className="mb-8 grid gap-4 lg:grid-cols-[1.4fr_0.6fr]">
+        <section className="rounded-md border border-emerald-500/40 bg-emerald-500/5 p-5 sm:p-6">
+          <div className="font-mono text-xs uppercase tracking-wider text-emerald-400">Real Sepolia testnet demo</div>
+          <h2 className="mt-2 text-2xl font-semibold">Deploy + Write + Read On-Chain</h2>
+          <p className="mt-2 max-w-4xl text-sm leading-6 text-muted-foreground">
+            Real testnet transactions through your injected EVM wallet. Deployment and writes require Sepolia test ETH and wallet confirmation; the site never stores a private key.
+          </p>
 
-        <div className="mt-5 rounded-md border border-border bg-card p-4">
-          <div className="font-mono text-[10px] uppercase text-muted-foreground">Contract write simulation</div>
-          <div className="mt-3 grid gap-3 sm:grid-cols-2">
-            <label className="text-xs text-muted-foreground">
-              Record key
-              <input value={keyName} onChange={(event) => setKeyName(event.target.value)} className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 font-mono text-xs text-foreground outline-none focus:border-primary" />
-            </label>
-            <label className="text-xs text-muted-foreground">
-              Record value
-              <input value={recordValue} onChange={(event) => setRecordValue(event.target.value)} className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 font-mono text-xs text-foreground outline-none focus:border-primary" />
-            </label>
+          <div className="mt-5 grid gap-4 xl:grid-cols-3">
+            <div className="rounded-md border border-border bg-card p-4">
+              <div className="font-mono text-[10px] uppercase text-muted-foreground">1 · Wallet / network</div>
+              <button type="button" onClick={connectWallet} className="mt-3 rounded-md border border-primary/50 bg-primary/10 px-4 py-2 font-mono text-xs font-semibold text-primary hover:bg-primary/15">
+                {wallet ? "Reconnect Wallet" : "Connect Wallet"}
+              </button>
+              <button type="button" onClick={switchToSepolia} className="ml-2 mt-3 rounded-md border border-border bg-background px-4 py-2 font-mono text-xs font-semibold text-foreground hover:border-primary/50">Switch to Sepolia</button>
+              <p className="mt-3 break-all font-mono text-xs text-muted-foreground">{walletStatus}</p>
+              <p className="mt-1 break-all font-mono text-xs text-muted-foreground">{chainStatus}</p>
+            </div>
+
+            <div className="rounded-md border border-border bg-card p-4">
+              <div className="font-mono text-[10px] uppercase text-muted-foreground">2 · Deploy contract</div>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <button type="button" onClick={estimateDeployGas} className="rounded-md border border-border bg-background px-4 py-2 font-mono text-xs font-semibold text-foreground hover:border-primary/50">Estimate Gas</button>
+                <button type="button" onClick={deploySepoliaContract} className="rounded-md border border-emerald-500/50 bg-emerald-500/10 px-4 py-2 font-mono text-xs font-semibold text-emerald-400 hover:bg-emerald-500/15">Deploy</button>
+              </div>
+              <p className="mt-3 font-mono text-xs text-muted-foreground">Estimated gas: <span className="text-foreground">{deployGas}</span></p>
+              <p className="mt-2 break-all font-mono text-xs text-muted-foreground">Contract: {contractAddress || "Not deployed"}</p>
+              {contractAddress ? <a className="mt-2 inline-block font-mono text-xs text-primary underline" href={`https://sepolia.etherscan.io/address/${contractAddress}`} target="_blank" rel="noreferrer">Open on Etherscan</a> : null}
+            </div>
+
+            <div className="rounded-md border border-border bg-card p-4">
+              <div className="font-mono text-[10px] uppercase text-muted-foreground">3 · Contract interaction</div>
+              <label className="mt-3 block text-xs text-muted-foreground">Integer value
+                <input value={onchainValue} onChange={(event) => setOnchainValue(event.target.value)} inputMode="numeric" className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 font-mono text-xs text-foreground outline-none focus:border-primary" />
+              </label>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <button type="button" onClick={estimateWriteGas} className="rounded-md border border-border bg-background px-3 py-2 font-mono text-xs font-semibold text-foreground hover:border-primary/50">Gas</button>
+                <button type="button" onClick={writeSepoliaValue} className="rounded-md border border-primary/50 bg-primary/10 px-3 py-2 font-mono text-xs font-semibold text-primary hover:bg-primary/15">Write</button>
+                <button type="button" onClick={readSepoliaValue} className="rounded-md border border-border bg-background px-3 py-2 font-mono text-xs font-semibold text-foreground hover:border-primary/50">Read</button>
+              </div>
+              <p className="mt-3 font-mono text-xs text-muted-foreground">Gas: <span className="text-foreground">{writeGas}</span> · Value: <span className="text-foreground">{readValue}</span></p>
+            </div>
           </div>
-          <button type="button" onClick={storeRecord} className="mt-3 rounded-md border border-emerald-500/50 bg-emerald-500/10 px-4 py-2 font-mono text-xs font-semibold text-emerald-400 hover:bg-emerald-500/15">Store Record</button>
-          <p className="mt-3 break-all font-mono text-xs text-muted-foreground">Event: {lastEvent}</p>
+
+          <div className="mt-4 rounded-md border border-border bg-card p-4">
+            <div className="flex items-center gap-2 font-mono text-[10px] uppercase text-muted-foreground"><Zap className="size-4 text-amber-400" />Sepolia activity</div>
+            <p className="mt-2 break-all font-mono text-xs text-muted-foreground">Status: {onchainStatus}</p>
+            {deployTx ? <p className="mt-1 break-all font-mono text-xs text-muted-foreground">Deploy tx: <a className="text-primary underline" href={`https://sepolia.etherscan.io/tx/${deployTx}`} target="_blank" rel="noreferrer">{deployTx}</a></p> : null}
+            {writeTx ? <p className="mt-1 break-all font-mono text-xs text-muted-foreground">Write tx: <a className="text-primary underline" href={`https://sepolia.etherscan.io/tx/${writeTx}`} target="_blank" rel="noreferrer">{writeTx}</a></p> : null}
+          </div>
+        </section>
+
+        <aside className="rounded-md border border-border bg-card p-5">
+          <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-primary"><Activity className="size-4" />Live activity feed</div>
+          <div className="mt-4 space-y-3">
+            {feed.map((item, index) => (
+              <div key={`${item.time}-${index}`} className="relative border-l border-primary/30 pl-4">
+                <span className="absolute -left-1 top-1.5 size-2 rounded-full bg-primary shadow-[0_0_12px_currentColor]" />
+                <div className="font-mono text-[10px] uppercase text-primary">{item.label}</div>
+                <div className="mt-1 text-xs text-foreground">{item.detail}</div>
+                <div className="mt-1 font-mono text-[9px] text-muted-foreground">{item.time}</div>
+              </div>
+            ))}
+          </div>
+        </aside>
+      </div>
+
+      <section className="mb-8 grid gap-4 lg:grid-cols-2">
+        <div className="rounded-md border border-border bg-card p-4">
+          <div className="font-mono text-[10px] uppercase text-muted-foreground">Transaction history</div>
+          {txHistory.length === 0 ? <p className="mt-3 text-sm text-muted-foreground">No testnet transactions yet.</p> : (
+            <div className="mt-3 space-y-2">
+              {txHistory.map((tx) => (
+                <div key={`${tx.type}-${tx.hash}`} className="rounded-md border border-border bg-background p-3">
+                  <div className="flex items-center justify-between gap-3"><span className="font-mono text-xs font-semibold uppercase text-foreground">{tx.type}</span><span className="font-mono text-[10px] uppercase text-muted-foreground">{tx.status}</span></div>
+                  <a className="mt-1 block break-all font-mono text-[10px] text-primary underline" href={`https://sepolia.etherscan.io/tx/${tx.hash}`} target="_blank" rel="noreferrer">{tx.hash}</a>
+                  <div className="mt-1 font-mono text-[10px] text-muted-foreground">gas used: {tx.gasUsed || "pending"} · {tx.time}</div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
-        <div className="mt-4 rounded-md border border-border bg-card p-4">
-          <div className="font-mono text-[10px] uppercase text-muted-foreground">Registry state</div>
-          {records.length === 0 ? (
-            <p className="mt-3 text-sm text-muted-foreground">No records stored yet.</p>
-          ) : (
-            <div className="mt-3 space-y-3">
-              {records.map((record) => (
-                <div key={record.id} className="rounded-md border border-border bg-background p-3">
-                  <div className="font-mono text-xs font-semibold text-foreground">{record.key} → {record.value}</div>
-                  <div className="mt-1 break-all font-mono text-[10px] text-muted-foreground">id: {record.id}</div>
-                  <div className="mt-1 font-mono text-[10px] text-muted-foreground">stored: {record.time}</div>
+        <div className="rounded-md border border-border bg-card p-4">
+          <div className="font-mono text-[10px] uppercase text-muted-foreground">Event / receipt logs</div>
+          {eventLogs.length === 0 ? <p className="mt-3 text-sm text-muted-foreground">No receipt logs yet.</p> : (
+            <div className="mt-3 space-y-2">
+              {eventLogs.map((log, index) => (
+                <div key={`${log.transactionHash || "log"}-${index}`} className="rounded-md border border-border bg-background p-3">
+                  <div className="break-all font-mono text-[10px] text-muted-foreground">address: {log.address || "—"}</div>
+                  <div className="mt-1 break-all font-mono text-[10px] text-muted-foreground">data: {log.data || "0x"}</div>
+                  <div className="mt-1 break-all font-mono text-[10px] text-muted-foreground">topics: {(log.topics || []).join(", ") || "none"}</div>
                 </div>
               ))}
             </div>
@@ -453,9 +526,24 @@ function Web3SolidityLab() {
         </div>
       </section>
 
+      <section className="mb-8 rounded-md border border-primary/40 bg-primary/5 p-5 sm:p-6">
+        <div className="font-mono text-xs uppercase tracking-wider text-primary">Browser-local contract simulator</div>
+        <h2 className="mt-2 text-2xl font-semibold">Research Registry Simulator</h2>
+        <p className="mt-2 text-sm leading-6 text-muted-foreground">Gas-free local logic demo that works even without Sepolia test ETH.</p>
+        <div className="mt-5 rounded-md border border-border bg-card p-4">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <label className="text-xs text-muted-foreground">Record key<input value={keyName} onChange={(event) => setKeyName(event.target.value)} className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 font-mono text-xs text-foreground outline-none focus:border-primary" /></label>
+            <label className="text-xs text-muted-foreground">Record value<input value={recordValue} onChange={(event) => setRecordValue(event.target.value)} className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 font-mono text-xs text-foreground outline-none focus:border-primary" /></label>
+          </div>
+          <button type="button" onClick={storeRecord} className="mt-3 rounded-md border border-emerald-500/50 bg-emerald-500/10 px-4 py-2 font-mono text-xs font-semibold text-emerald-400 hover:bg-emerald-500/15">Store Record</button>
+          <p className="mt-3 break-all font-mono text-xs text-muted-foreground">Event: {lastEvent}</p>
+        </div>
+        {records.length > 0 ? <div className="mt-4 space-y-2">{records.map((record) => <div key={record.id} className="rounded-md border border-border bg-card p-3"><div className="font-mono text-xs font-semibold text-foreground">{record.key} → {record.value}</div><div className="mt-1 break-all font-mono text-[10px] text-muted-foreground">{record.id} · {record.time}</div></div>)}</div> : null}
+      </section>
+
       <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {stack.map(({ icon: Icon, title, text }) => (
-          <article key={title} className="rounded-md border border-border bg-card p-5">
+          <article key={title} className="rounded-md border border-border bg-card p-5 transition hover:-translate-y-0.5 hover:border-primary/50">
             <Icon className="size-5 text-primary" aria-hidden="true" />
             <h2 className="mt-4 text-lg font-semibold">{title}</h2>
             <p className="mt-2 text-sm leading-6 text-muted-foreground">{text}</p>
@@ -466,28 +554,7 @@ function Web3SolidityLab() {
       <section className="mt-8 rounded-md border border-border bg-card p-5 sm:p-6">
         <div className="font-mono text-xs uppercase tracking-wider text-primary">Solidity example</div>
         <h2 className="mt-2 text-2xl font-semibold">Research Registry Smart Contract</h2>
-        <p className="mt-2 text-sm leading-6 text-muted-foreground">
-          Minimal Solidity example demonstrating ownership, mappings, calldata, events and access control. The live Sepolia demo above uses a tiny purpose-built EVM storage contract so deployment works directly from the browser without a server-side compiler.
-        </p>
-        <pre className="mt-5 overflow-x-auto rounded-md border border-border bg-background p-4 text-xs leading-6 text-foreground">
-          <code>{sampleContract}</code>
-        </pre>
-      </section>
-
-      <section className="mt-8 rounded-md border border-primary/30 bg-primary/5 p-5 sm:p-6">
-        <div className="font-mono text-xs uppercase tracking-wider text-primary">Developer path</div>
-        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {[
-            "1. Solidity fundamentals",
-            "2. Foundry / Hardhat testing",
-            "3. ethers.js / viem integration",
-            "4. Testnet deployment + security review",
-          ].map((step) => (
-            <div key={step} className="rounded-md border border-border bg-card p-4 font-mono text-xs text-foreground">
-              {step}
-            </div>
-          ))}
-        </div>
+        <pre className="mt-5 overflow-x-auto rounded-md border border-border bg-background p-4 text-xs leading-6 text-foreground"><code>{sampleContract}</code></pre>
       </section>
     </LabShell>
   );
