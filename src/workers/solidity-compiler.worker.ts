@@ -1,5 +1,7 @@
 import wrapper from "solc/wrapper";
-import soljsonUrl from "solc/soljson.js?url";
+// solc ships soljson.js without TypeScript declarations, but Vite can bundle it into this worker.
+// @ts-expect-error no declaration file for solc/soljson.js
+import soljson from "solc/soljson.js";
 
 type CompileRequest = {
   source: string;
@@ -22,26 +24,18 @@ type CompilerResult =
       warnings: string[];
     };
 
-type WorkerScope = DedicatedWorkerGlobalScope & typeof globalThis & {
-  Module?: unknown;
-};
+const workerScope = self as DedicatedWorkerGlobalScope & typeof globalThis;
 
-const workerScope = self as WorkerScope;
 let compiler: ReturnType<typeof wrapper> | null = null;
 
 function ensureCompiler() {
   if (compiler) return compiler;
 
-  delete workerScope.Module;
-  importScripts(soljsonUrl);
+  const candidate = (soljson as unknown) as Parameters<typeof wrapper>[0];
+  compiler = wrapper(candidate);
 
-  const module = workerScope.Module;
-  if (!module) {
-    throw new Error("Bundled Solidity compiler loaded, but Module was not created.");
-  }
-
-  compiler = wrapper(module);
   if (typeof compiler.version !== "function" || typeof compiler.compile !== "function") {
+    compiler = null;
     throw new Error("Bundled Solidity compiler API is unavailable.");
   }
 
@@ -49,7 +43,7 @@ function ensureCompiler() {
 }
 
 function compileSource(source: string): CompilerResult {
-  let compilerVersion = "solc 0.8.30";
+  let compilerVersion = "solc bundled";
 
   try {
     const solc = ensureCompiler();
@@ -119,7 +113,7 @@ function compileSource(source: string): CompilerResult {
     return {
       ok: false,
       compilerVersion,
-      errors: [error instanceof Error ? error.message : "Browser Solidity compiler failed."],
+      errors: [error instanceof Error ? error.message : "Bundled browser Solidity compiler failed."],
       warnings: [],
     };
   }
@@ -130,7 +124,7 @@ workerScope.addEventListener("message", (event: MessageEvent<CompileRequest>) =>
   if (!source) {
     workerScope.postMessage({
       ok: false,
-      compilerVersion: "solc 0.8.30",
+      compilerVersion: "solc bundled",
       errors: ["Solidity source is empty."],
       warnings: [],
     } satisfies CompilerResult);
