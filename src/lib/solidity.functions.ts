@@ -1,3 +1,4 @@
+import { createRequire } from "node:module";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
@@ -27,9 +28,10 @@ type SolcLike = {
   compile: (input: string) => string;
 };
 
-async function loadCompiler(): Promise<SolcLike> {
-  const mod = await import("solc");
-  const candidate = ((mod as { default?: unknown }).default ?? mod) as Partial<SolcLike>;
+function loadCompiler(): SolcLike {
+  const require = createRequire(import.meta.url);
+  const loaded = require("solc") as { default?: unknown } | SolcLike;
+  const candidate = ((loaded as { default?: unknown }).default ?? loaded) as Partial<SolcLike>;
 
   if (typeof candidate.version !== "function" || typeof candidate.compile !== "function") {
     throw new Error("The Solidity compiler module loaded, but its compile API is unavailable.");
@@ -44,7 +46,7 @@ export const compileSolidity = createServerFn({ method: "POST" })
     let compilerVersion = "solc unavailable";
 
     try {
-      const solc = await loadCompiler();
+      const solc = loadCompiler();
       compilerVersion = solc.version();
 
       const input = {
