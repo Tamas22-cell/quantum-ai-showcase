@@ -1,5 +1,3 @@
-import wrapper from "solc/wrapper";
-
 const SOLJSON_URL = "https://binaries.soliditylang.org/bin/soljson-v0.8.30+commit.73712a01.js";
 
 type CompileRequest = {
@@ -24,26 +22,51 @@ type CompilerResult =
     };
 
 type SolcModule = {
-  cwrap: (...args: any[]) => any;
+  cwrap: (
+    ident: string,
+    returnType: string | null,
+    argTypes: string[],
+  ) => (...args: any[]) => any;
 };
 
 type WorkerGlobal = typeof self & {
   Module?: SolcModule;
 };
 
-const scope = self as WorkerGlobal;
-let compiler: ReturnType<typeof wrapper> | null = null;
+type CompilerApi = {
+  version: () => string;
+  compile: (input: string) => string;
+};
 
-function getCompiler() {
+const scope = self as WorkerGlobal;
+let compiler: CompilerApi | null = null;
+
+function getCompiler(): CompilerApi {
   if (compiler) return compiler;
 
   importScripts(SOLJSON_URL);
 
-  if (!scope.Module || typeof scope.Module.cwrap !== "function") {
+  const module = scope.Module;
+  if (!module || typeof module.cwrap !== "function") {
     throw new Error("Official Solidity compiler binary did not initialize.");
   }
 
-  compiler = wrapper(scope.Module as any);
+  const solidityVersion = module.cwrap("solidity_version", "string", []);
+  const solidityCompile = module.cwrap("solidity_compile", "string", [
+    "string",
+    "number",
+    "number",
+  ]);
+
+  if (typeof solidityVersion !== "function" || typeof solidityCompile !== "function") {
+    throw new Error("Official Solidity compiler API is unavailable.");
+  }
+
+  compiler = {
+    version: () => String(solidityVersion()),
+    compile: (input: string) => String(solidityCompile(input, 0, 0)),
+  };
+
   return compiler;
 }
 
@@ -74,7 +97,8 @@ function compileSource(source: string): CompilerResult {
       },
     };
 
-    const output = JSON.parse(solc.compile(JSON.stringify(input)));
+    const rawOutput = solc.compile(JSON.stringify(input));
+    const output = JSON.parse(rawOutput);
     const diagnostics = Array.isArray(output?.errors) ? output.errors : [];
 
     const errors = diagnostics
