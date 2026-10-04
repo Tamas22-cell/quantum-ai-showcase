@@ -11,12 +11,12 @@ export const Route = createFileRoute("/lab/web3-solidity")({
       {
         name: "description",
         content:
-          "Interactive Web3 and Solidity research lab with live network pulse, wallet connection, gas estimation, Sepolia deployment, transaction history and on-chain read/write actions.",
+          "Interactive Web3 and Solidity research lab with public Sepolia telemetry, wallet connection, gas estimation, deployment, transaction history and on-chain read/write actions.",
       },
       { property: "og:title", content: "Web3 & Solidity Lab — Quantum AI Lab" },
       {
         property: "og:description",
-        content: "Live EVM network pulse, wallet activity, Sepolia smart-contract deployment and transaction monitoring.",
+        content: "Live Sepolia network pulse, wallet activity, smart-contract deployment and transaction monitoring.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -56,46 +56,17 @@ contract ResearchRegistry {
 
 const EVM_STORAGE_INIT_CODE = "0x6018600c60003960186000f33615600c57600035600055005b60005460005260206000f3";
 const SEPOLIA_CHAIN_ID = "0xaa36a7";
+const PUBLIC_SEPOLIA_RPCS = [
+  "https://ethereum-sepolia-rpc.publicnode.com",
+  "https://rpc.sepolia.org",
+];
 
-type StoredRecord = {
-  id: string;
-  key: string;
-  value: string;
-  time: string;
-};
-
-type EthereumProvider = {
-  request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
-};
-
-type RpcLog = {
-  address?: string;
-  data?: string;
-  topics?: string[];
-  transactionHash?: string;
-};
-
-type RpcReceipt = {
-  contractAddress?: string | null;
-  status?: string;
-  transactionHash?: string;
-  gasUsed?: string;
-  logs?: RpcLog[];
-};
-
-type TxHistoryItem = {
-  type: "deploy" | "write";
-  hash: string;
-  status: "submitted" | "confirmed" | "failed";
-  gasUsed?: string;
-  time: string;
-};
-
-type FeedItem = {
-  label: string;
-  detail: string;
-  time: string;
-};
+type StoredRecord = { id: string; key: string; value: string; time: string };
+type EthereumProvider = { request: (args: { method: string; params?: unknown[] }) => Promise<unknown> };
+type RpcLog = { address?: string; data?: string; topics?: string[]; transactionHash?: string };
+type RpcReceipt = { contractAddress?: string | null; status?: string; transactionHash?: string; gasUsed?: string; logs?: RpcLog[] };
+type TxHistoryItem = { type: "deploy" | "write"; hash: string; status: "submitted" | "confirmed" | "failed"; gasUsed?: string; time: string };
+type FeedItem = { label: string; detail: string; time: string };
 
 function shortAddress(value: string) {
   return value.length > 12 ? `${value.slice(0, 6)}…${value.slice(-4)}` : value;
@@ -103,11 +74,7 @@ function shortAddress(value: string) {
 
 function hexToDecimal(value?: string) {
   if (!value) return "—";
-  try {
-    return BigInt(value).toString(10);
-  } catch {
-    return value;
-  }
+  try { return BigInt(value).toString(10); } catch { return value; }
 }
 
 function weiHexToGwei(value?: string) {
@@ -116,9 +83,28 @@ function weiHexToGwei(value?: string) {
     const wei = BigInt(value);
     const whole = Number(wei) / 1_000_000_000;
     return whole.toFixed(2);
-  } catch {
-    return "—";
+  } catch { return "—"; }
+}
+
+async function publicRpc(method: string, params: unknown[] = []) {
+  let lastError: unknown;
+  for (const url of PUBLIC_SEPOLIA_RPCS) {
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }),
+      });
+      if (!response.ok) throw new Error(`RPC HTTP ${response.status}`);
+      const body = (await response.json()) as { result?: string; error?: { message?: string } };
+      if (body.error) throw new Error(body.error.message || "RPC error");
+      if (typeof body.result !== "string") throw new Error("RPC returned no result");
+      return body.result;
+    } catch (error) {
+      lastError = error;
+    }
   }
+  throw lastError instanceof Error ? lastError : new Error("Public Sepolia RPC unavailable");
 }
 
 async function hashKey(value: string) {
@@ -135,10 +121,7 @@ function toWordHex(value: string) {
 
 async function waitForReceipt(provider: EthereumProvider, txHash: string) {
   for (let i = 0; i < 90; i += 1) {
-    const receipt = (await provider.request({
-      method: "eth_getTransactionReceipt",
-      params: [txHash],
-    })) as RpcReceipt | null;
+    const receipt = (await provider.request({ method: "eth_getTransactionReceipt", params: [txHash] })) as RpcReceipt | null;
     if (receipt) return receipt;
     await new Promise((resolve) => window.setTimeout(resolve, 2000));
   }
@@ -167,7 +150,8 @@ function Web3SolidityLab() {
 
   const [liveBlock, setLiveBlock] = useState("—");
   const [liveGas, setLiveGas] = useState("—");
-  const [liveChain, setLiveChain] = useState("No wallet provider");
+  const [liveChain, setLiveChain] = useState("Sepolia · public RPC");
+  const [telemetrySource, setTelemetrySource] = useState("public RPC");
   const [lastRefresh, setLastRefresh] = useState("—");
   const [feed, setFeed] = useState<FeedItem[]>([
     { label: "LAB READY", detail: "Web3 engine initialized", time: new Date().toLocaleTimeString() },
@@ -180,10 +164,7 @@ function Web3SolidityLab() {
   }
 
   function pushFeed(label: string, detail: string) {
-    setFeed((current) => [
-      { label, detail, time: new Date().toLocaleTimeString() },
-      ...current,
-    ].slice(0, 8));
+    setFeed((current) => [{ label, detail, time: new Date().toLocaleTimeString() }, ...current].slice(0, 8));
   }
 
   function addHistory(item: TxHistoryItem) {
@@ -191,19 +172,35 @@ function Web3SolidityLab() {
   }
 
   async function refreshNetworkPulse() {
+    const injected = (window as typeof window & { ethereum?: EthereumProvider }).ethereum;
     try {
-      const provider = getProvider();
-      const [chainId, blockNumber, gasPrice] = await Promise.all([
-        provider.request({ method: "eth_chainId" }) as Promise<string>,
-        provider.request({ method: "eth_blockNumber" }) as Promise<string>,
-        provider.request({ method: "eth_gasPrice" }) as Promise<string>,
+      if (injected) {
+        const [chainId, blockNumber, gasPrice] = await Promise.all([
+          injected.request({ method: "eth_chainId" }) as Promise<string>,
+          injected.request({ method: "eth_blockNumber" }) as Promise<string>,
+          injected.request({ method: "eth_gasPrice" }) as Promise<string>,
+        ]);
+        setLiveChain(chainId === SEPOLIA_CHAIN_ID ? "Sepolia" : `Chain ${parseInt(chainId, 16)}`);
+        setLiveBlock(hexToDecimal(blockNumber));
+        setLiveGas(weiHexToGwei(gasPrice));
+        setTelemetrySource("wallet RPC");
+        setLastRefresh(new Date().toLocaleTimeString());
+        return;
+      }
+
+      const [blockNumber, gasPrice] = await Promise.all([
+        publicRpc("eth_blockNumber"),
+        publicRpc("eth_gasPrice"),
       ]);
-      setLiveChain(chainId === SEPOLIA_CHAIN_ID ? "Sepolia" : `Chain ${parseInt(chainId, 16)}`);
+      setLiveChain("Sepolia · public RPC");
       setLiveBlock(hexToDecimal(blockNumber));
       setLiveGas(weiHexToGwei(gasPrice));
+      setTelemetrySource("public RPC · no wallet needed");
       setLastRefresh(new Date().toLocaleTimeString());
-    } catch {
-      setLiveChain("Wallet provider unavailable");
+    } catch (error) {
+      setLiveChain("Sepolia telemetry unavailable");
+      setTelemetrySource(error instanceof Error ? error.message : "RPC error");
+      setLastRefresh(new Date().toLocaleTimeString());
     }
   }
 
@@ -245,10 +242,7 @@ function Web3SolidityLab() {
     try {
       const provider = getProvider();
       if (!wallet) throw new Error("Connect your wallet first.");
-      const estimate = (await provider.request({
-        method: "eth_estimateGas",
-        params: [{ from: wallet, data: EVM_STORAGE_INIT_CODE }],
-      })) as string;
+      const estimate = (await provider.request({ method: "eth_estimateGas", params: [{ from: wallet, data: EVM_STORAGE_INIT_CODE }] })) as string;
       const value = hexToDecimal(estimate);
       setDeployGas(value);
       setOnchainStatus(`Deploy gas estimate: ${value}`);
@@ -263,10 +257,7 @@ function Web3SolidityLab() {
       const provider = getProvider();
       if (!wallet) throw new Error("Connect your wallet first.");
       if (!contractAddress) throw new Error("Deploy the Sepolia demo contract first.");
-      const estimate = (await provider.request({
-        method: "eth_estimateGas",
-        params: [{ from: wallet, to: contractAddress, data: toWordHex(onchainValue) }],
-      })) as string;
+      const estimate = (await provider.request({ method: "eth_estimateGas", params: [{ from: wallet, to: contractAddress, data: toWordHex(onchainValue) }] })) as string;
       const value = hexToDecimal(estimate);
       setWriteGas(value);
       setOnchainStatus(`Write gas estimate: ${value}`);
@@ -283,10 +274,7 @@ function Web3SolidityLab() {
       const chainId = (await provider.request({ method: "eth_chainId" })) as string;
       if (chainId !== SEPOLIA_CHAIN_ID) throw new Error("Switch the wallet to Sepolia first.");
       setOnchainStatus("Waiting for wallet confirmation…");
-      const txHash = (await provider.request({
-        method: "eth_sendTransaction",
-        params: [{ from: wallet, data: EVM_STORAGE_INIT_CODE }],
-      })) as string;
+      const txHash = (await provider.request({ method: "eth_sendTransaction", params: [{ from: wallet, data: EVM_STORAGE_INIT_CODE }] })) as string;
       setDeployTx(txHash);
       addHistory({ type: "deploy", hash: txHash, status: "submitted", time: new Date().toLocaleTimeString() });
       pushFeed("DEPLOY", `Submitted ${shortAddress(txHash)}`);
@@ -295,13 +283,7 @@ function Web3SolidityLab() {
       if (!receipt.contractAddress) throw new Error("Transaction confirmed but no contract address was returned.");
       setContractAddress(receipt.contractAddress);
       setEventLogs(receipt.logs ?? []);
-      addHistory({
-        type: "deploy",
-        hash: txHash,
-        status: receipt.status === "0x0" ? "failed" : "confirmed",
-        gasUsed: hexToDecimal(receipt.gasUsed),
-        time: new Date().toLocaleTimeString(),
-      });
+      addHistory({ type: "deploy", hash: txHash, status: receipt.status === "0x0" ? "failed" : "confirmed", gasUsed: hexToDecimal(receipt.gasUsed), time: new Date().toLocaleTimeString() });
       setOnchainStatus(`Contract deployed: ${shortAddress(receipt.contractAddress)}`);
       pushFeed("CONFIRMED", `Contract ${shortAddress(receipt.contractAddress)}`);
       await refreshNetworkPulse();
@@ -319,22 +301,13 @@ function Web3SolidityLab() {
       if (chainId !== SEPOLIA_CHAIN_ID) throw new Error("Switch the wallet to Sepolia first.");
       const data = toWordHex(onchainValue);
       setOnchainStatus("Waiting for write confirmation…");
-      const txHash = (await provider.request({
-        method: "eth_sendTransaction",
-        params: [{ from: wallet, to: contractAddress, data }],
-      })) as string;
+      const txHash = (await provider.request({ method: "eth_sendTransaction", params: [{ from: wallet, to: contractAddress, data }] })) as string;
       setWriteTx(txHash);
       addHistory({ type: "write", hash: txHash, status: "submitted", time: new Date().toLocaleTimeString() });
       pushFeed("WRITE", `Submitted value ${onchainValue}`);
       const receipt = await waitForReceipt(provider, txHash);
       setEventLogs(receipt.logs ?? []);
-      addHistory({
-        type: "write",
-        hash: txHash,
-        status: receipt.status === "0x0" ? "failed" : "confirmed",
-        gasUsed: hexToDecimal(receipt.gasUsed),
-        time: new Date().toLocaleTimeString(),
-      });
+      addHistory({ type: "write", hash: txHash, status: receipt.status === "0x0" ? "failed" : "confirmed", gasUsed: hexToDecimal(receipt.gasUsed), time: new Date().toLocaleTimeString() });
       setOnchainStatus(`Stored ${onchainValue} on Sepolia.`);
       pushFeed("CONFIRMED", `Stored ${onchainValue} on-chain`);
       await refreshNetworkPulse();
@@ -347,10 +320,7 @@ function Web3SolidityLab() {
     try {
       const provider = getProvider();
       if (!contractAddress) throw new Error("Deploy the Sepolia demo contract first.");
-      const result = (await provider.request({
-        method: "eth_call",
-        params: [{ to: contractAddress, data: "0x" }, "latest"],
-      })) as string;
+      const result = (await provider.request({ method: "eth_call", params: [{ to: contractAddress, data: "0x" }, "latest"] })) as string;
       const value = BigInt(result || "0x0").toString(10);
       setReadValue(value);
       setOnchainStatus("Read completed from Sepolia.");
@@ -368,12 +338,7 @@ function Web3SolidityLab() {
       return;
     }
     const id = await hashKey(cleanKey);
-    const next: StoredRecord = {
-      id,
-      key: cleanKey,
-      value: cleanValue,
-      time: new Date().toLocaleTimeString(),
-    };
+    const next: StoredRecord = { id, key: cleanKey, value: cleanValue, time: new Date().toLocaleTimeString() };
     setRecords((current) => [next, ...current.filter((item) => item.id !== id)]);
     setLastEvent(`RecordStored(${id.slice(0, 12)}…, \"${cleanValue}\")`);
     pushFeed("LOCAL EVENT", `${cleanKey} → ${cleanValue}`);
@@ -391,7 +356,7 @@ function Web3SolidityLab() {
         </div>
         <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">Web3 & Solidity Lab</h1>
         <p className="mt-3 text-sm leading-7 text-muted-foreground">
-          Live EVM workspace for wallet connectivity, network telemetry, smart-contract deployment,
+          Live EVM workspace for public Sepolia telemetry, wallet connectivity, smart-contract deployment,
           gas analysis, transaction tracking and on-chain interaction.
         </p>
       </div>
@@ -417,12 +382,12 @@ function Web3SolidityLab() {
           <div className="bg-card p-5">
             <div className="flex items-center gap-2 font-mono text-[10px] uppercase text-muted-foreground"><Fuel className="size-4 text-amber-400" />Gas price</div>
             <div className="mt-2 text-xl font-semibold">{liveGas} <span className="text-xs text-muted-foreground">Gwei</span></div>
-            <div className="mt-1 font-mono text-[10px] text-muted-foreground">wallet RPC estimate</div>
+            <div className="mt-1 font-mono text-[10px] text-muted-foreground">{telemetrySource}</div>
           </div>
           <div className="bg-card p-5">
             <div className="flex items-center gap-2 font-mono text-[10px] uppercase text-muted-foreground"><WalletCards className="size-4 text-primary" />Wallet</div>
             <div className="mt-2 font-mono text-xl font-semibold">{wallet ? shortAddress(wallet) : "OFFLINE"}</div>
-            <div className="mt-1 font-mono text-[10px] text-muted-foreground">{wallet ? "ready to sign" : "connect to activate"}</div>
+            <div className="mt-1 font-mono text-[10px] text-muted-foreground">{wallet ? "ready to sign" : "telemetry still live"}</div>
           </div>
         </div>
       </section>
@@ -432,7 +397,7 @@ function Web3SolidityLab() {
           <div className="font-mono text-xs uppercase tracking-wider text-emerald-400">Real Sepolia testnet demo</div>
           <h2 className="mt-2 text-2xl font-semibold">Deploy + Write + Read On-Chain</h2>
           <p className="mt-2 max-w-4xl text-sm leading-6 text-muted-foreground">
-            Real testnet transactions through your injected EVM wallet. Deployment and writes require Sepolia test ETH and wallet confirmation; the site never stores a private key.
+            Live block and gas data work without a wallet. Real deploy/write actions still require an injected EVM wallet, Sepolia test ETH and your confirmation.
           </p>
 
           <div className="mt-5 grid gap-4 xl:grid-cols-3">
