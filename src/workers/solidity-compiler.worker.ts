@@ -1,6 +1,10 @@
 import wrapper from "solc/wrapper";
 
-const SOLJSON_URL = "https://binaries.soliditylang.org/bin/soljson-v0.8.30+commit.73712a01.js";
+const SOLJSON_URLS = [
+  "https://cdn.jsdelivr.net/npm/solc@0.8.30/soljson.js",
+  "https://unpkg.com/solc@0.8.30/soljson.js",
+  "https://binaries.soliditylang.org/bin/soljson-v0.8.30+commit.73712a01.js",
+];
 
 type CompileRequest = {
   source: string;
@@ -33,15 +37,33 @@ let compiler: ReturnType<typeof wrapper> | null = null;
 function ensureCompiler() {
   if (compiler) return compiler;
 
-  workerScope.Module = {};
-  importScripts(SOLJSON_URL);
+  let lastError: unknown;
 
-  if (!workerScope.Module) {
-    throw new Error("Solidity compiler binary did not initialize in the browser worker.");
+  for (const url of SOLJSON_URLS) {
+    try {
+      delete workerScope.Module;
+      importScripts(url);
+
+      const module = workerScope.Module;
+      if (!module) {
+        throw new Error(`Compiler script loaded from ${url}, but Module was not created.`);
+      }
+
+      compiler = wrapper(module);
+      if (typeof compiler.version !== "function" || typeof compiler.compile !== "function") {
+        throw new Error(`Compiler API was unavailable after loading ${url}.`);
+      }
+
+      return compiler;
+    } catch (error) {
+      lastError = error;
+      compiler = null;
+    }
   }
 
-  compiler = wrapper(workerScope.Module);
-  return compiler;
+  throw lastError instanceof Error
+    ? lastError
+    : new Error("Could not load the Solidity compiler in the browser worker.");
 }
 
 function compileSource(source: string): CompilerResult {
