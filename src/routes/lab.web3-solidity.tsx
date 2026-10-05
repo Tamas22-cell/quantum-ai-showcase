@@ -413,7 +413,7 @@ function Web3SolidityLab() {
             <div className="font-mono text-xs uppercase tracking-wider text-emerald-400">3 · ABI-driven contract sandbox</div>
             <h2 className="mt-2 text-2xl font-semibold">Deploy + Automatic Function Interaction</h2>
           </div>
-          <span className="rounded-full border border-emerald-500/40 bg-emerald-500/10 px-3 py-1 font-mono text-[10px] font-semibold uppercase text-emerald-400">No wallet required</span>
+          <span className="rounded-full border border-emerald-500/40 bg-emerald-500/10 px-3 py-1 font-mono text-[10px] font-semibold uppercase text-emerald-400">SANDBOX · No wallet required</span>
         </div>
         <p className="mt-2 max-w-4xl text-sm leading-6 text-muted-foreground">After compilation, inputs and buttons below are generated from the ABI. Calls execute inside the labelled browser SANDBOX; they do not broadcast real Ethereum transactions.</p>
 
