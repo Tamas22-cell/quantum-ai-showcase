@@ -7,7 +7,7 @@ export type LabModule = {
   topics: string[];
   status: "available" | "in-development";
   group: "core" | "command";
-  to?: "/lab/circuit-builder" | "/lab/entanglement" | "/lab/qaoa" | "/lab/vqe" | "/lab/vqe-molecular-chemistry" | "/lab/portfolio" | "/lab/arena" | "/lab/assistant" | "/lab/qml" | "/lab/reports" | "/lab/ibm" | "/lab/finance" | "/lab/benchmark" | "/lab/history" | "/lab/snapshot" | "/lab/qiskit" | "/lab/python" | "/lab/blockchain" | "/lab/crypto-intelligence" | "/lab/web3-solidity";
+  to?: "/lab/circuit-builder" | "/lab/entanglement" | "/lab/qaoa" | "/lab/vqe" | "/lab/vqe-molecular-chemistry" | "/lab/quantum-error-correction" | "/lab/quantum-noise-fidelity" | "/lab/portfolio" | "/lab/arena" | "/lab/assistant" | "/lab/qml" | "/lab/reports" | "/lab/ibm" | "/lab/finance" | "/lab/benchmark" | "/lab/history" | "/lab/snapshot" | "/lab/qiskit" | "/lab/python" | "/lab/blockchain" | "/lab/crypto-intelligence" | "/lab/web3-solidity";
 };
 
 export const LAB_MODULES: LabModule[] = [
@@ -50,12 +50,12 @@ export const LAB_MODULES: LabModule[] = [
   {
     id: "quantum-error-correction", index: "08", title: "Quantum Error Correction Lab",
     summary: "Explore bit-flip, phase-flip and repetition-code concepts with visual syndrome detection and recovery logic.",
-    topics: ["QEC", "Bit flip", "Phase flip", "Syndrome"], status: "in-development", group: "core",
+    topics: ["QEC", "Bit flip", "Phase flip", "Syndrome"], status: "available", to: "/lab/quantum-error-correction", group: "core",
   },
   {
     id: "quantum-noise-fidelity", index: "09", title: "Quantum Noise & Fidelity Lab",
     summary: "Study how decoherence, gate noise and measurement errors affect quantum states, circuits and final fidelity.",
-    topics: ["Noise", "Decoherence", "Fidelity", "NISQ"], status: "in-development", group: "core",
+    topics: ["Noise", "Decoherence", "Fidelity", "NISQ"], status: "available", to: "/lab/quantum-noise-fidelity", group: "core",
   },
 
   {
