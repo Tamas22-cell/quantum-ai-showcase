@@ -1,3 +1,5 @@
+declare function importScripts(...urls: string[]): void;
+
 const SOLJSON_URL = "https://binaries.soliditylang.org/bin/soljson-v0.8.30+commit.73712a01.js";
 
 type CompileRequest = {
@@ -130,7 +132,7 @@ function compileSource(source: string): CompilerResult {
       };
     }
 
-    const contractName = contractNames[0];
+    const contractName = contractNames[0] ?? "Contract";
     const compiled = contracts[contractName];
     const bytecodeObject = compiled?.evm?.bytecode?.object ?? "";
     const deployedBytecodeObject = compiled?.evm?.deployedBytecode?.object ?? "";
@@ -179,4 +181,4 @@ scope.addEventListener("message", (event: MessageEvent<CompileRequest>) => {
   scope.postMessage(compileSource(source));
 });
 
-export {};
+

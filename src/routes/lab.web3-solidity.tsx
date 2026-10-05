@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Activity, Blocks, Braces, Fuel, Radio, ShieldCheck, WalletCards, Zap } from "lucide-react";
+import { Activity, Blocks, Braces, Fuel, Radio, ShieldCheck, Zap } from "lucide-react";
 
 import { LabShell } from "@/components/lab/lab-shell";
 import { compileSolidity } from "@/lib/solidity.functions";
+import { OnchainLab } from "@/components/web3/onchain-lab";
+import type { CompiledArtifact } from "@/components/web3/types";
 
 export const Route = createFileRoute("/lab/web3-solidity")({
   head: () => ({
@@ -12,12 +14,12 @@ export const Route = createFileRoute("/lab/web3-solidity")({
       {
         name: "description",
         content:
-          "Interactive Web3 lab with real Solidity compilation, ABI explorer, generated function controls, wallet-free sandbox execution and live Sepolia telemetry.",
+          "Real Web3 testnet lab: compile Solidity, deploy on Ethereum Sepolia, Base Sepolia or Arbitrum Sepolia with your own wallet, and call ABI-driven read/write functions with decoded receipts and events — plus a wallet-free sandbox.",
       },
       { property: "og:title", content: "Web3 & Solidity Lab — Quantum AI Lab" },
       {
         property: "og:description",
-        content: "Compile Solidity into ABI and bytecode, inspect functions and interact with them through an ABI-driven sandbox.",
+        content: "Compile Solidity, deploy to real testnets via your injected wallet, interact through ABI-generated controls, decode events and prepare explorer verification.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -26,7 +28,6 @@ export const Route = createFileRoute("/lab/web3-solidity")({
   component: Web3SolidityLab,
 });
 
-const SEPOLIA_CHAIN_ID = "0xaa36a7";
 const PUBLIC_SEPOLIA_RPCS = [
   "https://ethereum-sepolia-rpc.publicnode.com",
   "https://rpc.sepolia.org",
@@ -44,10 +45,6 @@ contract ResearchRegistry {
         emit RecordStored(id, value);
     }
 }`;
-
-type EthereumProvider = {
-  request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
-};
 
 type AbiParameter = {
   name?: string;
@@ -160,27 +157,23 @@ function Web3SolidityLab() {
   const [sandboxGas, setSandboxGas] = useState("—");
   const [sandboxTxs, setSandboxTxs] = useState<SandboxTx[]>([]);
   const [sandboxEvents, setSandboxEvents] = useState<SandboxEvent[]>([
-    { name: "SANDBOX_READY", detail: "Wallet-free Web3 engine initialized", time: new Date().toLocaleTimeString() },
+    { name: "SANDBOX_READY", detail: "Wallet-free Web3 engine initialized", time: "page load" },
   ]);
 
   const [functionArgs, setFunctionArgs] = useState<Record<string, string[]>>({});
   const [functionResults, setFunctionResults] = useState<Record<string, string>>( {} );
   const [sandboxStorage, setSandboxStorage] = useState<Record<string, string>>({});
 
-  const [wallet, setWallet] = useState("");
-  const [walletStatus, setWalletStatus] = useState("Optional · not connected");
-  const [chainStatus, setChainStatus] = useState("Wallet actions inactive");
+  const [compileCounts, setCompileCounts] = useState({ errors: 0, warnings: 0 });
 
   const compiledReady = Boolean(bytecode);
+  const artifact = useMemo<CompiledArtifact>(() => ({
+    source, abi: abiEntries, bytecode, compilerVersion, contractName,
+    compiled: compiledReady, errors: compileCounts.errors, warnings: compileCounts.warnings,
+  }), [source, abiEntries, bytecode, compilerVersion, contractName, compiledReady, compileCounts]);
   const sandboxReady = Boolean(sandboxContract);
   const functions = useMemo(() => abiEntries.filter((entry) => entry.type === "function"), [abiEntries]);
   const events = useMemo(() => abiEntries.filter((entry) => entry.type === "event"), [abiEntries]);
-
-  function getProvider() {
-    const provider = (window as typeof window & { ethereum?: EthereumProvider }).ethereum;
-    if (!provider) throw new Error("No injected EVM wallet found in this browser.");
-    return provider;
-  }
 
   function pushEvent(name: string, detail: string) {
     setSandboxEvents((current) => [
@@ -191,7 +184,7 @@ function Web3SolidityLab() {
 
   function pushTx(type: SandboxTx["type"], label: string, gas: number) {
     setSandboxTxs((current) => [
-      { hash: randomHash(), type, label, status: "confirmed", gas, time: new Date().toLocaleTimeString() },
+      { hash: randomHash(), type, label, status: "confirmed" as const, gas, time: new Date().toLocaleTimeString() },
       ...current,
     ].slice(0, 12));
   }
@@ -231,6 +224,7 @@ function Web3SolidityLab() {
       if (!result.ok) {
         setCompileStatus("Compilation failed");
         setCompileMessages([...result.errors, ...result.warnings]);
+        setCompileCounts({ errors: result.errors.length, warnings: result.warnings.length });
         return;
       }
 
@@ -239,6 +233,7 @@ function Web3SolidityLab() {
       setAbiEntries(parsedAbi);
       setBytecode(result.bytecode);
       setCompileMessages(result.warnings);
+      setCompileCounts({ errors: 0, warnings: result.warnings.length });
       setCompileStatus("Compiled successfully");
 
       const defaults: Record<string, string[]> = {};
@@ -307,7 +302,7 @@ function Web3SolidityLab() {
     }
 
     if (entry.name === "records" && args.length >= 1) {
-      const value = sandboxStorage[args[0]] ?? "";
+      const value = sandboxStorage[args[0] ?? ""] ?? "";
       setFunctionResults((current) => ({ ...current, [key]: value || "(empty string)" }));
       pushTx("read", signature, 0);
       pushEvent("CALL", `${signature} → ${value || "empty"}`);
@@ -329,30 +324,6 @@ function Web3SolidityLab() {
     pushEvent("FUNCTION_CALL", `${signature}(${args.join(", ")})`);
   }
 
-  async function connectWallet() {
-    try {
-      const provider = getProvider();
-      const accounts = (await provider.request({ method: "eth_requestAccounts" })) as string[];
-      const account = accounts?.[0] ?? "";
-      setWallet(account);
-      setWalletStatus(account ? `Connected: ${short(account)}` : "No account returned");
-      const chainId = (await provider.request({ method: "eth_chainId" })) as string;
-      setChainStatus(chainId === SEPOLIA_CHAIN_ID ? "Sepolia connected" : `Connected chain ${parseInt(chainId, 16)}`);
-    } catch (error) {
-      setWalletStatus(error instanceof Error ? error.message : "Wallet connection failed");
-    }
-  }
-
-  async function switchToSepolia() {
-    try {
-      const provider = getProvider();
-      await provider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: SEPOLIA_CHAIN_ID }] });
-      setChainStatus("Sepolia connected");
-    } catch (error) {
-      setChainStatus(error instanceof Error ? error.message : "Could not switch network");
-    }
-  }
-
   return (
     <LabShell crumb="Web3 & Solidity">
       <div className="mb-8 max-w-3xl">
@@ -365,7 +336,7 @@ function Web3SolidityLab() {
         </div>
         <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">Web3 & Solidity Lab</h1>
         <p className="mt-3 text-sm leading-7 text-muted-foreground">
-          Solidity Editor → real solc compilation → ABI explorer → automatically generated function controls → wallet-free contract sandbox.
+          Solidity Editor → real solc compilation → ABI explorer → automatically generated function controls → wallet-free contract sandbox → real testnet deployment and ABI-driven on-chain interaction with your own wallet.
         </p>
       </div>
 
@@ -442,7 +413,7 @@ function Web3SolidityLab() {
             <div className="font-mono text-xs uppercase tracking-wider text-emerald-400">3 · ABI-driven contract sandbox</div>
             <h2 className="mt-2 text-2xl font-semibold">Deploy + Automatic Function Interaction</h2>
           </div>
-          <span className="rounded-full border border-emerald-500/40 bg-emerald-500/10 px-3 py-1 font-mono text-[10px] font-semibold uppercase text-emerald-400">No wallet required</span>
+          <span className="rounded-full border border-emerald-500/40 bg-emerald-500/10 px-3 py-1 font-mono text-[10px] font-semibold uppercase text-emerald-400">SANDBOX · No wallet required</span>
         </div>
         <p className="mt-2 max-w-4xl text-sm leading-6 text-muted-foreground">After compilation, inputs and buttons below are generated from the ABI. Calls execute inside the labelled browser SANDBOX; they do not broadcast real Ethereum transactions.</p>
 
@@ -503,18 +474,12 @@ function Web3SolidityLab() {
         <div className="grid gap-px bg-border md:grid-cols-3"><div className="bg-card p-5"><div className="flex items-center gap-2 font-mono text-[10px] uppercase text-muted-foreground"><Activity className="size-4 text-emerald-400" />Network</div><div className="mt-2 text-lg font-semibold">{networkStatus}</div><div className="mt-1 font-mono text-[10px] text-muted-foreground">updated {lastRefresh}</div></div><div className="bg-card p-5"><div className="flex items-center gap-2 font-mono text-[10px] uppercase text-muted-foreground"><Blocks className="size-4 text-primary" />Latest block</div><div className="mt-2 font-mono text-xl font-semibold">#{liveBlock}</div></div><div className="bg-card p-5"><div className="flex items-center gap-2 font-mono text-[10px] uppercase text-muted-foreground"><Fuel className="size-4 text-amber-400" />Gas price</div><div className="mt-2 text-xl font-semibold">{liveGas} <span className="text-xs text-muted-foreground">Gwei</span></div></div></div>
       </section>
 
-      <section className="mb-8 rounded-md border border-border bg-card p-5 sm:p-6">
-        <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-muted-foreground"><WalletCards className="size-4" />Optional real wallet mode</div>
-        <h2 className="mt-2 text-xl font-semibold">Connect an EVM Wallet</h2>
-        <p className="mt-2 text-sm text-muted-foreground">Only needed for future real signed deployment. Compilation, ABI inspection and SANDBOX interaction work without a wallet.</p>
-        <div className="mt-4 flex flex-wrap gap-2"><button type="button" onClick={connectWallet} className="rounded-md border border-primary/50 bg-primary/10 px-4 py-2 font-mono text-xs font-semibold text-primary">Connect Wallet</button><button type="button" onClick={switchToSepolia} className="rounded-md border border-border bg-background px-4 py-2 font-mono text-xs font-semibold">Switch to Sepolia</button></div>
-        <p className="mt-3 break-all font-mono text-xs text-muted-foreground">{walletStatus}</p><p className="mt-1 break-all font-mono text-xs text-muted-foreground">{chainStatus}</p>{wallet ? <p className="mt-1 break-all font-mono text-xs text-emerald-400">Wallet: {wallet}</p> : null}
-      </section>
+      <OnchainLab artifact={artifact} />
 
       <section className="grid gap-4 md:grid-cols-3">
         <article className="rounded-md border border-border bg-card p-5"><Braces className="size-5 text-primary" /><h2 className="mt-4 text-lg font-semibold">Solidity</h2><p className="mt-2 text-sm text-muted-foreground">Real solc compilation, ABI explorer and generated contract controls.</p></article>
-        <article className="rounded-md border border-border bg-card p-5"><Activity className="size-5 text-primary" /><h2 className="mt-4 text-lg font-semibold">EVM</h2><p className="mt-2 text-sm text-muted-foreground">Compiled bytecode, ABI-driven calls, gas and sandbox transactions.</p></article>
-        <article className="rounded-md border border-border bg-card p-5"><ShieldCheck className="size-5 text-primary" /><h2 className="mt-4 text-lg font-semibold">Security</h2><p className="mt-2 text-sm text-muted-foreground">Server-side compilation, no private-key storage and sandbox-first workflow.</p></article>
+        <article className="rounded-md border border-border bg-card p-5"><Activity className="size-5 text-primary" /><h2 className="mt-4 text-lg font-semibold">EVM</h2><p className="mt-2 text-sm text-muted-foreground">Compiled bytecode, real testnet deploys, ABI-driven calls, gas and decoded receipts.</p></article>
+        <article className="rounded-md border border-border bg-card p-5"><ShieldCheck className="size-5 text-primary" /><h2 className="mt-4 text-lg font-semibold">Security</h2><p className="mt-2 text-sm text-muted-foreground">Server-side compilation, no private-key handling, wallet-signed testnet transactions and static heuristic checks.</p></article>
       </section>
     </LabShell>
   );
