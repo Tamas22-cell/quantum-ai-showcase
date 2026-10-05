@@ -6,11 +6,11 @@ export type OnchainTx = {
   chainId: number;
   status: "pending" | "success" | "reverted";
   timestamp: string;
-  blockNumber?: string;
-  gasUsed?: string;
-  effectiveGasPrice?: string;
-  contractAddress?: string;
-  events?: OnchainEvent[];
+  blockNumber?: string | undefined;
+  gasUsed?: string | undefined;
+  effectiveGasPrice?: string | undefined;
+  contractAddress?: string | undefined;
+  events?: OnchainEvent[] | undefined;
 };
 export type Deployment = {
   chainId: number;
