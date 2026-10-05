@@ -1,3 +1,5 @@
+declare function importScripts(...urls: string[]): void;
+
 const SOLJSON_URL = "https://binaries.soliditylang.org/bin/soljson-v0.8.30+commit.73712a01.js";
 
 type CompileRequest = {
