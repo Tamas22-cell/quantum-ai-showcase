@@ -18,10 +18,11 @@ const EMPTY_STATUS: VerificationStatus = {
   configured: false,
   checked: false,
   verified: false,
+  source: "none",
   message: "Verification status has not been checked yet.",
 };
 
-/** Live explorer verification status + server-side submission. API keys stay on the server only. */
+/** Live explorer/Sourcify verification status + optional server-side explorer submission. */
 export function VerificationPanel({ testnet, deployment }: { testnet: TestnetConfig; deployment?: Deployment | undefined }) {
   const statusFn = useServerFn(getContractVerificationStatus);
   const submitFn = useServerFn(submitContractVerification);
@@ -37,9 +38,10 @@ export function VerificationPanel({ testnet, deployment }: { testnet: TestnetCon
       setStatus(next);
     } catch (error) {
       setStatus({
-        configured: true,
+        configured: false,
         checked: false,
         verified: false,
+        source: "none",
         message: error instanceof Error ? error.message : "Verification status request failed.",
       });
     } finally {
@@ -74,9 +76,10 @@ export function VerificationPanel({ testnet, deployment }: { testnet: TestnetCon
       });
       setSubmitMsg(result.message + (result.guid ? ` · request ${result.guid}` : ""));
       if (result.alreadyVerified) {
-        setStatus({ configured: true, checked: true, verified: true, message: "Contract is already verified." });
+        setStatus({ configured: true, checked: true, verified: true, source: "etherscan", message: "Contract is already verified." });
       } else if (result.ok) {
-        setStatus({ configured: true, checked: true, verified: false, message: "Verification submitted; explorer processing may still be pending." });
+        setStatus({ configured: true, checked: true, verified: false, source: "etherscan", message: "Verification submitted; explorer processing may still be pending." });
+        window.setTimeout(() => void refresh(), 1500);
       }
     } catch (error) {
       setSubmitMsg(error instanceof Error ? error.message : "Verification submission failed.");
@@ -87,7 +90,7 @@ export function VerificationPanel({ testnet, deployment }: { testnet: TestnetCon
 
   const tone = status.verified
     ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300"
-    : status.configured
+    : status.checked
       ? "border-amber-500/40 bg-amber-500/10 text-amber-300"
       : "border-cyan-500/40 bg-cyan-500/10 text-cyan-300";
 
@@ -96,6 +99,7 @@ export function VerificationPanel({ testnet, deployment }: { testnet: TestnetCon
       <div className={`rounded-md border p-3 font-mono text-xs ${tone}`} role="status">
         <div className="font-semibold">{status.verified ? "VERIFIED" : status.checked ? "NOT VERIFIED" : "LIVE STATUS"}</div>
         <div className="mt-1 opacity-90">{status.message}</div>
+        {status.source !== "none" ? <div className="mt-1 text-[10px] opacity-75">Source: {status.source}{status.match ? ` · ${status.match} match` : ""}</div> : null}
       </div>
 
       <div className="mt-4 flex flex-wrap gap-2">
@@ -109,7 +113,7 @@ export function VerificationPanel({ testnet, deployment }: { testnet: TestnetCon
 
       {!status.configured ? (
         <p className="mt-3 text-[11px] text-muted-foreground">
-          Automatic verification needs <code>ETHERSCAN_API_KEY</code> in the Vercel server environment. The key is never sent to the browser.
+          Live public verification status works through Sourcify. Add <code>ETHERSCAN_API_KEY</code> in Vercel to enable explorer API status and one-click explorer submission.
         </p>
       ) : null}
       {submitMsg ? <p className="mt-3 break-words font-mono text-[11px] text-muted-foreground">{submitMsg}</p> : null}
