@@ -7,7 +7,7 @@ export type LabModule = {
   topics: string[];
   status: "available" | "in-development";
   group: "core" | "command";
-  to?: "/lab/circuit-builder" | "/lab/entanglement" | "/lab/qaoa" | "/lab/vqe" | "/lab/portfolio" | "/lab/arena" | "/lab/assistant" | "/lab/qml" | "/lab/reports" | "/lab/ibm" | "/lab/finance" | "/lab/benchmark" | "/lab/history" | "/lab/snapshot" | "/lab/qiskit" | "/lab/python" | "/lab/blockchain" | "/lab/crypto-intelligence" | "/lab/web3-solidity";
+  to?: "/lab/circuit-builder" | "/lab/entanglement" | "/lab/qaoa" | "/lab/vqe" | "/lab/vqe-molecular-chemistry" | "/lab/portfolio" | "/lab/arena" | "/lab/assistant" | "/lab/qml" | "/lab/reports" | "/lab/ibm" | "/lab/finance" | "/lab/benchmark" | "/lab/history" | "/lab/snapshot" | "/lab/qiskit" | "/lab/python" | "/lab/blockchain" | "/lab/crypto-intelligence" | "/lab/web3-solidity";
 };
 
 export const LAB_MODULES: LabModule[] = [
@@ -41,6 +41,11 @@ export const LAB_MODULES: LabModule[] = [
     id: "qml", index: "06", title: "Quantum Machine Learning Lab",
     summary: "Small variational quantum classifier compared with a classical baseline on the same split.",
     topics: ["Feature maps", "Loss curves", "Confusion matrix"], status: "available", to: "/lab/qml", group: "core",
+  },
+  {
+    id: "vqe-molecular-chemistry", index: "07", title: "VQE Molecular Chemistry Lab",
+    summary: "Imported H₂ ab initio VQE research result with STO-3G molecular Hamiltonian, Hartree-Fock initialization, excitation ansatz, bond-length optimisation and exact-energy validation.",
+    topics: ["H₂", "Ab initio VQE", "STO-3G", "Hartree-Fock", "Bond scan", "Exact reference"], status: "available", to: "/lab/vqe-molecular-chemistry", group: "core",
   },
 
   {
