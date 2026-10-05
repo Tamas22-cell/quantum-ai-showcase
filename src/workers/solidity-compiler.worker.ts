@@ -132,7 +132,7 @@ function compileSource(source: string): CompilerResult {
       };
     }
 
-    const contractName = contractNames[0];
+    const contractName = contractNames[0] ?? "Contract";
     const compiled = contracts[contractName];
     const bytecodeObject = compiled?.evm?.bytecode?.object ?? "";
     const deployedBytecodeObject = compiled?.evm?.deployedBytecode?.object ?? "";
