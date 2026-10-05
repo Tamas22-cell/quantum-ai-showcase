@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Atom, Beaker, CheckCircle2, Download, FlaskConical, Sigma } from "lucide-react";
+import { Atom, Beaker, CheckCircle2, ChevronDown, ChevronUp, Download, FlaskConical, Sigma } from "lucide-react";
 
 import { LabShell } from "@/components/lab/lab-shell";
 
@@ -33,6 +34,9 @@ const result = {
   vqeEnergy: -1.127951287,
   exactEnergy: -1.137304145,
   error: 0.0093528581,
+  singlePointVqeEnergy: -1.1372700833,
+  singlePointExactEnergy: -1.1372701755,
+  singlePointError: 9.2172e-8,
 };
 
 const features = [
@@ -46,6 +50,76 @@ const features = [
   "VQE error analysis",
 ];
 
+const workflowSteps = [
+  {
+    index: "01",
+    title: "Molecular geometry",
+    description: "H₂ nuclear coordinates and bond length",
+    details: [
+      ["Atoms", "H, H"],
+      ["Coordinates", "H₁ = (0, 0, -0.6614), H₂ = (0, 0, +0.6614)"],
+      ["Optimised bond", "0.7364 Å"],
+      ["Reference bond", "0.7414 Å"],
+    ],
+  },
+  {
+    index: "02",
+    title: "Hamiltonian",
+    description: "Ab initio molecular Hamiltonian in STO-3G",
+    details: [
+      ["Generator", "qml.qchem.molecular_hamiltonian"],
+      ["Basis", "STO-3G"],
+      ["Charge", "0"],
+      ["Multiplicity", "1 (singlet)"],
+    ],
+  },
+  {
+    index: "03",
+    title: "Reference state",
+    description: "Hartree-Fock occupation state",
+    details: [
+      ["Electrons", "2"],
+      ["Preparation", "qml.qchem.hf_state"],
+      ["Circuit init", "qml.BasisState"],
+      ["Reference", "Hartree-Fock ground-state occupation"],
+    ],
+  },
+  {
+    index: "04",
+    title: "Ansatz",
+    description: "Single and double fermionic excitations",
+    details: [
+      ["Excitations", "qml.qchem.excitations"],
+      ["Single gates", "qml.SingleExcitation"],
+      ["Double gates", "qml.DoubleExcitation"],
+      ["Parameters", "One variational angle per generated excitation"],
+    ],
+  },
+  {
+    index: "05",
+    title: "VQE optimisation",
+    description: "Classical optimisation of variational parameters",
+    details: [
+      ["Optimizer", "GradientDescentOptimizer"],
+      ["Step size", "0.4"],
+      ["Max iterations", "100"],
+      ["Convergence tolerance", "1 × 10⁻⁷ Ha"],
+      ["Single-point VQE energy", `${result.singlePointVqeEnergy.toFixed(10)} Ha`],
+    ],
+  },
+  {
+    index: "06",
+    title: "Validation",
+    description: "Exact diagonalisation and error analysis",
+    details: [
+      ["Single-point exact energy", `${result.singlePointExactEnergy.toFixed(10)} Ha`],
+      ["Single-point absolute error", `${result.singlePointError.toExponential(4)} Ha`],
+      ["Bond-scan exact energy", `${result.exactEnergy.toFixed(10)} Ha`],
+      ["Bond-scan absolute error", `${result.error.toFixed(10)} Ha`],
+    ],
+  },
+];
+
 function MetricCard({ label, value, note }: { label: string; value: string; note?: string }) {
   return (
     <div className="rounded-md border border-border bg-card p-5">
@@ -57,6 +131,7 @@ function MetricCard({ label, value, note }: { label: string; value: string; note
 }
 
 function VqeMolecularChemistryPage() {
+  const [openStep, setOpenStep] = useState<string | null>("01");
   const energyGapPct = Math.abs(result.error / result.exactEnergy) * 100;
   const bondDelta = Math.abs(result.equilibrium - result.referenceBond);
 
@@ -121,26 +196,44 @@ function VqeMolecularChemistryPage() {
 
         <div className="rounded-md border border-border bg-card p-6">
           <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-[0.16em] text-primary">
-            <Sigma className="size-4" aria-hidden="true" /> Workflow
+            <Sigma className="size-4" aria-hidden="true" /> Interactive workflow
           </div>
+          <p className="mt-2 text-xs leading-5 text-muted-foreground">Click any step to inspect the actual configuration and result values used by the H₂ VQE research run.</p>
 
           <div className="mt-5 space-y-3">
-            {[
-              ["01", "Molecular geometry", "H₂ nuclear coordinates and bond length"],
-              ["02", "Hamiltonian", "Ab initio molecular Hamiltonian in STO-3G"],
-              ["03", "Reference state", "Hartree-Fock occupation state"],
-              ["04", "Ansatz", "Single and double fermionic excitations"],
-              ["05", "VQE optimisation", "Classical optimisation of variational parameters"],
-              ["06", "Validation", "Exact diagonalisation and error analysis"],
-            ].map(([index, title, description]) => (
-              <div key={index} className="flex gap-4 rounded-md border border-border bg-surface p-4">
-                <span className="font-mono text-xs text-primary">{index}</span>
-                <div>
-                  <div className="text-sm font-semibold text-foreground">{title}</div>
-                  <div className="mt-1 text-xs leading-5 text-muted-foreground">{description}</div>
+            {workflowSteps.map((step) => {
+              const isOpen = openStep === step.index;
+              return (
+                <div key={step.index} className="overflow-hidden rounded-md border border-border bg-surface">
+                  <button
+                    type="button"
+                    onClick={() => setOpenStep(isOpen ? null : step.index)}
+                    className="flex w-full items-start gap-4 p-4 text-left transition hover:bg-primary/5"
+                    aria-expanded={isOpen}
+                  >
+                    <span className="font-mono text-xs text-primary">{step.index}</span>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-sm font-semibold text-foreground">{step.title}</div>
+                      <div className="mt-1 text-xs leading-5 text-muted-foreground">{step.description}</div>
+                    </div>
+                    {isOpen ? <ChevronUp className="mt-0.5 size-4 shrink-0 text-primary" /> : <ChevronDown className="mt-0.5 size-4 shrink-0 text-muted-foreground" />}
+                  </button>
+
+                  {isOpen ? (
+                    <div className="border-t border-border bg-background/40 px-4 py-4">
+                      <div className="grid gap-2">
+                        {step.details.map(([label, value]) => (
+                          <div key={label} className="grid gap-1 rounded-md border border-border/70 bg-card px-3 py-2 sm:grid-cols-[150px_1fr] sm:gap-4">
+                            <div className="font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground">{label}</div>
+                            <div className="font-mono text-xs leading-5 text-foreground">{value}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
