@@ -11,11 +11,13 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as LabIndexRouteImport } from './routes/lab.index'
+import { Route as LabAiRouteImport } from './routes/lab.ai'
 import { Route as LabArenaRouteImport } from './routes/lab.arena'
 import { Route as LabAssistantRouteImport } from './routes/lab.assistant'
 import { Route as LabBenchmarkRouteImport } from './routes/lab.benchmark'
 import { Route as LabBlockchainRouteImport } from './routes/lab.blockchain'
 import { Route as LabCircuitBuilderRouteImport } from './routes/lab.circuit-builder'
+import { Route as LabCryptoIntelligenceRouteImport } from './routes/lab.crypto-intelligence'
 import { Route as LabEntanglementRouteImport } from './routes/lab.entanglement'
 import { Route as LabHistoryRouteImport } from './routes/lab.history'
 import { Route as LabIbmRouteImport } from './routes/lab.ibm'
@@ -27,8 +29,23 @@ import { Route as LabQmlRouteImport } from './routes/lab.qml'
 import { Route as LabReportsRouteImport } from './routes/lab.reports'
 import { Route as LabSnapshotRouteImport } from './routes/lab.snapshot'
 import { Route as LabVqeRouteImport } from './routes/lab.vqe'
+import { Route as LabVqeMolecularChemistryRouteImport } from './routes/lab.vqe-molecular-chemistry'
+import { Route as LabWeb3SolidityRouteImport } from './routes/lab.web3-solidity'
+import { Route as LabAiIndexRouteImport } from './routes/lab.ai.index'
+import { Route as LabAiComputerVisionRouteImport } from './routes/lab.ai.computer-vision'
+import { Route as LabAiDeepLearningRouteImport } from './routes/lab.ai.deep-learning'
+import { Route as LabAiExplainableAiRouteImport } from './routes/lab.ai.explainable-ai'
+import { Route as LabAiMachineLearningRouteImport } from './routes/lab.ai.machine-learning'
+import { Route as LabAiMlopsEvaluationRouteImport } from './routes/lab.ai.mlops-evaluation'
+import { Route as LabAiNlpLlmRouteImport } from './routes/lab.ai.nlp-llm'
+import { Route as LabAiRagRouteImport } from './routes/lab.ai.rag'
+import { Route as LabAiReinforcementLearningRouteImport } from './routes/lab.ai.reinforcement-learning'
+import { Route as LabAiTimeSeriesRouteImport } from './routes/lab.ai.time-series'
 import { Route as LabFinanceIndexRouteImport } from './routes/lab.finance.index'
+import { Route as LabFinanceMarketDataStructureRouteImport } from './routes/lab.finance.market-data-structure'
+import { Route as LabFinanceQuantumMarketRegimeRouteImport } from './routes/lab.finance.quantum-market-regime'
 import { Route as LabFinanceStressRouteImport } from './routes/lab.finance.stress'
+import { Route as LabFinanceVariationalRiskRouteImport } from './routes/lab.finance.variational-risk'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -38,6 +55,11 @@ const IndexRoute = IndexRouteImport.update({
 const LabIndexRoute = LabIndexRouteImport.update({
   id: '/lab/',
   path: '/lab/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LabAiRoute = LabAiRouteImport.update({
+  id: '/lab/ai',
+  path: '/lab/ai',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LabArenaRoute = LabArenaRouteImport.update({
@@ -63,6 +85,11 @@ const LabBlockchainRoute = LabBlockchainRouteImport.update({
 const LabCircuitBuilderRoute = LabCircuitBuilderRouteImport.update({
   id: '/lab/circuit-builder',
   path: '/lab/circuit-builder',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LabCryptoIntelligenceRoute = LabCryptoIntelligenceRouteImport.update({
+  id: '/lab/crypto-intelligence',
+  path: '/lab/crypto-intelligence',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LabEntanglementRoute = LabEntanglementRouteImport.update({
@@ -120,24 +147,106 @@ const LabVqeRoute = LabVqeRouteImport.update({
   path: '/lab/vqe',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LabVqeMolecularChemistryRoute =
+  LabVqeMolecularChemistryRouteImport.update({
+    id: '/lab/vqe-molecular-chemistry',
+    path: '/lab/vqe-molecular-chemistry',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const LabWeb3SolidityRoute = LabWeb3SolidityRouteImport.update({
+  id: '/lab/web3-solidity',
+  path: '/lab/web3-solidity',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LabAiIndexRoute = LabAiIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => LabAiRoute,
+} as any)
+const LabAiComputerVisionRoute = LabAiComputerVisionRouteImport.update({
+  id: '/computer-vision',
+  path: '/computer-vision',
+  getParentRoute: () => LabAiRoute,
+} as any)
+const LabAiDeepLearningRoute = LabAiDeepLearningRouteImport.update({
+  id: '/deep-learning',
+  path: '/deep-learning',
+  getParentRoute: () => LabAiRoute,
+} as any)
+const LabAiExplainableAiRoute = LabAiExplainableAiRouteImport.update({
+  id: '/explainable-ai',
+  path: '/explainable-ai',
+  getParentRoute: () => LabAiRoute,
+} as any)
+const LabAiMachineLearningRoute = LabAiMachineLearningRouteImport.update({
+  id: '/machine-learning',
+  path: '/machine-learning',
+  getParentRoute: () => LabAiRoute,
+} as any)
+const LabAiMlopsEvaluationRoute = LabAiMlopsEvaluationRouteImport.update({
+  id: '/mlops-evaluation',
+  path: '/mlops-evaluation',
+  getParentRoute: () => LabAiRoute,
+} as any)
+const LabAiNlpLlmRoute = LabAiNlpLlmRouteImport.update({
+  id: '/nlp-llm',
+  path: '/nlp-llm',
+  getParentRoute: () => LabAiRoute,
+} as any)
+const LabAiRagRoute = LabAiRagRouteImport.update({
+  id: '/rag',
+  path: '/rag',
+  getParentRoute: () => LabAiRoute,
+} as any)
+const LabAiReinforcementLearningRoute =
+  LabAiReinforcementLearningRouteImport.update({
+    id: '/reinforcement-learning',
+    path: '/reinforcement-learning',
+    getParentRoute: () => LabAiRoute,
+  } as any)
+const LabAiTimeSeriesRoute = LabAiTimeSeriesRouteImport.update({
+  id: '/time-series',
+  path: '/time-series',
+  getParentRoute: () => LabAiRoute,
+} as any)
 const LabFinanceIndexRoute = LabFinanceIndexRouteImport.update({
   id: '/lab/finance/',
   path: '/lab/finance/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LabFinanceMarketDataStructureRoute =
+  LabFinanceMarketDataStructureRouteImport.update({
+    id: '/lab/finance/market-data-structure',
+    path: '/lab/finance/market-data-structure',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const LabFinanceQuantumMarketRegimeRoute =
+  LabFinanceQuantumMarketRegimeRouteImport.update({
+    id: '/lab/finance/quantum-market-regime',
+    path: '/lab/finance/quantum-market-regime',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const LabFinanceStressRoute = LabFinanceStressRouteImport.update({
   id: '/lab/finance/stress',
   path: '/lab/finance/stress',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LabFinanceVariationalRiskRoute =
+  LabFinanceVariationalRiskRouteImport.update({
+    id: '/lab/finance/variational-risk',
+    path: '/lab/finance/variational-risk',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/lab/ai': typeof LabAiRouteWithChildren
   '/lab/arena': typeof LabArenaRoute
   '/lab/assistant': typeof LabAssistantRoute
   '/lab/benchmark': typeof LabBenchmarkRoute
   '/lab/blockchain': typeof LabBlockchainRoute
   '/lab/circuit-builder': typeof LabCircuitBuilderRoute
+  '/lab/crypto-intelligence': typeof LabCryptoIntelligenceRoute
   '/lab/entanglement': typeof LabEntanglementRoute
   '/lab/history': typeof LabHistoryRoute
   '/lab/ibm': typeof LabIbmRoute
@@ -149,8 +258,23 @@ export interface FileRoutesByFullPath {
   '/lab/reports': typeof LabReportsRoute
   '/lab/snapshot': typeof LabSnapshotRoute
   '/lab/vqe': typeof LabVqeRoute
+  '/lab/vqe-molecular-chemistry': typeof LabVqeMolecularChemistryRoute
+  '/lab/web3-solidity': typeof LabWeb3SolidityRoute
   '/lab/': typeof LabIndexRoute
+  '/lab/ai/computer-vision': typeof LabAiComputerVisionRoute
+  '/lab/ai/deep-learning': typeof LabAiDeepLearningRoute
+  '/lab/ai/explainable-ai': typeof LabAiExplainableAiRoute
+  '/lab/ai/machine-learning': typeof LabAiMachineLearningRoute
+  '/lab/ai/mlops-evaluation': typeof LabAiMlopsEvaluationRoute
+  '/lab/ai/nlp-llm': typeof LabAiNlpLlmRoute
+  '/lab/ai/rag': typeof LabAiRagRoute
+  '/lab/ai/reinforcement-learning': typeof LabAiReinforcementLearningRoute
+  '/lab/ai/time-series': typeof LabAiTimeSeriesRoute
+  '/lab/finance/market-data-structure': typeof LabFinanceMarketDataStructureRoute
+  '/lab/finance/quantum-market-regime': typeof LabFinanceQuantumMarketRegimeRoute
   '/lab/finance/stress': typeof LabFinanceStressRoute
+  '/lab/finance/variational-risk': typeof LabFinanceVariationalRiskRoute
+  '/lab/ai/': typeof LabAiIndexRoute
   '/lab/finance/': typeof LabFinanceIndexRoute
 }
 export interface FileRoutesByTo {
@@ -160,6 +284,7 @@ export interface FileRoutesByTo {
   '/lab/benchmark': typeof LabBenchmarkRoute
   '/lab/blockchain': typeof LabBlockchainRoute
   '/lab/circuit-builder': typeof LabCircuitBuilderRoute
+  '/lab/crypto-intelligence': typeof LabCryptoIntelligenceRoute
   '/lab/entanglement': typeof LabEntanglementRoute
   '/lab/history': typeof LabHistoryRoute
   '/lab/ibm': typeof LabIbmRoute
@@ -171,18 +296,35 @@ export interface FileRoutesByTo {
   '/lab/reports': typeof LabReportsRoute
   '/lab/snapshot': typeof LabSnapshotRoute
   '/lab/vqe': typeof LabVqeRoute
+  '/lab/vqe-molecular-chemistry': typeof LabVqeMolecularChemistryRoute
+  '/lab/web3-solidity': typeof LabWeb3SolidityRoute
   '/lab': typeof LabIndexRoute
+  '/lab/ai/computer-vision': typeof LabAiComputerVisionRoute
+  '/lab/ai/deep-learning': typeof LabAiDeepLearningRoute
+  '/lab/ai/explainable-ai': typeof LabAiExplainableAiRoute
+  '/lab/ai/machine-learning': typeof LabAiMachineLearningRoute
+  '/lab/ai/mlops-evaluation': typeof LabAiMlopsEvaluationRoute
+  '/lab/ai/nlp-llm': typeof LabAiNlpLlmRoute
+  '/lab/ai/rag': typeof LabAiRagRoute
+  '/lab/ai/reinforcement-learning': typeof LabAiReinforcementLearningRoute
+  '/lab/ai/time-series': typeof LabAiTimeSeriesRoute
+  '/lab/finance/market-data-structure': typeof LabFinanceMarketDataStructureRoute
+  '/lab/finance/quantum-market-regime': typeof LabFinanceQuantumMarketRegimeRoute
   '/lab/finance/stress': typeof LabFinanceStressRoute
+  '/lab/finance/variational-risk': typeof LabFinanceVariationalRiskRoute
+  '/lab/ai': typeof LabAiIndexRoute
   '/lab/finance': typeof LabFinanceIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/lab/ai': typeof LabAiRouteWithChildren
   '/lab/arena': typeof LabArenaRoute
   '/lab/assistant': typeof LabAssistantRoute
   '/lab/benchmark': typeof LabBenchmarkRoute
   '/lab/blockchain': typeof LabBlockchainRoute
   '/lab/circuit-builder': typeof LabCircuitBuilderRoute
+  '/lab/crypto-intelligence': typeof LabCryptoIntelligenceRoute
   '/lab/entanglement': typeof LabEntanglementRoute
   '/lab/history': typeof LabHistoryRoute
   '/lab/ibm': typeof LabIbmRoute
@@ -194,19 +336,36 @@ export interface FileRoutesById {
   '/lab/reports': typeof LabReportsRoute
   '/lab/snapshot': typeof LabSnapshotRoute
   '/lab/vqe': typeof LabVqeRoute
+  '/lab/vqe-molecular-chemistry': typeof LabVqeMolecularChemistryRoute
+  '/lab/web3-solidity': typeof LabWeb3SolidityRoute
   '/lab/': typeof LabIndexRoute
+  '/lab/ai/computer-vision': typeof LabAiComputerVisionRoute
+  '/lab/ai/deep-learning': typeof LabAiDeepLearningRoute
+  '/lab/ai/explainable-ai': typeof LabAiExplainableAiRoute
+  '/lab/ai/machine-learning': typeof LabAiMachineLearningRoute
+  '/lab/ai/mlops-evaluation': typeof LabAiMlopsEvaluationRoute
+  '/lab/ai/nlp-llm': typeof LabAiNlpLlmRoute
+  '/lab/ai/rag': typeof LabAiRagRoute
+  '/lab/ai/reinforcement-learning': typeof LabAiReinforcementLearningRoute
+  '/lab/ai/time-series': typeof LabAiTimeSeriesRoute
+  '/lab/finance/market-data-structure': typeof LabFinanceMarketDataStructureRoute
+  '/lab/finance/quantum-market-regime': typeof LabFinanceQuantumMarketRegimeRoute
   '/lab/finance/stress': typeof LabFinanceStressRoute
+  '/lab/finance/variational-risk': typeof LabFinanceVariationalRiskRoute
+  '/lab/ai/': typeof LabAiIndexRoute
   '/lab/finance/': typeof LabFinanceIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/lab/ai'
     | '/lab/arena'
     | '/lab/assistant'
     | '/lab/benchmark'
     | '/lab/blockchain'
     | '/lab/circuit-builder'
+    | '/lab/crypto-intelligence'
     | '/lab/entanglement'
     | '/lab/history'
     | '/lab/ibm'
@@ -218,8 +377,23 @@ export interface FileRouteTypes {
     | '/lab/reports'
     | '/lab/snapshot'
     | '/lab/vqe'
+    | '/lab/vqe-molecular-chemistry'
+    | '/lab/web3-solidity'
     | '/lab/'
+    | '/lab/ai/computer-vision'
+    | '/lab/ai/deep-learning'
+    | '/lab/ai/explainable-ai'
+    | '/lab/ai/machine-learning'
+    | '/lab/ai/mlops-evaluation'
+    | '/lab/ai/nlp-llm'
+    | '/lab/ai/rag'
+    | '/lab/ai/reinforcement-learning'
+    | '/lab/ai/time-series'
+    | '/lab/finance/market-data-structure'
+    | '/lab/finance/quantum-market-regime'
     | '/lab/finance/stress'
+    | '/lab/finance/variational-risk'
+    | '/lab/ai/'
     | '/lab/finance/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -229,6 +403,7 @@ export interface FileRouteTypes {
     | '/lab/benchmark'
     | '/lab/blockchain'
     | '/lab/circuit-builder'
+    | '/lab/crypto-intelligence'
     | '/lab/entanglement'
     | '/lab/history'
     | '/lab/ibm'
@@ -240,17 +415,34 @@ export interface FileRouteTypes {
     | '/lab/reports'
     | '/lab/snapshot'
     | '/lab/vqe'
+    | '/lab/vqe-molecular-chemistry'
+    | '/lab/web3-solidity'
     | '/lab'
+    | '/lab/ai/computer-vision'
+    | '/lab/ai/deep-learning'
+    | '/lab/ai/explainable-ai'
+    | '/lab/ai/machine-learning'
+    | '/lab/ai/mlops-evaluation'
+    | '/lab/ai/nlp-llm'
+    | '/lab/ai/rag'
+    | '/lab/ai/reinforcement-learning'
+    | '/lab/ai/time-series'
+    | '/lab/finance/market-data-structure'
+    | '/lab/finance/quantum-market-regime'
     | '/lab/finance/stress'
+    | '/lab/finance/variational-risk'
+    | '/lab/ai'
     | '/lab/finance'
   id:
     | '__root__'
     | '/'
+    | '/lab/ai'
     | '/lab/arena'
     | '/lab/assistant'
     | '/lab/benchmark'
     | '/lab/blockchain'
     | '/lab/circuit-builder'
+    | '/lab/crypto-intelligence'
     | '/lab/entanglement'
     | '/lab/history'
     | '/lab/ibm'
@@ -262,18 +454,35 @@ export interface FileRouteTypes {
     | '/lab/reports'
     | '/lab/snapshot'
     | '/lab/vqe'
+    | '/lab/vqe-molecular-chemistry'
+    | '/lab/web3-solidity'
     | '/lab/'
+    | '/lab/ai/computer-vision'
+    | '/lab/ai/deep-learning'
+    | '/lab/ai/explainable-ai'
+    | '/lab/ai/machine-learning'
+    | '/lab/ai/mlops-evaluation'
+    | '/lab/ai/nlp-llm'
+    | '/lab/ai/rag'
+    | '/lab/ai/reinforcement-learning'
+    | '/lab/ai/time-series'
+    | '/lab/finance/market-data-structure'
+    | '/lab/finance/quantum-market-regime'
     | '/lab/finance/stress'
+    | '/lab/finance/variational-risk'
+    | '/lab/ai/'
     | '/lab/finance/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  LabAiRoute: typeof LabAiRouteWithChildren
   LabArenaRoute: typeof LabArenaRoute
   LabAssistantRoute: typeof LabAssistantRoute
   LabBenchmarkRoute: typeof LabBenchmarkRoute
   LabBlockchainRoute: typeof LabBlockchainRoute
   LabCircuitBuilderRoute: typeof LabCircuitBuilderRoute
+  LabCryptoIntelligenceRoute: typeof LabCryptoIntelligenceRoute
   LabEntanglementRoute: typeof LabEntanglementRoute
   LabHistoryRoute: typeof LabHistoryRoute
   LabIbmRoute: typeof LabIbmRoute
@@ -285,8 +494,13 @@ export interface RootRouteChildren {
   LabReportsRoute: typeof LabReportsRoute
   LabSnapshotRoute: typeof LabSnapshotRoute
   LabVqeRoute: typeof LabVqeRoute
+  LabVqeMolecularChemistryRoute: typeof LabVqeMolecularChemistryRoute
+  LabWeb3SolidityRoute: typeof LabWeb3SolidityRoute
   LabIndexRoute: typeof LabIndexRoute
+  LabFinanceMarketDataStructureRoute: typeof LabFinanceMarketDataStructureRoute
+  LabFinanceQuantumMarketRegimeRoute: typeof LabFinanceQuantumMarketRegimeRoute
   LabFinanceStressRoute: typeof LabFinanceStressRoute
+  LabFinanceVariationalRiskRoute: typeof LabFinanceVariationalRiskRoute
   LabFinanceIndexRoute: typeof LabFinanceIndexRoute
 }
 
@@ -304,6 +518,13 @@ declare module '@tanstack/react-router' {
       path: '/lab'
       fullPath: '/lab/'
       preLoaderRoute: typeof LabIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lab/ai': {
+      id: '/lab/ai'
+      path: '/lab/ai'
+      fullPath: '/lab/ai'
+      preLoaderRoute: typeof LabAiRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/lab/arena': {
@@ -339,6 +560,13 @@ declare module '@tanstack/react-router' {
       path: '/lab/circuit-builder'
       fullPath: '/lab/circuit-builder'
       preLoaderRoute: typeof LabCircuitBuilderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lab/crypto-intelligence': {
+      id: '/lab/crypto-intelligence'
+      path: '/lab/crypto-intelligence'
+      fullPath: '/lab/crypto-intelligence'
+      preLoaderRoute: typeof LabCryptoIntelligenceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/lab/entanglement': {
@@ -418,11 +646,109 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LabVqeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lab/vqe-molecular-chemistry': {
+      id: '/lab/vqe-molecular-chemistry'
+      path: '/lab/vqe-molecular-chemistry'
+      fullPath: '/lab/vqe-molecular-chemistry'
+      preLoaderRoute: typeof LabVqeMolecularChemistryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lab/web3-solidity': {
+      id: '/lab/web3-solidity'
+      path: '/lab/web3-solidity'
+      fullPath: '/lab/web3-solidity'
+      preLoaderRoute: typeof LabWeb3SolidityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lab/ai/': {
+      id: '/lab/ai/'
+      path: '/'
+      fullPath: '/lab/ai/'
+      preLoaderRoute: typeof LabAiIndexRouteImport
+      parentRoute: typeof LabAiRoute
+    }
+    '/lab/ai/computer-vision': {
+      id: '/lab/ai/computer-vision'
+      path: '/computer-vision'
+      fullPath: '/lab/ai/computer-vision'
+      preLoaderRoute: typeof LabAiComputerVisionRouteImport
+      parentRoute: typeof LabAiRoute
+    }
+    '/lab/ai/deep-learning': {
+      id: '/lab/ai/deep-learning'
+      path: '/deep-learning'
+      fullPath: '/lab/ai/deep-learning'
+      preLoaderRoute: typeof LabAiDeepLearningRouteImport
+      parentRoute: typeof LabAiRoute
+    }
+    '/lab/ai/explainable-ai': {
+      id: '/lab/ai/explainable-ai'
+      path: '/explainable-ai'
+      fullPath: '/lab/ai/explainable-ai'
+      preLoaderRoute: typeof LabAiExplainableAiRouteImport
+      parentRoute: typeof LabAiRoute
+    }
+    '/lab/ai/machine-learning': {
+      id: '/lab/ai/machine-learning'
+      path: '/machine-learning'
+      fullPath: '/lab/ai/machine-learning'
+      preLoaderRoute: typeof LabAiMachineLearningRouteImport
+      parentRoute: typeof LabAiRoute
+    }
+    '/lab/ai/mlops-evaluation': {
+      id: '/lab/ai/mlops-evaluation'
+      path: '/mlops-evaluation'
+      fullPath: '/lab/ai/mlops-evaluation'
+      preLoaderRoute: typeof LabAiMlopsEvaluationRouteImport
+      parentRoute: typeof LabAiRoute
+    }
+    '/lab/ai/nlp-llm': {
+      id: '/lab/ai/nlp-llm'
+      path: '/nlp-llm'
+      fullPath: '/lab/ai/nlp-llm'
+      preLoaderRoute: typeof LabAiNlpLlmRouteImport
+      parentRoute: typeof LabAiRoute
+    }
+    '/lab/ai/rag': {
+      id: '/lab/ai/rag'
+      path: '/rag'
+      fullPath: '/lab/ai/rag'
+      preLoaderRoute: typeof LabAiRagRouteImport
+      parentRoute: typeof LabAiRoute
+    }
+    '/lab/ai/reinforcement-learning': {
+      id: '/lab/ai/reinforcement-learning'
+      path: '/reinforcement-learning'
+      fullPath: '/lab/ai/reinforcement-learning'
+      preLoaderRoute: typeof LabAiReinforcementLearningRouteImport
+      parentRoute: typeof LabAiRoute
+    }
+    '/lab/ai/time-series': {
+      id: '/lab/ai/time-series'
+      path: '/time-series'
+      fullPath: '/lab/ai/time-series'
+      preLoaderRoute: typeof LabAiTimeSeriesRouteImport
+      parentRoute: typeof LabAiRoute
+    }
     '/lab/finance/': {
       id: '/lab/finance/'
       path: '/lab/finance'
       fullPath: '/lab/finance/'
       preLoaderRoute: typeof LabFinanceIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lab/finance/market-data-structure': {
+      id: '/lab/finance/market-data-structure'
+      path: '/lab/finance/market-data-structure'
+      fullPath: '/lab/finance/market-data-structure'
+      preLoaderRoute: typeof LabFinanceMarketDataStructureRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lab/finance/quantum-market-regime': {
+      id: '/lab/finance/quantum-market-regime'
+      path: '/lab/finance/quantum-market-regime'
+      fullPath: '/lab/finance/quantum-market-regime'
+      preLoaderRoute: typeof LabFinanceQuantumMarketRegimeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/lab/finance/stress': {
@@ -432,16 +758,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LabFinanceStressRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lab/finance/variational-risk': {
+      id: '/lab/finance/variational-risk'
+      path: '/lab/finance/variational-risk'
+      fullPath: '/lab/finance/variational-risk'
+      preLoaderRoute: typeof LabFinanceVariationalRiskRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
+interface LabAiRouteChildren {
+  LabAiComputerVisionRoute: typeof LabAiComputerVisionRoute
+  LabAiDeepLearningRoute: typeof LabAiDeepLearningRoute
+  LabAiExplainableAiRoute: typeof LabAiExplainableAiRoute
+  LabAiMachineLearningRoute: typeof LabAiMachineLearningRoute
+  LabAiMlopsEvaluationRoute: typeof LabAiMlopsEvaluationRoute
+  LabAiNlpLlmRoute: typeof LabAiNlpLlmRoute
+  LabAiRagRoute: typeof LabAiRagRoute
+  LabAiReinforcementLearningRoute: typeof LabAiReinforcementLearningRoute
+  LabAiTimeSeriesRoute: typeof LabAiTimeSeriesRoute
+  LabAiIndexRoute: typeof LabAiIndexRoute
+}
+
+const LabAiRouteChildren: LabAiRouteChildren = {
+  LabAiComputerVisionRoute: LabAiComputerVisionRoute,
+  LabAiDeepLearningRoute: LabAiDeepLearningRoute,
+  LabAiExplainableAiRoute: LabAiExplainableAiRoute,
+  LabAiMachineLearningRoute: LabAiMachineLearningRoute,
+  LabAiMlopsEvaluationRoute: LabAiMlopsEvaluationRoute,
+  LabAiNlpLlmRoute: LabAiNlpLlmRoute,
+  LabAiRagRoute: LabAiRagRoute,
+  LabAiReinforcementLearningRoute: LabAiReinforcementLearningRoute,
+  LabAiTimeSeriesRoute: LabAiTimeSeriesRoute,
+  LabAiIndexRoute: LabAiIndexRoute,
+}
+
+const LabAiRouteWithChildren = LabAiRoute._addFileChildren(LabAiRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  LabAiRoute: LabAiRouteWithChildren,
   LabArenaRoute: LabArenaRoute,
   LabAssistantRoute: LabAssistantRoute,
   LabBenchmarkRoute: LabBenchmarkRoute,
   LabBlockchainRoute: LabBlockchainRoute,
   LabCircuitBuilderRoute: LabCircuitBuilderRoute,
+  LabCryptoIntelligenceRoute: LabCryptoIntelligenceRoute,
   LabEntanglementRoute: LabEntanglementRoute,
   LabHistoryRoute: LabHistoryRoute,
   LabIbmRoute: LabIbmRoute,
@@ -453,8 +816,13 @@ const rootRouteChildren: RootRouteChildren = {
   LabReportsRoute: LabReportsRoute,
   LabSnapshotRoute: LabSnapshotRoute,
   LabVqeRoute: LabVqeRoute,
+  LabVqeMolecularChemistryRoute: LabVqeMolecularChemistryRoute,
+  LabWeb3SolidityRoute: LabWeb3SolidityRoute,
   LabIndexRoute: LabIndexRoute,
+  LabFinanceMarketDataStructureRoute: LabFinanceMarketDataStructureRoute,
+  LabFinanceQuantumMarketRegimeRoute: LabFinanceQuantumMarketRegimeRoute,
   LabFinanceStressRoute: LabFinanceStressRoute,
+  LabFinanceVariationalRiskRoute: LabFinanceVariationalRiskRoute,
   LabFinanceIndexRoute: LabFinanceIndexRoute,
 }
 export const routeTree = rootRouteImport
