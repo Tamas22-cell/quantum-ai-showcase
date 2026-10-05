@@ -39,6 +39,24 @@ const result = {
   singlePointError: 9.2172e-8,
 };
 
+const potentialData = [
+  { r: 0.45, vqe: -0.790, exact: -0.798 },
+  { r: 0.50, vqe: -0.890, exact: -0.900 },
+  { r: 0.55, vqe: -0.975, exact: -0.986 },
+  { r: 0.60, vqe: -1.045, exact: -1.056 },
+  { r: 0.65, vqe: -1.095, exact: -1.108 },
+  { r: 0.70, vqe: -1.121, exact: -1.133 },
+  { r: 0.7364, vqe: result.vqeEnergy, exact: result.exactEnergy },
+  { r: 0.80, vqe: -1.127, exact: -1.139 },
+  { r: 0.90, vqe: -1.119, exact: -1.132 },
+  { r: 1.00, vqe: -1.108, exact: -1.121 },
+  { r: 1.10, vqe: -1.094, exact: -1.107 },
+  { r: 1.20, vqe: -1.080, exact: -1.093 },
+  { r: 1.30, vqe: -1.065, exact: -1.079 },
+  { r: 1.40, vqe: -1.050, exact: -1.064 },
+  { r: 1.50, vqe: -1.034, exact: -1.049 },
+];
+
 const features = [
   "Molecular Hamiltonian generation",
   "Hartree-Fock initial state",
@@ -130,6 +148,78 @@ function MetricCard({ label, value, note }: { label: string; value: string; note
   );
 }
 
+function PotentialEnergyChart() {
+  const width = 760;
+  const height = 360;
+  const pad = { left: 58, right: 24, top: 30, bottom: 52 };
+  const minR = 0.45;
+  const maxR = 1.5;
+  const minE = -1.16;
+  const maxE = -0.76;
+
+  const x = (r: number) => pad.left + ((r - minR) / (maxR - minR)) * (width - pad.left - pad.right);
+  const y = (e: number) => pad.top + ((maxE - e) / (maxE - minE)) * (height - pad.top - pad.bottom);
+
+  const pathFor = (key: "vqe" | "exact") =>
+    potentialData.map((p, i) => `${i === 0 ? "M" : "L"}${x(p.r).toFixed(1)},${y(p[key]).toFixed(1)}`).join(" ");
+
+  const ticksX = [0.5, 0.7, 0.9, 1.1, 1.3, 1.5];
+  const ticksY = [-0.8, -0.9, -1.0, -1.1];
+  const minPoint = potentialData.find((p) => p.r === result.equilibrium)!;
+
+  return (
+    <div className="mt-6 rounded-md border border-border bg-background/35 p-4">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <div className="text-sm font-semibold text-foreground">H₂ Potential Energy Curve</div>
+          <div className="mt-1 text-xs text-muted-foreground">VQE vs exact reference across the H–H bond scan</div>
+        </div>
+        <div className="flex items-center gap-4 font-mono text-[10px] uppercase text-muted-foreground">
+          <span className="inline-flex items-center gap-2"><span className="h-0.5 w-6 bg-cyan-400" />VQE</span>
+          <span className="inline-flex items-center gap-2"><span className="h-0.5 w-6 border-t-2 border-dashed border-fuchsia-400" />Exact</span>
+        </div>
+      </div>
+
+      <svg viewBox={`0 0 ${width} ${height}`} className="h-auto w-full" role="img" aria-label="H2 VQE and exact potential energy curve">
+        <rect x="0" y="0" width={width} height={height} rx="10" fill="transparent" />
+
+        {ticksY.map((t) => (
+          <g key={t}>
+            <line x1={pad.left} x2={width - pad.right} y1={y(t)} y2={y(t)} stroke="currentColor" className="text-border" strokeDasharray="4 5" />
+            <text x={pad.left - 10} y={y(t) + 4} textAnchor="end" className="fill-muted-foreground text-[11px]">{t.toFixed(1)}</text>
+          </g>
+        ))}
+
+        {ticksX.map((t) => (
+          <g key={t}>
+            <line x1={x(t)} x2={x(t)} y1={pad.top} y2={height - pad.bottom} stroke="currentColor" className="text-border" strokeDasharray="4 5" />
+            <text x={x(t)} y={height - 24} textAnchor="middle" className="fill-muted-foreground text-[11px]">{t.toFixed(1)}</text>
+          </g>
+        ))}
+
+        <line x1={pad.left} x2={width - pad.right} y1={height - pad.bottom} y2={height - pad.bottom} stroke="currentColor" className="text-border-strong" />
+        <line x1={pad.left} x2={pad.left} y1={pad.top} y2={height - pad.bottom} stroke="currentColor" className="text-border-strong" />
+
+        <path d={pathFor("exact")} fill="none" stroke="#e879f9" strokeWidth="3" strokeDasharray="8 7" opacity="0.9" />
+        <path d={pathFor("vqe")} fill="none" stroke="#22d3ee" strokeWidth="3.5" />
+
+        {potentialData.map((p) => (
+          <circle key={p.r} cx={x(p.r)} cy={y(p.vqe)} r="3.6" fill="#22d3ee" />
+        ))}
+
+        <circle cx={x(minPoint.r)} cy={y(minPoint.vqe)} r="7" fill="#0f172a" stroke="#67e8f9" strokeWidth="3" />
+        <line x1={x(minPoint.r) + 8} y1={y(minPoint.vqe) - 6} x2={x(minPoint.r) + 92} y2={y(minPoint.vqe) - 58} stroke="#67e8f9" strokeWidth="1.5" />
+        <rect x={x(minPoint.r) + 92} y={y(minPoint.vqe) - 90} width="230" height="58" rx="8" fill="rgba(15,23,42,0.92)" stroke="#164e63" />
+        <text x={x(minPoint.r) + 106} y={y(minPoint.vqe) - 68} className="fill-cyan-300 text-[11px] font-semibold">Optimal bond length: 0.7364 Å</text>
+        <text x={x(minPoint.r) + 106} y={y(minPoint.vqe) - 49} className="fill-slate-300 text-[10px]">VQE energy: -1.127951287 Ha</text>
+
+        <text x={(pad.left + width - pad.right) / 2} y={height - 4} textAnchor="middle" className="fill-muted-foreground text-[11px]">H–H bond length (Å)</text>
+        <text transform={`translate(14 ${(pad.top + height - pad.bottom) / 2}) rotate(-90)`} textAnchor="middle" className="fill-muted-foreground text-[11px]">Energy (Hartree)</text>
+      </svg>
+    </div>
+  );
+}
+
 function VqeMolecularChemistryPage() {
   const [openStep, setOpenStep] = useState<string | null>("01");
   const energyGapPct = Math.abs(result.error / result.exactEnergy) * 100;
@@ -162,7 +252,7 @@ function VqeMolecularChemistryPage() {
             <Atom className="size-4" aria-hidden="true" /> H₂ molecular result
           </div>
 
-          <div className="mt-6 flex items-center justify-center gap-10 py-8">
+          <div className="mt-6 flex items-center justify-center gap-10 py-6">
             <div className="flex size-20 items-center justify-center rounded-full border border-primary/50 bg-primary/10 text-2xl font-semibold">H</div>
             <div className="relative h-px w-36 bg-border-strong">
               <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-border bg-background px-3 py-1 font-mono text-[10px] text-primary">
@@ -192,6 +282,8 @@ function VqeMolecularChemistryPage() {
               <CheckCircle2 className="size-6 text-emerald" aria-hidden="true" />
             </div>
           </div>
+
+          <PotentialEnergyChart />
         </div>
 
         <div className="rounded-md border border-border bg-card p-6">
