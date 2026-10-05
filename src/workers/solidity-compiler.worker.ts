@@ -179,4 +179,4 @@ scope.addEventListener("message", (event: MessageEvent<CompileRequest>) => {
   scope.postMessage(compileSource(source));
 });
 
-export {};
+

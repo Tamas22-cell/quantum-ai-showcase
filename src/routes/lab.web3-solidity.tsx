@@ -157,7 +157,7 @@ function Web3SolidityLab() {
   const [sandboxGas, setSandboxGas] = useState("—");
   const [sandboxTxs, setSandboxTxs] = useState<SandboxTx[]>([]);
   const [sandboxEvents, setSandboxEvents] = useState<SandboxEvent[]>([
-    { name: "SANDBOX_READY", detail: "Wallet-free Web3 engine initialized", time: new Date().toLocaleTimeString() },
+    { name: "SANDBOX_READY", detail: "Wallet-free Web3 engine initialized", time: "page load" },
   ]);
 
   const [functionArgs, setFunctionArgs] = useState<Record<string, string[]>>({});
