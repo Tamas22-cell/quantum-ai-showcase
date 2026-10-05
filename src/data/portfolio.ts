@@ -120,7 +120,7 @@ export const portfolio = {
       title: "QCS11000: Quantum Computer Systems Design I: Intro to Quantum Computation and Programming",
       detail: "UChicagoX / edX · Verified Certificate · Issued Oct 5, 2026 · Credential ID 9569d436daf54c88a04cecb5d540d9b8",
       verified: true,
-      href: "/certificates/uchicago-qcs11000.html",
+      href: "https://courses.edx.org/certificates/9569d436daf54c88a04cecb5d540d9b8",
     },
   ],
   social: [
