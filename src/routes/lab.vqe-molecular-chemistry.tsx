@@ -54,68 +54,68 @@ const workflowSteps = [
   {
     index: "01",
     title: "Molecular geometry",
-    description: "H₂ nuclear coordinates and bond length",
+    description: "Hydrogen atom positions and H–H bond length",
     details: [
-      ["Atoms", "H, H"],
-      ["Coordinates", "H₁ = (0, 0, -0.6614), H₂ = (0, 0, +0.6614)"],
-      ["Optimised bond", "0.7364 Å"],
-      ["Reference bond", "0.7414 Å"],
+      ["Atoms", "H, H — two hydrogen nuclei"],
+      ["Coordinates", "H₁ = (0, 0, -0.6614), H₂ = (0, 0, +0.6614) — nuclear positions used by the calculation"],
+      ["Optimised bond", "0.7364 Å — bond length found by the VQE bond scan"],
+      ["Reference bond", "0.7414 Å — comparison value used as a benchmark"],
     ],
   },
   {
     index: "02",
     title: "Hamiltonian",
-    description: "Ab initio molecular Hamiltonian in STO-3G",
+    description: "Quantum-mechanical energy model for H₂ in the STO-3G basis",
     details: [
-      ["Generator", "qml.qchem.molecular_hamiltonian"],
-      ["Basis", "STO-3G"],
-      ["Charge", "0"],
-      ["Multiplicity", "1 (singlet)"],
+      ["Generator", "qml.qchem.molecular_hamiltonian — builds the molecular Hamiltonian from geometry and basis settings"],
+      ["Basis", "STO-3G — compact orbital basis used to describe the electrons"],
+      ["Charge", "0 — neutral H₂ molecule"],
+      ["Multiplicity", "1 (singlet) — paired-electron ground-state configuration"],
     ],
   },
   {
     index: "03",
     title: "Reference state",
-    description: "Hartree-Fock occupation state",
+    description: "Hartree-Fock starting state for the variational search",
     details: [
-      ["Electrons", "2"],
-      ["Preparation", "qml.qchem.hf_state"],
-      ["Circuit init", "qml.BasisState"],
-      ["Reference", "Hartree-Fock ground-state occupation"],
+      ["Electrons", "2 — one electron from each hydrogen atom"],
+      ["Preparation", "qml.qchem.hf_state — generates the Hartree-Fock occupation pattern"],
+      ["Circuit init", "qml.BasisState — loads that occupation pattern into the quantum circuit"],
+      ["Reference", "Hartree-Fock ground-state occupation — classical starting approximation before VQE optimisation"],
     ],
   },
   {
     index: "04",
     title: "Ansatz",
-    description: "Single and double fermionic excitations",
+    description: "Parameterized trial wavefunction built from electron excitations",
     details: [
-      ["Excitations", "qml.qchem.excitations"],
-      ["Single gates", "qml.SingleExcitation"],
-      ["Double gates", "qml.DoubleExcitation"],
-      ["Parameters", "One variational angle per generated excitation"],
+      ["Excitations", "qml.qchem.excitations — generates allowed single- and double-electron excitations"],
+      ["Single gates", "qml.SingleExcitation — single-electron excitation gate"],
+      ["Double gates", "qml.DoubleExcitation — correlated two-electron excitation gate"],
+      ["Parameters", "One variational angle per generated excitation — each angle is tuned to lower the molecular energy"],
     ],
   },
   {
     index: "05",
     title: "VQE optimisation",
-    description: "Classical optimisation of variational parameters",
+    description: "Classical optimiser tunes the quantum-circuit parameters to minimise energy",
     details: [
-      ["Optimizer", "GradientDescentOptimizer"],
-      ["Step size", "0.4"],
-      ["Max iterations", "100"],
-      ["Convergence tolerance", "1 × 10⁻⁷ Ha"],
-      ["Single-point VQE energy", `${result.singlePointVqeEnergy.toFixed(10)} Ha`],
+      ["Optimizer", "GradientDescentOptimizer — updates variational angles using the energy gradient"],
+      ["Step size", "0.4 — learning rate for each optimisation update"],
+      ["Max iterations", "100 — safety limit on optimisation steps"],
+      ["Convergence tolerance", "1 × 10⁻⁷ Ha — optimisation stops when the energy change becomes this small"],
+      ["Single-point VQE energy", `${result.singlePointVqeEnergy.toFixed(10)} Ha — optimised ground-state energy estimate`],
     ],
   },
   {
     index: "06",
     title: "Validation",
-    description: "Exact diagonalisation and error analysis",
+    description: "Compare the VQE estimate with an exact numerical reference",
     details: [
-      ["Single-point exact energy", `${result.singlePointExactEnergy.toFixed(10)} Ha`],
-      ["Single-point absolute error", `${result.singlePointError.toExponential(4)} Ha`],
-      ["Bond-scan exact energy", `${result.exactEnergy.toFixed(10)} Ha`],
-      ["Bond-scan absolute error", `${result.error.toFixed(10)} Ha`],
+      ["Single-point exact energy", `${result.singlePointExactEnergy.toFixed(10)} Ha — exact reference at the selected geometry`],
+      ["Single-point absolute error", `${result.singlePointError.toExponential(4)} Ha — difference between VQE and exact energy`],
+      ["Bond-scan exact energy", `${result.exactEnergy.toFixed(10)} Ha — exact energy at the scan minimum`],
+      ["Bond-scan absolute error", `${result.error.toFixed(10)} Ha — VQE error at the scan minimum`],
     ],
   },
 ];
@@ -198,7 +198,7 @@ function VqeMolecularChemistryPage() {
           <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-[0.16em] text-primary">
             <Sigma className="size-4" aria-hidden="true" /> Interactive workflow
           </div>
-          <p className="mt-2 text-xs leading-5 text-muted-foreground">Click any step to inspect the actual configuration and result values used by the H₂ VQE research run.</p>
+          <p className="mt-2 text-xs leading-5 text-muted-foreground">Click any step to inspect both the technical setting and a plain-language explanation of what it means in the H₂ VQE workflow.</p>
 
           <div className="mt-5 space-y-3">
             {workflowSteps.map((step) => {
@@ -225,7 +225,7 @@ function VqeMolecularChemistryPage() {
                         {step.details.map(([label, value]) => (
                           <div key={label} className="grid gap-1 rounded-md border border-border/70 bg-card px-3 py-2 sm:grid-cols-[150px_1fr] sm:gap-4">
                             <div className="font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground">{label}</div>
-                            <div className="font-mono text-xs leading-5 text-foreground">{value}</div>
+                            <div className="text-xs leading-5 text-foreground">{value}</div>
                           </div>
                         ))}
                       </div>
