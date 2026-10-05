@@ -23,11 +23,15 @@ export function runSecurityChecks(input: { source: string; abi: AbiItem[]; compi
   const out: SecurityCheck[] = [];
   const has = (re: RegExp) => re.test(code);
 
-  out.push(!input.compiled
-    ? { id: "compile", label: "Compilation", status: "fail", detail: `${input.errors} compiler error(s). Fix before deploying.` }
-    : input.warnings > 0
-      ? { id: "compile", label: "Compilation", status: "warn", detail: `Compiled with ${input.warnings} warning(s); review the compiler messages.` }
-      : { id: "compile", label: "Compilation", status: "pass", detail: "Compiled with no errors or warnings." });
+  out.push(
+    input.compiled
+      ? input.warnings > 0
+        ? { id: "compile", label: "Compilation", status: "warn", detail: `Compiled with ${input.warnings} warning(s); review the compiler messages.` }
+        : { id: "compile", label: "Compilation", status: "pass", detail: "Compiled with no errors or warnings." }
+      : input.errors > 0
+        ? { id: "compile", label: "Compilation", status: "fail", detail: `${input.errors} compiler error(s). Fix before deploying.` }
+        : { id: "compile", label: "Compilation", status: "info", detail: "Not compiled in the current session yet. Run Compile Solidity to validate the source before deployment." }
+  );
 
   const pragma = /pragma\s+solidity\s+([^;]+);/.exec(code);
   out.push(!pragma
