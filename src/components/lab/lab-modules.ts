@@ -47,6 +47,16 @@ export const LAB_MODULES: LabModule[] = [
     summary: "Imported H₂ ab initio VQE research result with STO-3G molecular Hamiltonian, Hartree-Fock initialization, excitation ansatz, bond-length optimisation and exact-energy validation.",
     topics: ["H₂", "Ab initio VQE", "STO-3G", "Hartree-Fock", "Bond scan", "Exact reference"], status: "available", to: "/lab/vqe-molecular-chemistry", group: "core",
   },
+  {
+    id: "quantum-error-correction", index: "08", title: "Quantum Error Correction Lab",
+    summary: "Explore bit-flip, phase-flip and repetition-code concepts with visual syndrome detection and recovery logic.",
+    topics: ["QEC", "Bit flip", "Phase flip", "Syndrome"], status: "in-development", group: "core",
+  },
+  {
+    id: "quantum-noise-fidelity", index: "09", title: "Quantum Noise & Fidelity Lab",
+    summary: "Study how decoherence, gate noise and measurement errors affect quantum states, circuits and final fidelity.",
+    topics: ["Noise", "Decoherence", "Fidelity", "NISQ"], status: "in-development", group: "core",
+  },
 
   {
     id: "arena", index: "C1", title: "Quantum vs Classical Arena", group: "command",
