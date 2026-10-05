@@ -10,7 +10,7 @@ export const explorerCompilerVersion = (v: string) => (v && v !== "—" ? `v${v.
  * Verification READINESS only. Submitting to an explorer API needs a secret key, which must never ship
  * to the browser, so we surface everything needed for manual submission and never claim success.
  */
-export function VerificationPanel({ testnet, deployment }: { testnet: TestnetConfig; deployment?: Deployment }) {
+export function VerificationPanel({ testnet, deployment }: { testnet: TestnetConfig; deployment?: Deployment | undefined }) {
   if (!deployment) return <p className="text-sm text-muted-foreground">Deploy a contract on {testnet.name} to prepare verification details.</p>;
   const abi = JSON.stringify(deployment.abi);
   const ver = explorerCompilerVersion(deployment.compilerVersion);

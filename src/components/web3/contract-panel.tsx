@@ -13,7 +13,7 @@ import { ExplorerLink, btnGhost, btnPrimary, inputCls } from "./ui";
 type Result = { kind: "ok" | "err" | "info"; text: string; hash?: string };
 
 /** ABI-driven controls against a real deployed contract: eth_call for reads, signed txs for writes. */
-export function ContractPanel({ ctx, abi, address, setAddress, latestAddress }: { ctx: ChainCtx; abi: AbiItem[]; address: string; setAddress: (a: string) => void; latestAddress?: string }) {
+export function ContractPanel({ ctx, abi, address, setAddress, latestAddress }: { ctx: ChainCtx; abi: AbiItem[]; address: string; setAddress: (a: string) => void; latestAddress?: string | undefined }) {
   const fns = useMemo(() => abi.filter((f) => f.type === "function"), [abi]);
   const [args, setArgs] = useState<Record<string, string[]>>({});
   const [values, setValues] = useState<Record<string, string>>({});
