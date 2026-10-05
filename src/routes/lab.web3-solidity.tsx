@@ -184,7 +184,7 @@ function Web3SolidityLab() {
 
   function pushTx(type: SandboxTx["type"], label: string, gas: number) {
     setSandboxTxs((current) => [
-      { hash: randomHash(), type, label, status: "confirmed", gas, time: new Date().toLocaleTimeString() },
+      { hash: randomHash(), type, label, status: "confirmed" as const, gas, time: new Date().toLocaleTimeString() },
       ...current,
     ].slice(0, 12));
   }
@@ -302,7 +302,7 @@ function Web3SolidityLab() {
     }
 
     if (entry.name === "records" && args.length >= 1) {
-      const value = sandboxStorage[args[0]] ?? "";
+      const value = sandboxStorage[args[0] ?? ""] ?? "";
       setFunctionResults((current) => ({ ...current, [key]: value || "(empty string)" }));
       pushTx("read", signature, 0);
       pushEvent("CALL", `${signature} → ${value || "empty"}`);
