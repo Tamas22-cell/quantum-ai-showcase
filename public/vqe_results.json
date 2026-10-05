@@ -1,0 +1,22 @@
+{
+  "project": "VQE Molecular Chemistry",
+  "molecule": "H2",
+  "method": "Ab Initio VQE",
+  "basis": "STO-3G",
+  "equilibrium_bond_length_angstrom": 0.7364,
+  "reference_bond_length_angstrom": 0.7414,
+  "minimum_vqe_energy_hartree": -1.127951287,
+  "exact_energy_at_minimum_hartree": -1.137304145,
+  "absolute_error_hartree": 0.0093528581,
+  "status": "completed",
+  "features": [
+    "Molecular Hamiltonian generation",
+    "Hartree-Fock initial state",
+    "Single and double excitations",
+    "Variational Quantum Eigensolver",
+    "Exact diagonalization reference",
+    "Potential energy curve",
+    "Bond-length scan",
+    "VQE error analysis"
+  ]
+}
