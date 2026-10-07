@@ -12,19 +12,18 @@ export const getMiningPools = createServerFn({ method: "GET" }).handler(async ()
     throw new Error(`Mining pool feed returned HTTP ${response.status}`);
   }
 
-  const payload = await response.json();
-  const rows = Array.isArray(payload)
-    ? payload
-    : Array.isArray(payload?.pools)
-      ? payload.pools
-      : [];
+  const payload = (await response.json()) as { pools?: unknown[] } | unknown[];
+  const rows: unknown[] = Array.isArray(payload) ? payload : payload.pools ?? [];
 
-  const normalized = rows
-    .map((p: any) => ({
-      name: p.name ?? p.poolName ?? p.slug ?? "Unknown pool",
-      blocks: Number(p.blockCount ?? p.blocksFound ?? p.blocks ?? 0),
-    }))
-    .filter((p: Pool) => Number.isFinite(p.blocks) && p.blocks > 0);
+  // Normalise the feed into Pool-shaped rows; unknown fields fall back to defaults.
+  const normalized: Pool[] = rows
+    .map((entry) => {
+      const pool = (entry ?? {}) as Record<string, unknown>;
+      const name = pool.name ?? pool.poolName ?? pool.slug ?? "Unknown pool";
+      const blocks = Number(pool.blockCount ?? pool.blocksFound ?? pool.blocks ?? 0);
+      return { name: String(name), blocks, share: 0 };
+    })
+    .filter((p) => Number.isFinite(p.blocks) && p.blocks > 0);
 
   const totalBlocks = normalized.reduce((sum, p) => sum + p.blocks, 0);
 

@@ -126,7 +126,7 @@ function extractOutputText(body: unknown): string {
 export const askAIResearchAssistant = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => Input.parse(data))
   .handler(async ({ data }) => {
-    const apiKey = process.env.OPENAI_API_KEY;
+    const apiKey = process.env["OPENAI_API_KEY"];
     if (!apiKey) throw new Error("OPENAI_API_KEY is not configured.");
 
     const history: ChatTurn[] = data.history ?? [];
@@ -194,7 +194,7 @@ Use web search for this request. Return 2-4 source URLs in a final "Sources" sec
       const circuitMatch = answer.match(/\`\`\`json\s*([\s\S]*?)\s*\`\`\`/i);
       if (circuitMatch) {
         try {
-          const parsed = JSON.parse(circuitMatch[1]);
+          const parsed = JSON.parse(circuitMatch[1] ?? "");
           if (parsed && typeof parsed === "object") circuitRaw = JSON.stringify(parsed);
         } catch {
           circuitRaw = null;
