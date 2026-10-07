@@ -19,8 +19,8 @@ export const getMiningPools = createServerFn({ method: "GET" }).handler(async ()
   const normalized: Pool[] = rows
     .map((entry) => {
       const pool = (entry ?? {}) as Record<string, unknown>;
-      const name = pool.name ?? pool.poolName ?? pool.slug ?? "Unknown pool";
-      const blocks = Number(pool.blockCount ?? pool.blocksFound ?? pool.blocks ?? 0);
+      const name = pool["name"] ?? pool["poolName"] ?? pool["slug"] ?? "Unknown pool";
+      const blocks = Number(pool["blockCount"] ?? pool["blocksFound"] ?? pool["blocks"] ?? 0);
       return { name: String(name), blocks, share: 0 };
     })
     .filter((p) => Number.isFinite(p.blocks) && p.blocks > 0);
