@@ -19,7 +19,7 @@ export const getBitcoinNetworkActivity = createServerFn({ method: "GET" }).handl
   const mempool = mempoolResult.status === "fulfilled" ? mempoolResult.value : null;
   const fees = feesResult.status === "fulfilled" ? feesResult.value : null;
   const blocks = blocksResult.status === "fulfilled" ? blocksResult.value.slice(0, 6) : [];
-  const intervals = blocks.slice(0, -1).map((b, i) => b.timestamp && blocks[i + 1]?.timestamp ? b.timestamp - (blocks[i + 1].timestamp as number) : null).filter((v): v is number => v != null && v > 0);
+  const intervals = blocks.slice(0, -1).map((b, i) => b.timestamp && blocks[i + 1]?.timestamp ? b.timestamp - (blocks[i + 1]!.timestamp as number) : null).filter((v): v is number => v != null && v > 0);
   const avgBlockIntervalMinutes = intervals.length ? intervals.reduce((a, b) => a + b, 0) / intervals.length / 60 : null;
   const latest = blocks[0];
   return {

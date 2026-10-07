@@ -73,11 +73,11 @@ function trainLinear(data: Point[]) {
     let pivot = i;
     for (let r = i + 1; r < 3; r++) if (Math.abs(a[r]![i]!) > Math.abs(a[pivot]![i]!)) pivot = r;
     [a[i], a[pivot]] = [a[pivot]!, a[i]!];
-    const d = a[i]![i] || 1e-12;
-    for (let c = i; c < 4; c++) a[i]![c] /= d;
+    const row = a[i]!; const d = row[i] || 1e-12;
+    for (let c = i; c < 4; c++) row[c] = (row[c] ?? 0) / d;
     for (let r = 0; r < 3; r++) if (r !== i) {
-      const f = a[r]![i]!;
-      for (let c = i; c < 4; c++) a[r]![c] -= f * a[i]![c]!;
+      const rr = a[r]!; const f = rr[i]!;
+      for (let c = i; c < 4; c++) rr[c] = (rr[c] ?? 0) - f * row[c]!;
     }
   }
   return { w0: a[0]![3]!, w1: a[1]![3]!, w2: a[2]![3]! };

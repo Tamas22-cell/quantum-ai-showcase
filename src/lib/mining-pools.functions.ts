@@ -19,7 +19,7 @@ export const getMiningPools = createServerFn({ method: "GET" }).handler(async ()
       ? payload.pools
       : [];
 
-  const normalized = rows
+  const normalized: Pool[] = (rows as any[])
     .map((p: any) => ({
       name: p.name ?? p.poolName ?? p.slug ?? "Unknown pool",
       blocks: Number(p.blockCount ?? p.blocksFound ?? p.blocks ?? 0),

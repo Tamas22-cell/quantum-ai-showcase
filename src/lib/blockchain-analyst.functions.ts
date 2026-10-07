@@ -20,7 +20,7 @@ export const getBlockchainAnalyst=createServerFn({method:"GET"}).handler(async()
   j<M>("/mempool"),j<F>("/v1/fees/recommended"),j<H>("/v1/mining/hashrate/1m"),j<D>("/v1/difficulty-adjustment"),j<B>("/v1/blocks"),j<R>("/mempool/recent")
  ]);
  const ts=b.map(x=>x.timestamp).filter((x):x is number=>typeof x==="number");
- const ints=ts.slice(0,-1).map((x,i)=>(x-ts[i+1])/60).filter(x=>x>0);
+ const ints=ts.slice(0,-1).map((x,i)=>(x-ts[i+1]!)/60).filter(x=>x>0);
  const interval=ints.length?ints.reduce((a,c)=>a+c,0)/ints.length:null;
  const fees=b.map(x=>x.extras?.totalFees).filter((x):x is number=>typeof x==="number");
  const avgFees=fees.length?fees.reduce((a,c)=>a+c,0)/fees.length/1e8:null;
