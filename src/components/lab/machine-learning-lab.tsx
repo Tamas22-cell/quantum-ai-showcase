@@ -65,19 +65,22 @@ function trainLinear(data: Point[]) {
   for (const p of data) {
     const f = [1, p.x1, p.x2];
     for (let i = 0; i < 3; i++) {
-      for (let j = 0; j < 3; j++) a[i][j] += f[i]! * f[j]!;
-      a[i][3] += f[i]! * p.y;
+      const row = a[i]!;
+      for (let j = 0; j < 3; j++) row[j] = (row[j] ?? 0) + f[i]! * f[j]!;
+      row[3] = (row[3] ?? 0) + f[i]! * p.y;
     }
   }
   for (let i = 0; i < 3; i++) {
     let pivot = i;
     for (let r = i + 1; r < 3; r++) if (Math.abs(a[r]![i]!) > Math.abs(a[pivot]![i]!)) pivot = r;
     [a[i], a[pivot]] = [a[pivot]!, a[i]!];
-    const d = a[i]![i] || 1e-12;
-    for (let c = i; c < 4; c++) a[i]![c] /= d;
+    const row = a[i]!;
+    const d = row[i] || 1e-12;
+    for (let c = i; c < 4; c++) row[c] = (row[c] ?? 0) / d;
     for (let r = 0; r < 3; r++) if (r !== i) {
-      const f = a[r]![i]!;
-      for (let c = i; c < 4; c++) a[r]![c] -= f * a[i]![c]!;
+      const other = a[r]!;
+      const f = other[i]!;
+      for (let c = i; c < 4; c++) other[c] = (other[c] ?? 0) - f * (row[c] ?? 0);
     }
   }
   return { w0: a[0]![3]!, w1: a[1]![3]!, w2: a[2]![3]! };

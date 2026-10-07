@@ -61,6 +61,8 @@ export function VerificationPanel({ testnet, deployment }: { testnet: TestnetCon
   const ver = explorerCompilerVersion(deployment.compilerVersion);
 
   async function submit() {
+    // `deployment` is a prop: narrowing does not survive into this closure, so re-check it here.
+    if (!deployment) return;
     setBusy(true);
     setSubmitMsg("");
     try {

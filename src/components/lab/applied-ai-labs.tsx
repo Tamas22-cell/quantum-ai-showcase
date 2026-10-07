@@ -183,10 +183,10 @@ export function TimeSeriesLab() {
   const [trend, setTrend] = useState(1.2);
   const series = useMemo(() => Array.from({ length: 36 }, (_, i) => 80 + i * trend + Math.sin(i * 0.7) * 8 + Math.cos(i * 0.23) * 4), [trend]);
   const forecast = series.map((_, i) => {
-    if (i < window) return series[i];
+    if (i < window) return series[i]!;
     return series.slice(i - window, i).reduce((a, b) => a + b, 0) / window;
   });
-  const errors = series.slice(window).map((v, i) => v - forecast[i + window]);
+  const errors = series.slice(window).map((v, i) => v - forecast[i + window]!);
   const mae = errors.reduce((a, b) => a + Math.abs(b), 0) / errors.length;
   const rmse = Math.sqrt(errors.reduce((a, b) => a + b * b, 0) / errors.length);
   const toPoints = (values: number[]) => values.map((v, i) => `${12 + i * 16},${150 - (v - 65) * 1.55}`).join(" ");

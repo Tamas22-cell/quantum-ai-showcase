@@ -26,7 +26,7 @@ export const getMiningRevenueData = createServerFn({ method: "GET" }).handler(as
   const avgRewardBtc = avgFeesBtc == null ? null : subsidyBtc + avgFeesBtc;
   const feeSharePercent = avgRewardBtc && avgFeesBtc != null ? avgFeesBtc / avgRewardBtc * 100 : null;
   const timestamps = recentBlocks.map((b) => b.timestamp).filter((v): v is number => v != null);
-  const intervals = timestamps.slice(0, -1).map((t, i) => t - timestamps[i + 1]).filter((v) => v > 0);
+  const intervals = timestamps.slice(0, -1).map((t, i) => t - timestamps[i + 1]!).filter((v) => v > 0);
   const avgBlockMinutes = intervals.length ? intervals.reduce((a, b) => a + b, 0) / intervals.length / 60 : null;
   const estimatedBlocksPerDay = avgBlockMinutes && avgBlockMinutes > 0 ? 1440 / avgBlockMinutes : null;
   return {

@@ -54,25 +54,24 @@ function extractSources(body: unknown): SourceRef[] {
     }
 
     const record = value as Record<string, unknown>;
-    const annotations = record.annotations;
+    const annotations = record["annotations"];
 
     if (Array.isArray(annotations)) {
       for (const item of annotations) {
         if (!item || typeof item !== "object") continue;
         const annotation = item as Record<string, unknown>;
+        const url = annotation["url"];
+        const title = annotation["title"];
         if (
-          annotation.type === "url_citation" &&
-          typeof annotation.url === "string" &&
-          annotation.url.startsWith("http") &&
-          !seen.has(annotation.url)
+          annotation["type"] === "url_citation" &&
+          typeof url === "string" &&
+          url.startsWith("http") &&
+          !seen.has(url)
         ) {
-          seen.add(annotation.url);
+          seen.add(url);
           sources.push({
-            url: annotation.url,
-            title:
-              typeof annotation.title === "string" && annotation.title.trim()
-                ? annotation.title
-                : annotation.url,
+            url,
+            title: typeof title === "string" && title.trim() ? title : url,
           });
           if (sources.length >= 4) return;
         }
