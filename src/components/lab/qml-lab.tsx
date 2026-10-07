@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Dices, Loader2, Play, RotateCcw, Square } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -104,6 +104,74 @@ function Confusion({ title, m }: { title: string; m: [[number, number], [number,
         ))}</tbody>
       </table>
     </div>
+  );
+}
+
+
+function LiveQmlShowcasePreview() {
+  const [tick, setTick] = useState(0);
+
+  useEffect(() => {
+    const id = window.setInterval(() => setTick((x) => (x + 1) % 140), 180);
+    return () => window.clearInterval(id);
+  }, []);
+
+  const points = Array.from({ length: 42 }, (_, i) => {
+    const x = 16 + i * 7.2;
+    const decay = 0.86 * Math.exp(-i / 18) + 0.08;
+    const wave = 0.035 * Math.sin((i + tick) * 0.28);
+    const loss = Math.max(0.07, decay + wave);
+    const accuracy = Math.min(0.96, 0.2 + i * 0.018 + 0.025 * Math.sin((i + tick) * 0.18));
+    return { x, lossY: 112 - loss * 92, accY: 112 - accuracy * 92 };
+  });
+
+  const lossPath = points.map((p, i) => `${i ? "L" : "M"} ${p.x.toFixed(1)} ${p.lossY.toFixed(1)}`).join(" ");
+  const accPath = points.map((p, i) => `${i ? "L" : "M"} ${p.x.toFixed(1)} ${p.accY.toFixed(1)}`).join(" ");
+  const angle = (tick * 3.6) % 360;
+
+  return (
+    <section className="overflow-hidden rounded-md border border-primary/30 bg-card">
+      <div className="grid grid-cols-1 lg:grid-cols-[1.35fr_0.65fr]">
+        <div className="border-b border-border p-4 lg:border-b-0 lg:border-r">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-primary">Live QML training</div>
+              <div className="mt-1 text-sm font-medium text-foreground">Loss ↓ · Accuracy ↑</div>
+            </div>
+            <span className="rounded-full border border-emerald/40 bg-emerald/10 px-2 py-1 font-mono text-[9px] uppercase text-emerald">live</span>
+          </div>
+          <svg viewBox="0 0 330 126" className="mt-3 w-full" role="img" aria-label="Continuously animated machine learning training preview">
+            {[28, 56, 84, 112].map((y) => <line key={y} x1="12" x2="320" y1={y} y2={y} stroke="var(--border)" strokeWidth="1" />)}
+            <path d={lossPath} fill="none" stroke="var(--amber)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+            <path d={accPath} fill="none" stroke="var(--emerald)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+            <circle cx={points.at(-1)?.x ?? 0} cy={points.at(-1)?.lossY ?? 0} r="4" fill="var(--amber)" />
+            <circle cx={points.at(-1)?.x ?? 0} cy={points.at(-1)?.accY ?? 0} r="4" fill="var(--emerald)" />
+          </svg>
+          <div className="mt-2 flex gap-4 font-mono text-[10px] text-muted-foreground">
+            <span><span className="mr-1 inline-block size-2 rounded-full bg-amber" />loss</span>
+            <span><span className="mr-1 inline-block size-2 rounded-full bg-emerald" />accuracy</span>
+          </div>
+        </div>
+
+        <div className="flex min-h-64 items-center justify-center p-5">
+          <div className="relative size-44 rounded-full border-2 border-primary/70 shadow-[0_0_36px_rgba(56,189,248,0.28)]">
+            <div className="absolute inset-[10%] rounded-full border border-primary/35" style={{ transform: `rotate(${angle}deg) scaleY(.38)` }} />
+            <div className="absolute inset-[10%] rounded-full border border-emerald/35" style={{ transform: `rotate(${-angle * 0.8 + 58}deg) scaleY(.38)` }} />
+            <div className="absolute inset-[10%] rounded-full border border-amber/35" style={{ transform: `rotate(${angle * 0.55 - 42}deg) scaleY(.38)` }} />
+            <div
+              className="absolute left-1/2 top-1/2 h-[42%] w-0.5 origin-bottom bg-gradient-to-t from-emerald to-foreground shadow-[0_0_14px_rgba(16,185,129,0.8)]"
+              style={{ transform: `translate(-50%,-100%) rotate(${angle + 18}deg)` }}
+            >
+              <span className="absolute -top-1.5 left-1/2 size-3 -translate-x-1/2 rounded-full bg-foreground shadow-[0_0_12px_rgba(255,255,255,0.8)]" />
+            </div>
+            <div className="absolute left-1/2 top-1/2 size-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary" />
+          </div>
+        </div>
+      </div>
+      <div className="border-t border-border bg-primary/5 px-4 py-2 font-mono text-[10px] text-muted-foreground">
+        Browser-rendered animation from the ML/QML lab — not a video and not a static image.
+      </div>
+    </section>
   );
 }
 
