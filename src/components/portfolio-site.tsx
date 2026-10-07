@@ -593,9 +593,9 @@ export function PortfolioSite() {
                   <p className="font-mono text-[10px] uppercase tracking-wider text-primary">Active workflow node</p>
                   <span className="rounded-full border border-primary/30 px-2.5 py-1 font-mono text-[9px] uppercase text-primary">Interactive</span>
                 </div>
-                <h3 className="mt-3 text-xl font-semibold text-foreground">{agentDetails[activeAgent].title}</h3>
-                <p className="mt-2 max-w-3xl text-sm leading-7 text-muted-foreground">{agentDetails[activeAgent].description}</p>
-                <p className="mt-4 font-mono text-[10px] uppercase tracking-wider text-primary">{agentDetails[activeAgent].output}</p>
+                <h3 className="mt-3 text-xl font-semibold text-foreground">{agentDetails[activeAgent]!.title}</h3>
+                <p className="mt-2 max-w-3xl text-sm leading-7 text-muted-foreground">{agentDetails[activeAgent]!.description}</p>
+                <p className="mt-4 font-mono text-[10px] uppercase tracking-wider text-primary">{agentDetails[activeAgent]!.output}</p>
               </div>
 
               {/* Capability chips */}

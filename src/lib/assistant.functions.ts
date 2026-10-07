@@ -54,25 +54,25 @@ function extractSources(body: unknown): SourceRef[] {
     }
 
     const record = value as Record<string, unknown>;
-    const annotations = record.annotations;
+    const annotations = record["annotations"];
 
     if (Array.isArray(annotations)) {
       for (const item of annotations) {
         if (!item || typeof item !== "object") continue;
         const annotation = item as Record<string, unknown>;
         if (
-          annotation.type === "url_citation" &&
-          typeof annotation.url === "string" &&
-          annotation.url.startsWith("http") &&
-          !seen.has(annotation.url)
+          annotation["type"] === "url_citation" &&
+          typeof annotation["url"] === "string" &&
+          annotation["url"].startsWith("http") &&
+          !seen.has(annotation["url"])
         ) {
-          seen.add(annotation.url);
+          seen.add(annotation["url"]);
           sources.push({
-            url: annotation.url,
+            url: annotation["url"],
             title:
-              typeof annotation.title === "string" && annotation.title.trim()
-                ? annotation.title
-                : annotation.url,
+              typeof annotation["title"] === "string" && annotation["title"].trim()
+                ? annotation["title"]
+                : annotation["url"],
           });
           if (sources.length >= 4) return;
         }
@@ -127,7 +127,7 @@ function extractOutputText(body: unknown): string {
 export const askAIResearchAssistant = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => Input.parse(data))
   .handler(async ({ data }) => {
-    const apiKey = process.env.OPENAI_API_KEY;
+    const apiKey = process.env["OPENAI_API_KEY"];
     if (!apiKey) throw new Error("OPENAI_API_KEY is not configured.");
 
     const history: ChatTurn[] = data.history ?? [];
@@ -195,7 +195,7 @@ Use web search for this request. Return 2-4 source URLs in a final "Sources" sec
       const circuitMatch = answer.match(/\`\`\`json\s*([\s\S]*?)\s*\`\`\`/i);
       if (circuitMatch) {
         try {
-          const parsed = JSON.parse(circuitMatch[1]);
+          const parsed = JSON.parse(circuitMatch[1] ?? "");
           if (parsed && typeof parsed === "object") circuitRaw = JSON.stringify(parsed);
         } catch {
           circuitRaw = null;

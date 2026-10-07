@@ -19,12 +19,12 @@ export const getMiningPools = createServerFn({ method: "GET" }).handler(async ()
       ? payload.pools
       : [];
 
-  const normalized = rows
+  const normalized = (rows as any[])
     .map((p: any) => ({
       name: p.name ?? p.poolName ?? p.slug ?? "Unknown pool",
       blocks: Number(p.blockCount ?? p.blocksFound ?? p.blocks ?? 0),
     }))
-    .filter((p: Pool) => Number.isFinite(p.blocks) && p.blocks > 0);
+    .filter((p) => Number.isFinite(p.blocks) && p.blocks > 0);
 
   const totalBlocks = normalized.reduce((sum, p) => sum + p.blocks, 0);
 

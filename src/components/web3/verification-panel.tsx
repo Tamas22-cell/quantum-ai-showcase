@@ -61,6 +61,7 @@ export function VerificationPanel({ testnet, deployment }: { testnet: TestnetCon
   const ver = explorerCompilerVersion(deployment.compilerVersion);
 
   async function submit() {
+    if (!deployment) return;
     setBusy(true);
     setSubmitMsg("");
     try {

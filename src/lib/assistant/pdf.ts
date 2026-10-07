@@ -156,7 +156,7 @@ export function exportAssistantResearchReport(report: AssistantResearchReport): 
       pdf.setFontSize(8.5);
       pdf.setTextColor(...CYAN);
       pdf.text(lines, M, y);
-      pdf.link(M, y - 9, Math.min(CW, Math.max(100, pdf.getTextWidth(lines[0]) + 8)), blockHeight, { url: source.url });
+      pdf.link(M, y - 9, Math.min(CW, Math.max(100, pdf.getTextWidth(lines[0] ?? "") + 8)), blockHeight, { url: source.url });
       y += blockHeight;
     });
   }
