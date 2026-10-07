@@ -26,6 +26,8 @@ import { Route as LabPythonRouteImport } from './routes/lab.python'
 import { Route as LabQaoaRouteImport } from './routes/lab.qaoa'
 import { Route as LabQiskitRouteImport } from './routes/lab.qiskit'
 import { Route as LabQmlRouteImport } from './routes/lab.qml'
+import { Route as LabQuantumErrorCorrectionRouteImport } from './routes/lab.quantum-error-correction'
+import { Route as LabQuantumNoiseFidelityRouteImport } from './routes/lab.quantum-noise-fidelity'
 import { Route as LabReportsRouteImport } from './routes/lab.reports'
 import { Route as LabSnapshotRouteImport } from './routes/lab.snapshot'
 import { Route as LabVqeRouteImport } from './routes/lab.vqe'
@@ -130,6 +132,17 @@ const LabQiskitRoute = LabQiskitRouteImport.update({
 const LabQmlRoute = LabQmlRouteImport.update({
   id: '/lab/qml',
   path: '/lab/qml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LabQuantumErrorCorrectionRoute =
+  LabQuantumErrorCorrectionRouteImport.update({
+    id: '/lab/quantum-error-correction',
+    path: '/lab/quantum-error-correction',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const LabQuantumNoiseFidelityRoute = LabQuantumNoiseFidelityRouteImport.update({
+  id: '/lab/quantum-noise-fidelity',
+  path: '/lab/quantum-noise-fidelity',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LabReportsRoute = LabReportsRouteImport.update({
@@ -255,6 +268,8 @@ export interface FileRoutesByFullPath {
   '/lab/qaoa': typeof LabQaoaRoute
   '/lab/qiskit': typeof LabQiskitRoute
   '/lab/qml': typeof LabQmlRoute
+  '/lab/quantum-error-correction': typeof LabQuantumErrorCorrectionRoute
+  '/lab/quantum-noise-fidelity': typeof LabQuantumNoiseFidelityRoute
   '/lab/reports': typeof LabReportsRoute
   '/lab/snapshot': typeof LabSnapshotRoute
   '/lab/vqe': typeof LabVqeRoute
@@ -293,6 +308,8 @@ export interface FileRoutesByTo {
   '/lab/qaoa': typeof LabQaoaRoute
   '/lab/qiskit': typeof LabQiskitRoute
   '/lab/qml': typeof LabQmlRoute
+  '/lab/quantum-error-correction': typeof LabQuantumErrorCorrectionRoute
+  '/lab/quantum-noise-fidelity': typeof LabQuantumNoiseFidelityRoute
   '/lab/reports': typeof LabReportsRoute
   '/lab/snapshot': typeof LabSnapshotRoute
   '/lab/vqe': typeof LabVqeRoute
@@ -333,6 +350,8 @@ export interface FileRoutesById {
   '/lab/qaoa': typeof LabQaoaRoute
   '/lab/qiskit': typeof LabQiskitRoute
   '/lab/qml': typeof LabQmlRoute
+  '/lab/quantum-error-correction': typeof LabQuantumErrorCorrectionRoute
+  '/lab/quantum-noise-fidelity': typeof LabQuantumNoiseFidelityRoute
   '/lab/reports': typeof LabReportsRoute
   '/lab/snapshot': typeof LabSnapshotRoute
   '/lab/vqe': typeof LabVqeRoute
@@ -374,6 +393,8 @@ export interface FileRouteTypes {
     | '/lab/qaoa'
     | '/lab/qiskit'
     | '/lab/qml'
+    | '/lab/quantum-error-correction'
+    | '/lab/quantum-noise-fidelity'
     | '/lab/reports'
     | '/lab/snapshot'
     | '/lab/vqe'
@@ -412,6 +433,8 @@ export interface FileRouteTypes {
     | '/lab/qaoa'
     | '/lab/qiskit'
     | '/lab/qml'
+    | '/lab/quantum-error-correction'
+    | '/lab/quantum-noise-fidelity'
     | '/lab/reports'
     | '/lab/snapshot'
     | '/lab/vqe'
@@ -451,6 +474,8 @@ export interface FileRouteTypes {
     | '/lab/qaoa'
     | '/lab/qiskit'
     | '/lab/qml'
+    | '/lab/quantum-error-correction'
+    | '/lab/quantum-noise-fidelity'
     | '/lab/reports'
     | '/lab/snapshot'
     | '/lab/vqe'
@@ -491,6 +516,8 @@ export interface RootRouteChildren {
   LabQaoaRoute: typeof LabQaoaRoute
   LabQiskitRoute: typeof LabQiskitRoute
   LabQmlRoute: typeof LabQmlRoute
+  LabQuantumErrorCorrectionRoute: typeof LabQuantumErrorCorrectionRoute
+  LabQuantumNoiseFidelityRoute: typeof LabQuantumNoiseFidelityRoute
   LabReportsRoute: typeof LabReportsRoute
   LabSnapshotRoute: typeof LabSnapshotRoute
   LabVqeRoute: typeof LabVqeRoute
@@ -623,6 +650,20 @@ declare module '@tanstack/react-router' {
       path: '/lab/qml'
       fullPath: '/lab/qml'
       preLoaderRoute: typeof LabQmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lab/quantum-error-correction': {
+      id: '/lab/quantum-error-correction'
+      path: '/lab/quantum-error-correction'
+      fullPath: '/lab/quantum-error-correction'
+      preLoaderRoute: typeof LabQuantumErrorCorrectionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lab/quantum-noise-fidelity': {
+      id: '/lab/quantum-noise-fidelity'
+      path: '/lab/quantum-noise-fidelity'
+      fullPath: '/lab/quantum-noise-fidelity'
+      preLoaderRoute: typeof LabQuantumNoiseFidelityRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/lab/reports': {
@@ -813,6 +854,8 @@ const rootRouteChildren: RootRouteChildren = {
   LabQaoaRoute: LabQaoaRoute,
   LabQiskitRoute: LabQiskitRoute,
   LabQmlRoute: LabQmlRoute,
+  LabQuantumErrorCorrectionRoute: LabQuantumErrorCorrectionRoute,
+  LabQuantumNoiseFidelityRoute: LabQuantumNoiseFidelityRoute,
   LabReportsRoute: LabReportsRoute,
   LabSnapshotRoute: LabSnapshotRoute,
   LabVqeRoute: LabVqeRoute,
