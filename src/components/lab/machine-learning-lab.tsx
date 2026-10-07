@@ -65,8 +65,8 @@ function trainLinear(data: Point[]) {
   for (const p of data) {
     const f = [1, p.x1, p.x2];
     for (let i = 0; i < 3; i++) {
-      for (let j = 0; j < 3; j++) a[i][j] += f[i]! * f[j]!;
-      a[i][3] += f[i]! * p.y;
+      const row = a[i]!; for (let j = 0; j < 3; j++) row[j] = (row[j] ?? 0) + f[i]! * f[j]!;
+      row[3] = (row[3] ?? 0) + f[i]! * p.y;
     }
   }
   for (let i = 0; i < 3; i++) {
