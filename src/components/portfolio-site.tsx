@@ -662,7 +662,7 @@ export function PortfolioSite() {
         {/* CERTIFICATIONS */}
         <section id="certifications" className="bg-surface px-5 py-24 sm:px-8 lg:py-32">
           <div className="mx-auto max-w-7xl">
-            <SectionHeading index="04" title="Certifications" copy="This section is reserved for verified credentials. No certification claims are displayed until details are supplied." />
+            <SectionHeading index="04" title="Certifications" copy="Verified credentials only. Each card links to the issuer's official certificate page for independent verification." />
             <div className="grid gap-4 md:grid-cols-2">
               {portfolio.certifications.map((item, index) => {
                 const verified = (item as { verified?: boolean }).verified === true;
