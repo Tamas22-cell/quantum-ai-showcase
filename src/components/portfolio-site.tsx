@@ -31,6 +31,7 @@ import { portfolio } from "@/data/portfolio";
 import { QuantumLab } from "@/components/quantum-lab";
 import { QuantumField } from "@/components/quantum-field";
 import { AIResearchAssistant } from "@/components/ai-research-assistant";
+import { LiveResearchMarquee } from "@/components/live-research-marquee";
 
 const projectIcons = [ShieldCheck, Network, Orbit];
 const researchIcons = [Orbit, Atom, Braces, Cpu];
@@ -261,7 +262,7 @@ export function PortfolioSite() {
         </section>
 
 
-
+        <LiveResearchMarquee />
 
         {/* RESEARCH HIGHLIGHTS */}
         <section className="border-b border-border px-5 py-10 sm:px-8 lg:py-12">
