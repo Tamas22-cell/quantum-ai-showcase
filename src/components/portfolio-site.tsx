@@ -50,6 +50,16 @@ const pipelineSteps = [
 
 const agentCapabilities = ["Python", "Multi-agent AI", "Market Analysis", "News / Sentiment", "Risk Analysis", "LLM orchestration"];
 
+const agentDetails: Record<string, { title: string; description: string; output: string }> = {
+  "Research Question": { title: "Research Question", description: "Defines the financial or market research problem that starts the workflow.", output: "Output · structured research objective" },
+  "Planner Agent": { title: "Planner Agent", description: "Breaks the research question into ordered tasks and assigns work to the specialist agents.", output: "Output · research plan + task sequence" },
+  "Data Agent": { title: "Data Agent", description: "Collects and prepares the quantitative data required by the research plan.", output: "Output · structured datasets + key metrics" },
+  "Market Agent": { title: "Market Agent", description: "Analyses market conditions, price behaviour, news and sentiment signals.", output: "Output · market analysis + signal context" },
+  "Risk Agent": { title: "Risk Agent", description: "Stress-tests the findings, evaluates downside scenarios and identifies material risks.", output: "Output · risk assessment + stress scenarios" },
+  "Critic Agent": { title: "Critic Agent", description: "Challenges assumptions, checks inconsistencies and critiques the other agents before synthesis.", output: "Output · critique + validation notes" },
+  "Final Synthesis": { title: "Final Synthesis", description: "Combines the validated agent outputs into one concise research conclusion.", output: "Output · final research synthesis" },
+};
+
 /**
  * Honest capability map: each discipline links only to items already present
  * on this page (project titles / research codes). No proficiency scores.
@@ -117,6 +127,7 @@ export function PortfolioSite() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [researchPulse, setResearchPulse] = useState(false);
+  const [activeAgent, setActiveAgent] = useState("Planner Agent");
   const active = useActiveSection(sectionIds);
 
   useEffect(() => {
@@ -554,9 +565,12 @@ export function PortfolioSite() {
                   const Icon = step.icon;
                   return (
                     <Fragment key={step.label}>
-                      <div
-                        className={`flex min-w-0 flex-1 items-center gap-3 rounded-md border px-4 py-3 md:flex-col md:items-center md:gap-2 md:px-2 md:py-4 md:text-center ${
-                          step.endpoint ? "border-primary/40 bg-signal-soft" : "border-border bg-background"
+                      <button
+                        type="button"
+                        onClick={() => setActiveAgent(step.label)}
+                        aria-pressed={activeAgent === step.label}
+                        className={`flex min-w-0 flex-1 items-center gap-3 rounded-md border px-4 py-3 text-left transition-all hover:-translate-y-0.5 hover:border-primary/60 hover:bg-signal-soft md:flex-col md:items-center md:gap-2 md:px-2 md:py-4 md:text-center ${focusRing} ${
+                          activeAgent === step.label || step.endpoint ? "border-primary/40 bg-signal-soft" : "border-border bg-background"
                         }`}
                       >
                         <span className={`grid size-9 shrink-0 place-items-center rounded-sm border ${step.endpoint ? "border-primary/50 text-primary" : "border-border text-primary/80"}`}>
@@ -565,13 +579,23 @@ export function PortfolioSite() {
                         <p className={`min-w-0 font-mono text-[11px] uppercase tracking-wider md:text-[10px] ${step.endpoint ? "text-primary" : "text-foreground/85"}`}>
                           {step.label}
                         </p>
-                      </div>
+                      </button>
                       {i < pipelineSteps.length - 1 ? (
                         <ArrowRight aria-hidden="true" className="mx-auto size-4 shrink-0 rotate-90 text-primary/60 md:rotate-0" />
                       ) : null}
                     </Fragment>
                   );
                 })}
+              </div>
+
+              <div className="mt-6 rounded-md border border-primary/30 bg-signal-soft p-5" aria-live="polite">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <p className="font-mono text-[10px] uppercase tracking-wider text-primary">Active workflow node</p>
+                  <span className="rounded-full border border-primary/30 px-2.5 py-1 font-mono text-[9px] uppercase text-primary">Interactive</span>
+                </div>
+                <h3 className="mt-3 text-xl font-semibold text-foreground">{agentDetails[activeAgent].title}</h3>
+                <p className="mt-2 max-w-3xl text-sm leading-7 text-muted-foreground">{agentDetails[activeAgent].description}</p>
+                <p className="mt-4 font-mono text-[10px] uppercase tracking-wider text-primary">{agentDetails[activeAgent].output}</p>
               </div>
 
               {/* Capability chips */}
