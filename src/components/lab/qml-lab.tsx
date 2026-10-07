@@ -109,67 +109,95 @@ function Confusion({ title, m }: { title: string; m: [[number, number], [number,
 
 
 function LiveQmlShowcasePreview() {
-  const [tick, setTick] = useState(0);
+  const [epoch, setEpoch] = useState(0);
+  const [loss, setLoss] = useState(0.95);
+  const [epochs, setEpochs] = useState<number[]>([]);
+  const [losses, setLosses] = useState<number[]>([]);
+  const [accuracies, setAccuracies] = useState<number[]>([]);
 
   useEffect(() => {
-    const id = window.setInterval(() => setTick((x) => (x + 1) % 140), 180);
+    const id = window.setInterval(() => {
+      setEpoch((prevEpoch) => {
+        const nextEpoch = prevEpoch + 1;
+        setLoss((prevLoss) => {
+          const nextLoss = Math.max(0.03, prevLoss * 0.96);
+          const nextAcc = Math.min(0.98, 0.10 + nextEpoch * 0.015);
+
+          setEpochs((prev) => [...prev, nextEpoch].slice(-60));
+          setLosses((prev) => [...prev, nextLoss].slice(-60));
+          setAccuracies((prev) => [...prev, nextAcc].slice(-60));
+
+          return nextLoss;
+        });
+        return nextEpoch;
+      });
+    }, 350);
+
     return () => window.clearInterval(id);
   }, []);
 
-  const points = Array.from({ length: 42 }, (_, i) => {
-    const x = 16 + i * 7.2;
-    const decay = 0.86 * Math.exp(-i / 18) + 0.08;
-    const wave = 0.035 * Math.sin((i + tick) * 0.28);
-    const loss = Math.max(0.07, decay + wave);
-    const accuracy = Math.min(0.96, 0.2 + i * 0.018 + 0.025 * Math.sin((i + tick) * 0.18));
-    return { x, lossY: 112 - loss * 92, accY: 112 - accuracy * 92 };
-  });
+  const width = 560;
+  const height = 260;
+  const padX = 42;
+  const padY = 24;
+  const maxX = Math.max(60, epoch || 60);
+  const x = (v: number) => padX + (v / maxX) * (width - padX - 18);
+  const y = (v: number) => height - padY - v * (height - padY - 18);
 
-  const lossPath = points.map((p, i) => `${i ? "L" : "M"} ${p.x.toFixed(1)} ${p.lossY.toFixed(1)}`).join(" ");
-  const accPath = points.map((p, i) => `${i ? "L" : "M"} ${p.x.toFixed(1)} ${p.accY.toFixed(1)}`).join(" ");
-  const angle = (tick * 3.6) % 360;
+  const lossPath = epochs.map((e, i) => `${i ? "L" : "M"} ${x(e)} ${y(losses[i] ?? 0)}`).join(" ");
+  const accPath = epochs.map((e, i) => `${i ? "L" : "M"} ${x(e)} ${y(accuracies[i] ?? 0)}`).join(" ");
 
   return (
-    <section className="overflow-hidden rounded-md border border-primary/30 bg-card">
-      <div className="grid grid-cols-1 lg:grid-cols-[1.35fr_0.65fr]">
-        <div className="border-b border-border p-4 lg:border-b-0 lg:border-r">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-primary">Live QML training</div>
-              <div className="mt-1 text-sm font-medium text-foreground">Loss ↓ · Accuracy ↑</div>
-            </div>
-            <span className="rounded-full border border-emerald/40 bg-emerald/10 px-2 py-1 font-mono text-[9px] uppercase text-emerald">live</span>
-          </div>
-          <svg viewBox="0 0 330 126" className="mt-3 w-full" role="img" aria-label="Continuously animated machine learning training preview">
-            {[28, 56, 84, 112].map((y) => <line key={y} x1="12" x2="320" y1={y} y2={y} stroke="var(--border)" strokeWidth="1" />)}
-            <path d={lossPath} fill="none" stroke="var(--amber)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-            <path d={accPath} fill="none" stroke="var(--emerald)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-            <circle cx={points.at(-1)?.x ?? 0} cy={points.at(-1)?.lossY ?? 0} r="4" fill="var(--amber)" />
-            <circle cx={points.at(-1)?.x ?? 0} cy={points.at(-1)?.accY ?? 0} r="4" fill="var(--emerald)" />
-          </svg>
-          <div className="mt-2 flex gap-4 font-mono text-[10px] text-muted-foreground">
-            <span><span className="mr-1 inline-block size-2 rounded-full bg-amber" />loss</span>
-            <span><span className="mr-1 inline-block size-2 rounded-full bg-emerald" />accuracy</span>
-          </div>
-        </div>
+    <section className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="rounded-[22px] border border-[#315081] bg-[#071228]/90 p-6 shadow-[0_0_35px_rgba(0,132,255,0.10)]">
+        <h2 className="text-xl font-semibold">🧠 Machine Learning Training</h2>
+        <p className="mt-1 text-sm text-[#9db4d7]">Live training visualization</p>
 
-        <div className="flex min-h-64 items-center justify-center p-5">
-          <div className="relative size-44 rounded-full border-2 border-primary/70 shadow-[0_0_36px_rgba(56,189,248,0.28)]">
-            <div className="absolute inset-[10%] rounded-full border border-primary/35" style={{ transform: `rotate(${angle}deg) scaleY(.38)` }} />
-            <div className="absolute inset-[10%] rounded-full border border-emerald/35" style={{ transform: `rotate(${-angle * 0.8 + 58}deg) scaleY(.38)` }} />
-            <div className="absolute inset-[10%] rounded-full border border-amber/35" style={{ transform: `rotate(${angle * 0.55 - 42}deg) scaleY(.38)` }} />
-            <div
-              className="absolute left-1/2 top-1/2 h-[42%] w-0.5 origin-bottom bg-gradient-to-t from-emerald to-foreground shadow-[0_0_14px_rgba(16,185,129,0.8)]"
-              style={{ transform: `translate(-50%,-100%) rotate(${angle + 18}deg)` }}
-            >
-              <span className="absolute -top-1.5 left-1/2 size-3 -translate-x-1/2 rounded-full bg-foreground shadow-[0_0_12px_rgba(255,255,255,0.8)]" />
-            </div>
-            <div className="absolute left-1/2 top-1/2 size-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary" />
+        <svg viewBox={`0 0 ${width} ${height}`} className="mt-4 w-full" role="img" aria-label="Live machine learning training chart">
+          {[0, 0.25, 0.5, 0.75, 1].map((v) => (
+            <g key={v}>
+              <line x1={padX} x2={width - 18} y1={y(v)} y2={y(v)} stroke="#24395d" strokeWidth="1" />
+              <text x={padX - 8} y={y(v) + 4} textAnchor="end" fontSize="10" fill="#9bb4df">{v.toFixed(2)}</text>
+            </g>
+          ))}
+          <line x1={padX} x2={width - 18} y1={height - padY} y2={height - padY} stroke="#506b96" />
+          <line x1={padX} x2={padX} y1={18} y2={height - padY} stroke="#506b96" />
+          <path d={lossPath} fill="none" stroke="#ffb347" strokeWidth="4" strokeLinecap="round" />
+          <path d={accPath} fill="none" stroke="#00ffbb" strokeWidth="4" strokeLinecap="round" />
+          <text x={width / 2} y={height - 5} textAnchor="middle" fontSize="11" fill="#9bb4df">Epoch</text>
+          <text x="14" y="16" fontSize="11" fill="#9bb4df">Metric</text>
+        </svg>
+
+        <div className="mt-4 grid grid-cols-3 gap-3">
+          <div className="rounded-xl border border-[#1f335d] p-3 text-center">
+            <div className="text-xs text-[#8fa7d6]">Epoch</div>
+            <div className="mt-1 text-lg font-bold">{epoch}</div>
+          </div>
+          <div className="rounded-xl border border-[#1f335d] p-3 text-center">
+            <div className="text-xs text-[#8fa7d6]">Loss</div>
+            <div className="mt-1 text-lg font-bold">{loss.toFixed(3)}</div>
+          </div>
+          <div className="rounded-xl border border-[#1f335d] p-3 text-center">
+            <div className="text-xs text-[#8fa7d6]">Accuracy</div>
+            <div className="mt-1 text-lg font-bold">{(Math.min(0.98, 0.10 + epoch * 0.015) * 100).toFixed(1)}%</div>
           </div>
         </div>
       </div>
-      <div className="border-t border-border bg-primary/5 px-4 py-2 font-mono text-[10px] text-muted-foreground">
-        Browser-rendered animation from the ML/QML lab — not a video and not a static image.
+
+      <div className="rounded-[22px] border border-[#315081] bg-[#071228]/90 p-6 shadow-[0_0_35px_rgba(0,132,255,0.10)]">
+        <h2 className="text-xl font-semibold">⚛ Quantum State Simulator</h2>
+        <p className="mt-1 text-sm text-[#9db4d7]">Animated Bloch sphere</p>
+
+        <div className="flex h-[330px] items-center justify-center">
+          <div className="relative h-[280px] w-[280px] rounded-full border-2 border-[#00d9ff] shadow-[0_0_45px_rgba(0,217,255,0.5)] animate-[pulse_3s_ease-in-out_infinite]">
+            <div className="absolute left-1/2 top-1/2 h-[36%] w-full -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#259ddd]" />
+            <div className="absolute left-1/2 top-1/2 h-[36%] w-full -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#259ddd] animate-[spin_5s_linear_infinite]" style={{ transform: "translate(-50%,-50%) rotate(55deg)" }} />
+            <div className="absolute left-1/2 top-1/2 h-[36%] w-full -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#259ddd] animate-[spin_7s_linear_infinite_reverse]" style={{ transform: "translate(-50%,-50%) rotate(-55deg)" }} />
+            <div className="absolute left-1/2 top-1/2 h-[115px] w-1 origin-bottom -translate-x-1/2 -translate-y-full bg-gradient-to-b from-white to-[#00ffbb] shadow-[0_0_20px_#00ffbb] animate-[spin_4s_linear_infinite]">
+              <span className="absolute -top-2 left-1/2 h-4 w-4 -translate-x-1/2 rounded-full bg-white shadow-[0_0_20px_#00ffbb]" />
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );
@@ -259,6 +287,8 @@ export function QmlLab() {
       <div role="note" className="rounded-md border border-amber/40 bg-amber/10 p-3 text-xs leading-6 text-foreground">
         <strong>{LABEL}</strong> Educational simulation only. No claim of quantum advantage, and no evidence that this QML model outperforms classical machine learning.
       </div>
+
+      <LiveQmlShowcasePreview />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <Panel title="Dataset" className="lg:col-span-1">
