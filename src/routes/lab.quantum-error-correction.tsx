@@ -40,7 +40,7 @@ function QuantumErrorCorrectionLab() {
     if (errorType === "bit") {
       const syndromeMap: Record<number, string> = { 1: "11", 2: "10", 3: "01" };
       setResult({
-        syndrome: syndromeMap[qubit],
+        syndrome: syndromeMap[qubit] ?? "--",
         detected: `Bit-flip error on qubit ${qubit}`,
         correction: `Apply X gate to qubit ${qubit}`,
         recovered: encoded,
@@ -51,7 +51,7 @@ function QuantumErrorCorrectionLab() {
 
     const syndromeMap: Record<number, string> = { 1: "11", 2: "10", 3: "01" };
     setResult({
-      syndrome: syndromeMap[qubit],
+      syndrome: syndromeMap[qubit] ?? "--",
       detected: `Phase-flip error on qubit ${qubit}`,
       correction: `Switch to X basis, identify syndrome, apply Z to qubit ${qubit}, return to computational basis`,
       recovered: encoded,
