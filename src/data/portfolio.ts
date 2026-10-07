@@ -122,6 +122,12 @@ export const portfolio = {
       verified: true,
       href: "https://courses.edx.org/certificates/9569d436daf54c88a04cecb5d540d9b8",
     },
+    {
+      title: "CS109xa: Machine Learning and AI with Python",
+      detail: "HarvardX / edX · Verified Certificate · Issued Oct 7, 2026 · Credential ID d5ae76d59b144650b763fff41bef45fd",
+      verified: true,
+      href: "https://courses.edx.org/certificates/d5ae76d59b144650b763fff41bef45fd",
+    },
   ],
   social: [
     { label: "LinkedIn", href: "https://www.linkedin.com/in/tamas-nemeth-8820a6a5/", placeholder: false },
