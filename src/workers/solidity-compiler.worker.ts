@@ -101,9 +101,8 @@ function compileSource(source: string): CompilerResult {
 
     const rawOutput = solc.compile(JSON.stringify(input));
     const output = JSON.parse(rawOutput);
-    const diagnostics: { severity?: string; formattedMessage?: string; message?: string }[] = Array.isArray(output?.errors)
-      ? output.errors
-      : [];
+    const diagnostics: { severity?: string; formattedMessage?: string; message?: string }[] =
+      Array.isArray(output?.errors) ? output.errors : [];
 
     const errors = diagnostics
       .filter((item) => item?.severity === "error")
