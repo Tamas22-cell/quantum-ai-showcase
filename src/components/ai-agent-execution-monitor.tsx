@@ -18,10 +18,19 @@ const AGENTS = [
 
 /** Monitors this page's real BTC data request; does not pretend the illustrative agents execute. */
 export function AiAgentExecutionMonitor({ running, completed, error, fetchedAt }: Props) {
-  const dataState = running ? "Fetching" : completed && !error && fetchedAt ? "Fetched" : completed ? "Unavailable" : "Idle";
+  const dataState = running
+    ? "Fetching"
+    : completed && !error && fetchedAt
+      ? "Fetched"
+      : completed
+        ? "Unavailable"
+        : "Idle";
 
   return (
-    <section className="mt-6 rounded-md border border-primary/30 bg-card p-5" aria-label="AI Agents Execution Monitor">
+    <section
+      className="mt-6 rounded-md border border-primary/30 bg-card p-5"
+      aria-label="AI Agents Execution Monitor"
+    >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h3 className="inline-flex items-center gap-2 text-lg font-semibold">
           <Activity className="size-5 text-primary" aria-hidden="true" />
@@ -43,7 +52,9 @@ export function AiAgentExecutionMonitor({ running, completed, error, fetchedAt }
             <div key={name} className="rounded-md border border-border bg-background p-3">
               <div className="flex items-center justify-between gap-2">
                 <span className="font-mono text-xs font-semibold">{name} Agent</span>
-                <span className={`font-mono text-[10px] ${isData && state === "Fetched" ? "text-emerald-400" : isData && state === "Unavailable" ? "text-destructive" : "text-muted-foreground"}`}>
+                <span
+                  className={`font-mono text-[10px] ${isData && state === "Fetched" ? "text-emerald-400" : isData && state === "Unavailable" ? "text-destructive" : "text-muted-foreground"}`}
+                >
                   {state}
                 </span>
               </div>
@@ -52,7 +63,10 @@ export function AiAgentExecutionMonitor({ running, completed, error, fetchedAt }
           );
         })}
       </div>
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground" aria-live="polite">
+      <div
+        className="mt-4 flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground"
+        aria-live="polite"
+      >
         <span>
           {running
             ? "Request in progress…"
@@ -62,7 +76,12 @@ export function AiAgentExecutionMonitor({ running, completed, error, fetchedAt }
                 : `BTC data received: ${fetchedAt ?? "timestamp unavailable"}`
               : "Run the research demo above to check the live market-data request."}
         </span>
-        <a href="https://ai-multi-agent-financial-research-p.vercel.app" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-primary hover:underline">
+        <a
+          href="https://ai-multi-agent-financial-research-p.vercel.app"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1 text-primary hover:underline"
+        >
           Open deployed agent platform <ExternalLink className="size-3" aria-hidden="true" />
         </a>
       </div>
