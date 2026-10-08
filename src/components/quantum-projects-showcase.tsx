@@ -21,31 +21,31 @@ const groups = [
 
 export function QuantumProjectsShowcase() {
   return (
-    <section id="quantum-projects" className="scroll-mt-20 border-b border-border px-5 py-20 sm:px-8 lg:py-24" aria-labelledby="quantum-projects-heading">
-      <div className="mx-auto max-w-7xl">
+    <section id="quantum-projects" className="scroll-mt-20 relative overflow-hidden border-y border-primary/40 bg-[radial-gradient(ellipse_at_top,color-mix(in_oklab,var(--color-primary)_14%,transparent),transparent_65%)] px-5 py-20 sm:px-8 lg:py-28" aria-labelledby="quantum-projects-heading">
+      <div className="relative mx-auto max-w-7xl">
         <p className="font-mono text-xs uppercase tracking-widest text-primary">Engineering & research portfolio</p>
-        <h2 id="quantum-projects-heading" className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">Quantum Projects</h2>
+        <h2 id="quantum-projects-heading" className="mt-3 text-4xl font-bold tracking-tight text-foreground drop-shadow-[0_0_24px_color-mix(in_oklab,var(--color-primary)_35%,transparent)] sm:text-5xl">Quantum Projects</h2>
         <p className="mt-4 max-w-2xl text-sm leading-7 text-muted-foreground">Explore all nine quantum research projects below, organized into three areas.</p>
-        <div className="mt-10 grid gap-4 md:grid-cols-3">
+        <div className="mt-12 grid gap-5 md:grid-cols-3">
           {groups.map((group, index) => {
             const Icon = group.icon;
-            return <a key={group.title} href={`#quantum-group-${index + 1}`} className="group rounded-xl border border-border bg-surface/80 p-6 text-left transition-all hover:-translate-y-1 hover:border-primary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
-              <span className="flex items-center justify-between text-primary"><Icon className="size-7" aria-hidden="true" /><span className="font-mono text-xs">0{index + 1} / 03</span></span>
-              <h3 className="mt-8 text-xl font-semibold">{group.title}</h3>
+            return <a key={group.title} href={`#quantum-group-${index + 1}`} className="group relative overflow-hidden rounded-2xl border-2 border-primary/55 bg-[linear-gradient(145deg,color-mix(in_oklab,var(--color-primary)_15%,var(--color-surface)),var(--color-surface))] p-7 text-left shadow-[0_0_35px_color-mix(in_oklab,var(--color-primary)_13%,transparent)] transition-all duration-300 hover:-translate-y-2 hover:border-primary hover:shadow-[0_0_45px_color-mix(in_oklab,var(--color-primary)_32%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+              <span className="flex items-center justify-between text-primary"><Icon className="size-9 transition-transform duration-300 group-hover:scale-110" aria-hidden="true" /><span className="font-mono text-xs">0{index + 1} / 03</span></span>
+              <h3 className="mt-8 text-2xl font-bold tracking-tight text-foreground">{group.title}</h3>
               <p className="mt-3 text-sm leading-6 text-muted-foreground">{group.description}</p>
-              <span className="mt-6 block font-mono text-xs text-primary">View 3 projects ↓</span>
+              <span className="mt-6 inline-flex rounded-full border border-primary/50 bg-primary/10 px-4 py-2 font-mono text-xs font-semibold text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">View 3 projects ↓</span>
             </a>;
           })}
         </div>
-        <div className="mt-12 space-y-12">
-          {groups.map((group, index) => <div key={group.title} id={`quantum-group-${index + 1}`} className="scroll-mt-24">
-            <h3 className="mb-5 text-xl font-semibold">{group.title}</h3>
-            <div className="grid gap-4 md:grid-cols-3">
-              {group.projects.map(([title, description, slug, stack]) => <article key={slug} className="flex flex-col rounded-xl border border-border bg-surface/60 p-6">
+        <div className="mt-16 space-y-16">
+          {groups.map((group, index) => <div key={group.title} id={`quantum-group-${index + 1}`} className="scroll-mt-24 rounded-2xl border border-primary/25 bg-surface/30 p-5 sm:p-7">
+            <h3 className="mb-7 border-l-4 border-primary pl-4 text-2xl font-bold tracking-tight text-foreground">{group.title}</h3>
+            <div className="grid gap-5 md:grid-cols-3">
+              {group.projects.map(([title, description, slug, stack]) => <article key={slug} className="group flex flex-col rounded-xl border border-primary/35 bg-card/90 p-6 shadow-[0_0_18px_color-mix(in_oklab,var(--color-primary)_7%,transparent)] transition-all duration-300 hover:-translate-y-1 hover:border-primary hover:bg-signal-soft hover:shadow-[0_0_30px_color-mix(in_oklab,var(--color-primary)_23%,transparent)]">
                 <p className="font-mono text-[10px] uppercase tracking-wider text-primary">{stack}</p>
-                <h4 className="mt-4 text-lg font-semibold">{title}</h4>
+                <h4 className="mt-4 text-xl font-bold text-foreground">{title}</h4>
                 <p className="mt-3 flex-1 text-sm leading-6 text-muted-foreground">{description}</p>
-                <a className="mt-6 inline-flex items-center gap-2 self-start rounded-sm font-mono text-xs text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary" href={owner + slug} target="_blank" rel="noopener noreferrer" aria-label={`Open ${title} GitHub repository`}>View source on GitHub <ArrowUpRight className="size-4" aria-hidden="true" /></a>
+                <a className="mt-6 inline-flex items-center gap-2 self-start rounded-md border border-primary/45 bg-primary/10 px-3 py-2 font-mono text-xs font-semibold text-primary transition-colors hover:bg-primary hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary" href={owner + slug} target="_blank" rel="noopener noreferrer" aria-label={`Open ${title} GitHub repository`}>View source on GitHub <ArrowUpRight className="size-4" aria-hidden="true" /></a>
               </article>)}
             </div>
           </div>)}
