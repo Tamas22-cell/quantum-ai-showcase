@@ -11,6 +11,7 @@ import {
 } from "@/components/lab/applied-ai-labs";
 import { DeepLearningLab } from "@/components/lab/deep-learning-lab";
 import { LabShell } from "@/components/lab/lab-shell";
+import { SystemHealthPanel } from "@/components/lab/system-health-panel";
 import { LAB_MODULES } from "@/components/lab/lab-modules";
 import { MachineLearningLab } from "@/components/lab/machine-learning-lab";
 import { MlModelComparison } from "@/components/lab/ml-model-comparison";
@@ -53,6 +54,8 @@ function LabDashboard() {
           Browser-based research laboratories covering quantum computing and modern artificial intelligence. Quantum modules use ideal classical simulations unless explicitly marked otherwise; AI modules below are interactive browser-local educational experiments.
         </p>
       </div>
+
+      <SystemHealthPanel />
 
       {(["core", "command"] as const).map((group) => (
         <section key={group} className="mb-12" aria-label={group === "core" ? "Core laboratories" : "Research Command Center"}>
