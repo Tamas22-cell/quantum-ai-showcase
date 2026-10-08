@@ -278,7 +278,7 @@ export function QiskitLab() {
             </div>
           </div>
           {!transpiled && (
-            <p className="mt-3 text-xs text-muted-foreground">Transpile the circuit first.</p>
+            <p className="mt-3 text-xs text-muted-foreground">Choose a simulator to automatically prepare the circuit, or transpile it manually first.</p>
           )}
         </Panel>
 
