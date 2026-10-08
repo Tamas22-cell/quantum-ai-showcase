@@ -326,7 +326,7 @@ function Web3SolidityLab() {
       setSandboxStorage((current) => ({ ...current, [storageKey]: value }));
       setFunctionResults((current) => ({
         ...current,
-        [key]: `tx confirmed · stored \"${value}\"`,
+        [key]: `tx confirmed · stored "${value}"`,
       }));
       pushTx("write", signature, 44_000 + Math.floor(Math.random() * 3_000));
       pushEvent("RecordStored", `${short(storageKey)} → ${value}`);
