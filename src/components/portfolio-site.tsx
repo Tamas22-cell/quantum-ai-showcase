@@ -231,7 +231,8 @@ export function PortfolioSite() {
                 AI & Quantum
                 <span className="text-gradient-signal block">Computing Researcher</span>
               </h1>
-              <p className="mt-8 max-w-2xl text-base leading-8 text-muted-foreground sm:text-lg">{portfolio.intro}</p>
+              <p className="mt-7 font-mono text-xs font-semibold uppercase tracking-[0.16em] text-primary sm:text-sm">AI Development <span className="text-muted-foreground">/</span> Quantum Computing <span className="text-muted-foreground">/</span> Blockchain &amp; Web3</p>
+              <p className="mt-5 max-w-3xl text-base leading-8 text-foreground/90 sm:text-lg">I design and develop intelligent AI applications, collaborative multi-agent research systems, and quantum computing solutions—connecting financial intelligence, advanced automation, and blockchain innovation through hands-on engineering and research.</p>
               <div className="mt-10 flex flex-wrap gap-3">
                 <Button asChild variant="signal" size="lg">
                   <a href="#projects">Explore research <ArrowDown aria-hidden="true" /></a>
