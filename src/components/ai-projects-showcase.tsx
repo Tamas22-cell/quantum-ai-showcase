@@ -32,17 +32,17 @@ export function AIProjectsShowcase() {
     <section id="ai-projects" className="bg-background px-5 py-24 sm:px-8 lg:py-28" aria-labelledby="ai-projects-title">
       <div className="mx-auto max-w-7xl">
         <p className="font-mono text-xs uppercase tracking-widest text-primary">AI Development / Portfolio</p>
-        <h2 id="ai-projects-title" className="mt-4 text-3xl font-semibold tracking-tight sm:text-5xl">AI Developer &amp; Multi-Agent Systems</h2>
+        <h2 id="ai-projects-title" className="mt-3 text-4xl font-bold tracking-tight text-foreground drop-shadow-[0_0_24px_color-mix(in_oklab,var(--color-primary)_35%,transparent)] sm:text-5xl">AI Developer &amp; Multi-Agent Systems</h2>
         <p className="mt-4 max-w-3xl text-sm leading-7 text-muted-foreground">Three selected AI research repositories. The Multi-Agent platform is shown as one evolving project rather than duplicating each version. GitHub links document the available source; a repository listing is not proof of a deployed or fully validated system.</p>
         <div className="mt-10 grid gap-5 md:grid-cols-3">
           {projects.map(({ title, subtitle, description, tags, href, icon: Icon }) => (
             <article key={title} className={`flex flex-col rounded-lg border bg-card p-6 ${title === "AI Multi-Agent Financial Research Platform" ? "border-primary/70 ring-1 ring-primary/30 md:scale-[1.02]" : "border-border"}`}>
-              <Icon className="size-7 text-primary" aria-hidden="true" />
+              <Icon className="size-9 text-primary transition-transform duration-300 group-hover:scale-110" aria-hidden="true" />
               <p className="mt-5 font-mono text-xs text-muted-foreground">{subtitle}</p>
-              <h3 className="mt-2 text-xl font-semibold">{title}</h3>
+              <h3 className="mt-3 text-2xl font-bold tracking-tight text-foreground">{title}</h3>
               <p className="mt-3 flex-1 text-sm leading-6 text-muted-foreground">{description}</p>
               <div className="mt-5 flex flex-wrap gap-2">{tags.map(tag => <span key={tag} className="rounded border border-border px-2 py-1 font-mono text-[10px]">{tag}</span>)}</div>
-              <a className="mt-6 inline-flex items-center gap-2 text-sm text-primary hover:underline" href={href} target="_blank" rel="noopener noreferrer">View GitHub repository <ArrowUpRight className="size-4" /></a>
+              <a className="mt-6 inline-flex items-center gap-2 self-start rounded-full border border-primary/50 bg-primary/10 px-4 py-2 font-mono text-xs font-semibold text-primary transition-colors hover:bg-primary hover:text-primary-foreground" href={href} target="_blank" rel="noopener noreferrer">View GitHub repository <ArrowUpRight className="size-4" /></a>
             </article>
           ))}
         </div>
