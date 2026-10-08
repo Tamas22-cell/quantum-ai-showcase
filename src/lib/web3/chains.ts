@@ -18,22 +18,34 @@ export type TestnetConfig = {
 
 export const TESTNETS: TestnetConfig[] = [
   {
-    id: 11155111, key: "sepolia", name: "Ethereum Sepolia", explorerName: "Etherscan",
+    id: 11155111,
+    key: "sepolia",
+    name: "Ethereum Sepolia",
+    explorerName: "Etherscan",
     explorer: "https://sepolia.etherscan.io",
     rpcs: ["https://ethereum-sepolia-rpc.publicnode.com", "https://rpc.sepolia.org"],
-    faucet: "https://www.alchemy.com/faucets/ethereum-sepolia", chain: sepolia,
+    faucet: "https://www.alchemy.com/faucets/ethereum-sepolia",
+    chain: sepolia,
   },
   {
-    id: 84532, key: "base-sepolia", name: "Base Sepolia", explorerName: "BaseScan",
+    id: 84532,
+    key: "base-sepolia",
+    name: "Base Sepolia",
+    explorerName: "BaseScan",
     explorer: "https://sepolia.basescan.org",
     rpcs: ["https://base-sepolia-rpc.publicnode.com", "https://sepolia.base.org"],
-    faucet: "https://www.alchemy.com/faucets/base-sepolia", chain: baseSepolia,
+    faucet: "https://www.alchemy.com/faucets/base-sepolia",
+    chain: baseSepolia,
   },
   {
-    id: 421614, key: "arbitrum-sepolia", name: "Arbitrum Sepolia", explorerName: "Arbiscan",
+    id: 421614,
+    key: "arbitrum-sepolia",
+    name: "Arbitrum Sepolia",
+    explorerName: "Arbiscan",
     explorer: "https://sepolia.arbiscan.io",
     rpcs: ["https://arbitrum-sepolia-rpc.publicnode.com", "https://sepolia-rollup.arbitrum.io/rpc"],
-    faucet: "https://www.alchemy.com/faucets/arbitrum-sepolia", chain: arbitrumSepolia,
+    faucet: "https://www.alchemy.com/faucets/arbitrum-sepolia",
+    chain: arbitrumSepolia,
   },
 ];
 
@@ -41,9 +53,11 @@ export const getTestnet = (id: number | null | undefined) => TESTNETS.find((t) =
 
 export const txUrl = (t: TestnetConfig, hash: string) => `${t.explorer}/tx/${hash}`;
 export const addressUrl = (t: TestnetConfig, address: string) => `${t.explorer}/address/${address}`;
-export const codeUrl = (t: TestnetConfig, address: string) => `${t.explorer}/address/${address}#code`;
+export const codeUrl = (t: TestnetConfig, address: string) =>
+  `${t.explorer}/address/${address}#code`;
 /** Etherscan-family manual verification form, pre-filled with the address. */
-export const verifyUrl = (t: TestnetConfig, address: string) => `${t.explorer}/verifyContract?a=${address}`;
+export const verifyUrl = (t: TestnetConfig, address: string) =>
+  `${t.explorer}/verifyContract?a=${address}`;
 
 export const toHexChainId = (id: number) => `0x${id.toString(16)}`;
 

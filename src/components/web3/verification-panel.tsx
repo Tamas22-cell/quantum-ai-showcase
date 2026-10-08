@@ -12,7 +12,8 @@ import {
 import { CopyButton, ExplorerLink, Field, btnGhost, btnPrimary } from "./ui";
 
 /** solc "0.8.30+commit.73712a01.Emscripten.clang" → explorer form value "v0.8.30+commit.73712a01". */
-export const explorerCompilerVersion = (v: string) => (v && v !== "—" ? `v${v.replace(/^v/, "").split(".Emscripten")[0]}` : "—");
+export const explorerCompilerVersion = (v: string) =>
+  v && v !== "—" ? `v${v.replace(/^v/, "").split(".Emscripten")[0]}` : "—";
 
 const EMPTY_STATUS: VerificationStatus = {
   configured: false,
@@ -23,7 +24,13 @@ const EMPTY_STATUS: VerificationStatus = {
 };
 
 /** Live explorer/Sourcify verification status + optional server-side explorer submission. */
-export function VerificationPanel({ testnet, deployment }: { testnet: TestnetConfig; deployment?: Deployment | undefined }) {
+export function VerificationPanel({
+  testnet,
+  deployment,
+}: {
+  testnet: TestnetConfig;
+  deployment?: Deployment | undefined;
+}) {
   const statusFn = useServerFn(getContractVerificationStatus);
   const submitFn = useServerFn(submitContractVerification);
   const [status, setStatus] = useState<VerificationStatus>(EMPTY_STATUS);
@@ -55,7 +62,12 @@ export function VerificationPanel({ testnet, deployment }: { testnet: TestnetCon
     else setStatus(EMPTY_STATUS);
   }, [deployment, refresh]);
 
-  if (!deployment) return <p className="text-sm text-muted-foreground">Deploy a contract on {testnet.name} to enable live verification.</p>;
+  if (!deployment)
+    return (
+      <p className="text-sm text-muted-foreground">
+        Deploy a contract on {testnet.name} to enable live verification.
+      </p>
+    );
 
   const abi = JSON.stringify(deployment.abi);
   const ver = explorerCompilerVersion(deployment.compilerVersion);
@@ -77,9 +89,21 @@ export function VerificationPanel({ testnet, deployment }: { testnet: TestnetCon
       });
       setSubmitMsg(result.message + (result.guid ? ` · request ${result.guid}` : ""));
       if (result.alreadyVerified) {
-        setStatus({ configured: true, checked: true, verified: true, source: "etherscan", message: "Contract is already verified." });
+        setStatus({
+          configured: true,
+          checked: true,
+          verified: true,
+          source: "etherscan",
+          message: "Contract is already verified.",
+        });
       } else if (result.ok) {
-        setStatus({ configured: true, checked: true, verified: false, source: "etherscan", message: "Verification submitted; explorer processing may still be pending." });
+        setStatus({
+          configured: true,
+          checked: true,
+          verified: false,
+          source: "etherscan",
+          message: "Verification submitted; explorer processing may still be pending.",
+        });
         window.setTimeout(() => void refresh(), 1500);
       }
     } catch (error) {
@@ -98,34 +122,61 @@ export function VerificationPanel({ testnet, deployment }: { testnet: TestnetCon
   return (
     <div>
       <div className={`rounded-md border p-3 font-mono text-xs ${tone}`} role="status">
-        <div className="font-semibold">{status.verified ? "VERIFIED" : status.checked ? "NOT VERIFIED" : "LIVE STATUS"}</div>
+        <div className="font-semibold">
+          {status.verified ? "VERIFIED" : status.checked ? "NOT VERIFIED" : "LIVE STATUS"}
+        </div>
         <div className="mt-1 opacity-90">{status.message}</div>
-        {status.source !== "none" ? <div className="mt-1 text-[10px] opacity-75">Source: {status.source}{status.match ? ` · ${status.match} match` : ""}</div> : null}
+        {status.source !== "none" ? (
+          <div className="mt-1 text-[10px] opacity-75">
+            Source: {status.source}
+            {status.match ? ` · ${status.match} match` : ""}
+          </div>
+        ) : null}
       </div>
 
       <div className="mt-4 flex flex-wrap gap-2">
         <button type="button" className={btnGhost} disabled={busy} onClick={() => void refresh()}>
           {busy ? "Checking…" : "Check live status"}
         </button>
-        <button type="button" className={btnPrimary} disabled={busy || !status.configured || status.verified} onClick={() => void submit()}>
+        <button
+          type="button"
+          className={btnPrimary}
+          disabled={busy || !status.configured || status.verified}
+          onClick={() => void submit()}
+        >
           {status.verified ? "Already verified" : "Submit verification"}
         </button>
       </div>
 
       {!status.configured ? (
         <p className="mt-3 text-[11px] text-muted-foreground">
-          Live public verification status works through Sourcify. Add <code>ETHERSCAN_API_KEY</code> in Vercel to enable explorer API status and one-click explorer submission.
+          Live public verification status works through Sourcify. Add <code>ETHERSCAN_API_KEY</code>{" "}
+          in Vercel to enable explorer API status and one-click explorer submission.
         </p>
       ) : null}
-      {submitMsg ? <p className="mt-3 break-words font-mono text-[11px] text-muted-foreground">{submitMsg}</p> : null}
+      {submitMsg ? (
+        <p className="mt-3 break-words font-mono text-[11px] text-muted-foreground">{submitMsg}</p>
+      ) : null}
 
       <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <div className="space-y-1"><Field k="Contract address" v={deployment.address} /><CopyButton value={deployment.address} /></div>
-        <div className="space-y-1"><Field k="Compiler version" v={ver} /><CopyButton value={ver} /></div>
-        <div className="space-y-1"><Field k="Contract name" v={deployment.contractName} /><CopyButton value={deployment.contractName} /></div>
+        <div className="space-y-1">
+          <Field k="Contract address" v={deployment.address} />
+          <CopyButton value={deployment.address} />
+        </div>
+        <div className="space-y-1">
+          <Field k="Compiler version" v={ver} />
+          <CopyButton value={ver} />
+        </div>
+        <div className="space-y-1">
+          <Field k="Contract name" v={deployment.contractName} />
+          <CopyButton value={deployment.contractName} />
+        </div>
         <Field k="Optimizer" v="Enabled · 200 runs" />
         <Field k="EVM version" v="Compiler default" />
-        <div className="space-y-1"><Field k="Constructor args (ABI-encoded)" v={deployment.constructorArgs || "None"} />{deployment.constructorArgs ? <CopyButton value={deployment.constructorArgs} /> : null}</div>
+        <div className="space-y-1">
+          <Field k="Constructor args (ABI-encoded)" v={deployment.constructorArgs || "None"} />
+          {deployment.constructorArgs ? <CopyButton value={deployment.constructorArgs} /> : null}
+        </div>
       </div>
 
       <div className="mt-4 flex flex-wrap gap-2">
@@ -134,8 +185,12 @@ export function VerificationPanel({ testnet, deployment }: { testnet: TestnetCon
       </div>
 
       <div className="mt-4 flex flex-wrap gap-4 text-xs">
-        <ExplorerLink href={verifyUrl(testnet, deployment.address)}>Open manual verification on {testnet.explorerName}</ExplorerLink>
-        <ExplorerLink href={codeUrl(testnet, deployment.address)}>Open contract code on {testnet.explorerName}</ExplorerLink>
+        <ExplorerLink href={verifyUrl(testnet, deployment.address)}>
+          Open manual verification on {testnet.explorerName}
+        </ExplorerLink>
+        <ExplorerLink href={codeUrl(testnet, deployment.address)}>
+          Open contract code on {testnet.explorerName}
+        </ExplorerLink>
       </div>
     </div>
   );

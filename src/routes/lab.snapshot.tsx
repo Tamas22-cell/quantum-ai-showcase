@@ -10,9 +10,16 @@ export const Route = createFileRoute("/lab/snapshot")({
   head: () => ({
     meta: [
       { title: "Generate Research Snapshot — Quantum AI Lab" },
-      { name: "description", content: "Turn a saved quantum experiment into a shareable research snapshot image." },
+      {
+        name: "description",
+        content: "Turn a saved quantum experiment into a shareable research snapshot image.",
+      },
       { property: "og:title", content: "Generate Research Snapshot — Quantum AI Lab" },
-      { property: "og:description", content: "Create a client-side PNG research card from a saved QAOA, VQE or portfolio experiment." },
+      {
+        property: "og:description",
+        content:
+          "Create a client-side PNG research card from a saved QAOA, VQE or portfolio experiment.",
+      },
       { property: "og:type", content: "website" },
     ],
   }),
@@ -27,7 +34,10 @@ function truncate(value: string, max = 74) {
 }
 
 function snapshotText(item: ExperimentSnapshot) {
-  const fields = Object.entries(item.fields).slice(0, 10).map(([k, v]) => `${k}: ${String(v)}`).join("\n");
+  const fields = Object.entries(item.fields)
+    .slice(0, 10)
+    .map(([k, v]) => `${k}: ${String(v)}`)
+    .join("\n");
   return [
     "Quantum AI Lab — Research Snapshot",
     `Module: ${item.module}`,
@@ -35,7 +45,9 @@ function snapshotText(item: ExperimentSnapshot) {
     fields,
     item.summary ? `Summary: ${item.summary}` : "",
     "Generated client-side. Educational research simulation; not investment advice.",
-  ].filter(Boolean).join("\n");
+  ]
+    .filter(Boolean)
+    .join("\n");
 }
 
 function drawCard(canvas: HTMLCanvasElement, item: ExperimentSnapshot) {
@@ -114,7 +126,11 @@ function drawCard(canvas: HTMLCanvasElement, item: ExperimentSnapshot) {
   ctx.fillText("quantum-ai-showcase.vercel.app", 92, 838);
   ctx.fillStyle = "#73879d";
   ctx.textAlign = "right";
-  ctx.fillText("Client-side research simulation · reproducible from saved experiment data", W - 92, 838);
+  ctx.fillText(
+    "Client-side research simulation · reproducible from saved experiment data",
+    W - 92,
+    838,
+  );
   ctx.textAlign = "left";
 }
 
@@ -128,7 +144,9 @@ function Page() {
     const refresh = () => {
       const next = getExperimentHistory();
       setItems(next);
-      setSelectedId((current) => current && next.some((x) => x.id === current) ? current : (next[0]?.id ?? ""));
+      setSelectedId((current) =>
+        current && next.some((x) => x.id === current) ? current : (next[0]?.id ?? ""),
+      );
     };
     refresh();
     window.addEventListener("experiment-history-changed", refresh);
@@ -139,7 +157,10 @@ function Page() {
     };
   }, []);
 
-  const selected = useMemo(() => items.find((x) => x.id === selectedId) ?? null, [items, selectedId]);
+  const selected = useMemo(
+    () => items.find((x) => x.id === selectedId) ?? null,
+    [items, selectedId],
+  );
 
   useEffect(() => {
     if (selected && canvasRef.current) drawCard(canvasRef.current, selected);
@@ -149,7 +170,10 @@ function Page() {
     if (!selected || !canvasRef.current) return;
     drawCard(canvasRef.current, selected);
     const link = document.createElement("a");
-    const safeModule = selected.module.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    const safeModule = selected.module
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "");
     link.download = `quantum-ai-research-snapshot-${safeModule || "experiment"}.png`;
     link.href = canvasRef.current.toDataURL("image/png");
     link.click();
@@ -166,22 +190,43 @@ function Page() {
     <LabShell crumb="Snapshot">
       <div className="mb-8 max-w-3xl">
         <span className="font-mono text-xs text-primary">COMMAND CENTER / C8</span>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">Generate Research Snapshot</h1>
+        <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
+          Generate Research Snapshot
+        </h1>
         <p className="mt-3 text-sm leading-7 text-muted-foreground">
-          Select a saved experiment and generate a branded PNG research card entirely in your browser. No upload, API key or paid service is required.
+          Select a saved experiment and generate a branded PNG research card entirely in your
+          browser. No upload, API key or paid service is required.
         </p>
       </div>
 
       {!items.length ? (
         <div className="rounded-md border border-dashed border-border-strong bg-card/50 p-8 text-sm text-muted-foreground">
-          No saved experiments yet. Run QAOA, VQE or Portfolio Lab first, save the experiment, then return here. <Link to="/lab/history" className="ml-1 text-primary underline underline-offset-4">Open Experiment History</Link>
+          No saved experiments yet. Run QAOA, VQE or Portfolio Lab first, save the experiment, then
+          return here.{" "}
+          <Link to="/lab/history" className="ml-1 text-primary underline underline-offset-4">
+            Open Experiment History
+          </Link>
         </div>
       ) : (
         <div className="grid gap-6 xl:grid-cols-[360px_1fr]">
           <section className="rounded-md border border-border bg-card p-5">
-            <label className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground" htmlFor="snapshot-run">Saved experiment</label>
-            <select id="snapshot-run" value={selectedId} onChange={(e) => setSelectedId(e.target.value)} className="mt-2 w-full rounded-sm border border-border bg-surface px-3 py-2 text-sm text-foreground">
-              {items.map((item) => <option key={item.id} value={item.id}>{item.module} — {new Date(item.createdAt).toLocaleString()}</option>)}
+            <label
+              className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground"
+              htmlFor="snapshot-run"
+            >
+              Saved experiment
+            </label>
+            <select
+              id="snapshot-run"
+              value={selectedId}
+              onChange={(e) => setSelectedId(e.target.value)}
+              className="mt-2 w-full rounded-sm border border-border bg-surface px-3 py-2 text-sm text-foreground"
+            >
+              {items.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.module} — {new Date(item.createdAt).toLocaleString()}
+                </option>
+              ))}
             </select>
 
             {selected && (
@@ -191,28 +236,58 @@ function Page() {
                   <div className="mt-1 text-sm font-medium text-foreground">{selected.module}</div>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
-                  {Object.entries(selected.fields).slice(0, 6).map(([k, v]) => (
-                    <div key={k} className="rounded-sm border border-border bg-surface p-2">
-                      <div className="truncate font-mono text-[9px] uppercase text-muted-foreground">{k}</div>
-                      <div className="mt-1 truncate font-mono text-xs text-foreground" title={String(v)}>{String(v)}</div>
-                    </div>
-                  ))}
+                  {Object.entries(selected.fields)
+                    .slice(0, 6)
+                    .map(([k, v]) => (
+                      <div key={k} className="rounded-sm border border-border bg-surface p-2">
+                        <div className="truncate font-mono text-[9px] uppercase text-muted-foreground">
+                          {k}
+                        </div>
+                        <div
+                          className="mt-1 truncate font-mono text-xs text-foreground"
+                          title={String(v)}
+                        >
+                          {String(v)}
+                        </div>
+                      </div>
+                    ))}
                 </div>
                 <div className="flex flex-wrap gap-2 pt-2">
-                  <Button type="button" onClick={downloadPng}><Download className="size-4" />Download PNG</Button>
-                  <Button type="button" variant="outline" onClick={copyText}>{copied ? <Check className="size-4" /> : <Clipboard className="size-4" />}{copied ? "Copied" : "Copy summary"}</Button>
+                  <Button type="button" onClick={downloadPng}>
+                    <Download className="size-4" />
+                    Download PNG
+                  </Button>
+                  <Button type="button" variant="outline" onClick={copyText}>
+                    {copied ? <Check className="size-4" /> : <Clipboard className="size-4" />}
+                    {copied ? "Copied" : "Copy summary"}
+                  </Button>
                 </div>
-                <Link to={selected.route as never} className="inline-flex items-center gap-1 font-mono text-xs text-primary hover:underline">Open source lab <ExternalLink className="size-3.5" /></Link>
+                <Link
+                  to={selected.route as never}
+                  className="inline-flex items-center gap-1 font-mono text-xs text-primary hover:underline"
+                >
+                  Open source lab <ExternalLink className="size-3.5" />
+                </Link>
               </div>
             )}
           </section>
 
           <section className="rounded-md border border-border bg-card p-4 sm:p-5">
-            <div className="mb-3 flex items-center gap-2 font-mono text-[10px] uppercase tracking-wider text-muted-foreground"><Camera className="size-4" />PNG preview · 1400 × 900</div>
-            <div className="overflow-hidden rounded-sm border border-border bg-black/20">
-              <canvas ref={canvasRef} className="block h-auto w-full" aria-label="Research snapshot preview" />
+            <div className="mb-3 flex items-center gap-2 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+              <Camera className="size-4" />
+              PNG preview · 1400 × 900
             </div>
-            <p className="mt-3 text-xs leading-5 text-muted-foreground">The image is generated locally from the experiment data already stored in your browser. It does not claim quantum advantage and does not upload results anywhere.</p>
+            <div className="overflow-hidden rounded-sm border border-border bg-black/20">
+              <canvas
+                ref={canvasRef}
+                className="block h-auto w-full"
+                aria-label="Research snapshot preview"
+              />
+            </div>
+            <p className="mt-3 text-xs leading-5 text-muted-foreground">
+              The image is generated locally from the experiment data already stored in your
+              browser. It does not claim quantum advantage and does not upload results anywhere.
+            </p>
           </section>
         </div>
       )}

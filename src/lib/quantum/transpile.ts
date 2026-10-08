@@ -27,23 +27,41 @@ const h = (q: number): Op[] => [rz(q, PI / 2), sx(q), rz(q, PI / 2)];
 function decompose(op: Op): Op[] {
   const q = op.qubits[0]!;
   switch (op.gate) {
-    case "H": return h(q);
-    case "Z": return [rz(q, PI)];
-    case "S": return [rz(q, PI / 2)];
-    case "T": return [rz(q, PI / 4)];
-    case "Y": return [rz(q, PI), { gate: "X", qubits: [q] }]; // Y = iXZ
-    case "RZ": return [rz(q, op.theta!)];
+    case "H":
+      return h(q);
+    case "Z":
+      return [rz(q, PI)];
+    case "S":
+      return [rz(q, PI / 2)];
+    case "T":
+      return [rz(q, PI / 4)];
+    case "Y":
+      return [rz(q, PI), { gate: "X", qubits: [q] }]; // Y = iXZ
+    case "RZ":
+      return [rz(q, op.theta!)];
     case "RX":
       // SX is already native; general RX(θ) = H·RZ(θ)·H
       return isSx(op) ? [op] : [...h(q), rz(q, op.theta!), ...h(q)];
-    case "RY": return [rz(q, -PI / 2), ...decompose({ gate: "RX", qubits: [q], theta: op.theta! }), rz(q, PI / 2)];
-    case "CNOT": { const t = op.qubits[1]!; return [...h(t), { gate: "CZ", qubits: [q, t] }, ...h(t)]; }
-    default: return [op]; // X, CZ, M are native
+    case "RY":
+      return [
+        rz(q, -PI / 2),
+        ...decompose({ gate: "RX", qubits: [q], theta: op.theta! }),
+        rz(q, PI / 2),
+      ];
+    case "CNOT": {
+      const t = op.qubits[1]!;
+      return [...h(t), { gate: "CZ", qubits: [q, t] }, ...h(t)];
+    }
+    default:
+      return [op]; // X, CZ, M are native
   }
 }
 
 const isSx = (op: Op) => op.gate === "RX" && Math.abs(op.theta! - PI / 2) < 1e-12;
-const wrap = (t: number) => { const r = ((t + PI) % (2 * PI) + 2 * PI) % (2 * PI) - PI; return Math.abs(r) < 1e-12 ? 0 : r; };
+const wrap = (t: number) => {
+  const r = ((((t + PI) % (2 * PI)) + 2 * PI) % (2 * PI)) - PI;
+  return Math.abs(r) < 1e-12 ? 0 : r;
+};
 
 /** Peephole pass: merge consecutive RZ, drop identity RZ, cancel X·X and CZ·CZ pairs. */
 function optimize(ops: Op[], n: number): Op[] {
@@ -55,16 +73,30 @@ function optimize(ops: Op[], n: number): Op[] {
     for (const op of cur) {
       const prevIdx = op.qubits.length === 1 ? last[op.qubits[0]!]! : -1;
       const prev = prevIdx >= 0 ? out[prevIdx] : undefined;
-      if (op.gate === "RZ" && prev?.gate === "RZ") { prev.theta = wrap(prev.theta! + op.theta!); changed = true; continue; }
-      if (op.gate === "X" && prev?.gate === "X") { out.splice(prevIdx, 1, { gate: "RZ", qubits: [op.qubits[0]!], theta: 0 }); changed = true; continue; }
+      if (op.gate === "RZ" && prev?.gate === "RZ") {
+        prev.theta = wrap(prev.theta! + op.theta!);
+        changed = true;
+        continue;
+      }
+      if (op.gate === "X" && prev?.gate === "X") {
+        out.splice(prevIdx, 1, { gate: "RZ", qubits: [op.qubits[0]!], theta: 0 });
+        changed = true;
+        continue;
+      }
       if (op.gate === "CZ") {
         const [a, b] = op.qubits as [number, number];
         const pi = last[a]!;
         const p = out[pi];
-        if (pi >= 0 && pi === last[b] && p?.gate === "CZ") { out.splice(pi, 1, { gate: "RZ", qubits: [a], theta: 0 }); changed = true; continue; }
+        if (pi >= 0 && pi === last[b] && p?.gate === "CZ") {
+          out.splice(pi, 1, { gate: "RZ", qubits: [a], theta: 0 });
+          changed = true;
+          continue;
+        }
       }
       out.push({ ...op, qubits: [...op.qubits] });
-      op.qubits.forEach((q) => { last[q] = out.length - 1; });
+      op.qubits.forEach((q) => {
+        last[q] = out.length - 1;
+      });
     }
     const filtered = out.filter((o) => !(o.gate === "RZ" && wrap(o.theta!) === 0));
     if (filtered.length !== out.length) changed = true;
@@ -85,14 +117,23 @@ export function transpile(c: Circuit, level: OptimizationLevel = 1): TranspileRe
   const opt = level === 1 ? optimize(unitary, c.numQubits) : unitary;
   const measures = c.ops.filter((o) => o.gate === "M");
   const out: Circuit = { numQubits: c.numQubits, ops: [...opt, ...measures] };
-  const before = stats(c), after = stats(out);
-  return { circuit: out, before, after, removed: unitary.length - opt.length, basis: ["rz", "sx", "x", "cz"] };
+  const before = stats(c),
+    after = stats(out);
+  return {
+    circuit: out,
+    before,
+    after,
+    removed: unitary.length - opt.length,
+    basis: ["rz", "sx", "x", "cz"],
+  };
 }
 
 /** |⟨ψ_a|ψ_b⟩|² — equals 1 when circuits agree up to global phase. */
 export function stateFidelity(a: Circuit, b: Circuit): number {
-  const s = simulate(a), t = simulate(b);
-  let re = 0, im = 0;
+  const s = simulate(a),
+    t = simulate(b);
+  let re = 0,
+    im = 0;
   for (let i = 0; i < s.re.length; i++) {
     re += s.re[i]! * t.re[i]! + s.im[i]! * t.im[i]!;
     im += s.re[i]! * t.im[i]! - s.im[i]! * t.re[i]!;

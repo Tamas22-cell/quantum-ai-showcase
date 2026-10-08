@@ -6,12 +6,25 @@ import { analyzeCircuit, toQasm3 } from "./qasm";
 import { buildJobRequest, readIbmTransfer, writeIbmTransfer, IBM_TRANSFER_KEY } from "./job";
 
 const bell = EXAMPLE_CIRCUITS.find((e) => e.id === "bell")!.circuit;
-const mem = () => { const m = new Map<string, string>(); return { getItem: (k: string) => m.get(k) ?? null, setItem: (k: string, v: string) => void m.set(k, v), removeItem: (k: string) => void m.delete(k) }; };
+const mem = () => {
+  const m = new Map<string, string>();
+  return {
+    getItem: (k: string) => m.get(k) ?? null,
+    setItem: (k: string, v: string) => void m.set(k, v),
+    removeItem: (k: string) => void m.delete(k),
+  };
+};
 
 describe("IBM circuit analysis", () => {
   it("counts gates, measurements and depth for the Bell circuit", () => {
     const a = analyzeCircuit(bell);
-    expect(a).toMatchObject({ numQubits: 2, gateCount: 2, twoQubitGates: 1, measurementOps: 2, implicitMeasurement: false });
+    expect(a).toMatchObject({
+      numQubits: 2,
+      gateCount: 2,
+      twoQubitGates: 1,
+      measurementOps: 2,
+      implicitMeasurement: false,
+    });
     expect(a.depth).toBe(3);
     expect(a.needsDecomposition.sort()).toEqual(["CNOT", "H"]);
   });
@@ -46,13 +59,19 @@ describe("job requests", () => {
     if (r.ok) expect(r.request.qasm).toContain("cx q[0], q[1];");
   });
   it("rejects bad shots, backend names and unsupported gates", () => {
-    const r = buildJobRequest({ circuit: { numQubits: 1, ops: [{ gate: "SWAP", qubits: [0] }] }, backend: "Bad Name!", shots: 0 });
+    const r = buildJobRequest({
+      circuit: { numQubits: 1, ops: [{ gate: "SWAP", qubits: [0] }] },
+      backend: "Bad Name!",
+      shots: 0,
+    });
     expect(r.ok).toBe(false);
     if (!r.ok) expect(r.errors.length).toBe(3);
     expect(buildJobRequest({ circuit: bell, backend: "ibm_x", shots: 20_001 }).ok).toBe(false);
   });
   it("rejects malformed payloads", () => {
-    expect(buildJobRequest({ circuit: "not json", backend: "ibm_brisbane", shots: 10 }).ok).toBe(false);
+    expect(buildJobRequest({ circuit: "not json", backend: "ibm_brisbane", shots: 10 }).ok).toBe(
+      false,
+    );
   });
 });
 
@@ -65,7 +84,10 @@ describe("Builder → IBM transfer", () => {
   });
   it("rejects tampered payloads", () => {
     const s = mem();
-    s.setItem(IBM_TRANSFER_KEY, JSON.stringify({ numQubits: 2, ops: [{ gate: "H", qubits: [7] }] }));
+    s.setItem(
+      IBM_TRANSFER_KEY,
+      JSON.stringify({ numQubits: 2, ops: [{ gate: "H", qubits: [7] }] }),
+    );
     expect(readIbmTransfer(s)).toBeNull();
     expect(writeIbmTransfer({ numQubits: 0, ops: [] } as Circuit, s)).toBe(false);
   });

@@ -75,7 +75,8 @@ export const portfolio = {
     {
       code: "QAOA",
       title: "Quantum Approximate Optimization",
-      description: "Studying variational approaches to combinatorial optimization and portfolio construction.",
+      description:
+        "Studying variational approaches to combinatorial optimization and portfolio construction.",
       href: "/lab/qaoa",
     },
     {
@@ -87,50 +88,62 @@ export const portfolio = {
     {
       code: "QISKIT",
       title: "Quantum Software Workflows",
-      description: "Building reproducible experiments and examining hardware-aware execution patterns with Qiskit.",
+      description:
+        "Building reproducible experiments and examining hardware-aware execution patterns with Qiskit.",
       href: "https://quantum-ai-showcase.vercel.app/lab/qiskit",
     },
     {
       code: "HYBRID",
       title: "Hybrid Algorithms",
-      description: "Investigating where classical and quantum methods can be composed into practical research workflows.",
+      description:
+        "Investigating where classical and quantum methods can be composed into practical research workflows.",
       href: "/lab/arena",
     },
   ],
   certifications: [
     {
       title: "Development and Applications of Germanium Quantum Technologies",
-      detail: "DelftX / edX · Verified Certificate · Issued Sep 2026 · Credential ID c7a7a5d0baf54375b6b2523afbdbb856",
+      detail:
+        "DelftX / edX · Verified Certificate · Issued Sep 2026 · Credential ID c7a7a5d0baf54375b6b2523afbdbb856",
       verified: true,
       href: "https://courses.edx.org/certificates/c7a7a5d0baf54375b6b2523afbdbb856",
     },
     {
       title: "Implementing AI Algorithms from Scratch",
-      detail: "CodeSignal / edX · Verified Certificate · Issued Oct 1, 2026 · Credential ID bc2ee34632334473ac2ccec9a1207cc1",
+      detail:
+        "CodeSignal / edX · Verified Certificate · Issued Oct 1, 2026 · Credential ID bc2ee34632334473ac2ccec9a1207cc1",
       verified: true,
       href: "https://courses.edx.org/certificates/bc2ee34632334473ac2ccec9a1207cc1",
     },
     {
       title: "QCST1x: Machine Learning for Semiconductor Quantum Devices",
-      detail: "DelftX / edX · Verified Certificate · Issued Oct 1, 2026 · Credential ID 94853a5f91cf4416bc459a5230d08fb4",
+      detail:
+        "DelftX / edX · Verified Certificate · Issued Oct 1, 2026 · Credential ID 94853a5f91cf4416bc459a5230d08fb4",
       verified: true,
       href: "https://courses.edx.org/certificates/94853a5f91cf4416bc459a5230d08fb4",
     },
     {
-      title: "QCS11000: Quantum Computer Systems Design I: Intro to Quantum Computation and Programming",
-      detail: "UChicagoX / edX · Verified Certificate · Issued Oct 5, 2026 · Credential ID 9569d436daf54c88a04cecb5d540d9b8",
+      title:
+        "QCS11000: Quantum Computer Systems Design I: Intro to Quantum Computation and Programming",
+      detail:
+        "UChicagoX / edX · Verified Certificate · Issued Oct 5, 2026 · Credential ID 9569d436daf54c88a04cecb5d540d9b8",
       verified: true,
       href: "https://courses.edx.org/certificates/9569d436daf54c88a04cecb5d540d9b8",
     },
     {
       title: "CS109xa: Machine Learning and AI with Python",
-      detail: "HarvardX / edX · Verified Certificate · Issued Oct 7, 2026 · Credential ID d5ae76d59b144650b763fff41bef45fd",
+      detail:
+        "HarvardX / edX · Verified Certificate · Issued Oct 7, 2026 · Credential ID d5ae76d59b144650b763fff41bef45fd",
       verified: true,
       href: "https://courses.edx.org/certificates/d5ae76d59b144650b763fff41bef45fd",
     },
   ],
   social: [
-    { label: "LinkedIn", href: "https://www.linkedin.com/in/tamas-nemeth-8820a6a5/", placeholder: false },
+    {
+      label: "LinkedIn",
+      href: "https://www.linkedin.com/in/tamas-nemeth-8820a6a5/",
+      placeholder: false,
+    },
     { label: "GitHub", href: "https://github.com/Tamas22-cell", placeholder: false },
   ] satisfies PortfolioLink[],
 } as const;

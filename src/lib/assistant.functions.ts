@@ -7,10 +7,15 @@ const Input = z.object({
   mode: z.enum(["explain-algorithm", "explain-results", "draft-circuit", "research"]),
   question: z.string().trim().min(2).max(2000),
   context: z.string().max(4000).optional(),
-  history: z.array(z.object({
-    role: z.enum(["user", "assistant"]),
-    content: z.string().max(5000),
-  })).max(12).optional(),
+  history: z
+    .array(
+      z.object({
+        role: z.enum(["user", "assistant"]),
+        content: z.string().max(5000),
+      }),
+    )
+    .max(12)
+    .optional(),
 });
 
 const PORTFOLIO_CONTEXT = `
@@ -32,10 +37,14 @@ General rules:
 `;
 
 const MODE_INSTRUCTIONS: Record<AssistantMode, string> = {
-  "explain-algorithm": "Explain quantum-computing algorithms accurately and practically. Focus on QAOA, VQE, Max-Cut, QML, circuits, optimisation and hybrid quantum-classical workflows.",
-  "explain-results": "Interpret supplied experiment data carefully. Explain probabilities, shot noise, sampling error and ideal classical simulation. Do not claim quantum-hardware results unless the user provides them.",
-  "draft-circuit": "Help design small quantum circuits. Explain the circuit clearly. If proposing a circuit, append a JSON object in a fenced json block with exactly this shape: {\"numQubits\":2,\"ops\":[{\"gate\":\"H\",\"qubits\":[0]}]}. Supported gates are H, X, Y, Z, RX, RY, RZ and CNOT.",
-  research: "Act as a research assistant. Use current web sources. Prefer primary sources such as arXiv, IBM Quantum documentation, university research pages and official project documentation. Every research answer MUST end with a Sources section containing 2-4 direct URLs to sources actually used. Never invent URLs.",
+  "explain-algorithm":
+    "Explain quantum-computing algorithms accurately and practically. Focus on QAOA, VQE, Max-Cut, QML, circuits, optimisation and hybrid quantum-classical workflows.",
+  "explain-results":
+    "Interpret supplied experiment data carefully. Explain probabilities, shot noise, sampling error and ideal classical simulation. Do not claim quantum-hardware results unless the user provides them.",
+  "draft-circuit":
+    'Help design small quantum circuits. Explain the circuit clearly. If proposing a circuit, append a JSON object in a fenced json block with exactly this shape: {"numQubits":2,"ops":[{"gate":"H","qubits":[0]}]}. Supported gates are H, X, Y, Z, RX, RY, RZ and CNOT.',
+  research:
+    "Act as a research assistant. Use current web sources. Prefer primary sources such as arXiv, IBM Quantum documentation, university research pages and official project documentation. Every research answer MUST end with a Sources section containing 2-4 direct URLs to sources actually used. Never invent URLs.",
 };
 
 type SourceRef = { title: string; url: string };
@@ -109,9 +118,11 @@ function extractOutputText(body: unknown): string {
   const outputText = (body as { output_text?: unknown }).output_text;
   if (typeof outputText === "string" && outputText.trim()) return outputText.trim();
 
-  const output = (body as {
-    output?: Array<{ content?: Array<{ type?: string; text?: string }> }>;
-  }).output;
+  const output = (
+    body as {
+      output?: Array<{ content?: Array<{ type?: string; text?: string }> }>;
+    }
+  ).output;
 
   if (!Array.isArray(output)) return "";
 
@@ -171,7 +182,9 @@ Use web search for this request. Return 2-4 source URLs in a final "Sources" sec
       try {
         const body = (await response.json()) as { error?: { message?: unknown } };
         detail = typeof body.error?.message === "string" ? body.error.message : "";
-      } catch {}
+      } catch {
+        // Non-JSON error response; use HTTP status below.
+      }
       throw new Error(detail || `OpenAI request failed (${response.status}).`);
     }
 
@@ -192,7 +205,7 @@ Use web search for this request. Return 2-4 source URLs in a final "Sources" sec
 
     let circuitRaw: string | null = null;
     if (data.mode === "draft-circuit") {
-      const circuitMatch = answer.match(/\`\`\`json\s*([\s\S]*?)\s*\`\`\`/i);
+      const circuitMatch = answer.match(/```json\s*([\s\S]*?)\s*```/i);
       if (circuitMatch) {
         try {
           const parsed = JSON.parse(circuitMatch[1] ?? "");

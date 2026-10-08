@@ -28,7 +28,7 @@ type SolcModule = {
     ident: string,
     returnType: string | null,
     argTypes: string[],
-  ) => (...args: any[]) => any;
+  ) => (...args: unknown[]) => unknown;
 };
 
 type WorkerGlobal = typeof self & {
@@ -101,15 +101,16 @@ function compileSource(source: string): CompilerResult {
 
     const rawOutput = solc.compile(JSON.stringify(input));
     const output = JSON.parse(rawOutput);
-    const diagnostics = Array.isArray(output?.errors) ? output.errors : [];
+    const diagnostics: { severity?: string; formattedMessage?: string; message?: string }[] =
+      Array.isArray(output?.errors) ? output.errors : [];
 
     const errors = diagnostics
-      .filter((item: any) => item?.severity === "error")
-      .map((item: any) => item?.formattedMessage || item?.message || "Compilation error");
+      .filter((item) => item?.severity === "error")
+      .map((item) => item?.formattedMessage || item?.message || "Compilation error");
 
     const warnings = diagnostics
-      .filter((item: any) => item?.severity !== "error")
-      .map((item: any) => item?.formattedMessage || item?.message || "Compiler warning");
+      .filter((item) => item?.severity !== "error")
+      .map((item) => item?.formattedMessage || item?.message || "Compiler warning");
 
     if (errors.length) {
       return {
@@ -159,7 +160,9 @@ function compileSource(source: string): CompilerResult {
     return {
       ok: false,
       compilerVersion,
-      errors: [error instanceof Error ? error.message : "Solidity compiler failed in browser worker."],
+      errors: [
+        error instanceof Error ? error.message : "Solidity compiler failed in browser worker.",
+      ],
       warnings: [],
     };
   }
@@ -180,5 +183,3 @@ scope.addEventListener("message", (event: MessageEvent<CompileRequest>) => {
 
   scope.postMessage(compileSource(source));
 });
-
-

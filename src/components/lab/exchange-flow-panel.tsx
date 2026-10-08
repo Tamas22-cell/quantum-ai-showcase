@@ -26,7 +26,8 @@ export function ExchangeFlowPanel() {
         fetch("https://mempool.space/api/v1/fees/recommended", { cache: "no-store" }),
         fetch("https://mempool.space/api/mempool", { cache: "no-store" }),
       ]);
-      if (!feesResponse.ok || !mempoolResponse.ok) throw new Error("Bitcoin network data feed unavailable");
+      if (!feesResponse.ok || !mempoolResponse.ok)
+        throw new Error("Bitcoin network data feed unavailable");
       const feeData = await feesResponse.json();
       const mempoolData = await mempoolResponse.json();
       setFees(feeData);
@@ -45,13 +46,19 @@ export function ExchangeFlowPanel() {
   }, []);
 
   return (
-    <section id="fee-intelligence" className="mt-4 w-full max-w-full overflow-hidden rounded-md border border-primary/30 bg-card p-4 sm:p-5">
+    <section
+      id="fee-intelligence"
+      className="mt-4 w-full max-w-full overflow-hidden rounded-md border border-primary/30 bg-card p-4 sm:p-5"
+    >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-primary">LIVE BITCOIN NETWORK</div>
+          <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-primary">
+            LIVE BITCOIN NETWORK
+          </div>
           <h2 className="mt-1 text-xl font-semibold">Bitcoin Fee &amp; Mempool Intelligence</h2>
           <p className="mt-1 max-w-3xl text-xs leading-5 text-muted-foreground">
-            Live recommended fee levels and current mempool pressure from the public Bitcoin network.
+            Live recommended fee levels and current mempool pressure from the public Bitcoin
+            network.
           </p>
         </div>
         <Button variant="outline" size="sm" onClick={() => void load()} disabled={loading}>
@@ -60,14 +67,38 @@ export function ExchangeFlowPanel() {
         </Button>
       </div>
 
-      {error ? <div className="mt-4 rounded-md border border-destructive/30 bg-destructive/5 p-3 text-xs text-destructive">{error}</div> : null}
+      {error ? (
+        <div className="mt-4 rounded-md border border-destructive/30 bg-destructive/5 p-3 text-xs text-destructive">
+          {error}
+        </div>
+      ) : null}
 
       <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
-        <Metric label="NEXT BLOCK" value={fees ? `${fees.fastestFee} sat/vB` : loading ? "Loading…" : "—"} note="Fast confirmation" />
-        <Metric label="~30 MIN" value={fees ? `${fees.halfHourFee} sat/vB` : loading ? "Loading…" : "—"} note="Medium priority" />
-        <Metric label="~60 MIN" value={fees ? `${fees.hourFee} sat/vB` : loading ? "Loading…" : "—"} note="Lower priority" />
-        <Metric label="ECONOMY" value={fees ? `${fees.economyFee} sat/vB` : loading ? "Loading…" : "—"} note="Economy fee" />
-        <Metric label="MEMPOOL" value={mempool ? mempool.count.toLocaleString() : loading ? "Loading…" : "—"} note="Unconfirmed transactions" />
+        <Metric
+          label="NEXT BLOCK"
+          value={fees ? `${fees.fastestFee} sat/vB` : loading ? "Loading…" : "—"}
+          note="Fast confirmation"
+        />
+        <Metric
+          label="~30 MIN"
+          value={fees ? `${fees.halfHourFee} sat/vB` : loading ? "Loading…" : "—"}
+          note="Medium priority"
+        />
+        <Metric
+          label="~60 MIN"
+          value={fees ? `${fees.hourFee} sat/vB` : loading ? "Loading…" : "—"}
+          note="Lower priority"
+        />
+        <Metric
+          label="ECONOMY"
+          value={fees ? `${fees.economyFee} sat/vB` : loading ? "Loading…" : "—"}
+          note="Economy fee"
+        />
+        <Metric
+          label="MEMPOOL"
+          value={mempool ? mempool.count.toLocaleString() : loading ? "Loading…" : "—"}
+          note="Unconfirmed transactions"
+        />
       </div>
 
       <div className="mt-3 grid grid-cols-1 gap-3 lg:grid-cols-2">
@@ -78,7 +109,9 @@ export function ExchangeFlowPanel() {
           </div>
           <div className="mt-3 flex items-end gap-3">
             <span className="font-mono text-3xl font-semibold">{fees?.fastestFee ?? "—"}</span>
-            <span className="pb-1 font-mono text-[10px] text-muted-foreground">sat/vB · next block</span>
+            <span className="pb-1 font-mono text-[10px] text-muted-foreground">
+              sat/vB · next block
+            </span>
           </div>
           <p className="mt-2 text-[11px] leading-4 text-muted-foreground">
             Higher recommended fees indicate stronger competition for near-term block space.

@@ -7,9 +7,17 @@ export const Route = createFileRoute("/lab/benchmark")({
   head: () => ({
     meta: [
       { title: "Quantum Benchmark Dashboard — Quantum AI Lab" },
-      { name: "description", content: "Research benchmark overview for QAOA, VQE, portfolio optimisation and quantum-vs-classical experiments." },
+      {
+        name: "description",
+        content:
+          "Research benchmark overview for QAOA, VQE, portfolio optimisation and quantum-vs-classical experiments.",
+      },
       { property: "og:title", content: "Quantum Benchmark Dashboard — Quantum AI Lab" },
-      { property: "og:description", content: "Compare benchmark scope, classical references and reproducibility across the interactive Quantum AI Lab." },
+      {
+        property: "og:description",
+        content:
+          "Compare benchmark scope, classical references and reproducibility across the interactive Quantum AI Lab.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -92,9 +100,14 @@ function BenchmarkDashboard() {
           <BarChart3 className="size-4" aria-hidden="true" />
           COMMAND CENTER / C6
         </span>
-        <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">Quantum Benchmark Dashboard</h1>
+        <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
+          Quantum Benchmark Dashboard
+        </h1>
         <p className="mt-3 text-sm leading-7 text-muted-foreground">
-          A research overview of the benchmark logic used across the interactive lab. It connects QAOA, VQE, portfolio optimisation and the Quantum vs Classical Arena without inventing aggregate results. Open each lab to run the actual experiment and inspect its real outputs.
+          A research overview of the benchmark logic used across the interactive lab. It connects
+          QAOA, VQE, portfolio optimisation and the Quantum vs Classical Arena without inventing
+          aggregate results. Open each lab to run the actual experiment and inspect its real
+          outputs.
         </p>
       </div>
 
@@ -111,16 +124,24 @@ function BenchmarkDashboard() {
       <section className="mt-8 overflow-hidden rounded-md border border-border bg-card">
         <div className="border-b border-border px-5 py-4">
           <h2 className="text-lg font-semibold">Benchmark matrix</h2>
-          <p className="mt-1 text-sm text-muted-foreground">What each live module measures and what it is compared against.</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            What each live module measures and what it is compared against.
+          </p>
         </div>
 
         <div className="divide-y divide-border">
           {benchmarks.map((row) => (
-            <div key={row.name} className="grid gap-4 px-5 py-5 md:grid-cols-[1.2fr_1fr_1.2fr_1.2fr]">
+            <div
+              key={row.name}
+              className="grid gap-4 px-5 py-5 md:grid-cols-[1.2fr_1fr_1.2fr_1.2fr]"
+            >
               <div>
                 <div className="font-medium">{row.name}</div>
                 <div className="mt-1 text-xs text-muted-foreground">{row.problem}</div>
-                <Link to={row.to} className="mt-3 inline-flex items-center gap-1 font-mono text-xs text-primary hover:underline">
+                <Link
+                  to={row.to}
+                  className="mt-3 inline-flex items-center gap-1 font-mono text-xs text-primary hover:underline"
+                >
                   Open lab <ArrowUpRight className="size-3.5" aria-hidden="true" />
                 </Link>
               </div>
@@ -135,7 +156,10 @@ function BenchmarkDashboard() {
       <section className="mt-8 rounded-md border border-border bg-card p-5">
         <h2 className="text-lg font-semibold">How to use this dashboard</h2>
         <p className="mt-2 max-w-4xl text-sm leading-7 text-muted-foreground">
-          Use this page as the research index. Choose a benchmark, open the corresponding lab, run the experiment with controlled parameters, then compare the quantum-simulation result against the stated classical reference. The dashboard intentionally avoids fabricated cross-lab scores because the modules solve different optimisation and estimation problems.
+          Use this page as the research index. Choose a benchmark, open the corresponding lab, run
+          the experiment with controlled parameters, then compare the quantum-simulation result
+          against the stated classical reference. The dashboard intentionally avoids fabricated
+          cross-lab scores because the modules solve different optimisation and estimation problems.
         </p>
       </section>
     </LabShell>
@@ -145,7 +169,9 @@ function BenchmarkDashboard() {
 function Metric({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">{label}</div>
+      <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+        {label}
+      </div>
       <div className="mt-1 text-sm leading-6">{value}</div>
     </div>
   );

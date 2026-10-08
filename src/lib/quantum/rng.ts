@@ -5,7 +5,7 @@
 export type Rng = () => number;
 
 export function createRng(seed: number): Rng {
-  let a = (Math.floor(seed) >>> 0) || 0x9e3779b9;
+  let a = Math.floor(seed) >>> 0 || 0x9e3779b9;
   return () => {
     a = (a + 0x6d2b79f5) >>> 0;
     let t = a;

@@ -22,13 +22,27 @@ function mapTx(t: RecentTx | TxDetail, btcUsd: number | null) {
   let sats: number | null = null;
   if ("value" in t && typeof t.value === "number") sats = t.value;
   if ("vout" in t && Array.isArray(t.vout)) {
-    sats = t.vout.reduce((sum, output) => sum + (typeof output.value === "number" ? output.value : 0), 0);
+    sats = t.vout.reduce(
+      (sum, output) => sum + (typeof output.value === "number" ? output.value : 0),
+      0,
+    );
   }
   if (!t.txid || sats == null || sats <= 0) return null;
   const valueBtc = sats / 100_000_000;
-  const vsize = "vsize" in t && typeof t.vsize === "number" ? t.vsize : ("weight" in t && typeof t.weight === "number" ? t.weight / 4 : null);
+  const vsize =
+    "vsize" in t && typeof t.vsize === "number"
+      ? t.vsize
+      : "weight" in t && typeof t.weight === "number"
+        ? t.weight / 4
+        : null;
   const feeRate = typeof t.fee === "number" && vsize && vsize > 0 ? t.fee / vsize : null;
-  return { txid: t.txid, valueBtc, valueUsd: btcUsd == null ? null : valueBtc * btcUsd, feeRate, isWhale: valueBtc >= WHALE_THRESHOLD_BTC };
+  return {
+    txid: t.txid,
+    valueBtc,
+    valueUsd: btcUsd == null ? null : valueBtc * btcUsd,
+    feeRate,
+    isWhale: valueBtc >= WHALE_THRESHOLD_BTC,
+  };
 }
 
 export const getWhaleFlow = createServerFn({ method: "GET" }).handler(async () => {
@@ -38,33 +52,46 @@ export const getWhaleFlow = createServerFn({ method: "GET" }).handler(async () =
     mempoolJson<Block[]>("/v1/blocks"),
   ]);
 
-  const btcUsd = priceResult.status === "fulfilled" && typeof priceResult.value.USD === "number" ? priceResult.value.USD : null;
+  const btcUsd =
+    priceResult.status === "fulfilled" && typeof priceResult.value.USD === "number"
+      ? priceResult.value.USD
+      : null;
   const recent = recentResult.status === "fulfilled" ? recentResult.value : [];
-  const recentMapped = recent.map(t => mapTx(t, btcUsd)).filter((t): t is NonNullable<ReturnType<typeof mapTx>> => t !== null);
+  const recentMapped = recent
+    .map((t) => mapTx(t, btcUsd))
+    .filter((t): t is NonNullable<ReturnType<typeof mapTx>> => t !== null);
 
-  const blocks = blocksResult.status === "fulfilled" ? blocksResult.value.slice(0, BLOCK_COUNT) : [];
-  const blockTxResults = await Promise.allSettled(blocks.map(async block => {
-    if (!block.id) return [] as TxDetail[];
-    const pages: TxDetail[] = [];
-    for (let start = 0; start < MAX_BLOCK_TXS; start += 25) {
-      try {
-        const batch = await mempoolJson<TxDetail[]>(`/block/${block.id}/txs/${start}`);
-        pages.push(...batch);
-        if (batch.length < 25) break;
-      } catch { break; }
-    }
-    return pages;
-  }));
+  const blocks =
+    blocksResult.status === "fulfilled" ? blocksResult.value.slice(0, BLOCK_COUNT) : [];
+  const blockTxResults = await Promise.allSettled(
+    blocks.map(async (block) => {
+      if (!block.id) return [] as TxDetail[];
+      const pages: TxDetail[] = [];
+      for (let start = 0; start < MAX_BLOCK_TXS; start += 25) {
+        try {
+          const batch = await mempoolJson<TxDetail[]>(`/block/${block.id}/txs/${start}`);
+          pages.push(...batch);
+          if (batch.length < 25) break;
+        } catch {
+          break;
+        }
+      }
+      return pages;
+    }),
+  );
 
-  const blockMapped = blockTxResults.flatMap(r => r.status === "fulfilled" ? r.value : []).map(t => mapTx(t, btcUsd)).filter((t): t is NonNullable<ReturnType<typeof mapTx>> => t !== null);
+  const blockMapped = blockTxResults
+    .flatMap((r) => (r.status === "fulfilled" ? r.value : []))
+    .map((t) => mapTx(t, btcUsd))
+    .filter((t): t is NonNullable<ReturnType<typeof mapTx>> => t !== null);
   const unique = new Map<string, NonNullable<ReturnType<typeof mapTx>>>();
-  [...recentMapped, ...blockMapped].forEach(t => unique.set(t.txid, t));
+  [...recentMapped, ...blockMapped].forEach((t) => unique.set(t.txid, t));
   const mapped = [...unique.values()];
 
   if (!mapped.length) throw new Error("Unable to load Bitcoin transaction sample");
 
   const ranked = [...mapped].sort((a, b) => b.valueBtc - a.valueBtc);
-  const whales = ranked.filter(t => t.isWhale);
+  const whales = ranked.filter((t) => t.isWhale);
   const whaleVolumeBtc = whales.reduce((sum, t) => sum + t.valueBtc, 0);
   const totalSampleBtc = mapped.reduce((sum, t) => sum + t.valueBtc, 0);
 

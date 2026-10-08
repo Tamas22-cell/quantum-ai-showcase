@@ -1,6 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { AlertTriangle, Bot, CheckCircle2, FileText, Loader2, Send, Sparkles, Trash2, XCircle } from "lucide-react";
+import {
+  AlertTriangle,
+  Bot,
+  CheckCircle2,
+  FileText,
+  Loader2,
+  Send,
+  Sparkles,
+  Trash2,
+  XCircle,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { askAIResearchAssistant } from "@/lib/assistant.functions";
@@ -67,7 +77,11 @@ export function ResearchAssistant() {
   const [busy, setBusy] = useState(false);
   const nextId = useRef(1);
   const conversationHistory = useMemo<ChatTurn[]>(
-    () => messages.filter((m) => !m.error).slice(-10).map(({ role, content }) => ({ role, content })),
+    () =>
+      messages
+        .filter((m) => !m.error)
+        .slice(-10)
+        .map(({ role, content }) => ({ role, content })),
     [messages],
   );
 
@@ -152,10 +166,14 @@ export function ResearchAssistant() {
           ))}
         </div>
 
-        <div aria-live="polite" className="min-h-72 space-y-4 rounded-md border border-border bg-card p-4 sm:p-5">
+        <div
+          aria-live="polite"
+          className="min-h-72 space-y-4 rounded-md border border-border bg-card p-4 sm:p-5"
+        >
           {messages.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              Ask a question or choose Research mode for current sources. Conversation context is remembered during this browser session.
+              Ask a question or choose Research mode for current sources. Conversation context is
+              remembered during this browser session.
             </p>
           ) : (
             messages.map((m) => <MessageView key={m.id} m={m} />)
@@ -181,8 +199,16 @@ export function ResearchAssistant() {
           </label>
         ) : null}
 
-        <form onSubmit={(e) => { e.preventDefault(); void send(input); }} className="flex gap-2">
-          <label htmlFor="assistant-q" className="sr-only">Research question</label>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            void send(input);
+          }}
+          className="flex gap-2"
+        >
+          <label htmlFor="assistant-q" className="sr-only">
+            Research question
+          </label>
           <input
             id="assistant-q"
             value={input}
@@ -192,7 +218,8 @@ export function ResearchAssistant() {
             className="min-w-0 flex-1 rounded-sm border border-border bg-surface px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           />
           <Button type="submit" variant="signal" disabled={busy || !input.trim()}>
-            <Send aria-hidden="true" />Ask
+            <Send aria-hidden="true" />
+            Ask
           </Button>
         </form>
       </div>
@@ -223,22 +250,35 @@ export function ResearchAssistant() {
 
         <Panel title="Session memory">
           <p className="text-xs text-muted-foreground">
-            The last 12 messages are kept in this browser session and sent as context for follow-up questions. Clearing the conversation removes the session memory.
+            The last 12 messages are kept in this browser session and sent as context for follow-up
+            questions. Clearing the conversation removes the session memory.
           </p>
         </Panel>
 
         <Panel title="Provenance legend">
           <ul className="space-y-1.5 text-[11px] text-muted-foreground">
-            <li><span className="text-primary">AI explanation</span> — generated text, unverified.</li>
-            <li><span className="text-amber">Research mode</span> — current web research with cited sources.</li>
-            <li><span className="text-emerald">Quantum simulation</span> — exact classical statevector simulation.</li>
-            <li><span className="text-foreground">Hardware results</span> — none; no quantum hardware is connected.</li>
+            <li>
+              <span className="text-primary">AI explanation</span> — generated text, unverified.
+            </li>
+            <li>
+              <span className="text-amber">Research mode</span> — current web research with cited
+              sources.
+            </li>
+            <li>
+              <span className="text-emerald">Quantum simulation</span> — exact classical statevector
+              simulation.
+            </li>
+            <li>
+              <span className="text-foreground">Hardware results</span> — none; no quantum hardware
+              is connected.
+            </li>
           </ul>
         </Panel>
 
         {messages.length ? (
           <Button variant="signalOutline" size="sm" onClick={clearConversation}>
-            <Trash2 aria-hidden="true" />Clear conversation
+            <Trash2 aria-hidden="true" />
+            Clear conversation
           </Button>
         ) : null}
       </aside>
@@ -280,8 +320,12 @@ function MessageView({ m }: { m: Msg }) {
 
   if (m.error) {
     return (
-      <div role="alert" className="flex max-w-[92%] gap-2 rounded-md border border-rose/50 px-3 py-2 text-sm text-rose">
-        <AlertTriangle className="size-4 shrink-0" aria-hidden="true" />{m.content}
+      <div
+        role="alert"
+        className="flex max-w-[92%] gap-2 rounded-md border border-rose/50 px-3 py-2 text-sm text-rose"
+      >
+        <AlertTriangle className="size-4 shrink-0" aria-hidden="true" />
+        {m.content}
       </div>
     );
   }
@@ -289,11 +333,19 @@ function MessageView({ m }: { m: Msg }) {
   return (
     <div className="max-w-[95%] space-y-3">
       <div className="rounded-md border border-border px-3 py-2 text-sm leading-6">
-        <span className={`mb-1 flex items-center gap-1 font-mono text-[9px] uppercase ${m.mode === "research" ? "text-primary" : "text-amber"}`}>
+        <span
+          className={`mb-1 flex items-center gap-1 font-mono text-[9px] uppercase ${m.mode === "research" ? "text-primary" : "text-amber"}`}
+        >
           {m.mode === "research" ? (
-            <><Sparkles className="size-3" aria-hidden="true" />Research response · current sources</>
+            <>
+              <Sparkles className="size-3" aria-hidden="true" />
+              Research response · current sources
+            </>
           ) : (
-            <><Bot className="size-3" aria-hidden="true" />AI response</>
+            <>
+              <Bot className="size-3" aria-hidden="true" />
+              AI response
+            </>
           )}
         </span>
         <p className="whitespace-pre-wrap">{m.content}</p>
@@ -324,7 +376,8 @@ function MessageView({ m }: { m: Msg }) {
             className="mt-3"
             onClick={exportReport}
           >
-            <FileText aria-hidden="true" />Export Research Report
+            <FileText aria-hidden="true" />
+            Export Research Report
           </Button>
         </div>
       ) : null}
@@ -339,7 +392,8 @@ function MessageView({ m }: { m: Msg }) {
             className="mt-3"
             onClick={exportReport}
           >
-            <FileText aria-hidden="true" />Export Research Report
+            <FileText aria-hidden="true" />
+            Export Research Report
           </Button>
         </div>
       ) : null}
@@ -364,17 +418,21 @@ function ProposalCard({ raw }: { raw: string }) {
     return (
       <div className="rounded-md border border-rose/50 p-3 text-xs">
         <p className="flex items-center gap-1.5 font-mono uppercase text-rose">
-          <XCircle className="size-4" aria-hidden="true" />Proposal rejected by validator — cannot be loaded
+          <XCircle className="size-4" aria-hidden="true" />
+          Proposal rejected by validator — cannot be loaded
         </p>
         <ul className="mt-2 list-disc space-y-1 pl-5 text-muted-foreground">
-          {result.errors.map((e) => <li key={e}>{e}</li>)}
+          {result.errors.map((e) => (
+            <li key={e}>{e}</li>
+          ))}
         </ul>
       </div>
     );
   }
 
   const load = () => {
-    if (writeTransfer(result.circuit, window.sessionStorage)) void navigate({ to: "/lab/circuit-builder" });
+    if (writeTransfer(result.circuit, window.sessionStorage))
+      void navigate({ to: "/lab/circuit-builder" });
     else setLoadError("Transfer failed validation.");
   };
 
@@ -382,7 +440,8 @@ function ProposalCard({ raw }: { raw: string }) {
     <div className="space-y-3 rounded-md border border-emerald/50 p-3">
       <p className="flex items-center gap-1.5 font-mono text-[10px] uppercase text-emerald">
         <CheckCircle2 className="size-4" aria-hidden="true" />
-        Validated · {result.circuit.numQubits} qubit(s) · {result.circuit.ops.length} ops · depth {result.depth}
+        Validated · {result.circuit.numQubits} qubit(s) · {result.circuit.ops.length} ops · depth{" "}
+        {result.depth}
       </p>
       <div className="overflow-x-auto">
         <CircuitDiagram circuit={result.circuit} selected={null} onSelect={() => {}} />
@@ -393,14 +452,22 @@ function ProposalCard({ raw }: { raw: string }) {
             Quantum simulation · exact ideal statevector (classical computer, not hardware)
           </p>
           <div className="space-y-1">
-            {Array.from(sim.marg).map((p, i) => p > 1e-9 ? (
-              <ProbabilityRow key={i} label={toBitstring(i, sim.mq.length)} p={p} />
-            ) : null)}
+            {Array.from(sim.marg).map((p, i) =>
+              p > 1e-9 ? (
+                <ProbabilityRow key={i} label={toBitstring(i, sim.mq.length)} p={p} />
+              ) : null,
+            )}
           </div>
         </div>
       ) : null}
-      <Button variant="signal" size="sm" onClick={load}>Load in Circuit Builder</Button>
-      {loadError ? <p role="alert" className="text-xs text-rose">{loadError}</p> : null}
+      <Button variant="signal" size="sm" onClick={load}>
+        Load in Circuit Builder
+      </Button>
+      {loadError ? (
+        <p role="alert" className="text-xs text-rose">
+          {loadError}
+        </p>
+      ) : null}
     </div>
   );
 }

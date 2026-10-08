@@ -4,7 +4,13 @@ import { isAddress, keccak256, stringToHex, type Abi, type Address } from "viem"
 import { txUrl } from "@/lib/web3/chains";
 import { friendlyError } from "@/lib/web3/errors";
 import { runSecurityChecks, type CheckStatus } from "@/lib/web3/security";
-import { getInjected, publicClientFor, receiptToTx, trackReceipt, walletClientFor } from "@/lib/web3/tx";
+import {
+  getInjected,
+  publicClientFor,
+  receiptToTx,
+  trackReceipt,
+  walletClientFor,
+} from "@/lib/web3/tx";
 
 import type { ChainCtx, CompiledArtifact } from "./types";
 import { ExplorerLink, btnPrimary } from "./ui";
@@ -28,12 +34,35 @@ type LocalScan = {
 };
 
 /** Static heuristic checks + local scan summary + explicit wallet-signed write→read smoke test. */
-export function SecurityPanel({ artifact, ctx, abi, address }: { artifact: CompiledArtifact; ctx: ChainCtx; abi: AbiItemList; address: string }) {
+export function SecurityPanel({
+  artifact,
+  ctx,
+  abi,
+  address,
+}: {
+  artifact: CompiledArtifact;
+  ctx: ChainCtx;
+  abi: AbiItemList;
+  address: string;
+}) {
   const checks = useMemo(() => runSecurityChecks(artifact), [artifact]);
-  const supportsSmoke = abi.some((f) => f.type === "function" && f.name === "store" && f.inputs?.map((p) => p.type).join(",") === "bytes32,string")
-    && abi.some((f) => f.type === "function" && f.name === "records");
+  const supportsSmoke =
+    abi.some(
+      (f) =>
+        f.type === "function" &&
+        f.name === "store" &&
+        f.inputs?.map((p) => p.type).join(",") === "bytes32,string",
+    ) && abi.some((f) => f.type === "function" && f.name === "records");
 
-  const [localScan, setLocalScan] = useState<LocalScan>({ state: "idle", score: 0, verdict: "REVIEW", pass: 0, warn: 0, fail: 0, info: 0 });
+  const [localScan, setLocalScan] = useState<LocalScan>({
+    state: "idle",
+    score: 0,
+    verdict: "REVIEW",
+    pass: 0,
+    warn: 0,
+    fail: 0,
+    info: 0,
+  });
   const [smoke, setSmoke] = useState<Smoke>({ state: "idle", log: [] });
 
   function runLocalSecurityTest() {
@@ -48,7 +77,8 @@ export function SecurityPanel({ artifact, ctx, abi, address }: { artifact: Compi
     const total = Math.max(1, checks.length);
     const penalty = counts.fail * 35 + counts.warn * 12 + counts.info * 2;
     const score = Math.max(0, Math.min(100, Math.round(100 - penalty * (8 / Math.max(8, total)))));
-    const verdict: LocalScan["verdict"] = counts.fail > 0 ? "FAIL" : counts.warn > 0 ? "REVIEW" : "PASS";
+    const verdict: LocalScan["verdict"] =
+      counts.fail > 0 ? "FAIL" : counts.warn > 0 ? "REVIEW" : "PASS";
 
     setLocalScan({
       state: "done",
@@ -64,7 +94,12 @@ export function SecurityPanel({ artifact, ctx, abi, address }: { artifact: Compi
   async function runSmoke() {
     const provider = getInjected();
     if (!provider || !ctx.account || !isAddress(address)) return;
-    if (!window.confirm(`Send a real test transaction to ${address} on ${ctx.testnet.name}? Your wallet will ask you to sign and pay testnet gas.`)) return;
+    if (
+      !window.confirm(
+        `Send a real test transaction to ${address} on ${ctx.testnet.name}? Your wallet will ask you to sign and pay testnet gas.`,
+      )
+    )
+      return;
 
     const value = `smoke-test ${new Date().toISOString()}`;
     const id = keccak256(stringToHex(value));
@@ -80,21 +115,38 @@ export function SecurityPanel({ artifact, ctx, abi, address }: { artifact: Compi
         args: [id, value],
         account: ctx.account,
       });
-      const hash = await walletClientFor(ctx.testnet, provider).writeContract({ ...request, account: ctx.account, chain: ctx.testnet.chain });
-      const base = { hash, label: "smoke test · store()", chainId: ctx.testnet.id, timestamp: new Date().toISOString() };
+      const hash = await walletClientFor(ctx.testnet, provider).writeContract({
+        ...request,
+        account: ctx.account,
+        chain: ctx.testnet.chain,
+      });
+      const base = {
+        hash,
+        label: "smoke test · store()",
+        chainId: ctx.testnet.id,
+        timestamp: new Date().toISOString(),
+      };
       ctx.recordTx({ ...base, status: "pending" });
       setSmoke({ state: "running", log: [...log, `tx ${hash} submitted`], hash });
 
       const receipt = await trackReceipt(pc, hash, () => undefined);
       if (!receipt) {
-        setSmoke({ state: "fail", log: [...log, "Receipt not found within 5 min — result unknown, check the explorer."], hash });
+        setSmoke({
+          state: "fail",
+          log: [...log, "Receipt not found within 5 min — result unknown, check the explorer."],
+          hash,
+        });
         return;
       }
 
       const tx = receiptToTx(base, receipt, abi);
       ctx.recordTx(tx);
       if (tx.status !== "success") {
-        setSmoke({ state: "fail", log: [...log, `Transaction reverted in block ${tx.blockNumber}.`], hash });
+        setSmoke({
+          state: "fail",
+          log: [...log, `Transaction reverted in block ${tx.blockNumber}.`],
+          hash,
+        });
         return;
       }
 
@@ -129,12 +181,20 @@ export function SecurityPanel({ artifact, ctx, abi, address }: { artifact: Compi
       <div className="rounded-md border border-border bg-card p-4 sm:p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <div className="font-mono text-[10px] uppercase tracking-wider text-cyan-300">Interactive local security test</div>
+            <div className="font-mono text-[10px] uppercase tracking-wider text-cyan-300">
+              Interactive local security test
+            </div>
             <p className="mt-2 max-w-2xl text-xs leading-5 text-muted-foreground">
-              Run the current Solidity source through the built-in heuristic security checks and get a consolidated result instantly. This is a local educational scan, not a formal audit.
+              Run the current Solidity source through the built-in heuristic security checks and get
+              a consolidated result instantly. This is a local educational scan, not a formal audit.
             </p>
           </div>
-          <button type="button" className={btnPrimary} disabled={!artifact.source.trim()} onClick={runLocalSecurityTest}>
+          <button
+            type="button"
+            className={btnPrimary}
+            disabled={!artifact.source.trim()}
+            onClick={runLocalSecurityTest}
+          >
             Run Security Test
           </button>
         </div>
@@ -142,11 +202,17 @@ export function SecurityPanel({ artifact, ctx, abi, address }: { artifact: Compi
         {localScan.state === "done" ? (
           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-6" role="status">
             <div className="rounded-md border border-border bg-background p-3 lg:col-span-2">
-              <div className="font-mono text-[10px] uppercase text-muted-foreground">Overall result</div>
-              <div className={`mt-2 text-2xl font-semibold ${localScan.verdict === "PASS" ? "text-emerald-400" : localScan.verdict === "FAIL" ? "text-destructive" : "text-amber-300"}`}>
+              <div className="font-mono text-[10px] uppercase text-muted-foreground">
+                Overall result
+              </div>
+              <div
+                className={`mt-2 text-2xl font-semibold ${localScan.verdict === "PASS" ? "text-emerald-400" : localScan.verdict === "FAIL" ? "text-destructive" : "text-amber-300"}`}
+              >
                 {localScan.verdict}
               </div>
-              <div className="mt-1 font-mono text-xs text-muted-foreground">Security score: {localScan.score}/100</div>
+              <div className="mt-1 font-mono text-xs text-muted-foreground">
+                Security score: {localScan.score}/100
+              </div>
             </div>
             <div className="rounded-md border border-emerald-500/30 bg-emerald-500/5 p-3">
               <div className="font-mono text-[10px] uppercase text-emerald-400">Pass</div>
@@ -170,17 +236,28 @@ export function SecurityPanel({ artifact, ctx, abi, address }: { artifact: Compi
 
       <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
         <div>
-          <div className="font-mono text-[10px] uppercase text-muted-foreground">Static heuristic checks · not a formal audit</div>
+          <div className="font-mono text-[10px] uppercase text-muted-foreground">
+            Static heuristic checks · not a formal audit
+          </div>
           {!artifact.source.trim() ? (
             <p className="mt-3 text-sm text-muted-foreground">No source.</p>
           ) : (
             <ul className="mt-3 space-y-2">
               {checks.map((c) => (
-                <li key={c.id} className="flex gap-3 rounded-md border border-border bg-background p-3">
-                  <span className={`h-fit shrink-0 rounded-full border px-2 py-0.5 font-mono text-[9px] uppercase ${STATUS_STYLE[c.status]}`}>{c.status}</span>
+                <li
+                  key={c.id}
+                  className="flex gap-3 rounded-md border border-border bg-background p-3"
+                >
+                  <span
+                    className={`h-fit shrink-0 rounded-full border px-2 py-0.5 font-mono text-[9px] uppercase ${STATUS_STYLE[c.status]}`}
+                  >
+                    {c.status}
+                  </span>
                   <div className="min-w-0">
                     <div className="text-sm font-medium">{c.label}</div>
-                    <div className="mt-0.5 break-words text-xs text-muted-foreground">{c.detail}</div>
+                    <div className="mt-0.5 break-words text-xs text-muted-foreground">
+                      {c.detail}
+                    </div>
                   </div>
                 </li>
               ))}
@@ -189,27 +266,62 @@ export function SecurityPanel({ artifact, ctx, abi, address }: { artifact: Compi
         </div>
 
         <div>
-          <div className="font-mono text-[10px] uppercase text-muted-foreground">Runtime smoke test · real chain</div>
+          <div className="font-mono text-[10px] uppercase text-muted-foreground">
+            Runtime smoke test · real chain
+          </div>
           {!supportsSmoke ? (
             <p className="mt-3 text-sm text-muted-foreground">
-              Available for contracts exposing <code>store(bytes32,string)</code> and <code>records(bytes32)</code> (the default ResearchRegistry).
+              Available for contracts exposing <code>store(bytes32,string)</code> and{" "}
+              <code>records(bytes32)</code> (the default ResearchRegistry).
             </p>
           ) : (
             <>
               <p className="mt-3 text-xs leading-5 text-muted-foreground">
-                Writes a unique test record with your wallet signature, waits for the receipt, then reads it back with eth_call. PASS/FAIL comes only from the chain result. Nothing is sent without your click and confirmation.
+                Writes a unique test record with your wallet signature, waits for the receipt, then
+                reads it back with eth_call. PASS/FAIL comes only from the chain result. Nothing is
+                sent without your click and confirmation.
               </p>
-              <button type="button" className={`${btnPrimary} mt-3`} disabled={!ctx.ready || !isAddress(address) || smoke.state === "running"} onClick={() => void runSmoke()}>
+              <button
+                type="button"
+                className={`${btnPrimary} mt-3`}
+                disabled={!ctx.ready || !isAddress(address) || smoke.state === "running"}
+                onClick={() => void runSmoke()}
+              >
                 {smoke.state === "running" ? "Running…" : "Run smoke test"}
               </button>
-              {!ctx.ready ? <p className="mt-2 text-[11px] text-muted-foreground">Connect your wallet on {ctx.testnet.name} and set a deployed address first.</p> : null}
+              {!ctx.ready ? (
+                <p className="mt-2 text-[11px] text-muted-foreground">
+                  Connect your wallet on {ctx.testnet.name} and set a deployed address first.
+                </p>
+              ) : null}
               {smoke.state !== "idle" ? (
-                <div role="status" className="mt-3 rounded-md border border-border bg-background p-3 font-mono text-[11px]">
-                  <div className={smoke.state === "pass" ? "text-emerald-400" : smoke.state === "fail" ? "text-destructive" : "text-muted-foreground"}>
+                <div
+                  role="status"
+                  className="mt-3 rounded-md border border-border bg-background p-3 font-mono text-[11px]"
+                >
+                  <div
+                    className={
+                      smoke.state === "pass"
+                        ? "text-emerald-400"
+                        : smoke.state === "fail"
+                          ? "text-destructive"
+                          : "text-muted-foreground"
+                    }
+                  >
                     {smoke.state === "pass" ? "PASS" : smoke.state === "fail" ? "FAIL" : "RUNNING"}
                   </div>
-                  {smoke.log.map((l, i) => <div key={i} className="mt-1 break-all text-muted-foreground">{l}</div>)}
-                  {smoke.hash ? <div className="mt-1"><ExplorerLink href={txUrl(ctx.testnet, smoke.hash)}>{smoke.hash}</ExplorerLink></div> : null}
+                  {smoke.log.map((l, i) => (
+                    <div key={i} className="mt-1 break-all text-muted-foreground">
+                      {l}
+                    </div>
+                  ))}
+                  {smoke.hash ? (
+                    <div className="mt-1">
+                      <ExplorerLink href={txUrl(ctx.testnet, smoke.hash)}>
+                        {smoke.hash}
+                      </ExplorerLink>
+                    </div>
+                  ) : null}
                 </div>
               ) : null}
             </>

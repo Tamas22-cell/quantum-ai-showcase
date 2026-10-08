@@ -34,7 +34,11 @@ export function AIResearchAssistant() {
     } catch {
       setMessages((current) => [
         ...current,
-        { role: "assistant", content: "I couldn't reach the research assistant right now. Please try again in a moment." },
+        {
+          role: "assistant",
+          content:
+            "I couldn't reach the research assistant right now. Please try again in a moment.",
+        },
       ]);
     } finally {
       setLoading(false);
@@ -65,17 +69,31 @@ export function AIResearchAssistant() {
               </span>
               <div>
                 <p className="text-sm font-semibold">AI Research Assistant</p>
-                <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Quantum AI Lab</p>
+                <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                  Quantum AI Lab
+                </p>
               </div>
             </div>
-            <Button variant="ghost" size="icon" onClick={() => setOpen(false)} aria-label="Close assistant">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setOpen(false)}
+              aria-label="Close assistant"
+            >
               <X />
             </Button>
           </div>
 
           <div className="max-h-[55vh] space-y-3 overflow-y-auto p-4">
             {messages.map((message, index) => (
-              <div key={index} className={message.role === "user" ? "ml-8 rounded-lg bg-primary px-3 py-2 text-sm text-primary-foreground" : "mr-8 rounded-lg border border-border bg-card px-3 py-2 text-sm leading-6"}>
+              <div
+                key={index}
+                className={
+                  message.role === "user"
+                    ? "ml-8 rounded-lg bg-primary px-3 py-2 text-sm text-primary-foreground"
+                    : "mr-8 rounded-lg border border-border bg-card px-3 py-2 text-sm leading-6"
+                }
+              >
                 {message.content}
               </div>
             ))}
@@ -114,7 +132,13 @@ export function AIResearchAssistant() {
               className="min-w-0 flex-1 rounded-lg border border-border bg-card px-3 py-2 text-sm outline-none focus:border-primary"
               aria-label="Ask the AI Research Assistant"
             />
-            <Button type="submit" variant="signal" size="icon" disabled={!input.trim() || loading} aria-label="Send question">
+            <Button
+              type="submit"
+              variant="signal"
+              size="icon"
+              disabled={!input.trim() || loading}
+              aria-label="Send question"
+            >
               <Send className="size-4" />
             </Button>
           </form>

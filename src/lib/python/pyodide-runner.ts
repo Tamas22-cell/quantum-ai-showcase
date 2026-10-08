@@ -7,7 +7,13 @@
 export const PYODIDE_VERSION = "0.26.4";
 const INDEX_URL = `https://cdn.jsdelivr.net/pyodide/v${PYODIDE_VERSION}/full/`;
 
-export type RunResult = { ok: boolean; stdout: string; stderr: string; result: string | null; durationMs: number };
+export type RunResult = {
+  ok: boolean;
+  stdout: string;
+  stderr: string;
+  result: string | null;
+  durationMs: number;
+};
 
 // Worker source kept inline (Blob URL) so no extra build config is required.
 const WORKER_SOURCE = `
@@ -42,7 +48,10 @@ self.onmessage = async (e) => {
 export class PyodideRunner {
   private worker: Worker | null = null;
   private seq = 0;
-  private pending = new Map<number, { resolve: (v: RunResult) => void; reject: (e: Error) => void }>();
+  private pending = new Map<
+    number,
+    { resolve: (v: RunResult) => void; reject: (e: Error) => void }
+  >();
   private readyPromise: Promise<void> | null = null;
 
   /** Start (or reuse) the worker and resolve once Pyodide has booted. */
@@ -61,7 +70,9 @@ export class PyodideRunner {
         else reject(new Error(e.data.error ?? "Python runtime failed to load"));
       };
       worker.addEventListener("message", onMsg);
-      worker.addEventListener("error", (e) => reject(new Error(e.message || "Python runtime failed to load (network blocked?)")));
+      worker.addEventListener("error", (e) =>
+        reject(new Error(e.message || "Python runtime failed to load (network blocked?)")),
+      );
       worker.postMessage({ id, code: null });
     });
     worker.addEventListener("message", (e) => {
@@ -81,11 +92,21 @@ export class PyodideRunner {
       const timer = window.setTimeout(() => {
         this.pending.delete(id);
         this.terminate();
-        reject(new Error(`Execution exceeded ${timeoutMs / 1000}s and was stopped. The runtime will reload.`));
+        reject(
+          new Error(
+            `Execution exceeded ${timeoutMs / 1000}s and was stopped. The runtime will reload.`,
+          ),
+        );
       }, timeoutMs);
       this.pending.set(id, {
-        resolve: (v) => { window.clearTimeout(timer); resolve(v); },
-        reject: (e) => { window.clearTimeout(timer); reject(e); },
+        resolve: (v) => {
+          window.clearTimeout(timer);
+          resolve(v);
+        },
+        reject: (e) => {
+          window.clearTimeout(timer);
+          reject(e);
+        },
       });
       this.worker!.postMessage({ id, code });
     });

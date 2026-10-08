@@ -14,11 +14,35 @@ const MUTED: [number, number, number] = [96, 108, 128];
 const RULE: [number, number, number] = [214, 222, 232];
 
 const MAP: Record<string, string> = {
-  "⟨": "<", "⟩": ">", "γ": "gamma", "β": "beta", "θ": "theta", "ψ": "psi",
-  "Ψ": "Psi", "Φ": "Phi", "π": "pi", "μ": "mu", "Σ": "Sum", "Π": "Prod",
-  "√": "sqrt", "≤": "<=", "≥": ">=", "≈": "~", "−": "-", "⊗": "(x)",
-  "₀": "0", "₂": "2", "ᵀ": "^T", "′": "'", "†": "^dag", "→": "->",
-  "∈": " in ", "½": "1/2", "⁺": "+", "⁻": "-", "ψ⁺": "psi+",
+  "⟨": "<",
+  "⟩": ">",
+  γ: "gamma",
+  β: "beta",
+  θ: "theta",
+  ψ: "psi",
+  Ψ: "Psi",
+  Φ: "Phi",
+  π: "pi",
+  μ: "mu",
+  Σ: "Sum",
+  Π: "Prod",
+  "√": "sqrt",
+  "≤": "<=",
+  "≥": ">=",
+  "≈": "~",
+  "−": "-",
+  "⊗": "(x)",
+  "₀": "0",
+  "₂": "2",
+  ᵀ: "^T",
+  "′": "'",
+  "†": "^dag",
+  "→": "->",
+  "∈": " in ",
+  "½": "1/2",
+  "⁺": "+",
+  "⁻": "-",
+  "ψ⁺": "psi+",
 };
 
 function pdfSafe(text: string): string {
@@ -32,12 +56,14 @@ function pdfSafe(text: string): string {
 }
 
 function safeFilename(text: string): string {
-  return text
-    .normalize("NFKD")
-    .replace(/[^a-zA-Z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 70)
-    .toLowerCase() || "research-report";
+  return (
+    text
+      .normalize("NFKD")
+      .replace(/[^a-zA-Z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 70)
+      .toLowerCase() || "research-report"
+  );
 }
 
 function addWrappedText(
@@ -107,7 +133,10 @@ export function exportAssistantResearchReport(report: AssistantResearchReport): 
   pdf.setFontSize(9);
   pdf.setTextColor(170, 190, 210);
   pdf.text(
-    `Generated ${report.generatedAt.replace("T", " ").replace(/\.\d+Z$/, " UTC").replace(/Z$/, " UTC")}`,
+    `Generated ${report.generatedAt
+      .replace("T", " ")
+      .replace(/\.\d+Z$/, " UTC")
+      .replace(/Z$/, " UTC")}`,
     M,
     154,
   );
@@ -156,7 +185,13 @@ export function exportAssistantResearchReport(report: AssistantResearchReport): 
       pdf.setFontSize(8.5);
       pdf.setTextColor(...CYAN);
       pdf.text(lines, M, y);
-      pdf.link(M, y - 9, Math.min(CW, Math.max(100, pdf.getTextWidth(lines[0] ?? "") + 8)), blockHeight, { url: source.url });
+      pdf.link(
+        M,
+        y - 9,
+        Math.min(CW, Math.max(100, pdf.getTextWidth(lines[0] ?? "") + 8)),
+        blockHeight,
+        { url: source.url },
+      );
       y += blockHeight;
     });
   }

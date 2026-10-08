@@ -14,7 +14,9 @@ function safeParse(raw: string | null): ExperimentSnapshot[] {
   if (!raw) return [];
   try {
     const value = JSON.parse(raw);
-    return Array.isArray(value) ? value.filter((x) => x && typeof x === "object") as ExperimentSnapshot[] : [];
+    return Array.isArray(value)
+      ? (value.filter((x) => x && typeof x === "object") as ExperimentSnapshot[])
+      : [];
   } catch {
     return [];
   }
@@ -25,10 +27,15 @@ export function getExperimentHistory(): ExperimentSnapshot[] {
   return safeParse(window.localStorage.getItem(KEY));
 }
 
-export function saveExperimentSnapshot(snapshot: Omit<ExperimentSnapshot, "id" | "createdAt">): ExperimentSnapshot {
+export function saveExperimentSnapshot(
+  snapshot: Omit<ExperimentSnapshot, "id" | "createdAt">,
+): ExperimentSnapshot {
   const record: ExperimentSnapshot = {
     ...snapshot,
-    id: typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    id:
+      typeof crypto !== "undefined" && "randomUUID" in crypto
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random().toString(36).slice(2)}`,
     createdAt: new Date().toISOString(),
   };
   const next = [record, ...getExperimentHistory()].slice(0, LIMIT);

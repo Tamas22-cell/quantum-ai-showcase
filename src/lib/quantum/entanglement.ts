@@ -29,7 +29,11 @@ export function bellPrep(state: BellState): Op[] {
 /** Rotation mapping the chosen Pauli eigenbasis onto Z: X → H, Y → S†·H (S† = Rz(−π/2) up to phase). */
 export function basisOps(basis: Basis, q: number): Op[] {
   if (basis === "X") return [{ gate: "H", qubits: [q] }];
-  if (basis === "Y") return [{ gate: "RZ", qubits: [q], theta: -Math.PI / 2 }, { gate: "H", qubits: [q] }];
+  if (basis === "Y")
+    return [
+      { gate: "RZ", qubits: [q], theta: -Math.PI / 2 },
+      { gate: "H", qubits: [q] },
+    ];
   return [];
 }
 
@@ -41,7 +45,16 @@ export function angleOps(theta: number, q: number): Op[] {
 
 export function bellCircuit(state: BellState, a: Basis, b: Basis): Circuit {
   if (!(state in BELL_STATES)) throw new RangeError(`Unknown Bell state: ${state}`);
-  return { numQubits: 2, ops: [...bellPrep(state), ...basisOps(a, 0), ...basisOps(b, 1), { gate: "M", qubits: [0] }, { gate: "M", qubits: [1] }] };
+  return {
+    numQubits: 2,
+    ops: [
+      ...bellPrep(state),
+      ...basisOps(a, 0),
+      ...basisOps(b, 1),
+      { gate: "M", qubits: [0] },
+      { gate: "M", qubits: [1] },
+    ],
+  };
 }
 
 /** Joint probabilities indexed by basis index (bit0 = A, bit1 = B): [00, 01(A=1), 10(B=1), 11]. */
@@ -75,8 +88,10 @@ export type ChshResult = {
 /** S = E(a,b) + E(a,b′) + E(a′,b) − E(a′,b′). Optional seeded sampling estimates each E from shots. */
 export function runChsh(state: BellState, ang: ChshAngles, shots?: number, seed = 1): ChshResult {
   const settings: [string, number, number, 1 | -1][] = [
-    ["E(a, b)", ang.a, ang.b, 1], ["E(a, b′)", ang.a, ang.b2, 1],
-    ["E(a′, b)", ang.a2, ang.b, 1], ["E(a′, b′)", ang.a2, ang.b2, -1],
+    ["E(a, b)", ang.a, ang.b, 1],
+    ["E(a, b′)", ang.a, ang.b2, 1],
+    ["E(a′, b)", ang.a2, ang.b, 1],
+    ["E(a′, b′)", ang.a2, ang.b2, -1],
   ];
   const rng = shots !== undefined ? createRng(seed) : null;
   const terms = settings.map(([label, ta, tb, sign]) => {
@@ -85,9 +100,16 @@ export function runChsh(state: BellState, ang: ChshAngles, shots?: number, seed 
     return { label, sign, exact: correlator(p), sampled };
   });
   const sum = (k: "exact" | "sampled") => terms.reduce((s, t) => s + t.sign * (t[k] ?? 0), 0);
-  return { terms, exactS: sum("exact"), sampledS: rng ? sum("sampled") : null, shotsPerSetting: shots ?? null };
+  return {
+    terms,
+    exactS: sum("exact"),
+    sampledS: rng ? sum("sampled") : null,
+    shotsPerSetting: shots ?? null,
+  };
 }
 
 export function validateShots(shots: number): string | null {
-  return Number.isInteger(shots) && shots >= 1 && shots <= 100_000 ? null : "Shots must be an integer between 1 and 100,000";
+  return Number.isInteger(shots) && shots >= 1 && shots <= 100_000
+    ? null
+    : "Shots must be an integer between 1 and 100,000";
 }
