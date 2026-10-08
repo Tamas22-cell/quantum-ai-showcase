@@ -130,6 +130,8 @@ export function PortfolioSite() {
   const [scrolled, setScrolled] = useState(false);
   const [researchPulse, setResearchPulse] = useState(false);
   const [activeAgent, setActiveAgent] = useState("Planner Agent");
+  const [demoQuestion, setDemoQuestion] = useState("What are the main risks of investing in Bitcoin?");
+  const [demoResult, setDemoResult] = useState(false);
   const active = useActiveSection(sectionIds);
 
   useEffect(() => {
@@ -602,6 +604,36 @@ export function PortfolioSite() {
                 <h3 className="mt-3 text-xl font-semibold text-foreground">{agentDetails[activeAgent]!.title}</h3>
                 <p className="mt-2 max-w-3xl text-sm leading-7 text-muted-foreground">{agentDetails[activeAgent]!.description}</p>
                 <p className="mt-4 font-mono text-[10px] uppercase tracking-wider text-primary">{agentDetails[activeAgent]!.output}</p>
+              </div>
+
+              {/* Local, clearly labelled educational demo; no live AI/API calls. */}
+              <div className="mt-8 rounded-lg border border-primary/40 bg-background/70 p-5 sm:p-7">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <h3 className="text-xl font-semibold text-foreground">Launch Interactive Demo</h3>
+                  <span className="rounded-full border border-primary/40 px-3 py-1 font-mono text-[10px] uppercase text-primary">Educational simulation</span>
+                </div>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">Enter a research question and explore how a multi-agent workflow could organize its analysis. This is a local demonstration with illustrative outputs, not a live AI model or investment advice.</p>
+                <label htmlFor="agent-demo-question" className="mt-5 block font-mono text-xs text-primary">Your research question</label>
+                <textarea id="agent-demo-question" rows={3} maxLength={500} value={demoQuestion} onChange={(event) => { setDemoQuestion(event.target.value); setDemoResult(false); }} placeholder="e.g. What are the risks of investing in Bitcoin?" className={`mt-2 w-full resize-y rounded-md border border-border bg-card p-3 text-sm text-foreground placeholder:text-muted-foreground ${focusRing}`} />
+                <Button type="button" variant="signal" className="mt-3" disabled={!demoQuestion.trim()} onClick={() => setDemoResult(true)}>Run simulated agents <ArrowRight className="size-4" aria-hidden="true" /></Button>
+                {demoResult ? (
+                  <div className="mt-6 space-y-3" aria-live="polite">
+                    <p className="text-sm font-semibold text-foreground">Simulated workflow for: {demoQuestion}</p>
+                    {[
+                      ["Planner Agent", "Define the scope, time horizon, key assumptions, and evidence needed to answer the question."],
+                      ["Data Agent", "Identify relevant price, volume, on-chain, and historical datasets; no live data is fetched in this demo."],
+                      ["Market Agent", "Outline market drivers, trends, news context, and possible scenarios without claiming current signals."],
+                      ["Risk Agent", "Consider volatility, liquidity, counterparty exposure, uncertainty, and downside scenarios."],
+                      ["Critic Agent", "Flag missing sources, unverified claims, biases, and assumptions requiring further checks."],
+                      ["Final Synthesis", "Combine the findings into a structured research brief; real conclusions require verified data and actual model execution."],
+                    ].map(([name, output], index) => (
+                      <div key={name} className="flex gap-3 rounded-md border border-border bg-card p-3">
+                        <span className="font-mono text-xs text-primary">{String(index + 1).padStart(2, "0")}</span>
+                        <div><p className="text-sm font-semibold text-foreground">{name}</p><p className="mt-1 text-xs leading-6 text-muted-foreground">{output}</p></div>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
               </div>
 
               {/* Capability chips */}
