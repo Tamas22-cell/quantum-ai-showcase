@@ -30,10 +30,19 @@ const NET_KEY = "web3-lab:network:v1";
 
 function read<T>(key: string, fallback: T): T {
   if (typeof window === "undefined") return fallback;
-  try { const v = window.localStorage.getItem(key); return v ? (JSON.parse(v) as T) : fallback; } catch { return fallback; }
+  try {
+    const v = window.localStorage.getItem(key);
+    return v ? (JSON.parse(v) as T) : fallback;
+  } catch {
+    return fallback;
+  }
 }
 function write(key: string, v: unknown) {
-  try { window.localStorage.setItem(key, JSON.stringify(v)); } catch { /* storage full/blocked: keep in memory only */ }
+  try {
+    window.localStorage.setItem(key, JSON.stringify(v));
+  } catch {
+    /* storage full/blocked: keep in memory only */
+  }
 }
 
 export const loadTxs = () => read<OnchainTx[]>(TX_KEY, []);

@@ -13,7 +13,10 @@ export type GateName = "H" | "X" | "Y" | "Z" | "S" | "T" | "RX" | "RY" | "RZ" | 
 export type Op = { gate: GateName; qubits: number[]; theta?: number };
 export type Circuit = { numQubits: number; ops: Op[] };
 
-export const GATE_META: Record<GateName, { arity: 1 | 2; param: boolean; label: string; description: string }> = {
+export const GATE_META: Record<
+  GateName,
+  { arity: 1 | 2; param: boolean; label: string; description: string }
+> = {
   H: { arity: 1, param: false, label: "H", description: "Hadamard" },
   X: { arity: 1, param: false, label: "X", description: "Pauli-X (NOT)" },
   Y: { arity: 1, param: false, label: "Y", description: "Pauli-Y" },
@@ -30,16 +33,28 @@ export const GATE_META: Record<GateName, { arity: 1 | 2; param: boolean; label: 
 
 export function gateMatrix(op: Op): G.Matrix2 {
   switch (op.gate) {
-    case "H": return G.H;
-    case "X": case "CNOT": return G.X;
-    case "Y": return G.Y;
-    case "Z": case "CZ": return G.Z;
-    case "S": return G.S;
-    case "T": return G.T;
-    case "RX": return G.rx(op.theta ?? 0);
-    case "RY": return G.ry(op.theta ?? 0);
-    case "RZ": return G.rz(op.theta ?? 0);
-    case "M": return G.I;
+    case "H":
+      return G.H;
+    case "X":
+    case "CNOT":
+      return G.X;
+    case "Y":
+      return G.Y;
+    case "Z":
+    case "CZ":
+      return G.Z;
+    case "S":
+      return G.S;
+    case "T":
+      return G.T;
+    case "RX":
+      return G.rx(op.theta ?? 0);
+    case "RY":
+      return G.ry(op.theta ?? 0);
+    case "RZ":
+      return G.rz(op.theta ?? 0);
+    case "M":
+      return G.I;
   }
 }
 
@@ -52,15 +67,24 @@ export function validateCircuit(c: Circuit, maxQubits = 5, maxOps = 64): string[
   const measured = new Set<number>();
   c.ops.forEach((op, i) => {
     const meta = GATE_META[op.gate];
-    if (!meta) { errors.push(`Step ${i + 1}: unknown gate.`); return; }
-    if (op.qubits.length !== meta.arity) errors.push(`Step ${i + 1}: ${op.gate} needs ${meta.arity} qubit(s).`);
+    if (!meta) {
+      errors.push(`Step ${i + 1}: unknown gate.`);
+      return;
+    }
+    if (op.qubits.length !== meta.arity)
+      errors.push(`Step ${i + 1}: ${op.gate} needs ${meta.arity} qubit(s).`);
     op.qubits.forEach((q) => {
-      if (!Number.isInteger(q) || q < 0 || q >= c.numQubits) errors.push(`Step ${i + 1}: qubit q${q} does not exist.`);
+      if (!Number.isInteger(q) || q < 0 || q >= c.numQubits)
+        errors.push(`Step ${i + 1}: qubit q${q} does not exist.`);
       else if (op.gate !== "M" && measured.has(q))
-        errors.push(`Step ${i + 1}: q${q} was already measured — only terminal measurements are supported.`);
+        errors.push(
+          `Step ${i + 1}: q${q} was already measured — only terminal measurements are supported.`,
+        );
     });
-    if (meta.arity === 2 && op.qubits[0] === op.qubits[1]) errors.push(`Step ${i + 1}: control and target must differ.`);
-    if (meta.param && !Number.isFinite(op.theta)) errors.push(`Step ${i + 1}: rotation angle must be a finite number.`);
+    if (meta.arity === 2 && op.qubits[0] === op.qubits[1])
+      errors.push(`Step ${i + 1}: control and target must differ.`);
+    if (meta.param && !Number.isFinite(op.theta))
+      errors.push(`Step ${i + 1}: rotation angle must be a finite number.`);
     if (op.gate === "M") measured.add(op.qubits[0]!);
   });
   return errors;
@@ -82,6 +106,8 @@ export function simulate(c: Circuit): StateVector {
 
 /** Qubits to read out: explicit M ops (sorted) or, if none, every qubit. */
 export function measuredQubits(c: Circuit): number[] {
-  const m = [...new Set(c.ops.filter((o) => o.gate === "M").map((o) => o.qubits[0]!))].sort((a, b) => a - b);
+  const m = [...new Set(c.ops.filter((o) => o.gate === "M").map((o) => o.qubits[0]!))].sort(
+    (a, b) => a - b,
+  );
   return m.length ? m : Array.from({ length: c.numQubits }, (_, i) => i);
 }

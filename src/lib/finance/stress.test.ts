@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { buildUniverse, getScenario, projectSimplex, runStressTest, simulatedMaxDrawdown, SCENARIOS, validateStress } from "./stress";
+import {
+  buildUniverse,
+  getScenario,
+  projectSimplex,
+  runStressTest,
+  simulatedMaxDrawdown,
+  SCENARIOS,
+  validateStress,
+} from "./stress";
 
 const tickers = ["SPX", "TLT", "GLD", "BTC", "XLE"];
 
@@ -23,13 +31,30 @@ describe("stress lab", () => {
   });
 
   it("validates config", () => {
-    expect(validateStress({ tickers: ["SPX", "TLT"], weights: [1, 1], scenario: "baseline", riskPref: 5, k: 2, seed: 1 }).length).toBeGreaterThan(0);
+    expect(
+      validateStress({
+        tickers: ["SPX", "TLT"],
+        weights: [1, 1],
+        scenario: "baseline",
+        riskPref: 5,
+        k: 2,
+        seed: 1,
+      }).length,
+    ).toBeGreaterThan(0);
   });
 
   it("runs every scenario with valid weights and classical ≥ original in mean-variance utility", async () => {
     for (const s of SCENARIOS) {
-      const r = await runStressTest({ tickers, weights: [1, 1, 1, 1, 1], scenario: s.id, riskPref: 5, k: 3, seed: 11 });
-      for (const w of [r.original.w, r.classical.w, r.qaoa.w]) expect(w.reduce((a, b) => a + b, 0)).toBeCloseTo(1, 6);
+      const r = await runStressTest({
+        tickers,
+        weights: [1, 1, 1, 1, 1],
+        scenario: s.id,
+        riskPref: 5,
+        k: 3,
+        seed: 11,
+      });
+      for (const w of [r.original.w, r.classical.w, r.qaoa.w])
+        expect(w.reduce((a, b) => a + b, 0)).toBeCloseTo(1, 6);
       expect(r.qaoa.selected.length).toBe(3);
       const lam = 9;
       const util = (m: { ret: number; vol: number }) => m.ret - (lam / 2) * m.vol ** 2;

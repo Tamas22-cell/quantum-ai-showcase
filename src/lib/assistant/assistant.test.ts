@@ -9,21 +9,35 @@ import { readTransfer, TRANSFER_KEY, writeTransfer } from "./transfer";
 
 function memStore() {
   const m = new Map<string, string>();
-  return { getItem: (k: string) => m.get(k) ?? null, setItem: (k: string, v: string) => void m.set(k, v), removeItem: (k: string) => void m.delete(k), m };
+  return {
+    getItem: (k: string) => m.get(k) ?? null,
+    setItem: (k: string, v: string) => void m.set(k, v),
+    removeItem: (k: string) => void m.delete(k),
+    m,
+  };
 }
 
 describe("C2 proposal validation", () => {
   it("accepts a valid Bell proposal and simulates it correctly", () => {
-    const r = parseProposal({ numQubits: 2, ops: [{ gate: "H", qubits: [0], theta: null }, { gate: "CX", qubits: [0, 1], theta: null }] });
+    const r = parseProposal({
+      numQubits: 2,
+      ops: [
+        { gate: "H", qubits: [0], theta: null },
+        { gate: "CX", qubits: [0, 1], theta: null },
+      ],
+    });
     expect(r.ok).toBe(true);
     if (!r.ok) return;
     expect(r.circuit.ops[1]!.gate).toBe("CNOT");
     const p = probabilities(simulate(r.circuit));
-    expect(p[0]).toBeCloseTo(0.5); expect(p[3]).toBeCloseTo(0.5);
+    expect(p[0]).toBeCloseTo(0.5);
+    expect(p[3]).toBeCloseTo(0.5);
     expect(r.depth).toBe(2);
   });
   it("accepts JSON text in a code fence and rotations with theta", () => {
-    const r = parseProposal('```json\n{"numQubits":1,"ops":[{"gate":"ry","qubits":[0],"theta":1.0472}]}\n```');
+    const r = parseProposal(
+      '```json\n{"numQubits":1,"ops":[{"gate":"ry","qubits":[0],"theta":1.0472}]}\n```',
+    );
     expect(r.ok).toBe(true);
   });
   it("rejects unsupported gates", () => {
@@ -39,23 +53,63 @@ describe("C2 proposal validation", () => {
   });
   it("rejects bad parameters", () => {
     expect(parseProposal({ numQubits: 1, ops: [{ gate: "RX", qubits: [0] }] }).ok).toBe(false);
-    expect(parseProposal({ numQubits: 1, ops: [{ gate: "RX", qubits: [0], theta: "pi" }] }).ok).toBe(false);
-    expect(parseProposal({ numQubits: 1, ops: [{ gate: "RX", qubits: [0], theta: 1e9 }] }).ok).toBe(false);
-    expect(parseProposal({ numQubits: 1, ops: [{ gate: "H", qubits: [0], theta: 1 }] }).ok).toBe(false);
+    expect(
+      parseProposal({ numQubits: 1, ops: [{ gate: "RX", qubits: [0], theta: "pi" }] }).ok,
+    ).toBe(false);
+    expect(parseProposal({ numQubits: 1, ops: [{ gate: "RX", qubits: [0], theta: 1e9 }] }).ok).toBe(
+      false,
+    );
+    expect(parseProposal({ numQubits: 1, ops: [{ gate: "H", qubits: [0], theta: 1 }] }).ok).toBe(
+      false,
+    );
   });
   it("enforces qubit, op-count and depth limits", () => {
     expect(parseProposal({ numQubits: 6, ops: [] }).ok).toBe(false);
-    expect(parseProposal({ numQubits: 1, ops: Array.from({ length: 41 }, () => ({ gate: "X", qubits: [0] })) }).ok).toBe(false);
-    const deep = parseProposal({ numQubits: 1, ops: Array.from({ length: 31 }, () => ({ gate: "X", qubits: [0] })) });
+    expect(
+      parseProposal({
+        numQubits: 1,
+        ops: Array.from({ length: 41 }, () => ({ gate: "X", qubits: [0] })),
+      }).ok,
+    ).toBe(false);
+    const deep = parseProposal({
+      numQubits: 1,
+      ops: Array.from({ length: 31 }, () => ({ gate: "X", qubits: [0] })),
+    });
     expect(deep.ok).toBe(false);
     if (!deep.ok) expect(deep.errors[0]).toMatch(/depth/);
-    expect(circuitDepth({ numQubits: 2, ops: [{ gate: "H", qubits: [0] }, { gate: "H", qubits: [1] }] })).toBe(1);
+    expect(
+      circuitDepth({
+        numQubits: 2,
+        ops: [
+          { gate: "H", qubits: [0] },
+          { gate: "H", qubits: [1] },
+        ],
+      }),
+    ).toBe(1);
   });
   it("rejects gates after measurement", () => {
-    expect(parseProposal({ numQubits: 1, ops: [{ gate: "M", qubits: [0] }, { gate: "H", qubits: [0] }] }).ok).toBe(false);
+    expect(
+      parseProposal({
+        numQubits: 1,
+        ops: [
+          { gate: "M", qubits: [0] },
+          { gate: "H", qubits: [0] },
+        ],
+      }).ok,
+    ).toBe(false);
   });
   it("handles malformed AI output without throwing", () => {
-    for (const bad of ["not json", "{", "[]", "null", '{"numQubits":2}', '{"numQubits":"two","ops":[]}', 42, null, { ops: [null] }]) {
+    for (const bad of [
+      "not json",
+      "{",
+      "[]",
+      "null",
+      '{"numQubits":2}',
+      '{"numQubits":"two","ops":[]}',
+      42,
+      null,
+      { ops: [null] },
+    ]) {
       expect(() => parseProposal(bad)).not.toThrow();
       expect(parseProposal(bad).ok).toBe(false);
     }
@@ -85,7 +139,10 @@ describe("C2 demo mode", () => {
     const bell = demoReply("draft-circuit", "Draft a Bell state");
     expect(bell.ok && bell.source).toBe("demo");
     expect(bell.ok && parseProposal(bell.circuitRaw!).ok).toBe(true);
-    for (const q of ["ghz", "qaoa layer"]) { const r = demoReply("draft-circuit", q); expect(r.ok && parseProposal(r.circuitRaw!).ok).toBe(true); }
+    for (const q of ["ghz", "qaoa layer"]) {
+      const r = demoReply("draft-circuit", q);
+      expect(r.ok && parseProposal(r.circuitRaw!).ok).toBe(true);
+    }
     const bad = demoReply("draft-circuit", "invalid toffoli");
     expect(bad.ok && parseProposal(bad.circuitRaw!).ok).toBe(false);
     const ex = demoReply("explain-algorithm", "qaoa");
@@ -98,10 +155,21 @@ describe("Regression: existing modules", () => {
     for (const ex of EXAMPLE_CIRCUITS) expect(parseProposal(ex.circuit).ok).toBe(true);
   });
   it("C1 Arena still runs reproducibly", async () => {
-    const cfg: ArenaConfig = { graph: GRAPH_PRESETS[0]!.graph, seed: 7, p: 1, restarts: 2, maxIter: 60, shots: 300, saSteps: 300, greedyRestarts: 2 };
+    const cfg: ArenaConfig = {
+      graph: GRAPH_PRESETS[0]!.graph,
+      seed: 7,
+      p: 1,
+      restarts: 2,
+      maxIter: 60,
+      shots: 300,
+      saSteps: 300,
+      greedyRestarts: 2,
+    };
     expect((await runArena(cfg)).results.find((x) => x.id === "exhaustive")!.value).toBe(2);
-    const a = await runArena(cfg); const b = await runArena(cfg);
-    const strip = (r: unknown) => JSON.stringify(r, (k, v) => (/ms|time|createdAt/i.test(k) ? undefined : v));
+    const a = await runArena(cfg);
+    const b = await runArena(cfg);
+    const strip = (r: unknown) =>
+      JSON.stringify(r, (k, v) => (/ms|time|createdAt/i.test(k) ? undefined : v));
     expect(strip(a)).toBe(strip(b));
   });
 });

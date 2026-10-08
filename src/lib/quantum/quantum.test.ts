@@ -1,8 +1,19 @@
 import { describe, expect, it } from "vitest";
 import * as G from "./gates";
 import {
-  EXAMPLE_CIRCUITS, applySingle, createRng, marginal, measuredQubits, norm, probabilities,
-  sampleCounts, simulate, validateCircuit, zeroState, type Circuit, type GateName,
+  EXAMPLE_CIRCUITS,
+  applySingle,
+  createRng,
+  marginal,
+  measuredQubits,
+  norm,
+  probabilities,
+  sampleCounts,
+  simulate,
+  validateCircuit,
+  zeroState,
+  type Circuit,
+  type GateName,
 } from "./index";
 
 const EPS = 1e-12;
@@ -10,7 +21,10 @@ const close = (a: number, b: number, eps = EPS) => expect(Math.abs(a - b)).toBeL
 
 function isUnitary(m: G.Matrix2) {
   const p = G.matmul(G.dagger(m), m);
-  [1, 0, 0, 1].forEach((v, i) => { close(p.re[i]!, v); close(p.im[i]!, 0); });
+  [1, 0, 0, 1].forEach((v, i) => {
+    close(p.re[i]!, v);
+    close(p.im[i]!, 0);
+  });
 }
 
 describe("gate matrices", () => {
@@ -18,21 +32,29 @@ describe("gate matrices", () => {
     [G.H, G.X, G.Y, G.Z, G.S, G.T, G.rx(0.7), G.ry(-1.3), G.rz(2.9)].forEach(isUnitary);
   });
   it("satisfy algebraic identities", () => {
-    const eq = (a: G.Matrix2, b: G.Matrix2) => a.re.forEach((_, i) => { close(a.re[i]!, b.re[i]!); close(a.im[i]!, b.im[i]!); });
+    const eq = (a: G.Matrix2, b: G.Matrix2) =>
+      a.re.forEach((_, i) => {
+        close(a.re[i]!, b.re[i]!);
+        close(a.im[i]!, b.im[i]!);
+      });
     eq(G.matmul(G.H, G.H), G.I);
     eq(G.matmul(G.S, G.S), G.Z);
     eq(G.matmul(G.T, G.T), G.S);
     eq(G.matmul(G.matmul(G.H, G.Z), G.H), G.X);
     // Rx(π) = -iX
     const r = G.rx(Math.PI);
-    close(r.im[1], -1); close(r.im[2], -1); close(r.re[0], 0);
+    close(r.im[1], -1);
+    close(r.im[2], -1);
+    close(r.re[0], 0);
   });
 });
 
 describe("statevector", () => {
   it("H|0> gives equal superposition", () => {
-    const s = zeroState(1); applySingle(s, 0, G.H);
-    close(s.re[0]!, Math.SQRT1_2); close(s.re[1]!, Math.SQRT1_2);
+    const s = zeroState(1);
+    applySingle(s, 0, G.H);
+    close(s.re[0]!, Math.SQRT1_2);
+    close(s.re[1]!, Math.SQRT1_2);
   });
   it("uses little-endian qubit ordering", () => {
     const s = simulate({ numQubits: 3, ops: [{ gate: "X", qubits: [1] }] });
@@ -49,7 +71,11 @@ describe("statevector", () => {
         if ((g === "CNOT" || g === "CZ") && n < 2) continue;
         const a = Math.floor(rng() * n);
         const b = (a + 1 + Math.floor(rng() * (n - 1))) % n;
-        c.ops.push({ gate: g, qubits: g === "CNOT" || g === "CZ" ? [a, b] : [a], theta: rng() * 6.28 });
+        c.ops.push({
+          gate: g,
+          qubits: g === "CNOT" || g === "CZ" ? [a, b] : [a],
+          theta: rng() * 6.28,
+        });
       }
       close(norm(simulate(c)), 1, 1e-10);
     }
@@ -59,25 +85,46 @@ describe("statevector", () => {
 describe("entanglement", () => {
   it("prepares the Bell state (|00>+|11>)/√2", () => {
     const s = simulate(EXAMPLE_CIRCUITS.find((e) => e.id === "bell")!.circuit);
-    close(s.re[0]!, Math.SQRT1_2); close(s.re[3]!, Math.SQRT1_2);
-    close(s.re[1]!, 0); close(s.re[2]!, 0);
+    close(s.re[0]!, Math.SQRT1_2);
+    close(s.re[3]!, Math.SQRT1_2);
+    close(s.re[1]!, 0);
+    close(s.re[2]!, 0);
   });
   it("CZ applies a phase only to |11>", () => {
-    const s = simulate({ numQubits: 2, ops: [{ gate: "H", qubits: [0] }, { gate: "H", qubits: [1] }, { gate: "CZ", qubits: [0, 1] }] });
+    const s = simulate({
+      numQubits: 2,
+      ops: [
+        { gate: "H", qubits: [0] },
+        { gate: "H", qubits: [1] },
+        { gate: "CZ", qubits: [0, 1] },
+      ],
+    });
     [0.5, 0.5, 0.5, -0.5].forEach((v, i) => close(s.re[i]!, v));
   });
   it("GHZ state has only 000 and 111", () => {
     const p = probabilities(simulate(EXAMPLE_CIRCUITS.find((e) => e.id === "ghz")!.circuit));
-    close(p[0]!, 0.5); close(p[7]!, 0.5);
+    close(p[0]!, 0.5);
+    close(p[7]!, 0.5);
   });
 });
 
 describe("measurement", () => {
   it("Ry(π/3) gives P(1)=0.25", () => {
-    close(probabilities(simulate(EXAMPLE_CIRCUITS.find((e) => e.id === "rotation")!.circuit))[1]!, 0.25);
+    close(
+      probabilities(simulate(EXAMPLE_CIRCUITS.find((e) => e.id === "rotation")!.circuit))[1]!,
+      0.25,
+    );
   });
   it("marginalises correctly", () => {
-    const p = probabilities(simulate({ numQubits: 2, ops: [{ gate: "X", qubits: [1] }, { gate: "H", qubits: [0] }] }));
+    const p = probabilities(
+      simulate({
+        numQubits: 2,
+        ops: [
+          { gate: "X", qubits: [1] },
+          { gate: "H", qubits: [0] },
+        ],
+      }),
+    );
     const m1 = marginal(p, [1]);
     close(m1[1]!, 1);
     const m0 = marginal(p, [0]);
@@ -100,10 +147,24 @@ describe("measurement", () => {
 describe("validation", () => {
   it("rejects invalid circuits", () => {
     expect(validateCircuit({ numQubits: 6, ops: [] })).not.toHaveLength(0);
-    expect(validateCircuit({ numQubits: 2, ops: [{ gate: "CNOT", qubits: [1, 1] }] })).not.toHaveLength(0);
-    expect(validateCircuit({ numQubits: 1, ops: [{ gate: "RX", qubits: [0], theta: NaN }] })).not.toHaveLength(0);
-    expect(validateCircuit({ numQubits: 1, ops: [{ gate: "M", qubits: [0] }, { gate: "H", qubits: [0] }] })).not.toHaveLength(0);
-    expect(validateCircuit({ numQubits: 1, ops: [{ gate: "H", qubits: [3] }] })).not.toHaveLength(0);
+    expect(
+      validateCircuit({ numQubits: 2, ops: [{ gate: "CNOT", qubits: [1, 1] }] }),
+    ).not.toHaveLength(0);
+    expect(
+      validateCircuit({ numQubits: 1, ops: [{ gate: "RX", qubits: [0], theta: NaN }] }),
+    ).not.toHaveLength(0);
+    expect(
+      validateCircuit({
+        numQubits: 1,
+        ops: [
+          { gate: "M", qubits: [0] },
+          { gate: "H", qubits: [0] },
+        ],
+      }),
+    ).not.toHaveLength(0);
+    expect(validateCircuit({ numQubits: 1, ops: [{ gate: "H", qubits: [3] }] })).not.toHaveLength(
+      0,
+    );
   });
   it("accepts all examples", () => {
     EXAMPLE_CIRCUITS.forEach((e) => expect(validateCircuit(e.circuit)).toEqual([]));

@@ -13,10 +13,17 @@ function fieldName(el: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElemen
 
 function captureFields(root: HTMLElement) {
   const fields: Record<string, string | boolean> = {};
-  const controls = Array.from(root.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>("input, select, textarea"));
+  const controls = Array.from(
+    root.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>(
+      "input, select, textarea",
+    ),
+  );
   controls.forEach((el, i) => {
     const key = fieldName(el, i);
-    fields[key] = el instanceof HTMLInputElement && (el.type === "checkbox" || el.type === "radio") ? el.checked : el.value;
+    fields[key] =
+      el instanceof HTMLInputElement && (el.type === "checkbox" || el.type === "radio")
+        ? el.checked
+        : el.value;
   });
   return fields;
 }
@@ -35,7 +42,11 @@ export function ExperimentSnapshotButton({ module, route }: { module: string; ro
 
   return (
     <Button type="button" variant="outline" size="sm" onClick={save}>
-      {saved ? <Check className="size-4" aria-hidden="true" /> : <Save className="size-4" aria-hidden="true" />}
+      {saved ? (
+        <Check className="size-4" aria-hidden="true" />
+      ) : (
+        <Save className="size-4" aria-hidden="true" />
+      )}
       {saved ? "Saved" : "Save experiment"}
     </Button>
   );

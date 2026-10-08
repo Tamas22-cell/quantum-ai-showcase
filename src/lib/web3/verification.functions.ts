@@ -29,7 +29,10 @@ async function sourcifyStatus(chainId: number, address: string) {
   const base = "https://repo.sourcify.dev/contracts";
   const urls = [
     { status: "full" as const, url: `${base}/full_match/${chainId}/${address}/metadata.json` },
-    { status: "partial" as const, url: `${base}/partial_match/${chainId}/${address}/metadata.json` },
+    {
+      status: "partial" as const,
+      url: `${base}/partial_match/${chainId}/${address}/metadata.json`,
+    },
   ];
   for (const item of urls) {
     try {
@@ -78,7 +81,9 @@ export const getContractVerificationStatus = createServerFn({ method: "GET" })
               checked: true,
               verified,
               source: "etherscan",
-              message: verified ? "Verified source found on explorer." : "Contract exists, but verified source is not published yet.",
+              message: verified
+                ? "Verified source found on explorer."
+                : "Contract exists, but verified source is not published yet.",
             };
           }
         }
@@ -95,7 +100,10 @@ export const getContractVerificationStatus = createServerFn({ method: "GET" })
         verified: true,
         source: "sourcify",
         match: sourcify,
-        message: sourcify === "full" ? "Fully verified source found on Sourcify." : "Partially verified source found on Sourcify.",
+        message:
+          sourcify === "full"
+            ? "Fully verified source found on Sourcify."
+            : "Partially verified source found on Sourcify.",
       };
     }
 
@@ -121,7 +129,8 @@ export const submitContractVerification = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => SubmitInput.parse(d))
   .handler(async ({ data }): Promise<SubmitVerificationResult> => {
     const apiKey = key();
-    if (!apiKey) return { ok: false, message: "ETHERSCAN_API_KEY is not configured on the server." };
+    if (!apiKey)
+      return { ok: false, message: "ETHERSCAN_API_KEY is not configured on the server." };
 
     const form = new URLSearchParams();
     form.set("chainid", String(data.chainId));
@@ -132,7 +141,10 @@ export const submitContractVerification = createServerFn({ method: "POST" })
     form.set("sourceCode", data.source);
     form.set("codeformat", "solidity-single-file");
     form.set("contractname", data.contractName);
-    form.set("compilerversion", data.compilerVersion.startsWith("v") ? data.compilerVersion : `v${data.compilerVersion}`);
+    form.set(
+      "compilerversion",
+      data.compilerVersion.startsWith("v") ? data.compilerVersion : `v${data.compilerVersion}`,
+    );
     form.set("optimizationUsed", "1");
     form.set("runs", "200");
     form.set("constructorArguements", data.constructorArgs || "");
@@ -155,8 +167,14 @@ export const submitContractVerification = createServerFn({ method: "POST" })
       if (alreadyVerified) {
         return { ok: true, alreadyVerified: true, message: "Contract is already verified." };
       }
-      return { ok: false, message: result || body.message || "Explorer rejected verification submission." };
+      return {
+        ok: false,
+        message: result || body.message || "Explorer rejected verification submission.",
+      };
     } catch (error) {
-      return { ok: false, message: error instanceof Error ? error.message : "Verification submission failed." };
+      return {
+        ok: false,
+        message: error instanceof Error ? error.message : "Verification submission failed.",
+      };
     }
   });

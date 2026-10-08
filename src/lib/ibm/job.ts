@@ -13,16 +13,30 @@ export const IBM_TRANSFER_KEY = "qal:ibm-circuit";
 export type JobRequest = { backend: string; shots: number; qasm: string; circuit: Circuit };
 export type JobRequestResult = { ok: true; request: JobRequest } | { ok: false; errors: string[] };
 
-export function buildJobRequest(input: { circuit: unknown; backend: string; shots: number }): JobRequestResult {
+export function buildJobRequest(input: {
+  circuit: unknown;
+  backend: string;
+  shots: number;
+}): JobRequestResult {
   const errors: string[] = [];
   const check = parseProposal(input.circuit);
   if (!check.ok) errors.push(...check.errors);
   const backend = input.backend.trim();
-  if (!IBM_BACKEND_RE.test(backend)) errors.push("Backend name must look like an IBM backend id, e.g. ibm_brisbane.");
-  if (!Number.isInteger(input.shots) || input.shots < IBM_LIMITS.minShots || input.shots > IBM_LIMITS.maxShots)
-    errors.push(`Shots must be an integer between ${IBM_LIMITS.minShots} and ${IBM_LIMITS.maxShots}.`);
+  if (!IBM_BACKEND_RE.test(backend))
+    errors.push("Backend name must look like an IBM backend id, e.g. ibm_brisbane.");
+  if (
+    !Number.isInteger(input.shots) ||
+    input.shots < IBM_LIMITS.minShots ||
+    input.shots > IBM_LIMITS.maxShots
+  )
+    errors.push(
+      `Shots must be an integer between ${IBM_LIMITS.minShots} and ${IBM_LIMITS.maxShots}.`,
+    );
   if (errors.length || !check.ok) return { ok: false, errors };
-  return { ok: true, request: { backend, shots: input.shots, circuit: check.circuit, qasm: toQasm3(check.circuit) } };
+  return {
+    ok: true,
+    request: { backend, shots: input.shots, circuit: check.circuit, qasm: toQasm3(check.circuit) },
+  };
 }
 
 type KV = Pick<Storage, "getItem" | "setItem" | "removeItem">;

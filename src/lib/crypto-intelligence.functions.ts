@@ -58,7 +58,8 @@ async function requestJson<T>(url: string): Promise<T> {
 }
 
 function finite(value: unknown): number | null {
-  const number = typeof value === "number" ? value : typeof value === "string" ? Number(value) : NaN;
+  const number =
+    typeof value === "number" ? value : typeof value === "string" ? Number(value) : NaN;
   return Number.isFinite(number) ? number : null;
 }
 
@@ -74,12 +75,18 @@ export const getCryptoIntelligence = createServerFn({ method: "GET" }).handler(a
   const [globalResult, fearResult, fundingResult, oiResult] = await Promise.allSettled([
     requestJson<CoinGeckoGlobalResponse>("https://api.coingecko.com/api/v3/global"),
     requestJson<FearGreedResponse>("https://api.alternative.me/fng/?limit=1"),
-    requestJson<OkxFundingResponse>("https://www.okx.com/api/v5/public/funding-rate?instId=BTC-USDT-SWAP"),
-    requestJson<OkxOpenInterestResponse>("https://www.okx.com/api/v5/public/open-interest?instType=SWAP&instId=BTC-USDT-SWAP"),
+    requestJson<OkxFundingResponse>(
+      "https://www.okx.com/api/v5/public/funding-rate?instId=BTC-USDT-SWAP",
+    ),
+    requestJson<OkxOpenInterestResponse>(
+      "https://www.okx.com/api/v5/public/open-interest?instType=SWAP&instId=BTC-USDT-SWAP",
+    ),
   ]);
 
   const btcDominance =
-    globalResult.status === "fulfilled" ? finite(globalResult.value.data?.market_cap_percentage?.btc) : null;
+    globalResult.status === "fulfilled"
+      ? finite(globalResult.value.data?.market_cap_percentage?.btc)
+      : null;
 
   const fearRow = fearResult.status === "fulfilled" ? fearResult.value.data?.[0] : undefined;
   const fearGreed = finite(fearRow?.value);
@@ -119,9 +126,10 @@ export const getCryptoIntelligence = createServerFn({ method: "GET" }).handler(a
     nextFundingTime,
     fundingTimestamp,
     openInterestTimestamp,
-    derivativesError: [fundingApiError && `Funding: ${fundingApiError}`, oiApiError && `OI: ${oiApiError}`]
-      .filter(Boolean)
-      .join(" | ") || null,
+    derivativesError:
+      [fundingApiError && `Funding: ${fundingApiError}`, oiApiError && `OI: ${oiApiError}`]
+        .filter(Boolean)
+        .join(" | ") || null,
     updatedAt: new Date().toISOString(),
     sources: {
       dominance: globalResult.status === "fulfilled" ? "CoinGecko" : null,

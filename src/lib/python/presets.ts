@@ -5,7 +5,8 @@ export const PYTHON_PRESETS: PythonPreset[] = [
   {
     id: "quant-finance",
     label: "Quantitative finance",
-    description: "Seeded GBM price path, log returns, annualised volatility, Sharpe, max drawdown and 95% historical VaR on synthetic data.",
+    description:
+      "Seeded GBM price path, log returns, annualised volatility, Sharpe, max drawdown and 95% historical VaR on synthetic data.",
     code: `import math, random, statistics
 
 # Synthetic data only: seeded geometric Brownian motion (not market data)
@@ -40,7 +41,8 @@ print(f"1-day 95% VaR     : {var95:.2%}")
   {
     id: "data-stats",
     label: "Data analysis / statistics",
-    description: "Descriptive statistics, Pearson correlation, OLS regression and a bootstrap confidence interval on a seeded synthetic dataset.",
+    description:
+      "Descriptive statistics, Pearson correlation, OLS regression and a bootstrap confidence interval on a seeded synthetic dataset.",
     code: `import random, statistics
 
 random.seed(7)
@@ -74,7 +76,8 @@ print(f"Bootstrap 95% CI for slope: [{boot[12]:.4f}, {boot[487]:.4f}]")
   {
     id: "quantum-ai",
     label: "Quantum / AI helpers",
-    description: "Pure-Python 2-qubit statevector (H + CNOT → Bell state), Born-rule probabilities, entanglement entropy, and a softmax/cross-entropy helper.",
+    description:
+      "Pure-Python 2-qubit statevector (H + CNOT → Bell state), Born-rule probabilities, entanglement entropy, and a softmax/cross-entropy helper.",
     code: `import math, cmath
 
 # --- 2-qubit statevector simulation (basis |q1 q0>) ---

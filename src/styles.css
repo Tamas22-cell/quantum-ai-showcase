@@ -73,8 +73,13 @@
   --shadow-signal: 0 0 32px oklch(0.82 0.145 192 / 0.16);
 }
 
-* { border-color: var(--color-border); }
-html { scroll-behavior: smooth; scroll-padding-top: 5rem; }
+* {
+  border-color: var(--color-border);
+}
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
+}
 body {
   margin: 0;
   background: var(--color-background);
@@ -82,7 +87,10 @@ body {
   font-family: var(--font-sans);
   letter-spacing: 0;
 }
-::selection { background: var(--color-primary); color: var(--color-primary-foreground); }
+::selection {
+  background: var(--color-primary);
+  color: var(--color-primary-foreground);
+}
 
 @utility lab-grid {
   background-image:
@@ -104,7 +112,12 @@ body {
 }
 
 @utility text-gradient-signal {
-  background: linear-gradient(100deg, var(--color-primary) 0%, oklch(0.88 0.1 205) 50%, var(--color-primary) 100%);
+  background: linear-gradient(
+    100deg,
+    var(--color-primary) 0%,
+    oklch(0.88 0.1 205) 50%,
+    var(--color-primary) 100%
+  );
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -116,8 +129,13 @@ body {
 }
 
 @utility card-interactive {
-  transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1), border-color 300ms, box-shadow 300ms, background-color 300ms;
-  &:hover, &:focus-within {
+  transition:
+    transform 300ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 300ms,
+    box-shadow 300ms,
+    background-color 300ms;
+  &:hover,
+  &:focus-within {
     transform: translateY(-3px);
     border-color: oklch(0.82 0.145 192 / 0.45);
     background-color: var(--color-surface-raised);
@@ -126,17 +144,39 @@ body {
 }
 
 @keyframes reveal-up {
-  from { opacity: 0; transform: translateY(18px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes signal-pulse {
-  0%, 100% { opacity: 0.55; }
-  50% { opacity: 1; }
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
-  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
-  .card-interactive:hover, .card-interactive:focus-within { transform: none; }
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .card-interactive:hover,
+  .card-interactive:focus-within {
+    transform: none;
+  }
 }

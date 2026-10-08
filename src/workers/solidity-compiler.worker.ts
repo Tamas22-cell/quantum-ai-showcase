@@ -24,11 +24,7 @@ type CompilerResult =
     };
 
 type SolcModule = {
-  cwrap: (
-    ident: string,
-    returnType: string | null,
-    argTypes: string[],
-  ) => (...args: any[]) => any;
+  cwrap: (ident: string, returnType: string | null, argTypes: string[]) => (...args: any[]) => any;
 };
 
 type WorkerGlobal = typeof self & {
@@ -159,7 +155,9 @@ function compileSource(source: string): CompilerResult {
     return {
       ok: false,
       compilerVersion,
-      errors: [error instanceof Error ? error.message : "Solidity compiler failed in browser worker."],
+      errors: [
+        error instanceof Error ? error.message : "Solidity compiler failed in browser worker.",
+      ],
       warnings: [],
     };
   }
@@ -180,5 +178,3 @@ scope.addEventListener("message", (event: MessageEvent<CompileRequest>) => {
 
   scope.postMessage(compileSource(source));
 });
-
-

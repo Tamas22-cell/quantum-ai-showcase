@@ -1,13 +1,29 @@
 import { describe, expect, it } from "vitest";
 import {
-  accuracy, bceLoss, confusionMatrix, encodeAngle, generateDataset, logRegPredict, measurementProbs, parseSamples, predictProba,
-  qmlCircuit, sigmoid, trainLogReg, trainQml, trainTestSplit, validateCircuit, validateDataset, validateQmlConfig,
+  accuracy,
+  bceLoss,
+  confusionMatrix,
+  encodeAngle,
+  generateDataset,
+  logRegPredict,
+  measurementProbs,
+  parseSamples,
+  predictProba,
+  qmlCircuit,
+  sigmoid,
+  trainLogReg,
+  trainQml,
+  trainTestSplit,
+  validateCircuit,
+  validateDataset,
+  validateQmlConfig,
 } from "@/lib/quantum";
 
 describe("QML lab", () => {
   it("generates deterministic, bounded, two-class datasets", () => {
     for (const k of ["linear", "xor", "circle"] as const) {
-      const a = generateDataset(k, 60, 11), b = generateDataset(k, 60, 11);
+      const a = generateDataset(k, 60, 11),
+        b = generateDataset(k, 60, 11);
       expect(a).toEqual(b);
       expect(a).toHaveLength(60);
       expect(validateDataset(a)).toEqual([]);
@@ -19,7 +35,8 @@ describe("QML lab", () => {
 
   it("splits train/test deterministically without loss or overlap", () => {
     const d = generateDataset("circle", 50, 1);
-    const s1 = trainTestSplit(d, 0.3, 5), s2 = trainTestSplit(d, 0.3, 5);
+    const s1 = trainTestSplit(d, 0.3, 5),
+      s2 = trainTestSplit(d, 0.3, 5);
     expect(s1).toEqual(s2);
     expect(s1.test).toHaveLength(15);
     expect(s1.train.length + s1.test.length).toBe(50);
@@ -40,14 +57,27 @@ describe("QML lab", () => {
 
   it("gives normalised probabilities and the analytic parity output", () => {
     for (let i = 0; i < 20; i++) {
-      const p = measurementProbs(Math.sin(i), Math.cos(i), Array.from({ length: 8 }, (_, j) => i + j), 2);
+      const p = measurementProbs(
+        Math.sin(i),
+        Math.cos(i),
+        Array.from({ length: 8 }, (_, j) => i + j),
+        2,
+      );
       expect(p.reduce((a, b) => a + b, 0)).toBeCloseTo(1, 12);
-      const q = predictProba(Math.sin(i), Math.cos(i), Array.from({ length: 8 }, (_, j) => i + j), 2);
-      expect(q).toBeGreaterThanOrEqual(0); expect(q).toBeLessThanOrEqual(1);
+      const q = predictProba(
+        Math.sin(i),
+        Math.cos(i),
+        Array.from({ length: 8 }, (_, j) => i + j),
+        2,
+      );
+      expect(q).toBeGreaterThanOrEqual(0);
+      expect(q).toBeLessThanOrEqual(1);
     }
     // Zero trainable params, depth 1: Ry(πx1)⊗Ry(πx2) then CNOT; parity odd prob = sin²(a/2)cos²(b/2)+cos²(a/2)sin²(b/2) with CNOT mapping q1→q1⊕q0 → P(q1=1).
-    const a = encodeAngle(0.3), b = encodeAngle(-0.7);
-    const s = (t: number) => Math.sin(t / 2) ** 2, c = (t: number) => Math.cos(t / 2) ** 2;
+    const a = encodeAngle(0.3),
+      b = encodeAngle(-0.7);
+    const s = (t: number) => Math.sin(t / 2) ** 2,
+      c = (t: number) => Math.cos(t / 2) ** 2;
     expect(predictProba(0.3, -0.7, [0, 0, 0, 0], 1)).toBeCloseTo(s(b) * c(a) + c(b) * s(a), 12);
   });
 
@@ -55,9 +85,13 @@ describe("QML lab", () => {
     expect(bceLoss([0.5, 0.5], [0, 1])).toBeCloseTo(Math.log(2));
     expect(bceLoss([1, 0], [1, 0])).toBeLessThan(1e-6);
     expect(Number.isFinite(bceLoss([0, 1], [1, 0]))).toBe(true); // clamped
-    const p = [0.9, 0.2, 0.6, 0.4], y: (0 | 1)[] = [1, 0, 0, 1];
+    const p = [0.9, 0.2, 0.6, 0.4],
+      y: (0 | 1)[] = [1, 0, 0, 1];
     expect(accuracy(p, y)).toBe(0.5);
-    expect(confusionMatrix(p, y)).toEqual([[1, 1], [1, 1]]);
+    expect(confusionMatrix(p, y)).toEqual([
+      [1, 1],
+      [1, 1],
+    ]);
   });
 
   it("trains deterministically for the same seed and reduces loss", async () => {
@@ -74,13 +108,22 @@ describe("QML lab", () => {
 
   it("learns XOR with the parity readout", async () => {
     const { train, test } = trainTestSplit(generateDataset("xor", 40, 4), 0.25, 4);
-    const r = await trainQml(train, test, { depth: 1, maxIter: 150, seed: 1, testFraction: 0.25 }, { yieldEvery: 1000 });
+    const r = await trainQml(
+      train,
+      test,
+      { depth: 1, maxIter: 150, seed: 1, testFraction: 0.25 },
+      { yieldEvery: 1000 },
+    );
     expect(r.trainAcc).toBeGreaterThanOrEqual(0.9);
   });
 
   it("supports cancellation", async () => {
-    const d = generateDataset("circle", 30, 1); const ac = new AbortController(); ac.abort();
-    await expect(trainQml(d, [], { depth: 1, maxIter: 50, seed: 1, testFraction: 0.2 }, { signal: ac.signal })).rejects.toThrow();
+    const d = generateDataset("circle", 30, 1);
+    const ac = new AbortController();
+    ac.abort();
+    await expect(
+      trainQml(d, [], { depth: 1, maxIter: 50, seed: 1, testFraction: 0.2 }, { signal: ac.signal }),
+    ).rejects.toThrow();
   });
 
   it("classical logistic regression baseline behaves as expected", () => {
@@ -88,21 +131,37 @@ describe("QML lab", () => {
     const lin = generateDataset("linear", 80, 3);
     const m = trainLogReg(lin);
     expect(m.w).toHaveLength(2);
-    expect(accuracy(lin.map((s) => logRegPredict(m, s.x1, s.x2)), lin.map((s) => s.y))).toBeGreaterThanOrEqual(0.95);
+    expect(
+      accuracy(
+        lin.map((s) => logRegPredict(m, s.x1, s.x2)),
+        lin.map((s) => s.y),
+      ),
+    ).toBeGreaterThanOrEqual(0.95);
     expect(trainLogReg(lin)).toEqual(m); // deterministic
     const circ = generateDataset("circle", 80, 3);
     const quad = trainLogReg(circ, { quadratic: true });
-    expect(accuracy(circ.map((s) => logRegPredict(quad, s.x1, s.x2)), circ.map((s) => s.y))).toBeGreaterThan(0.85);
+    expect(
+      accuracy(
+        circ.map((s) => logRegPredict(quad, s.x1, s.x2)),
+        circ.map((s) => s.y),
+      ),
+    ).toBeGreaterThan(0.85);
   });
 
   it("validates datasets, custom samples and config", () => {
     expect(validateDataset(generateDataset("linear", 4, 1)).length).toBeGreaterThan(0);
-    expect(validateDataset(Array.from({ length: 10 }, () => ({ x1: 0, x2: 0, y: 1 as const })))).toContain("Both classes (0 and 1) must be present.");
-    expect(validateDataset([...generateDataset("xor", 10, 1), { x1: NaN, x2: 0, y: 0 }]).length).toBeGreaterThan(0);
+    expect(
+      validateDataset(Array.from({ length: 10 }, () => ({ x1: 0, x2: 0, y: 1 as const }))),
+    ).toContain("Both classes (0 and 1) must be present.");
+    expect(
+      validateDataset([...generateDataset("xor", 10, 1), { x1: NaN, x2: 0, y: 0 }]).length,
+    ).toBeGreaterThan(0);
     const p = parseSamples("0.1, 0.2, 1\nfoo,1,0\n2,0,1\n0,0,3\n0.5 -0.5 0\n0,0");
     expect(p.samples).toHaveLength(2);
     expect(p.errors).toHaveLength(4);
-    expect(validateQmlConfig({ depth: 0, maxIter: 1000, seed: -1, testFraction: 0.9 })).toHaveLength(4);
+    expect(
+      validateQmlConfig({ depth: 0, maxIter: 1000, seed: -1, testFraction: 0.9 }),
+    ).toHaveLength(4);
     expect(validateQmlConfig({ depth: 2, maxIter: 100, seed: 0, testFraction: 0.25 })).toEqual([]);
   });
 });

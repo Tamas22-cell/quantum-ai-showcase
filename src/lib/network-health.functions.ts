@@ -1,5 +1,67 @@
 import { createServerFn } from "@tanstack/react-start";
-type H={hashrates?:{timestamp?:number;avgHashrate?:number}[];currentHashrate?:number};type D={difficultyChange?:number};type M={count?:number;vsize?:number};type F={fastestFee?:number;halfHourFee?:number;hourFee?:number};type B={timestamp?:number}[];
-async function j<T>(p:string):Promise<T>{const r=await fetch(`https://mempool.space/api${p}`,{headers:{accept:"application/json","user-agent":"quantum-ai-showcase/1.0"}});if(!r.ok)throw new Error(`mempool.space returned ${r.status}`);return r.json() as Promise<T>}
-const clamp=(x:number)=>Math.max(0,Math.min(100,x));
-export const getNetworkHealth=createServerFn({method:"GET"}).handler(async()=>{const[h,d,m,f,b]=await Promise.all([j<H>("/v1/mining/hashrate/1m"),j<D>("/v1/difficulty-adjustment"),j<M>("/mempool"),j<F>("/v1/fees/recommended"),j<B>("/v1/blocks")]);const hs=(h.hashrates??[]).filter(x=>typeof x.avgHashrate==="number");const recent=hs.slice(-7),old=hs.slice(0,7);const av=(a:typeof hs)=>a.length?a.reduce((s,x)=>s+(x.avgHashrate??0),0)/a.length:0;const hv=av(recent),ov=av(old),trend=ov?((hv/ov)-1)*100:0;const blockTimes=b.map(x=>x.timestamp).filter((x):x is number=>typeof x==="number");const ints=blockTimes.slice(0,-1).map((x,i)=>(x-blockTimes[i+1]!)/60).filter(x=>x>0);const interval=ints.length?ints.reduce((a,c)=>a+c,0)/ints.length:10;const hashScore=clamp(70+trend*4);const blockScore=clamp(100-Math.abs(interval-10)*8);const fee=typeof f.hourFee==="number"?f.hourFee:0;const feeScore=clamp(100-Math.max(0,fee-10)*2);const mempoolMb=(m.vsize??0)/1e6;const mempoolScore=clamp(100-Math.max(0,mempoolMb-50)*0.6);const diff=typeof d.difficultyChange==="number"?d.difficultyChange:0;const difficultyScore=clamp(75+Math.max(-10,Math.min(10,diff))*2);const score=Math.round(hashScore*.3+blockScore*.25+feeScore*.15+mempoolScore*.15+difficultyScore*.15);return{score,hashScore,blockScore,feeScore,mempoolScore,difficultyScore,hashrateTrendPercent:trend,avgBlockMinutes:interval,hourFee:fee,mempoolMb,difficultyChange:diff,currentHashrateEh:typeof h.currentHashrate==="number"?h.currentHashrate/1e18:null,updatedAt:new Date().toISOString()}});
+type H = { hashrates?: { timestamp?: number; avgHashrate?: number }[]; currentHashrate?: number };
+type D = { difficultyChange?: number };
+type M = { count?: number; vsize?: number };
+type F = { fastestFee?: number; halfHourFee?: number; hourFee?: number };
+type B = { timestamp?: number }[];
+async function j<T>(p: string): Promise<T> {
+  const r = await fetch(`https://mempool.space/api${p}`, {
+    headers: { accept: "application/json", "user-agent": "quantum-ai-showcase/1.0" },
+  });
+  if (!r.ok) throw new Error(`mempool.space returned ${r.status}`);
+  return r.json() as Promise<T>;
+}
+const clamp = (x: number) => Math.max(0, Math.min(100, x));
+export const getNetworkHealth = createServerFn({ method: "GET" }).handler(async () => {
+  const [h, d, m, f, b] = await Promise.all([
+    j<H>("/v1/mining/hashrate/1m"),
+    j<D>("/v1/difficulty-adjustment"),
+    j<M>("/mempool"),
+    j<F>("/v1/fees/recommended"),
+    j<B>("/v1/blocks"),
+  ]);
+  const hs = (h.hashrates ?? []).filter((x) => typeof x.avgHashrate === "number");
+  const recent = hs.slice(-7),
+    old = hs.slice(0, 7);
+  const av = (a: typeof hs) =>
+    a.length ? a.reduce((s, x) => s + (x.avgHashrate ?? 0), 0) / a.length : 0;
+  const hv = av(recent),
+    ov = av(old),
+    trend = ov ? (hv / ov - 1) * 100 : 0;
+  const blockTimes = b.map((x) => x.timestamp).filter((x): x is number => typeof x === "number");
+  const ints = blockTimes
+    .slice(0, -1)
+    .map((x, i) => (x - blockTimes[i + 1]!) / 60)
+    .filter((x) => x > 0);
+  const interval = ints.length ? ints.reduce((a, c) => a + c, 0) / ints.length : 10;
+  const hashScore = clamp(70 + trend * 4);
+  const blockScore = clamp(100 - Math.abs(interval - 10) * 8);
+  const fee = typeof f.hourFee === "number" ? f.hourFee : 0;
+  const feeScore = clamp(100 - Math.max(0, fee - 10) * 2);
+  const mempoolMb = (m.vsize ?? 0) / 1e6;
+  const mempoolScore = clamp(100 - Math.max(0, mempoolMb - 50) * 0.6);
+  const diff = typeof d.difficultyChange === "number" ? d.difficultyChange : 0;
+  const difficultyScore = clamp(75 + Math.max(-10, Math.min(10, diff)) * 2);
+  const score = Math.round(
+    hashScore * 0.3 +
+      blockScore * 0.25 +
+      feeScore * 0.15 +
+      mempoolScore * 0.15 +
+      difficultyScore * 0.15,
+  );
+  return {
+    score,
+    hashScore,
+    blockScore,
+    feeScore,
+    mempoolScore,
+    difficultyScore,
+    hashrateTrendPercent: trend,
+    avgBlockMinutes: interval,
+    hourFee: fee,
+    mempoolMb,
+    difficultyChange: diff,
+    currentHashrateEh: typeof h.currentHashrate === "number" ? h.currentHashrate / 1e18 : null,
+    updatedAt: new Date().toISOString(),
+  };
+});

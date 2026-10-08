@@ -63,14 +63,29 @@ export function CryptoMarketPanel() {
   }, []);
 
   return (
-    <section className="mb-6 rounded-md border border-border bg-card p-4 sm:p-5" aria-labelledby="live-market-heading">
+    <section
+      className="mb-6 rounded-md border border-border bg-card p-4 sm:p-5"
+      aria-labelledby="live-market-heading"
+    >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <div className="font-mono text-[10px] uppercase tracking-wider text-primary">Live market intelligence</div>
-          <h2 id="live-market-heading" className="mt-1 text-xl font-semibold tracking-tight">BTC · ETH · SOL</h2>
-          <p className="mt-1 text-xs text-muted-foreground">USD market data · refreshes every 60 seconds · source: CoinGecko</p>
+          <div className="font-mono text-[10px] uppercase tracking-wider text-primary">
+            Live market intelligence
+          </div>
+          <h2 id="live-market-heading" className="mt-1 text-xl font-semibold tracking-tight">
+            BTC · ETH · SOL
+          </h2>
+          <p className="mt-1 text-xs text-muted-foreground">
+            USD market data · refreshes every 60 seconds · source: CoinGecko
+          </p>
         </div>
-        <Button type="button" variant="outline" size="sm" onClick={() => void load()} disabled={loading}>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => void load()}
+          disabled={loading}
+        >
           <RefreshCw className={`size-4 ${loading ? "animate-spin" : ""}`} aria-hidden="true" />
           Refresh
         </Button>
@@ -94,8 +109,11 @@ export function CryptoMarketPanel() {
                   <div className="text-sm text-muted-foreground">{coin.name}</div>
                 </div>
                 {row ? (
-                  <span className={`font-mono text-xs ${change >= 0 ? "text-primary" : "text-destructive"}`}>
-                    {change >= 0 ? "+" : ""}{change.toFixed(2)}%
+                  <span
+                    className={`font-mono text-xs ${change >= 0 ? "text-primary" : "text-destructive"}`}
+                  >
+                    {change >= 0 ? "+" : ""}
+                    {change.toFixed(2)}%
                   </span>
                 ) : null}
               </div>
@@ -103,8 +121,16 @@ export function CryptoMarketPanel() {
                 {row ? money.format(row.usd) : loading ? "Loading…" : "—"}
               </div>
               <dl className="mt-4 grid grid-cols-2 gap-3 text-xs">
-                <div><dt className="text-muted-foreground">Market cap</dt><dd className="mt-1 font-mono">{row ? `$${compact(row.usd_market_cap)}` : "—"}</dd></div>
-                <div><dt className="text-muted-foreground">24h volume</dt><dd className="mt-1 font-mono">{row ? `$${compact(row.usd_24h_vol)}` : "—"}</dd></div>
+                <div>
+                  <dt className="text-muted-foreground">Market cap</dt>
+                  <dd className="mt-1 font-mono">
+                    {row ? `$${compact(row.usd_market_cap)}` : "—"}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-muted-foreground">24h volume</dt>
+                  <dd className="mt-1 font-mono">{row ? `$${compact(row.usd_24h_vol)}` : "—"}</dd>
+                </div>
               </dl>
             </article>
           );
