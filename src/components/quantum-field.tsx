@@ -99,7 +99,8 @@ export function QuantumField({ className = "" }: { className?: string }) {
     ro.observe(canvas);
     const io = new IntersectionObserver(([e]) => {
       visible = !!e?.isIntersecting;
-      visible ? start() : stop();
+      if (visible) start();
+      else stop();
     });
     io.observe(canvas);
     const onVis = () => (document.hidden ? stop() : start());
