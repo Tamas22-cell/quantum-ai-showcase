@@ -153,6 +153,29 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  useEffect(() => {
+    const held = new Set<string>();
+    const down = (event: KeyboardEvent) => {
+      if (event.key === "F1" || event.key === "F2") {
+        event.preventDefault();
+        held.add(event.key);
+        if (held.has("F1") && held.has("F2")) {
+          held.clear();
+          window.location.assign("/admin");
+        }
+      }
+    };
+    const up = (event: KeyboardEvent) => held.delete(event.key);
+    const clear = () => held.clear();
+    window.addEventListener("keydown", down);
+    window.addEventListener("keyup", up);
+    window.addEventListener("blur", clear);
+    return () => {
+      window.removeEventListener("keydown", down);
+      window.removeEventListener("keyup", up);
+      window.removeEventListener("blur", clear);
+    };
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
