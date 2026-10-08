@@ -41,8 +41,8 @@ const PRESETS = EXAMPLE_CIRCUITS.filter((e) => e.circuit.numQubits <= 4);
 export function QiskitLab() {
   const [presetId, setPresetId] = useState(PRESETS[0]!.id);
   const [level, setLevel] = useState<OptimizationLevel>(1);
-  const [transpiled, setTranspiled] = useState(false);
-  const [backend, setBackend] = useState<Backend | null>(null);
+  const [transpiled, setTranspiled] = useState(true);
+  const [backend, setBackend] = useState<Backend | null>("sampler");
   const [shots, setShots] = useState(1024);
   const [seed, setSeed] = useState(42);
   const [result, setResult] = useState<RunResult | null>(null);
@@ -63,8 +63,8 @@ export function QiskitLab() {
   const stepIndex = saved ? 6 : result ? 5 : backend ? 3 : transpiled ? 2 : 1;
 
   function resetFrom(step: number) {
-    if (step <= 1) setTranspiled(false);
-    if (step <= 2) setBackend(null);
+    if (step <= 1) setTranspiled(true);
+    if (step <= 2) setBackend("sampler");
     setResult(null);
     setSaved(false);
     setError(null);
