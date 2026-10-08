@@ -36,7 +36,7 @@ export function AIProjectsShowcase() {
         <p className="mt-4 max-w-3xl text-sm leading-7 text-muted-foreground">Three selected AI research repositories. The Multi-Agent platform is shown as one evolving project rather than duplicating each version. GitHub links document the available source; a repository listing is not proof of a deployed or fully validated system.</p>
         <div className="mt-10 grid gap-5 md:grid-cols-3">
           {projects.map(({ title, subtitle, description, tags, href, icon: Icon }) => (
-            <article key={title} className="flex flex-col rounded-lg border border-border bg-card p-6">
+            <article key={title} className={`flex flex-col rounded-lg border bg-card p-6 ${title === "AI Multi-Agent Financial Research Platform" ? "border-primary/70 ring-1 ring-primary/30 md:scale-[1.02]" : "border-border"}`}>
               <Icon className="size-7 text-primary" aria-hidden="true" />
               <p className="mt-5 font-mono text-xs text-muted-foreground">{subtitle}</p>
               <h3 className="mt-2 text-xl font-semibold">{title}</h3>
