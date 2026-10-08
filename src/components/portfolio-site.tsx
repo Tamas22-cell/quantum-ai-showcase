@@ -330,6 +330,7 @@ export function PortfolioSite() {
                   {item.label}
                 </a>
               ))}
+              <Link to="/account" onClick={() => setMenuOpen(false)} className="border-b border-border/60 py-3.5 font-mono text-xs uppercase tracking-wider text-cyan-400">Belépés / Regisztráció</Link>
             </div>
           </nav>
         ) : null}
