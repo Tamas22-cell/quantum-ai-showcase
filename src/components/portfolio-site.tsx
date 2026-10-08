@@ -123,7 +123,7 @@ function useActiveSection(ids: string[]) {
   return active;
 }
 
-const sectionIds = portfolio.navigation.map((n) => n.href.slice(1));
+const sectionIds = portfolio.navigation.filter((n) => n.href.startsWith("#")).map((n) => n.href.slice(1));
 
 export function PortfolioSite() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -191,7 +191,7 @@ export function PortfolioSite() {
           </a>
           <nav className="hidden items-center gap-1 lg:flex" aria-label="Primary navigation">
             {portfolio.navigation.map((item) => {
-              const isActive = active === item.href.slice(1);
+              const isActive = item.href.startsWith("#") && active === item.href.slice(1);
               return (
                 <a
                   key={item.href}
