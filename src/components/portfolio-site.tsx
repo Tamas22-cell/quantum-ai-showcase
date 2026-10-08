@@ -34,6 +34,7 @@ import { AIResearchAssistant } from "@/components/ai-research-assistant";
 import { LiveResearchMarquee } from "@/components/live-research-marquee";
 import { QuantumProjectsShowcase } from "@/components/quantum-projects-showcase";
 import { AIProjectsShowcase } from "@/components/ai-projects-showcase";
+import { AiAgentExecutionMonitor } from "@/components/ai-agent-execution-monitor";
 
 const projectIcons = [ShieldCheck, Network, Orbit];
 const researchIcons = [Orbit, Atom, Braces, Cpu];
@@ -1000,6 +1001,12 @@ export function PortfolioSite() {
                 >
                   Run research demo <ArrowRight className="size-4" aria-hidden="true" />
                 </Button>
+                <AiAgentExecutionMonitor
+                  running={quoteLoading}
+                  completed={demoResult}
+                  error={quoteError}
+                  fetchedAt={btcQuote?.fetchedAt ?? null}
+                />
                 {quoteLoading ? (
                   <p className="mt-4 text-sm text-primary" role="status">
                     Fetching live Bitcoin market data…
