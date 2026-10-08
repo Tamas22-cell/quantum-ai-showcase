@@ -182,7 +182,9 @@ Use web search for this request. Return 2-4 source URLs in a final "Sources" sec
       try {
         const body = (await response.json()) as { error?: { message?: unknown } };
         detail = typeof body.error?.message === "string" ? body.error.message : "";
-      } catch {}
+      } catch {
+        // Non-JSON error response; use HTTP status below.
+      }
       throw new Error(detail || `OpenAI request failed (${response.status}).`);
     }
 
@@ -203,7 +205,7 @@ Use web search for this request. Return 2-4 source URLs in a final "Sources" sec
 
     let circuitRaw: string | null = null;
     if (data.mode === "draft-circuit") {
-      const circuitMatch = answer.match(/\`\`\`json\s*([\s\S]*?)\s*\`\`\`/i);
+      const circuitMatch = answer.match(/```json\s*([\s\S]*?)\s*```/i);
       if (circuitMatch) {
         try {
           const parsed = JSON.parse(circuitMatch[1] ?? "");
