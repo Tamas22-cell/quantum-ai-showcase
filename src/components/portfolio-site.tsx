@@ -644,19 +644,35 @@ export function PortfolioSite() {
                   <div className="mt-6 space-y-3" aria-live="polite">
                     <p className="text-sm font-semibold text-foreground">Research question: {demoQuestion}</p>
                     {btcQuote ? <div className="rounded-md border border-primary/40 bg-signal-soft p-4"><p className="font-mono text-[10px] uppercase text-primary">Live Bitcoin market snapshot · CoinGecko</p><p className="mt-2 text-2xl font-semibold text-foreground">{btcQuote.usd.toLocaleString("en-US", { style: "currency", currency: "USD" })}</p><p className="mt-1 text-sm text-muted-foreground">24h change: {btcQuote.change24h === null ? "Not available" : `${btcQuote.change24h >= 0 ? "+" : ""}${btcQuote.change24h.toFixed(2)}%`} · Retrieved: {btcQuote.fetchedAt}</p><p className="mt-2 text-xs text-muted-foreground">Provider quote may be delayed. Not an exchange execution price.</p></div> : <p role="alert" className="rounded-md border border-border p-3 text-sm text-muted-foreground">{quoteError}</p>}
-                    {[
-                      ["Planner Agent", "Define the scope, time horizon, key assumptions, and evidence needed to answer the question."],
-                      ["Data Agent", "Retrieve a live BTC/USD market snapshot when the provider is available; other datasets are not fetched."],
-                      ["Market Agent", "Display the fetched 24-hour BTC change; broader market drivers and news require separate verified sources."],
-                      ["Risk Agent", "Consider volatility, liquidity, counterparty exposure, uncertainty, and downside scenarios."],
-                      ["Critic Agent", "Flag missing sources, unverified claims, biases, and assumptions requiring further checks."],
-                      ["Final Synthesis", "Summarize the verified BTC snapshot and the remaining research steps. These agent descriptions are illustrative, not AI-generated conclusions."],
-                    ].map(([name, output], index) => (
-                      <div key={name} className="flex gap-3 rounded-md border border-border bg-card p-3">
-                        <span className="font-mono text-xs text-primary">{String(index + 1).padStart(2, "0")}</span>
-                        <div><p className="text-sm font-semibold text-foreground">{name}</p><p className="mt-1 text-xs leading-6 text-muted-foreground">{output}</p></div>
-                      </div>
-                    ))}
+                    <div className="grid gap-4 md:grid-cols-2">
+                      {[
+                        { name: "Planner Agent", icon: BrainCircuit, label: "01 / RESEARCH PLAN", output: "Define the scope, time horizon, key assumptions, and evidence needed to answer the question." },
+                        { name: "Data Agent", icon: Database, label: "02 / MARKET DATA", output: "Retrieve a live BTC/USD market snapshot when the provider is available; other datasets are not fetched." },
+                        { name: "Market Agent", icon: LineChart, label: "03 / MARKET CONTEXT", output: "Display the fetched 24-hour BTC change; broader market drivers and news require separate verified sources." },
+                        { name: "Risk Agent", icon: ShieldCheck, label: "04 / RISK REVIEW", output: "Consider volatility, liquidity, counterparty exposure, uncertainty, and downside scenarios." },
+                        { name: "Critic Agent", icon: ScanSearch, label: "05 / CRITICAL REVIEW", output: "Flag missing sources, unverified claims, biases, and assumptions requiring further checks." },
+                        { name: "Final Synthesis", icon: FileText, label: "06 / RESEARCH SUMMARY", output: "Summarize the verified BTC snapshot and the remaining research steps. These agent descriptions are illustrative, not AI-generated conclusions." },
+                      ].map(({ name, icon: AgentIcon, label, output }, index) => (
+                        <article key={name} className={`relative overflow-hidden rounded-xl border p-5 sm:p-6 transition-colors ${index === 5 ? "border-primary/60 bg-signal-soft shadow-[0_0_35px_color-mix(in_oklab,var(--color-primary)_12%,transparent)] md:col-span-2" : "border-border bg-card hover:border-primary/40"}`}>
+                          <div className="flex items-center gap-3">
+                            <span className="grid size-11 shrink-0 place-items-center rounded-lg border border-primary/40 bg-signal-soft text-primary"><AgentIcon className="size-5" aria-hidden="true" /></span>
+                            <div>
+                              <p className="font-mono text-[11px] font-semibold tracking-wider text-primary">{label}</p>
+                              <h4 className="mt-1 text-lg font-bold text-foreground sm:text-xl">{name}</h4>
+                            </div>
+                          </div>
+                          <p className="mt-4 text-sm leading-7 text-foreground/85 sm:text-base">{output}</p>
+                          {index === 5 ? (
+                            <div className="mt-5 rounded-lg border border-primary/35 bg-background/60 p-4">
+                              <p className="font-mono text-xs font-semibold uppercase tracking-wider text-primary">Verified market snapshot</p>
+                              <p className="mt-2 text-lg font-semibold text-foreground">{btcQuote ? `BTC/USD ${btcQuote.usd.toLocaleString("en-US", { style: "currency", currency: "USD" })}` : "Live market data unavailable"}</p>
+                              <p className="mt-1 text-sm text-muted-foreground">{btcQuote?.change24h != null ? `24h change: ${btcQuote.change24h >= 0 ? "+" : ""}${btcQuote.change24h.toFixed(2)}%` : "No verified 24-hour change"}</p>
+                              <p className="mt-3 text-xs text-muted-foreground">Illustrative agent workflow · Not an AI-generated investment recommendation</p>
+                            </div>
+                          ) : null}
+                        </article>
+                      ))}
+                    </div>
                   </div>
                 ) : null}
               </div>
