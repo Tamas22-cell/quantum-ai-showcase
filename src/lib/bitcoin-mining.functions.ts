@@ -44,16 +44,14 @@ export const getBitcoinMiningIntelligence = createServerFn({ method: "GET" }).ha
   const adjustment = difficultyResult.status === "fulfilled" ? difficultyResult.value : undefined;
   const poolData = poolsResult.status === "fulfilled" ? poolsResult.value : undefined;
   const totalBlocks = finite(poolData?.blockCount);
-  const topPools = (poolData?.pools ?? [])
-    .slice(0, 5)
-    .map((pool) => ({
-      name: pool.name ?? pool.slug ?? "Unknown",
-      blocks: finite(pool.blockCount) ?? 0,
-      sharePercent:
-        totalBlocks && totalBlocks > 0 && finite(pool.blockCount) != null
-          ? ((pool.blockCount as number) / totalBlocks) * 100
-          : null,
-    }));
+  const topPools = (poolData?.pools ?? []).slice(0, 5).map((pool) => ({
+    name: pool.name ?? pool.slug ?? "Unknown",
+    blocks: finite(pool.blockCount) ?? 0,
+    sharePercent:
+      totalBlocks && totalBlocks > 0 && finite(pool.blockCount) != null
+        ? ((pool.blockCount as number) / totalBlocks) * 100
+        : null,
+  }));
   const hashrateHistory = (hashData?.hashrates ?? [])
     .map((p) => ({
       timestamp: finite(p.timestamp),

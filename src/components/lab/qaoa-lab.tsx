@@ -119,7 +119,7 @@ export function QaoaLab() {
   const abortRef = useRef<AbortController | null>(null);
 
   const config = { graph, ...cfg };
-  const errors = useMemo(() => validateQaoaLabConfig(config), [graph, cfg]); // eslint-disable-line react-hooks/exhaustive-deps
+  const errors = useMemo(() => validateQaoaLabConfig(config), [graph, cfg]);
   const graphOk = validateGraph(graph).length === 0;
   const stale = result !== null && JSON.stringify(result.config) !== JSON.stringify(config);
 
@@ -133,7 +133,7 @@ export function QaoaLab() {
         ? evaluateAngles(graph, g, b)
         : null,
     [graph, JSON.stringify(g), JSON.stringify(b), graphOk],
-  ); // eslint-disable-line react-hooks/exhaustive-deps
+  );
 
   const setNum = (k: keyof typeof cfg) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setCfg((c) => ({ ...c, [k]: Number(e.target.value) }));

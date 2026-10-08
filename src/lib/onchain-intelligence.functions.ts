@@ -52,13 +52,11 @@ export const getOnchainIntelligence = createServerFn({ method: "GET" }).handler(
     lightningChannels: ln?.channel_count ?? null,
     lightningCapacityBtc:
       typeof ln?.total_capacity === "number" ? ln.total_capacity / 100_000_000 : null,
-    recentTransactions: txs
-      .slice(0, 6)
-      .map((t) => ({
-        txid: t.txid ?? "",
-        valueBtc: typeof t.value === "number" ? t.value / 100_000_000 : null,
-        feeRate: t.fee && t.vsize ? t.fee / t.vsize : null,
-      })),
+    recentTransactions: txs.slice(0, 6).map((t) => ({
+      txid: t.txid ?? "",
+      valueBtc: typeof t.value === "number" ? t.value / 100_000_000 : null,
+      feeRate: t.fee && t.vsize ? t.fee / t.vsize : null,
+    })),
     updatedAt: new Date().toISOString(),
   };
 });

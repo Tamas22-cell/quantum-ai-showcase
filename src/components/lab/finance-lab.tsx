@@ -421,7 +421,7 @@ export function FinanceLab() {
     } catch {
       return null;
     }
-  }, [stats, errors.length, model]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [stats, errors.length, model]);
 
   const switchMode = (m: Mode) => {
     abort.current?.abort();

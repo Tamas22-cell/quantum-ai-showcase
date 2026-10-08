@@ -128,7 +128,7 @@ export function Arena() {
   const abortRef = useRef<AbortController | null>(null);
 
   const config: ArenaConfig = { graph, ...cfg };
-  const errors = useMemo(() => validateArenaConfig(config), [graph, cfg]); // eslint-disable-line react-hooks/exhaustive-deps
+  const errors = useMemo(() => validateArenaConfig(config), [graph, cfg]);
   const stale = result !== null && JSON.stringify(result.config) !== JSON.stringify(config);
 
   const setNum = (k: keyof typeof cfg) => (e: React.ChangeEvent<HTMLInputElement>) =>

@@ -194,7 +194,6 @@ export function PortfolioLab() {
     if (dataErrors.length) return null;
     const q = buildQubo(data, model);
     return { q, ising: quboToIsing(q), ex: exhaustivePortfolio(q, model) };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify([data, model]), dataErrors.length]);
 
   const setSynthetic = (count: number, seed: number) => {

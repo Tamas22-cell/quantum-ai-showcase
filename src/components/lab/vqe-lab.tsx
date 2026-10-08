@@ -79,21 +79,21 @@ export function VqeLab() {
 
   const config = { hamiltonian: h, ...cfg };
   const hErrors = validateHamiltonian(h);
-  const errors = useMemo(() => validateVqeConfig(config), [JSON.stringify(config)]); // eslint-disable-line react-hooks/exhaustive-deps
+  const errors = useMemo(() => validateVqeConfig(config), [JSON.stringify(config)]);
   const exact = useMemo(() => {
     try {
       return hErrors.length ? null : exactSpectrum(h);
     } catch {
       return null;
     }
-  }, [JSON.stringify(h)]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(h)]);
   const matrix = useMemo(() => {
     try {
       return hErrors.length ? null : hamiltonianMatrix(h);
     } catch {
       return null;
     }
-  }, [JSON.stringify(h)]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(h)]);
   const stale = result !== null && JSON.stringify(result.config) !== JSON.stringify(config);
   const shown = result && !stale ? result : null;
   const np =
