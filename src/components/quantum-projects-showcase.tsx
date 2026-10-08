@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { ArrowUpRight, Atom, Cpu, LineChart } from "lucide-react";
 
 const owner = "https://github.com/Tamas22-cell/";
@@ -21,32 +20,36 @@ const groups = [
 ] as const;
 
 export function QuantumProjectsShowcase() {
-  const [selected, setSelected] = useState<number | null>(null);
   return (
     <section id="quantum-projects" className="scroll-mt-20 border-b border-border px-5 py-20 sm:px-8 lg:py-24" aria-labelledby="quantum-projects-heading">
       <div className="mx-auto max-w-7xl">
         <p className="font-mono text-xs uppercase tracking-widest text-primary">Engineering & research portfolio</p>
         <h2 id="quantum-projects-heading" className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">Quantum Projects</h2>
-        <p className="mt-4 max-w-2xl text-sm leading-7 text-muted-foreground">Nine GitHub research projects across three areas. Select a field to explore the repositories and their technical focus.</p>
+        <p className="mt-4 max-w-2xl text-sm leading-7 text-muted-foreground">Explore all nine quantum research projects below, organized into three areas.</p>
         <div className="mt-10 grid gap-4 md:grid-cols-3">
           {groups.map((group, index) => {
             const Icon = group.icon;
-            return <button key={group.title} type="button" onClick={() => setSelected(selected === index ? null : index)} aria-expanded={selected === index} aria-controls="quantum-project-details" className={`group rounded-xl border p-6 text-left transition-all hover:-translate-y-1 hover:border-primary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${selected === index ? "border-primary bg-signal-soft" : "border-border bg-surface/80"}`}>
+            return <a key={group.title} href={`#quantum-group-${index + 1}`} className="group rounded-xl border border-border bg-surface/80 p-6 text-left transition-all hover:-translate-y-1 hover:border-primary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
               <span className="flex items-center justify-between text-primary"><Icon className="size-7" aria-hidden="true" /><span className="font-mono text-xs">0{index + 1} / 03</span></span>
               <h3 className="mt-8 text-xl font-semibold">{group.title}</h3>
               <p className="mt-3 text-sm leading-6 text-muted-foreground">{group.description}</p>
-              <span className="mt-6 block font-mono text-xs text-primary">{selected === index ? "Close projects −" : "Explore 3 projects →"}</span>
-            </button>;
+              <span className="mt-6 block font-mono text-xs text-primary">View 3 projects ↓</span>
+            </a>;
           })}
         </div>
-        {selected !== null && <div id="quantum-project-details" className="mt-6 grid gap-4 md:grid-cols-3" aria-live="polite">
-          {groups[selected].projects.map(([title, description, slug, stack]) => <article key={slug} className="flex flex-col rounded-xl border border-border bg-surface/60 p-6">
-            <p className="font-mono text-[10px] uppercase tracking-wider text-primary">{stack}</p>
-            <h4 className="mt-4 text-lg font-semibold">{title}</h4>
-            <p className="mt-3 flex-1 text-sm leading-6 text-muted-foreground">{description}</p>
-            <a className="mt-6 inline-flex items-center gap-2 self-start rounded-sm font-mono text-xs text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary" href={owner + slug} target="_blank" rel="noopener noreferrer" aria-label={`Open ${title} GitHub repository`}>View source on GitHub <ArrowUpRight className="size-4" aria-hidden="true" /></a>
-          </article>)}
-        </div>}
+        <div className="mt-12 space-y-12">
+          {groups.map((group, index) => <div key={group.title} id={`quantum-group-${index + 1}`} className="scroll-mt-24">
+            <h3 className="mb-5 text-xl font-semibold">{group.title}</h3>
+            <div className="grid gap-4 md:grid-cols-3">
+              {group.projects.map(([title, description, slug, stack]) => <article key={slug} className="flex flex-col rounded-xl border border-border bg-surface/60 p-6">
+                <p className="font-mono text-[10px] uppercase tracking-wider text-primary">{stack}</p>
+                <h4 className="mt-4 text-lg font-semibold">{title}</h4>
+                <p className="mt-3 flex-1 text-sm leading-6 text-muted-foreground">{description}</p>
+                <a className="mt-6 inline-flex items-center gap-2 self-start rounded-sm font-mono text-xs text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary" href={owner + slug} target="_blank" rel="noopener noreferrer" aria-label={`Open ${title} GitHub repository`}>View source on GitHub <ArrowUpRight className="size-4" aria-hidden="true" /></a>
+              </article>)}
+            </div>
+          </div>)}
+        </div>
       </div>
     </section>
   );
