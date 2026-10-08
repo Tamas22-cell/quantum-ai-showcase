@@ -132,6 +132,29 @@ export function PortfolioSite() {
   const [activeAgent, setActiveAgent] = useState("Planner Agent");
   const [demoQuestion, setDemoQuestion] = useState("What are the main risks of investing in Bitcoin?");
   const [demoResult, setDemoResult] = useState(false);
+  const [btcQuote, setBtcQuote] = useState<{ usd: number; change24h: number | null; fetchedAt: string } | null>(null);
+  const [quoteLoading, setQuoteLoading] = useState(false);
+  const [quoteError, setQuoteError] = useState("");
+  const runDemo = async () => {
+    setDemoResult(false);
+    setBtcQuote(null);
+    setQuoteError("");
+    setQuoteLoading(true);
+    try {
+      const response = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true", { headers: { accept: "application/json" } });
+      if (!response.ok) throw new Error("Price provider unavailable");
+      const json: unknown = await response.json();
+      if (!json || typeof json !== "object" || !("bitcoin" in json)) throw new Error("Invalid response");
+      const btc = (json as { bitcoin?: { usd?: unknown; usd_24h_change?: unknown } }).bitcoin;
+      if (!btc || typeof btc.usd !== "number" || !Number.isFinite(btc.usd) || btc.usd <= 0) throw new Error("Invalid BTC price");
+      setBtcQuote({ usd: btc.usd, change24h: typeof btc.usd_24h_change === "number" && Number.isFinite(btc.usd_24h_change) ? btc.usd_24h_change : null, fetchedAt: new Date().toLocaleString() });
+    } catch {
+      setQuoteError("Live BTC data could not be retrieved. Please retry later; no price has been estimated.");
+    } finally {
+      setQuoteLoading(false);
+      setDemoResult(true);
+    }
+  };
   const active = useActiveSection(sectionIds);
 
   useEffect(() => {
@@ -610,22 +633,24 @@ export function PortfolioSite() {
               <div className="mt-8 rounded-lg border border-primary/40 bg-background/70 p-5 sm:p-7">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <h3 className="text-xl font-semibold text-foreground">Launch Interactive Demo</h3>
-                  <span className="rounded-full border border-primary/40 px-3 py-1 font-mono text-[10px] uppercase text-primary">Educational simulation</span>
+                  <span className="rounded-full border border-primary/40 px-3 py-1 font-mono text-[10px] uppercase text-primary">Live BTC data + guided workflow</span>
                 </div>
-                <p className="mt-2 text-sm leading-6 text-muted-foreground">Enter a research question and explore how a multi-agent workflow could organize its analysis. This is a local demonstration with illustrative outputs, not a live AI model or investment advice.</p>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">Enter a research question and explore how a multi-agent workflow could organize its analysis. Bitcoin price and 24-hour change are fetched from CoinGecko when available. Agent steps remain illustrative, not live AI reasoning or investment advice.</p>
                 <label htmlFor="agent-demo-question" className="mt-5 block font-mono text-xs text-primary">Your research question</label>
                 <textarea id="agent-demo-question" rows={3} maxLength={500} value={demoQuestion} onChange={(event) => { setDemoQuestion(event.target.value); setDemoResult(false); }} placeholder="e.g. What are the risks of investing in Bitcoin?" className={`mt-2 w-full resize-y rounded-md border border-border bg-card p-3 text-sm text-foreground placeholder:text-muted-foreground ${focusRing}`} />
-                <Button type="button" variant="signal" className="mt-3" disabled={!demoQuestion.trim()} onClick={() => setDemoResult(true)}>Run simulated agents <ArrowRight className="size-4" aria-hidden="true" /></Button>
+                <Button type="button" variant="signal" className="mt-3" disabled={quoteLoading || !demoQuestion.trim()} onClick={runDemo}>Run research demo <ArrowRight className="size-4" aria-hidden="true" /></Button>
+                {quoteLoading ? <p className="mt-4 text-sm text-primary" role="status">Fetching live Bitcoin market data…</p> : null}
                 {demoResult ? (
                   <div className="mt-6 space-y-3" aria-live="polite">
-                    <p className="text-sm font-semibold text-foreground">Simulated workflow for: {demoQuestion}</p>
+                    <p className="text-sm font-semibold text-foreground">Research question: {demoQuestion}</p>
+                    {btcQuote ? <div className="rounded-md border border-primary/40 bg-signal-soft p-4"><p className="font-mono text-[10px] uppercase text-primary">Live Bitcoin market snapshot · CoinGecko</p><p className="mt-2 text-2xl font-semibold text-foreground">{btcQuote.usd.toLocaleString("en-US", { style: "currency", currency: "USD" })}</p><p className="mt-1 text-sm text-muted-foreground">24h change: {btcQuote.change24h === null ? "Not available" : `${btcQuote.change24h >= 0 ? "+" : ""}${btcQuote.change24h.toFixed(2)}%`} · Retrieved: {btcQuote.fetchedAt}</p><p className="mt-2 text-xs text-muted-foreground">Provider quote may be delayed. Not an exchange execution price.</p></div> : <p role="alert" className="rounded-md border border-border p-3 text-sm text-muted-foreground">{quoteError}</p>}
                     {[
                       ["Planner Agent", "Define the scope, time horizon, key assumptions, and evidence needed to answer the question."],
-                      ["Data Agent", "Identify relevant price, volume, on-chain, and historical datasets; no live data is fetched in this demo."],
-                      ["Market Agent", "Outline market drivers, trends, news context, and possible scenarios without claiming current signals."],
+                      ["Data Agent", "Retrieve a live BTC/USD market snapshot when the provider is available; other datasets are not fetched."],
+                      ["Market Agent", "Display the fetched 24-hour BTC change; broader market drivers and news require separate verified sources."],
                       ["Risk Agent", "Consider volatility, liquidity, counterparty exposure, uncertainty, and downside scenarios."],
                       ["Critic Agent", "Flag missing sources, unverified claims, biases, and assumptions requiring further checks."],
-                      ["Final Synthesis", "Combine the findings into a structured research brief; real conclusions require verified data and actual model execution."],
+                      ["Final Synthesis", "Summarize the verified BTC snapshot and the remaining research steps. These agent descriptions are illustrative, not AI-generated conclusions."],
                     ].map(([name, output], index) => (
                       <div key={name} className="flex gap-3 rounded-md border border-border bg-card p-3">
                         <span className="font-mono text-xs text-primary">{String(index + 1).padStart(2, "0")}</span>
