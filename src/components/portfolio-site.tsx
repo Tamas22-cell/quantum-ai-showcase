@@ -501,6 +501,7 @@ export function PortfolioSite() {
         </section>
 
         <QuantumProjectsShowcase />
+        <AIProjectsShowcase />
 
         {/* PROJECTS */}
         <section id="projects" className="bg-surface px-5 py-24 sm:px-8 lg:py-32">
@@ -545,8 +546,6 @@ export function PortfolioSite() {
             </div>
           </div>
         </section>
-
-        <AIProjectsShowcase />
 
         {/* AI MULTI-AGENT RESEARCH SYSTEM */}
         <section id="ai-agents" className="border-b border-border px-5 py-24 sm:px-8 lg:py-32">
