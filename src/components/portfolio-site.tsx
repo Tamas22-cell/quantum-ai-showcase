@@ -33,6 +33,7 @@ import { QuantumField } from "@/components/quantum-field";
 import { AIResearchAssistant } from "@/components/ai-research-assistant";
 import { LiveResearchMarquee } from "@/components/live-research-marquee";
 import { QuantumProjectsShowcase } from "@/components/quantum-projects-showcase";
+import { AIProjectsShowcase } from "@/components/ai-projects-showcase";
 
 const projectIcons = [ShieldCheck, Network, Orbit];
 const researchIcons = [Orbit, Atom, Braces, Cpu];
@@ -500,6 +501,7 @@ export function PortfolioSite() {
         </section>
 
         <QuantumProjectsShowcase />
+        <AIProjectsShowcase />
 
         {/* PROJECTS */}
         <section id="projects" className="bg-surface px-5 py-24 sm:px-8 lg:py-32">
