@@ -20,6 +20,7 @@ import {
   type GateName,
 } from "@/lib/quantum";
 import { CircuitDiagram } from "./circuit-diagram";
+import { CircuitBlochLive } from "./circuit-bloch-live";
 import { Histogram, Panel, ProbabilityRow } from "./charts";
 
 const MAX_QUBITS = 5;
@@ -163,6 +164,7 @@ export function CircuitBuilder() {
 
   return (
     <div className="grid gap-5">
+      {result && <CircuitBlochLive state={result.state} />}
       {/* Controls */}
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         <Panel
