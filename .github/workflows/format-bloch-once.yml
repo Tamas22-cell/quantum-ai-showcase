@@ -1,0 +1,34 @@
+name: Format Bloch component once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/format-bloch-once.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.3.6"
+      - run: bun install --frozen-lockfile
+      - name: Format Bloch component
+        run: bunx prettier --write src/components/lab/circuit-bloch-live.tsx
+      - name: Commit formatting if changed
+        run: |
+          if ! git diff --quiet -- src/components/lab/circuit-bloch-live.tsx; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add src/components/lab/circuit-bloch-live.tsx
+            git commit -m "style: format Bloch component with Prettier"
+            git push origin HEAD:main
+          fi
