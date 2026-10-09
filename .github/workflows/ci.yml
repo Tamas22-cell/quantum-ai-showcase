@@ -2,13 +2,13 @@ name: Quantum AI Showcase CI
 
 on:
   push:
-    branches: [main, feature/circuit-bloch-live-3d]
+    branches: [main]
   pull_request:
     branches: [main]
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
@@ -27,28 +27,10 @@ jobs:
         with:
           bun-version: "1.3.6"
       - name: Install dependencies
-        id: install
-        run: bun install
-      - name: Repair tracked formatting and lockfile on feature branch
-        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
-        run: |
-          git fetch origin feature/circuit-bloch-live-3d
-          git checkout -B feature/circuit-bloch-live-3d origin/feature/circuit-bloch-live-3d
-          bunx prettier --write src/components/lab/circuit-bloch-live.tsx src/components/lab/circuit-bloch-live.test.ts src/components/portfolio-site.tsx src/components/ui/badge.tsx src/components/ui/button.tsx src/components/ui/form.tsx src/components/ui/navigation-menu.tsx src/components/ui/sidebar.tsx src/components/ui/toggle.tsx src/components/web3/verification-panel.tsx src/lib/site-auth.ts src/routes/account.tsx src/routes/admin.tsx
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add bun.lock src
-          if ! git diff --cached --quiet; then
-            git commit -m "style: fix formatting and refresh Bun lockfile"
-            git push origin HEAD:feature/circuit-bloch-live-3d
-          fi
-      - name: Verify frozen lockfile
         run: bun install --frozen-lockfile
       - name: Lint
         run: bun run lint
       - name: Unit tests
-        if: always() && steps.install.outcome == 'success'
         run: bun run test
       - name: Production build
-        if: always() && steps.install.outcome == 'success'
         run: bun run build
