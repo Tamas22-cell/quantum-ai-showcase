@@ -69,6 +69,17 @@ export function CircuitBlochLive({ state }: { state: StateVector }) {
       const pt = project(p);
       return `${i === 0 ? "M" : "L"}${pt.x.toFixed(2)} ${pt.y.toFixed(2)}`;
     }).join(" ");
+  const meridian = (angle: number) => angleArc(Array.from({ length: 81 }, (_, i) => {
+    const t = i * Math.PI * 2 / 80;
+    return { x: Math.sin(t) * Math.cos(angle), y: Math.sin(t) * Math.sin(angle), z: Math.cos(t) };
+  }));
+  const parallels = [-0.65, -0.33, 0.33, 0.65].map(z =>
+    angleArc(Array.from({ length: 81 }, (_, i) => {
+      const t = i * Math.PI * 2 / 80;
+      const r = Math.sqrt(1 - z * z);
+      return { x: r * Math.cos(t), y: r * Math.sin(t), z };
+    }))
+  );
   const direction = phi ?? 0;
   const thetaArc = theta === null ? "" : angleArc(Array.from({ length: 33 }, (_, i) => {
     const t = theta * i / 32;
@@ -80,7 +91,7 @@ export function CircuitBlochLive({ state }: { state: StateVector }) {
   }));
   return (
     <Panel
-      title="Live Circuit Bloch View"
+      title="Live Circuit Bloch View · Neon 3D"
       aside={
         <span className="font-mono text-[10px] text-muted-foreground">Exact circuit state</span>
       }
@@ -114,6 +125,13 @@ export function CircuitBlochLive({ state }: { state: StateVector }) {
           <rect x="0" y="0" width="360" height="364" rx="16" fill="#061753" />
           <circle cx="180" cy="182" r="157" fill={`url(#${id}-halo)`} />
           <circle cx="180" cy="182" r="116" fill={`url(#${id}-sphere)`} stroke="#f8fafc" strokeWidth="1.5" />
+          {parallels.map((path, i) => (
+            <path key={`latitude-${i}`} d={path} fill="none" stroke="#a5f3fc" strokeWidth=".9" opacity=".3" />
+          ))}
+          {[0, Math.PI / 3, 2 * Math.PI / 3].map((angle, i) => (
+            <path key={`meridian-${i}`} d={meridian(angle)} fill="none"
+              stroke={i === 1 ? "#f0abfc" : "#67e8f9"} strokeWidth="1" opacity=".42" />
+          ))}
           <path d={halfRing(false)} fill="none" stroke="#99bff8" strokeDasharray="3 6" strokeWidth="1.2" opacity=".35" />
           <path d={halfRing(true)} fill="none" stroke="#7dd3fc" strokeWidth="1.8" opacity=".8" />
           <path d={equator(0, Math.PI * 2)} fill="none" stroke="#dbeafe" strokeDasharray="2 9" strokeWidth=".5" opacity=".22" />
@@ -150,7 +168,16 @@ export function CircuitBlochLive({ state }: { state: StateVector }) {
               {phi !== null && <text x={center.x + 20} y={center.y + 26} fill="#67e8f9" fontSize="17">φ</text>}
             </>
           )}
-          <circle cx={center.x} cy={center.y} r="3" fill="#ffffff" />
+          {length <= 1e-8 && (
+            <g>
+              <circle cx={center.x} cy={center.y} r="15" fill="#fbbf24" opacity=".18" />
+              <circle cx={center.x} cy={center.y} r="6" fill="#fbbf24" />
+              <text x="180" y="344" textAnchor="middle" fill="#fcd34d" fontSize="12">
+                Mixed state · Bloch vector = 0
+              </text>
+            </g>
+          )}
+          <circle cx={center.x} cy={center.y} r="3" fill="#fcd34d" />
         </svg>
         <div className="space-y-3 text-sm">
           <label className="block">
