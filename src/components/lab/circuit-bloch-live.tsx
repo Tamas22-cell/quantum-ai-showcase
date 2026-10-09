@@ -55,40 +55,69 @@ export function CircuitBlochLive({ state }: { state: StateVector }) {
       return `${i === 0 ? "M" : "L"}${p.x.toFixed(2)} ${p.y.toFixed(2)}`;
     }).join(" ");
   // Split the latitude ring by camera depth: faint behind the sphere, vivid in front.
-  const halfRing = (front: boolean) => Array.from({ length: 101 }, (_, i) => {
-    const t = (i / 100) * Math.PI * 2;
-    const depth = Math.cos(t) * Math.sin(a) + Math.sin(t) * Math.cos(a);
-    const isFront = depth >= 0;
-    const p = project({ x: Math.cos(t), y: Math.sin(t), z: 0 });
-    return { p, visible: front === isFront };
-  }).map(({ p, visible }, i, arr) =>
-    `${visible ? (i === 0 || !arr[i - 1]?.visible ? "M" : "L") : "M"}${p.x.toFixed(2)} ${p.y.toFixed(2)}`
-  ).join(" ");
+  const halfRing = (front: boolean) =>
+    Array.from({ length: 101 }, (_, i) => {
+      const t = (i / 100) * Math.PI * 2;
+      const depth = Math.cos(t) * Math.sin(a) + Math.sin(t) * Math.cos(a);
+      const isFront = depth >= 0;
+      const p = project({ x: Math.cos(t), y: Math.sin(t), z: 0 });
+      return { p, visible: front === isFront };
+    })
+      .map(
+        ({ p, visible }, i, arr) =>
+          `${visible ? (i === 0 || !arr[i - 1]?.visible ? "M" : "L") : "M"}${p.x.toFixed(2)} ${p.y.toFixed(2)}`,
+      )
+      .join(" ");
   const angleArc = (points: Array<typeof v>) =>
-    points.map((p, i) => {
-      const pt = project(p);
-      return `${i === 0 ? "M" : "L"}${pt.x.toFixed(2)} ${pt.y.toFixed(2)}`;
-    }).join(" ");
-  const meridian = (angle: number) => angleArc(Array.from({ length: 81 }, (_, i) => {
-    const t = i * Math.PI * 2 / 80;
-    return { x: Math.sin(t) * Math.cos(angle), y: Math.sin(t) * Math.sin(angle), z: Math.cos(t) };
-  }));
-  const parallels = [-0.65, -0.33, 0.33, 0.65].map(z =>
-    angleArc(Array.from({ length: 81 }, (_, i) => {
-      const t = i * Math.PI * 2 / 80;
-      const r = Math.sqrt(1 - z * z);
-      return { x: r * Math.cos(t), y: r * Math.sin(t), z };
-    }))
+    points
+      .map((p, i) => {
+        const pt = project(p);
+        return `${i === 0 ? "M" : "L"}${pt.x.toFixed(2)} ${pt.y.toFixed(2)}`;
+      })
+      .join(" ");
+  const meridian = (angle: number) =>
+    angleArc(
+      Array.from({ length: 81 }, (_, i) => {
+        const t = (i * Math.PI * 2) / 80;
+        return {
+          x: Math.sin(t) * Math.cos(angle),
+          y: Math.sin(t) * Math.sin(angle),
+          z: Math.cos(t),
+        };
+      }),
+    );
+  const parallels = [-0.65, -0.33, 0.33, 0.65].map((z) =>
+    angleArc(
+      Array.from({ length: 81 }, (_, i) => {
+        const t = (i * Math.PI * 2) / 80;
+        const r = Math.sqrt(1 - z * z);
+        return { x: r * Math.cos(t), y: r * Math.sin(t), z };
+      }),
+    ),
   );
   const direction = phi ?? 0;
-  const thetaArc = theta === null ? "" : angleArc(Array.from({ length: 33 }, (_, i) => {
-    const t = theta * i / 32;
-    return { x: .31 * Math.sin(t) * Math.cos(direction), y: .31 * Math.sin(t) * Math.sin(direction), z: .31 * Math.cos(t) };
-  }));
-  const phiArc = phi === null ? "" : angleArc(Array.from({ length: 33 }, (_, i) => {
-    const t = phi * i / 32;
-    return { x: .43 * Math.cos(t), y: .43 * Math.sin(t), z: 0 };
-  }));
+  const thetaArc =
+    theta === null
+      ? ""
+      : angleArc(
+          Array.from({ length: 33 }, (_, i) => {
+            const t = (theta * i) / 32;
+            return {
+              x: 0.31 * Math.sin(t) * Math.cos(direction),
+              y: 0.31 * Math.sin(t) * Math.sin(direction),
+              z: 0.31 * Math.cos(t),
+            };
+          }),
+        );
+  const phiArc =
+    phi === null
+      ? ""
+      : angleArc(
+          Array.from({ length: 33 }, (_, i) => {
+            const t = (phi * i) / 32;
+            return { x: 0.43 * Math.cos(t), y: 0.43 * Math.sin(t), z: 0 };
+          }),
+        );
   return (
     <Panel
       title="Live Circuit Bloch View · Neon 3D"
@@ -118,54 +147,159 @@ export function CircuitBlochLive({ state }: { state: StateVector }) {
             <filter id={`${id}-glow`} x="-120%" y="-120%" width="340%" height="340%">
               <feGaussianBlur stdDeviation="3.5" />
             </filter>
-            <marker id={`${id}-arrow`} viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+            <marker
+              id={`${id}-arrow`}
+              viewBox="0 0 10 10"
+              refX="9"
+              refY="5"
+              markerWidth="5"
+              markerHeight="5"
+              orient="auto-start-reverse"
+            >
               <path d="M 0 0 L 10 5 L 0 10 z" fill="#fbbf24" />
             </marker>
           </defs>
           <rect x="0" y="0" width="360" height="364" rx="16" fill="#061753" />
           <circle cx="180" cy="182" r="157" fill={`url(#${id}-halo)`} />
-          <circle cx="180" cy="182" r="116" fill={`url(#${id}-sphere)`} stroke="#f8fafc" strokeWidth="1.5" />
+          <circle
+            cx="180"
+            cy="182"
+            r="116"
+            fill={`url(#${id}-sphere)`}
+            stroke="#f8fafc"
+            strokeWidth="1.5"
+          />
           {parallels.map((path, i) => (
-            <path key={`latitude-${i}`} d={path} fill="none" stroke="#a5f3fc" strokeWidth=".9" opacity=".3" />
+            <path
+              key={`latitude-${i}`}
+              d={path}
+              fill="none"
+              stroke="#a5f3fc"
+              strokeWidth=".9"
+              opacity=".3"
+            />
           ))}
-          {[0, Math.PI / 3, 2 * Math.PI / 3].map((angle, i) => (
-            <path key={`meridian-${i}`} d={meridian(angle)} fill="none"
-              stroke={i === 1 ? "#f0abfc" : "#67e8f9"} strokeWidth="1" opacity=".42" />
+          {[0, Math.PI / 3, (2 * Math.PI) / 3].map((angle, i) => (
+            <path
+              key={`meridian-${i}`}
+              d={meridian(angle)}
+              fill="none"
+              stroke={i === 1 ? "#f0abfc" : "#67e8f9"}
+              strokeWidth="1"
+              opacity=".42"
+            />
           ))}
-          <path d={halfRing(false)} fill="none" stroke="#99bff8" strokeDasharray="3 6" strokeWidth="1.2" opacity=".35" />
+          <path
+            d={halfRing(false)}
+            fill="none"
+            stroke="#99bff8"
+            strokeDasharray="3 6"
+            strokeWidth="1.2"
+            opacity=".35"
+          />
           <path d={halfRing(true)} fill="none" stroke="#7dd3fc" strokeWidth="1.8" opacity=".8" />
-          <path d={equator(0, Math.PI * 2)} fill="none" stroke="#dbeafe" strokeDasharray="2 9" strokeWidth=".5" opacity=".22" />
+          <path
+            d={equator(0, Math.PI * 2)}
+            fill="none"
+            stroke="#dbeafe"
+            strokeDasharray="2 9"
+            strokeWidth=".5"
+            opacity=".22"
+          />
           {axes.map((axis) => {
             const end = project(axis.p);
             return (
               <g key={axis.label}>
-                <line x1={center.x} y1={center.y} x2={end.x} y2={end.y}
-                  stroke={axis.color} strokeWidth="2"
-                  />
-                <text x={end.x + 8} y={end.y + 8} fill={axis.color} fontSize="18" fontWeight="600">{axis.label.toUpperCase()}</text>
+                <line
+                  x1={center.x}
+                  y1={center.y}
+                  x2={end.x}
+                  y2={end.y}
+                  stroke={axis.color}
+                  strokeWidth="2"
+                />
+                <text x={end.x + 8} y={end.y + 8} fill={axis.color} fontSize="18" fontWeight="600">
+                  {axis.label.toUpperCase()}
+                </text>
               </g>
             );
           })}
-          <circle cx={poleTop.x} cy={poleTop.y} r="7" fill="#15df79" stroke="#fff" strokeWidth="1.5" />
-          <circle cx={poleBottom.x} cy={poleBottom.y} r="7" fill="#fc236e" stroke="#fff" strokeWidth="1.5" />
-          <text x={poleTop.x - 43} y={poleTop.y - 11} fill="#fff" fontSize="17">|0⟩</text>
-          <text x={poleBottom.x - 43} y={poleBottom.y + 22} fill="#fff" fontSize="17">|1⟩</text>
+          <circle
+            cx={poleTop.x}
+            cy={poleTop.y}
+            r="7"
+            fill="#15df79"
+            stroke="#fff"
+            strokeWidth="1.5"
+          />
+          <circle
+            cx={poleBottom.x}
+            cy={poleBottom.y}
+            r="7"
+            fill="#fc236e"
+            stroke="#fff"
+            strokeWidth="1.5"
+          />
+          <text x={poleTop.x - 43} y={poleTop.y - 11} fill="#fff" fontSize="17">
+            |0⟩
+          </text>
+          <text x={poleBottom.x - 43} y={poleBottom.y + 22} fill="#fff" fontSize="17">
+            |1⟩
+          </text>
           {length > 1e-8 && (
             <>
-              <line x1={tip.x} y1={tip.y} x2={tip.x} y2={center.y}
-                stroke="#e2e8f0" strokeWidth="1" strokeDasharray="4 5" opacity=".9" />
+              <line
+                x1={tip.x}
+                y1={tip.y}
+                x2={tip.x}
+                y2={center.y}
+                stroke="#e2e8f0"
+                strokeWidth="1"
+                strokeDasharray="4 5"
+                opacity=".9"
+              />
               <path d={thetaArc} stroke="#67e8f9" strokeWidth="2.5" fill="none" />
               <path d={phiArc} stroke="#67e8f9" strokeWidth="2.5" fill="none" opacity=".8" />
-              <line x1={center.x} y1={center.y} x2={tip.x} y2={tip.y}
-                stroke="#f59e0b" strokeWidth="9" opacity=".5" filter={`url(#${id}-glow)`} />
-              <line x1={center.x} y1={center.y} x2={tip.x} y2={tip.y}
-                stroke="#fbbf24" strokeWidth="3.5" markerEnd={`url(#${id}-arrow)`}
-                style={{ transition: "x2 450ms ease, y2 450ms ease" }} />
-              <circle cx={tip.x} cy={tip.y} r="4.5" fill="#fbbf24"
-                style={{ transition: "cx 450ms ease, cy 450ms ease" }} />
-              <text x={tip.x + 9} y={tip.y - 6} fill="#fcd34d" fontSize="16">|ψ⟩</text>
-              {theta !== null && <text x={center.x + 15} y={center.y - 28} fill="#67e8f9" fontSize="17">θ</text>}
-              {phi !== null && <text x={center.x + 20} y={center.y + 26} fill="#67e8f9" fontSize="17">φ</text>}
+              <line
+                x1={center.x}
+                y1={center.y}
+                x2={tip.x}
+                y2={tip.y}
+                stroke="#f59e0b"
+                strokeWidth="9"
+                opacity=".5"
+                filter={`url(#${id}-glow)`}
+              />
+              <line
+                x1={center.x}
+                y1={center.y}
+                x2={tip.x}
+                y2={tip.y}
+                stroke="#fbbf24"
+                strokeWidth="3.5"
+                markerEnd={`url(#${id}-arrow)`}
+                style={{ transition: "x2 450ms ease, y2 450ms ease" }}
+              />
+              <circle
+                cx={tip.x}
+                cy={tip.y}
+                r="4.5"
+                fill="#fbbf24"
+                style={{ transition: "cx 450ms ease, cy 450ms ease" }}
+              />
+              <text x={tip.x + 9} y={tip.y - 6} fill="#fcd34d" fontSize="16">
+                |ψ⟩
+              </text>
+              {theta !== null && (
+                <text x={center.x + 15} y={center.y - 28} fill="#67e8f9" fontSize="17">
+                  θ
+                </text>
+              )}
+              {phi !== null && (
+                <text x={center.x + 20} y={center.y + 26} fill="#67e8f9" fontSize="17">
+                  φ
+                </text>
+              )}
             </>
           )}
           {length <= 1e-8 && (
@@ -219,15 +353,22 @@ export function CircuitBlochLive({ state }: { state: StateVector }) {
           <div className="grid grid-cols-3 gap-2 font-mono text-xs">
             {(["x", "y", "z"] as const).map((k) => (
               <div key={k} className="rounded border border-border p-2">
-                <span className={k === "x" ? "text-pink-400" : k === "y" ? "text-violet-400" : "text-cyan-400"}>
+                <span
+                  className={
+                    k === "x" ? "text-pink-400" : k === "y" ? "text-violet-400" : "text-cyan-400"
+                  }
+                >
                   {k}: {v[k].toFixed(3)}
                 </span>
               </div>
             ))}
           </div>
           <p className="text-xs text-muted-foreground">
-            Bloch length: {length.toFixed(3)}. θ: {theta === null ? "—" : ((theta * 180) / Math.PI).toFixed(1) + "°"} · φ: {phi === null ? "—" : ((phi * 180) / Math.PI).toFixed(1) + "°"}. Values below 1 indicate a reduced mixed state.
-            Interactive 3D projection of a classical quantum-state simulation, not quantum hardware.
+            Bloch length: {length.toFixed(3)}. θ:{" "}
+            {theta === null ? "—" : ((theta * 180) / Math.PI).toFixed(1) + "°"} · φ:{" "}
+            {phi === null ? "—" : ((phi * 180) / Math.PI).toFixed(1) + "°"}. Values below 1 indicate
+            a reduced mixed state. Interactive 3D projection of a classical quantum-state
+            simulation, not quantum hardware.
           </p>
         </div>
       </div>
