@@ -44,7 +44,7 @@ export function CircuitBlochLive({ state }: { state: StateVector }) {
   const axes = [
     { label: "x", p: { x: 1.22, y: 0, z: 0 }, color: "#fd74b9" },
     { label: "y", p: { x: 0, y: 1.22, z: 0 }, color: "#7dd3fc" },
-    { label: "z", p: { x: 0, y: 0, z: 1.23 }, color: "#ffffff" },
+    { label: "z", p: { x: 0, y: 0, z: 1.23 }, color: "#52f4b5" },
   ];
   const theta = length > 1e-8 ? Math.acos(Math.max(-1, Math.min(1, v.z / length))) : null;
   const phi = length > 1e-8 ? Math.atan2(v.y, v.x) : null;
@@ -54,6 +54,30 @@ export function CircuitBlochLive({ state }: { state: StateVector }) {
       const p = project({ x: Math.cos(t), y: Math.sin(t), z: 0 });
       return `${i === 0 ? "M" : "L"}${p.x.toFixed(2)} ${p.y.toFixed(2)}`;
     }).join(" ");
+  // Split the latitude ring by camera depth: faint behind the sphere, vivid in front.
+  const halfRing = (front: boolean) => Array.from({ length: 101 }, (_, i) => {
+    const t = (i / 100) * Math.PI * 2;
+    const depth = Math.cos(t) * Math.sin(a) + Math.sin(t) * Math.cos(a);
+    const isFront = depth >= 0;
+    const p = project({ x: Math.cos(t), y: Math.sin(t), z: 0 });
+    return { p, visible: front === isFront };
+  }).map(({ p, visible }, i, arr) =>
+    `${visible ? (i === 0 || !arr[i - 1]?.visible ? "M" : "L") : "M"}${p.x.toFixed(2)} ${p.y.toFixed(2)}`
+  ).join(" ");
+  const angleArc = (points: Array<typeof v>) =>
+    points.map((p, i) => {
+      const pt = project(p);
+      return `${i === 0 ? "M" : "L"}${pt.x.toFixed(2)} ${pt.y.toFixed(2)}`;
+    }).join(" ");
+  const direction = phi ?? 0;
+  const thetaArc = theta === null ? "" : angleArc(Array.from({ length: 33 }, (_, i) => {
+    const t = theta * i / 32;
+    return { x: .31 * Math.sin(t) * Math.cos(direction), y: .31 * Math.sin(t) * Math.sin(direction), z: .31 * Math.cos(t) };
+  }));
+  const phiArc = phi === null ? "" : angleArc(Array.from({ length: 33 }, (_, i) => {
+    const t = phi * i / 32;
+    return { x: .43 * Math.cos(t), y: .43 * Math.sin(t), z: 0 };
+  }));
   return (
     <Panel
       title="Live Circuit Bloch View"
@@ -80,21 +104,26 @@ export function CircuitBlochLive({ state }: { state: StateVector }) {
               <stop offset="60%" stopColor="#17449e" stopOpacity=".38" />
               <stop offset="100%" stopColor="#2863da" stopOpacity=".08" />
             </radialGradient>
+            <filter id={`${id}-glow`} x="-120%" y="-120%" width="340%" height="340%">
+              <feGaussianBlur stdDeviation="3.5" />
+            </filter>
             <marker id={`${id}-arrow`} viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
-              <path d="M 0 0 L 10 5 L 0 10 z" fill="#fff" />
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#fbbf24" />
             </marker>
           </defs>
           <rect x="0" y="0" width="360" height="364" rx="16" fill="#061753" />
           <circle cx="180" cy="182" r="157" fill={`url(#${id}-halo)`} />
           <circle cx="180" cy="182" r="116" fill={`url(#${id}-sphere)`} stroke="#f8fafc" strokeWidth="1.5" />
-          <path d={equator(0, Math.PI * 2)} fill="none" stroke="#f8fafc" strokeDasharray="4 6" strokeWidth="1" opacity=".78" />
+          <path d={halfRing(false)} fill="none" stroke="#99bff8" strokeDasharray="3 6" strokeWidth="1.2" opacity=".35" />
+          <path d={halfRing(true)} fill="none" stroke="#7dd3fc" strokeWidth="1.8" opacity=".8" />
+          <path d={equator(0, Math.PI * 2)} fill="none" stroke="#dbeafe" strokeDasharray="2 9" strokeWidth=".5" opacity=".22" />
           {axes.map((axis) => {
             const end = project(axis.p);
             return (
               <g key={axis.label}>
                 <line x1={center.x} y1={center.y} x2={end.x} y2={end.y}
-                  stroke={axis.color} strokeWidth="1.7"
-                  markerEnd={`url(#${id}-arrow)`} />
+                  stroke={axis.color} strokeWidth="2"
+                  />
                 <text x={end.x + 8} y={end.y + 8} fill={axis.color} fontSize="18" fontWeight="600">{axis.label.toUpperCase()}</text>
               </g>
             );
@@ -107,12 +136,18 @@ export function CircuitBlochLive({ state }: { state: StateVector }) {
             <>
               <line x1={tip.x} y1={tip.y} x2={tip.x} y2={center.y}
                 stroke="#e2e8f0" strokeWidth="1" strokeDasharray="4 5" opacity=".9" />
+              <path d={thetaArc} stroke="#67e8f9" strokeWidth="2.5" fill="none" />
+              <path d={phiArc} stroke="#67e8f9" strokeWidth="2.5" fill="none" opacity=".8" />
               <line x1={center.x} y1={center.y} x2={tip.x} y2={tip.y}
-                stroke="#ffffff" strokeWidth="2.8" markerEnd={`url(#${id}-arrow)`} />
-              <circle cx={tip.x} cy={tip.y} r="4.5" fill="#fff" />
-              <text x={tip.x + 9} y={tip.y - 6} fill="#fff" fontSize="16">|ψ⟩</text>
-              <text x={center.x + 15} y={center.y - 28} fill="#fff" fontSize="17">θ</text>
-              <text x={center.x + 20} y={center.y + 26} fill="#fff" fontSize="17">φ</text>
+                stroke="#f59e0b" strokeWidth="9" opacity=".5" filter={`url(#${id}-glow)`} />
+              <line x1={center.x} y1={center.y} x2={tip.x} y2={tip.y}
+                stroke="#fbbf24" strokeWidth="3.5" markerEnd={`url(#${id}-arrow)`}
+                style={{ transition: "x2 450ms ease, y2 450ms ease" }} />
+              <circle cx={tip.x} cy={tip.y} r="4.5" fill="#fbbf24"
+                style={{ transition: "cx 450ms ease, cy 450ms ease" }} />
+              <text x={tip.x + 9} y={tip.y - 6} fill="#fcd34d" fontSize="16">|ψ⟩</text>
+              {theta !== null && <text x={center.x + 15} y={center.y - 28} fill="#67e8f9" fontSize="17">θ</text>}
+              {phi !== null && <text x={center.x + 20} y={center.y + 26} fill="#67e8f9" fontSize="17">φ</text>}
             </>
           )}
           <circle cx={center.x} cy={center.y} r="3" fill="#ffffff" />
