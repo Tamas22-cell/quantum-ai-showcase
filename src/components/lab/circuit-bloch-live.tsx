@@ -49,15 +49,27 @@ export function CircuitBlochLive({ state }: { state: StateVector }) {
           viewBox="0 0 320 320"
           role="img"
           aria-label={`Qubit ${selected}: Bloch x ${v.x.toFixed(3)}, y ${v.y.toFixed(3)}, z ${v.z.toFixed(3)}`}
-          className="mx-auto aspect-square w-full max-w-[340px] text-primary"
+          className="mx-auto aspect-square w-full max-w-[340px] drop-shadow-[0_0_22px_rgba(56,189,248,0.25)]"
         >
+          <defs>
+            <radialGradient id="live-bloch-fill" cx="38%" cy="30%" r="72%">
+              <stop offset="0%" stopColor="#38bdf8" stopOpacity=".28" />
+              <stop offset="55%" stopColor="#8b5cf6" stopOpacity=".11" />
+              <stop offset="100%" stopColor="#0f172a" stopOpacity=".03" />
+            </radialGradient>
+            <linearGradient id="live-bloch-ring" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#22d3ee" />
+              <stop offset="50%" stopColor="#a78bfa" />
+              <stop offset="100%" stopColor="#f472b6" />
+            </linearGradient>
+          </defs>
           <circle
             cx="160"
             cy="160"
             r="112"
-            fill="none"
-            stroke="currentColor"
-            strokeOpacity=".45"
+            fill="url(#live-bloch-fill)"
+            stroke="url(#live-bloch-ring)"
+            strokeOpacity=".9"
             strokeWidth="1.5"
           />
           <ellipse
@@ -66,17 +78,19 @@ export function CircuitBlochLive({ state }: { state: StateVector }) {
             rx="112"
             ry={Math.max(8, 112 * Math.abs(Math.sin(b)))}
             fill="none"
-            stroke="currentColor"
-            strokeOpacity=".25"
+            stroke="#a78bfa"
+            strokeOpacity=".65"
             strokeDasharray="4 5"
           />
-          <path d="M160 48 V272" stroke="currentColor" strokeOpacity=".25" />
-          <line x1="160" y1="160" x2={tip.x} y2={tip.y} stroke="currentColor" strokeWidth="3" />
-          <circle cx={tip.x} cy={tip.y} r="6" fill="currentColor" />
-          <text x="165" y="40" fill="currentColor" fontSize="12">
+          <path d="M160 48 V272" stroke="#38bdf8" strokeOpacity=".65" />
+          <path d="M48 160 H272" stroke="#f472b6" strokeOpacity=".5" strokeDasharray="3 5" />
+          <line x1="160" y1="160" x2={tip.x} y2={tip.y} stroke="#fbbf24" strokeWidth="4" />
+          <circle cx={tip.x} cy={tip.y} r="7" fill="#fbbf24" stroke="#fff7ed" strokeWidth="2" />
+          <circle cx="160" cy="160" r="3" fill="#e2e8f0" />
+          <text x="165" y="40" fill="#67e8f9" fontSize="12">
             |0⟩
           </text>
-          <text x="165" y="291" fill="currentColor" fontSize="12">
+          <text x="165" y="291" fill="#f9a8d4" fontSize="12">
             |1⟩
           </text>
         </svg>
@@ -120,7 +134,9 @@ export function CircuitBlochLive({ state }: { state: StateVector }) {
           <div className="grid grid-cols-3 gap-2 font-mono text-xs">
             {(["x", "y", "z"] as const).map((k) => (
               <div key={k} className="rounded border border-border p-2">
-                {k}: {v[k].toFixed(3)}
+                <span className={k === "x" ? "text-pink-400" : k === "y" ? "text-violet-400" : "text-cyan-400"}>
+                  {k}: {v[k].toFixed(3)}
+                </span>
               </div>
             ))}
           </div>
