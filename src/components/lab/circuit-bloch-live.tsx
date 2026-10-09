@@ -80,39 +80,108 @@ export function CircuitBlochLive({ state }: { state: StateVector }) {
               <stop offset="60%" stopColor="#17449e" stopOpacity=".38" />
               <stop offset="100%" stopColor="#2863da" stopOpacity=".08" />
             </radialGradient>
-            <marker id={`${id}-arrow`} viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+            <marker
+              id={`${id}-arrow`}
+              viewBox="0 0 10 10"
+              refX="9"
+              refY="5"
+              markerWidth="5"
+              markerHeight="5"
+              orient="auto-start-reverse"
+            >
               <path d="M 0 0 L 10 5 L 0 10 z" fill="#fff" />
             </marker>
           </defs>
           <rect x="0" y="0" width="360" height="364" rx="16" fill="#061753" />
           <circle cx="180" cy="182" r="157" fill={`url(#${id}-halo)`} />
-          <circle cx="180" cy="182" r="116" fill={`url(#${id}-sphere)`} stroke="#f8fafc" strokeWidth="1.5" />
-          <path d={equator(0, Math.PI * 2)} fill="none" stroke="#f8fafc" strokeDasharray="4 6" strokeWidth="1" opacity=".78" />
+          <circle
+            cx="180"
+            cy="182"
+            r="116"
+            fill={`url(#${id}-sphere)`}
+            stroke="#f8fafc"
+            strokeWidth="1.5"
+          />
+          <path
+            d={equator(0, Math.PI * 2)}
+            fill="none"
+            stroke="#f8fafc"
+            strokeDasharray="4 6"
+            strokeWidth="1"
+            opacity=".78"
+          />
           {axes.map((axis) => {
             const end = project(axis.p);
             return (
               <g key={axis.label}>
-                <line x1={center.x} y1={center.y} x2={end.x} y2={end.y}
-                  stroke={axis.color} strokeWidth="1.7"
-                  markerEnd={`url(#${id}-arrow)`} />
-                <text x={end.x + 8} y={end.y + 8} fill={axis.color} fontSize="18" fontWeight="600">{axis.label.toUpperCase()}</text>
+                <line
+                  x1={center.x}
+                  y1={center.y}
+                  x2={end.x}
+                  y2={end.y}
+                  stroke={axis.color}
+                  strokeWidth="1.7"
+                  markerEnd={`url(#${id}-arrow)`}
+                />
+                <text x={end.x + 8} y={end.y + 8} fill={axis.color} fontSize="18" fontWeight="600">
+                  {axis.label.toUpperCase()}
+                </text>
               </g>
             );
           })}
-          <circle cx={poleTop.x} cy={poleTop.y} r="7" fill="#15df79" stroke="#fff" strokeWidth="1.5" />
-          <circle cx={poleBottom.x} cy={poleBottom.y} r="7" fill="#fc236e" stroke="#fff" strokeWidth="1.5" />
-          <text x={poleTop.x - 43} y={poleTop.y - 11} fill="#fff" fontSize="17">|0⟩</text>
-          <text x={poleBottom.x - 43} y={poleBottom.y + 22} fill="#fff" fontSize="17">|1⟩</text>
+          <circle
+            cx={poleTop.x}
+            cy={poleTop.y}
+            r="7"
+            fill="#15df79"
+            stroke="#fff"
+            strokeWidth="1.5"
+          />
+          <circle
+            cx={poleBottom.x}
+            cy={poleBottom.y}
+            r="7"
+            fill="#fc236e"
+            stroke="#fff"
+            strokeWidth="1.5"
+          />
+          <text x={poleTop.x - 43} y={poleTop.y - 11} fill="#fff" fontSize="17">
+            |0⟩
+          </text>
+          <text x={poleBottom.x - 43} y={poleBottom.y + 22} fill="#fff" fontSize="17">
+            |1⟩
+          </text>
           {length > 1e-8 && (
             <>
-              <line x1={tip.x} y1={tip.y} x2={tip.x} y2={center.y}
-                stroke="#e2e8f0" strokeWidth="1" strokeDasharray="4 5" opacity=".9" />
-              <line x1={center.x} y1={center.y} x2={tip.x} y2={tip.y}
-                stroke="#ffffff" strokeWidth="2.8" markerEnd={`url(#${id}-arrow)`} />
+              <line
+                x1={tip.x}
+                y1={tip.y}
+                x2={tip.x}
+                y2={center.y}
+                stroke="#e2e8f0"
+                strokeWidth="1"
+                strokeDasharray="4 5"
+                opacity=".9"
+              />
+              <line
+                x1={center.x}
+                y1={center.y}
+                x2={tip.x}
+                y2={tip.y}
+                stroke="#ffffff"
+                strokeWidth="2.8"
+                markerEnd={`url(#${id}-arrow)`}
+              />
               <circle cx={tip.x} cy={tip.y} r="4.5" fill="#fff" />
-              <text x={tip.x + 9} y={tip.y - 6} fill="#fff" fontSize="16">|ψ⟩</text>
-              <text x={center.x + 15} y={center.y - 28} fill="#fff" fontSize="17">θ</text>
-              <text x={center.x + 20} y={center.y + 26} fill="#fff" fontSize="17">φ</text>
+              <text x={tip.x + 9} y={tip.y - 6} fill="#fff" fontSize="16">
+                |ψ⟩
+              </text>
+              <text x={center.x + 15} y={center.y - 28} fill="#fff" fontSize="17">
+                θ
+              </text>
+              <text x={center.x + 20} y={center.y + 26} fill="#fff" fontSize="17">
+                φ
+              </text>
             </>
           )}
           <circle cx={center.x} cy={center.y} r="3" fill="#ffffff" />
@@ -157,15 +226,22 @@ export function CircuitBlochLive({ state }: { state: StateVector }) {
           <div className="grid grid-cols-3 gap-2 font-mono text-xs">
             {(["x", "y", "z"] as const).map((k) => (
               <div key={k} className="rounded border border-border p-2">
-                <span className={k === "x" ? "text-pink-400" : k === "y" ? "text-violet-400" : "text-cyan-400"}>
+                <span
+                  className={
+                    k === "x" ? "text-pink-400" : k === "y" ? "text-violet-400" : "text-cyan-400"
+                  }
+                >
                   {k}: {v[k].toFixed(3)}
                 </span>
               </div>
             ))}
           </div>
           <p className="text-xs text-muted-foreground">
-            Bloch length: {length.toFixed(3)}. θ: {theta === null ? "—" : ((theta * 180) / Math.PI).toFixed(1) + "°"} · φ: {phi === null ? "—" : ((phi * 180) / Math.PI).toFixed(1) + "°"}. Values below 1 indicate a reduced mixed state.
-            Interactive 3D projection of a classical quantum-state simulation, not quantum hardware.
+            Bloch length: {length.toFixed(3)}. θ:{" "}
+            {theta === null ? "—" : ((theta * 180) / Math.PI).toFixed(1) + "°"} · φ:{" "}
+            {phi === null ? "—" : ((phi * 180) / Math.PI).toFixed(1) + "°"}. Values below 1 indicate
+            a reduced mixed state. Interactive 3D projection of a classical quantum-state
+            simulation, not quantum hardware.
           </p>
         </div>
       </div>
