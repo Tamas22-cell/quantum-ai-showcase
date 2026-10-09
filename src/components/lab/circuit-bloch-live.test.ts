@@ -22,10 +22,13 @@ describe("live circuit Bloch vector", () => {
     expect(v.z).toBeCloseTo(0);
   });
   it("shows a maximally mixed reduced state for a Bell pair", () => {
-    const s = simulate({ numQubits: 2, ops: [
-      { gate: "H", qubits: [0] },
-      { gate: "CNOT", qubits: [0, 1] },
-    ] });
+    const s = simulate({
+      numQubits: 2,
+      ops: [
+        { gate: "H", qubits: [0] },
+        { gate: "CNOT", qubits: [0, 1] },
+      ],
+    });
     for (const q of [0, 1]) {
       const v = reducedBloch(s, q);
       expect(v.x).toBeCloseTo(0);

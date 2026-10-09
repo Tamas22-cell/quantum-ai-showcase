@@ -298,7 +298,12 @@ export function PortfolioSite() {
                 </a>
               );
             })}
-            <Link to="/account" className="rounded-sm px-3 py-2 font-mono text-[11px] uppercase tracking-wider text-cyan-400 hover:text-cyan-200">Belépés / Regisztráció</Link>
+            <Link
+              to="/account"
+              className="rounded-sm px-3 py-2 font-mono text-[11px] uppercase tracking-wider text-cyan-400 hover:text-cyan-200"
+            >
+              Belépés / Regisztráció
+            </Link>
           </nav>
           <Button
             variant="ghost"
@@ -330,7 +335,13 @@ export function PortfolioSite() {
                   {item.label}
                 </a>
               ))}
-              <Link to="/account" onClick={() => setMenuOpen(false)} className="border-b border-border/60 py-3.5 font-mono text-xs uppercase tracking-wider text-cyan-400">Belépés / Regisztráció</Link>
+              <Link
+                to="/account"
+                onClick={() => setMenuOpen(false)}
+                className="border-b border-border/60 py-3.5 font-mono text-xs uppercase tracking-wider text-cyan-400"
+              >
+                Belépés / Regisztráció
+              </Link>
             </div>
           </nav>
         ) : null}
