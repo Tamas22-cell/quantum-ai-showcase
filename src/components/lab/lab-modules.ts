@@ -8,6 +8,8 @@ export type LabModule = {
   status: "available" | "in-development";
   group: "core" | "command";
   to?:
+    | "/lab/quantum-teleportation"
+    | "/lab/quantum-interference"
     | "/lab/quantum-zxz"
     | "/lab/circuit-builder"
     | "/lab/entanglement"
@@ -34,6 +36,8 @@ export type LabModule = {
 };
 
 export const LAB_MODULES: LabModule[] = [
+  { id: "quantum-teleportation", index: "11", title: "Quantum Teleportation Simulator", summary: "Prepare a qubit and explore three-qubit Bell-pair teleportation, Alice measurement outcomes and Bob corrections with exact state fidelity.", topics: ["Bell pair", "3 qubits", "Classical bits", "Fidelity"], status: "available", to: "/lab/quantum-teleportation", group: "core" },
+  { id: "quantum-interference", index: "12", title: "Quantum Interference Visualizer", summary: "Adjust the relative phase of an H–Rz–H circuit and see complex amplitudes interfere constructively or destructively.", topics: ["Phase", "Interference", "Amplitudes", "Born rule"], status: "available", to: "/lab/quantum-interference", group: "core" },
   {
     id: "quantum-zxz", index: "10", title: "3D Bloch Sphere & ZXZ Gate Simulator",
     summary: "Drag to rotate the Bloch sphere, explore Rz–Rx–Rz decomposition and exact qubit measurement probabilities.",
