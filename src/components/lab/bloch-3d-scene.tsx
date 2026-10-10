@@ -50,7 +50,7 @@ function StateArrow({ target }: { target: BlochVec }) {
 
 function Label({ position, children }: { position: [number, number, number]; children: string }) {
   return (
-    <Html position={position} center style={{ pointerEvents: "none" }}>
+    <Html position={position} center zIndexRange={[10, 0]} style={{ pointerEvents: "none" }}>
       <span className="whitespace-nowrap rounded-sm bg-background/80 px-1.5 py-0.5 font-mono text-[11px] text-foreground">
         {children}
       </span>
