@@ -12,9 +12,9 @@ const mul=(a:C,b:C):C=>({re:a.re*b.re-a.im*b.im,im:a.re*b.im+a.im*b.re});
 const abs2=(a:C)=>a.re*a.re+a.im*a.im;
 const Z:C={re:0,im:0}, ONE:C={re:1,im:0};
 const scale=(a:C,v:number):C=>({re:a.re*v,im:a.im*v});
-function gate(s:C[],q:number,m:C[][]):C[]{const t=s.map(v=>({...v}));for(let i=0;i<s.length;i++)if(!(i&(1<<q))){let j=i|(1<<q);t[i]=add(mul(m[0]![0]!,s[i]!),mul(m[0]![1]!,s[j]!));t[j]=add(mul(m[1]![0]!,s[i]!),mul(m[1]![1]!,s[j]!));}return t;}
+function gate(s:C[],q:number,m:C[][]):C[]{const t=s.map(v=>({...v}));for(let i=0;i<s.length;i++)if(!(i&(1<<q))){const j=i|(1<<q);t[i]=add(mul(m[0]![0]!,s[i]!),mul(m[0]![1]!,s[j]!));t[j]=add(mul(m[1]![0]!,s[i]!),mul(m[1]![1]!,s[j]!));}return t;}
 const H:C[][]=[[scale(ONE,Math.SQRT1_2),scale(ONE,Math.SQRT1_2)],[scale(ONE,Math.SQRT1_2),scale(ONE,-Math.SQRT1_2)]];
-function cnot(s:C[],control:number,target:number):C[]{let t=s.map(v=>({...v}));for(let i=0;i<8;i++)if((i&(1<<control))&&!(i&(1<<target))){const j=i|(1<<target);t[i]=s[j]!;t[j]=s[i]!;}return t;}
+function cnot(s:C[],control:number,target:number):C[]{const t=s.map(v=>({...v}));for(let i=0;i<8;i++)if((i&(1<<control))&&!(i&(1<<target))){const j=i|(1<<target);t[i]=s[j]!;t[j]=s[i]!;}return t;}
 function phase(theta:number):C{return {re:Math.cos(theta),im:Math.sin(theta)};}
 function calculate(theta:number,phi:number,m0:number,m1:number){
  const a=scale(ONE,Math.cos(theta/2)),b=scale(phase(phi),Math.sin(theta/2));
