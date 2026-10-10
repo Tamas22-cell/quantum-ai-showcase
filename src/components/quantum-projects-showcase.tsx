@@ -99,6 +99,13 @@ export function QuantumProjectsShowcase() {
         <p className="mt-4 max-w-2xl text-sm leading-7 text-muted-foreground">
           Explore all nine quantum research projects below, organized into three areas.
         </p>
+        <a
+          href="/lab/bloch-sphere"
+          className="mt-6 inline-flex items-center gap-2 rounded-full border border-primary/60 bg-primary/10 px-4 py-2 font-mono text-xs font-semibold text-primary transition-colors hover:bg-primary hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        >
+          <Atom className="size-4" aria-hidden="true" /> Open the Interactive Quantum Lab (3D Bloch sphere)
+          <ArrowUpRight className="size-4" aria-hidden="true" />
+        </a>
         <div className="mt-12 grid gap-5 md:grid-cols-3">
           {groups.map((group, index) => {
             const Icon = group.icon;

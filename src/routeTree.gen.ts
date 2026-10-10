@@ -17,6 +17,7 @@ import { Route as LabAiRouteImport } from './routes/lab.ai'
 import { Route as LabArenaRouteImport } from './routes/lab.arena'
 import { Route as LabAssistantRouteImport } from './routes/lab.assistant'
 import { Route as LabBenchmarkRouteImport } from './routes/lab.benchmark'
+import { Route as LabBlochSphereRouteImport } from './routes/lab.bloch-sphere'
 import { Route as LabBlockchainRouteImport } from './routes/lab.blockchain'
 import { Route as LabCircuitBuilderRouteImport } from './routes/lab.circuit-builder'
 import { Route as LabCryptoIntelligenceRouteImport } from './routes/lab.crypto-intelligence'
@@ -89,6 +90,11 @@ const LabAssistantRoute = LabAssistantRouteImport.update({
 const LabBenchmarkRoute = LabBenchmarkRouteImport.update({
   id: '/lab/benchmark',
   path: '/lab/benchmark',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LabBlochSphereRoute = LabBlochSphereRouteImport.update({
+  id: '/lab/bloch-sphere',
+  path: '/lab/bloch-sphere',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LabBlockchainRoute = LabBlockchainRouteImport.update({
@@ -271,6 +277,7 @@ export interface FileRoutesByFullPath {
   '/lab/arena': typeof LabArenaRoute
   '/lab/assistant': typeof LabAssistantRoute
   '/lab/benchmark': typeof LabBenchmarkRoute
+  '/lab/bloch-sphere': typeof LabBlochSphereRoute
   '/lab/blockchain': typeof LabBlockchainRoute
   '/lab/circuit-builder': typeof LabCircuitBuilderRoute
   '/lab/crypto-intelligence': typeof LabCryptoIntelligenceRoute
@@ -313,6 +320,7 @@ export interface FileRoutesByTo {
   '/lab/arena': typeof LabArenaRoute
   '/lab/assistant': typeof LabAssistantRoute
   '/lab/benchmark': typeof LabBenchmarkRoute
+  '/lab/bloch-sphere': typeof LabBlochSphereRoute
   '/lab/blockchain': typeof LabBlockchainRoute
   '/lab/circuit-builder': typeof LabCircuitBuilderRoute
   '/lab/crypto-intelligence': typeof LabCryptoIntelligenceRoute
@@ -357,6 +365,7 @@ export interface FileRoutesById {
   '/lab/arena': typeof LabArenaRoute
   '/lab/assistant': typeof LabAssistantRoute
   '/lab/benchmark': typeof LabBenchmarkRoute
+  '/lab/bloch-sphere': typeof LabBlochSphereRoute
   '/lab/blockchain': typeof LabBlockchainRoute
   '/lab/circuit-builder': typeof LabCircuitBuilderRoute
   '/lab/crypto-intelligence': typeof LabCryptoIntelligenceRoute
@@ -402,6 +411,7 @@ export interface FileRouteTypes {
     | '/lab/arena'
     | '/lab/assistant'
     | '/lab/benchmark'
+    | '/lab/bloch-sphere'
     | '/lab/blockchain'
     | '/lab/circuit-builder'
     | '/lab/crypto-intelligence'
@@ -444,6 +454,7 @@ export interface FileRouteTypes {
     | '/lab/arena'
     | '/lab/assistant'
     | '/lab/benchmark'
+    | '/lab/bloch-sphere'
     | '/lab/blockchain'
     | '/lab/circuit-builder'
     | '/lab/crypto-intelligence'
@@ -487,6 +498,7 @@ export interface FileRouteTypes {
     | '/lab/arena'
     | '/lab/assistant'
     | '/lab/benchmark'
+    | '/lab/bloch-sphere'
     | '/lab/blockchain'
     | '/lab/circuit-builder'
     | '/lab/crypto-intelligence'
@@ -531,6 +543,7 @@ export interface RootRouteChildren {
   LabArenaRoute: typeof LabArenaRoute
   LabAssistantRoute: typeof LabAssistantRoute
   LabBenchmarkRoute: typeof LabBenchmarkRoute
+  LabBlochSphereRoute: typeof LabBlochSphereRoute
   LabBlockchainRoute: typeof LabBlockchainRoute
   LabCircuitBuilderRoute: typeof LabCircuitBuilderRoute
   LabCryptoIntelligenceRoute: typeof LabCryptoIntelligenceRoute
@@ -613,6 +626,13 @@ declare module '@tanstack/react-router' {
       path: '/lab/benchmark'
       fullPath: '/lab/benchmark'
       preLoaderRoute: typeof LabBenchmarkRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lab/bloch-sphere': {
+      id: '/lab/bloch-sphere'
+      path: '/lab/bloch-sphere'
+      fullPath: '/lab/bloch-sphere'
+      preLoaderRoute: typeof LabBlochSphereRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/lab/blockchain': {
@@ -885,6 +905,7 @@ const rootRouteChildren: RootRouteChildren = {
   LabArenaRoute: LabArenaRoute,
   LabAssistantRoute: LabAssistantRoute,
   LabBenchmarkRoute: LabBenchmarkRoute,
+  LabBlochSphereRoute: LabBlochSphereRoute,
   LabBlockchainRoute: LabBlockchainRoute,
   LabCircuitBuilderRoute: LabCircuitBuilderRoute,
   LabCryptoIntelligenceRoute: LabCryptoIntelligenceRoute,
