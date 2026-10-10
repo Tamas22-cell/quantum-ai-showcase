@@ -29,7 +29,8 @@ export type LabModule = {
     | "/lab/python"
     | "/lab/blockchain"
     | "/lab/crypto-intelligence"
-    | "/lab/web3-solidity";
+    | "/lab/web3-solidity"
+    | "/lab/bloch-sphere";
 };
 
 export const LAB_MODULES: LabModule[] = [
@@ -130,6 +131,17 @@ export const LAB_MODULES: LabModule[] = [
     topics: ["Noise", "Decoherence", "Fidelity", "NISQ"],
     status: "available",
     to: "/lab/quantum-noise-fidelity",
+    group: "core",
+  },
+  {
+    id: "bloch-sphere",
+    index: "10",
+    title: "Interactive Quantum Lab",
+    summary:
+      "Rotate a 3D Bloch sphere and drive one qubit through Rz(α)·Rx(β)·Rz(γ) with exact amplitudes, P(0)/P(1) and matching Qiskit code.",
+    topics: ["3D Bloch sphere", "ZXZ rotations", "Global phase", "Qiskit"],
+    status: "available",
+    to: "/lab/bloch-sphere",
     group: "core",
   },
 

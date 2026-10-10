@@ -10,11 +10,14 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AccountRouteImport } from './routes/account'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as LabIndexRouteImport } from './routes/lab.index'
 import { Route as LabAiRouteImport } from './routes/lab.ai'
 import { Route as LabArenaRouteImport } from './routes/lab.arena'
 import { Route as LabAssistantRouteImport } from './routes/lab.assistant'
 import { Route as LabBenchmarkRouteImport } from './routes/lab.benchmark'
+import { Route as LabBlochSphereRouteImport } from './routes/lab.bloch-sphere'
 import { Route as LabBlockchainRouteImport } from './routes/lab.blockchain'
 import { Route as LabCircuitBuilderRouteImport } from './routes/lab.circuit-builder'
 import { Route as LabCryptoIntelligenceRouteImport } from './routes/lab.crypto-intelligence'
@@ -54,6 +57,16 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AccountRoute = AccountRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LabIndexRoute = LabIndexRouteImport.update({
   id: '/lab/',
   path: '/lab/',
@@ -77,6 +90,11 @@ const LabAssistantRoute = LabAssistantRouteImport.update({
 const LabBenchmarkRoute = LabBenchmarkRouteImport.update({
   id: '/lab/benchmark',
   path: '/lab/benchmark',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LabBlochSphereRoute = LabBlochSphereRouteImport.update({
+  id: '/lab/bloch-sphere',
+  path: '/lab/bloch-sphere',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LabBlockchainRoute = LabBlockchainRouteImport.update({
@@ -253,10 +271,13 @@ const LabFinanceVariationalRiskRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/account': typeof AccountRoute
+  '/admin': typeof AdminRoute
   '/lab/ai': typeof LabAiRouteWithChildren
   '/lab/arena': typeof LabArenaRoute
   '/lab/assistant': typeof LabAssistantRoute
   '/lab/benchmark': typeof LabBenchmarkRoute
+  '/lab/bloch-sphere': typeof LabBlochSphereRoute
   '/lab/blockchain': typeof LabBlockchainRoute
   '/lab/circuit-builder': typeof LabCircuitBuilderRoute
   '/lab/crypto-intelligence': typeof LabCryptoIntelligenceRoute
@@ -294,9 +315,12 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/account': typeof AccountRoute
+  '/admin': typeof AdminRoute
   '/lab/arena': typeof LabArenaRoute
   '/lab/assistant': typeof LabAssistantRoute
   '/lab/benchmark': typeof LabBenchmarkRoute
+  '/lab/bloch-sphere': typeof LabBlochSphereRoute
   '/lab/blockchain': typeof LabBlockchainRoute
   '/lab/circuit-builder': typeof LabCircuitBuilderRoute
   '/lab/crypto-intelligence': typeof LabCryptoIntelligenceRoute
@@ -335,10 +359,13 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/account': typeof AccountRoute
+  '/admin': typeof AdminRoute
   '/lab/ai': typeof LabAiRouteWithChildren
   '/lab/arena': typeof LabArenaRoute
   '/lab/assistant': typeof LabAssistantRoute
   '/lab/benchmark': typeof LabBenchmarkRoute
+  '/lab/bloch-sphere': typeof LabBlochSphereRoute
   '/lab/blockchain': typeof LabBlockchainRoute
   '/lab/circuit-builder': typeof LabCircuitBuilderRoute
   '/lab/crypto-intelligence': typeof LabCryptoIntelligenceRoute
@@ -378,10 +405,13 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/account'
+    | '/admin'
     | '/lab/ai'
     | '/lab/arena'
     | '/lab/assistant'
     | '/lab/benchmark'
+    | '/lab/bloch-sphere'
     | '/lab/blockchain'
     | '/lab/circuit-builder'
     | '/lab/crypto-intelligence'
@@ -419,9 +449,12 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/account'
+    | '/admin'
     | '/lab/arena'
     | '/lab/assistant'
     | '/lab/benchmark'
+    | '/lab/bloch-sphere'
     | '/lab/blockchain'
     | '/lab/circuit-builder'
     | '/lab/crypto-intelligence'
@@ -459,10 +492,13 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/account'
+    | '/admin'
     | '/lab/ai'
     | '/lab/arena'
     | '/lab/assistant'
     | '/lab/benchmark'
+    | '/lab/bloch-sphere'
     | '/lab/blockchain'
     | '/lab/circuit-builder'
     | '/lab/crypto-intelligence'
@@ -501,10 +537,13 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AccountRoute: typeof AccountRoute
+  AdminRoute: typeof AdminRoute
   LabAiRoute: typeof LabAiRouteWithChildren
   LabArenaRoute: typeof LabArenaRoute
   LabAssistantRoute: typeof LabAssistantRoute
   LabBenchmarkRoute: typeof LabBenchmarkRoute
+  LabBlochSphereRoute: typeof LabBlochSphereRoute
   LabBlockchainRoute: typeof LabBlockchainRoute
   LabCircuitBuilderRoute: typeof LabCircuitBuilderRoute
   LabCryptoIntelligenceRoute: typeof LabCryptoIntelligenceRoute
@@ -540,6 +579,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/account': {
+      id: '/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof AccountRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lab/': {
       id: '/lab/'
       path: '/lab'
@@ -573,6 +626,13 @@ declare module '@tanstack/react-router' {
       path: '/lab/benchmark'
       fullPath: '/lab/benchmark'
       preLoaderRoute: typeof LabBenchmarkRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lab/bloch-sphere': {
+      id: '/lab/bloch-sphere'
+      path: '/lab/bloch-sphere'
+      fullPath: '/lab/bloch-sphere'
+      preLoaderRoute: typeof LabBlochSphereRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/lab/blockchain': {
@@ -839,10 +899,13 @@ const LabAiRouteWithChildren = LabAiRoute._addFileChildren(LabAiRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AccountRoute: AccountRoute,
+  AdminRoute: AdminRoute,
   LabAiRoute: LabAiRouteWithChildren,
   LabArenaRoute: LabArenaRoute,
   LabAssistantRoute: LabAssistantRoute,
   LabBenchmarkRoute: LabBenchmarkRoute,
+  LabBlochSphereRoute: LabBlochSphereRoute,
   LabBlockchainRoute: LabBlockchainRoute,
   LabCircuitBuilderRoute: LabCircuitBuilderRoute,
   LabCryptoIntelligenceRoute: LabCryptoIntelligenceRoute,
