@@ -8,6 +8,7 @@ export type LabModule = {
   status: "available" | "in-development";
   group: "core" | "command";
   to?:
+    | "/lab/quantum-zxz"
     | "/lab/circuit-builder"
     | "/lab/entanglement"
     | "/lab/qaoa"
@@ -33,6 +34,12 @@ export type LabModule = {
 };
 
 export const LAB_MODULES: LabModule[] = [
+  {
+    id: "quantum-zxz", index: "10", title: "3D Bloch Sphere & ZXZ Gate Simulator",
+    summary: "Drag to rotate the Bloch sphere, explore Rz–Rx–Rz decomposition and exact qubit measurement probabilities.",
+    topics: ["Bloch sphere", "ZXZ", "Gate rotations", "Qiskit"],
+    status: "available", to: "/lab/quantum-zxz", group: "core",
+  },
   {
     id: "circuit-builder",
     index: "01",
