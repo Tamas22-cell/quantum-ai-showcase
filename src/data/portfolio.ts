@@ -137,6 +137,13 @@ export const portfolio = {
       verified: true,
       href: "https://courses.edx.org/certificates/d5ae76d59b144650b763fff41bef45fd",
     },
+    {
+      title: "QCS12000: Quantum Computer Systems Design II: Principles of Quantum Architecture",
+      detail:
+        "UChicagoX / edX · Verified Certificate · Issued Oct 10, 2026 · Credential ID 5864184ee20c43689086dd710789f4c0",
+      verified: true,
+      href: "https://courses.edx.org/certificates/5864184ee20c43689086dd710789f4c0",
+    },
   ],
   social: [
     {
