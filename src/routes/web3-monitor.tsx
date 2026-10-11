@@ -104,6 +104,22 @@ function Web3Terminal() {
     const signal = rsi < 30 ? "Oversold watch" : rsi > 70 ? "Overbought watch" : active.price > sma ? "Above SMA14" : "Below SMA14";
     return { sma, rsi, signal };
   })();
+  const rsiSeries = (() => {
+    if (!active || active.closes.length < 16) return [];
+    return active.closes.slice(15).map((_, idx) => {
+      const end = idx + 16;
+      const window = active.closes.slice(end - 15, end);
+      let gains = 0, losses = 0;
+      for (let i = 1; i < window.length; i++) {
+        const delta = window[i] - window[i - 1];
+        gains += Math.max(0, delta);
+        losses += Math.max(0, -delta);
+      }
+      return losses === 0 ? (gains === 0 ? 50 : 100) : 100 - 100 / (1 + gains / losses);
+    });
+  })();
+  const rsiLine = rsiSeries.length > 1 ? rsiSeries.map((v, i) => String(i / (rsiSeries.length - 1) * 100) + "," + String(100 - v)).join(" ") : "";
+  const rsiColor = indicator ? indicator.rsi >= 70 ? "#fb7185" : indicator.rsi <= 30 ? "#34d399" : "#fbbf24" : "#94a3b8";
   const priceLine = active && active.closes.length > 1 ? (() => {
     const values = active.closes, lo = Math.min(...values), hi = Math.max(...values);
     return values.map((v, i) => String((i / (values.length - 1)) * 100) + "," + String(85 - (hi === lo ? 40 : ((v - lo) / (hi - lo)) * 65))).join(" ");
@@ -177,6 +193,26 @@ function Web3Terminal() {
           <svg viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label={selected + " recent price history"} style={{ width: "100%", height: 210, background: "repeating-linear-gradient(to bottom,transparent 0px,transparent 47px,#233042 48px)" }}>
             {priceLine && <polyline points={priceLine} fill="none" stroke="#41e5bb" strokeWidth="2" vectorEffect="non-scaling-stroke" />}
           </svg>
+          <div style={{ marginTop: 24, borderRadius: 14, border: "1px solid #344155", padding: 18, background: "linear-gradient(135deg,#121b2c,#1b1430)" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
+              <strong style={{ fontSize: 17 }}>RSI 14 · Momentum</strong>
+              <strong style={{ fontSize: 25, color: rsiColor }}>{indicator ? fmt(indicator.rsi, 1) : "—"}</strong>
+            </div>
+            <div style={{ display: "flex", gap: 16, flexWrap: "wrap", fontSize: 12, margin: "12px 0", color: "#a5b3c6" }}>
+              <span style={{ color: "#34d399" }}>● Below 30 · Oversold</span>
+              <span style={{ color: "#fbbf24" }}>● 30–70 · Neutral</span>
+              <span style={{ color: "#fb7185" }}>● Above 70 · Overbought</span>
+            </div>
+            <svg viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label={selected + " RSI 14 momentum chart with 30 and 70 levels"} style={{ width: "100%", height: 165, borderRadius: 8, background: "#0b1220" }}>
+              <rect x="0" y="0" width="100" height="30" fill="#fb7185" fillOpacity="0.12" />
+              <rect x="0" y="30" width="100" height="40" fill="#fbbf24" fillOpacity="0.07" />
+              <rect x="0" y="70" width="100" height="30" fill="#34d399" fillOpacity="0.12" />
+              <line x1="0" y1="30" x2="100" y2="30" stroke="#fb7185" strokeWidth="0.6" strokeDasharray="2 2" vectorEffect="non-scaling-stroke" />
+              <line x1="0" y1="70" x2="100" y2="70" stroke="#34d399" strokeWidth="0.6" strokeDasharray="2 2" vectorEffect="non-scaling-stroke" />
+              {rsiLine && <polyline points={rsiLine} fill="none" stroke={rsiColor} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />}
+            </svg>
+            <div style={{ display: "flex", justifyContent: "space-between", color: "#8394aa", fontSize: 11, marginTop: 8 }}><span>Recent hourly candles</span><span>RSI levels: 30 / 70</span></div>
+          </div>
           <p style={{ color: "#8394aa", fontSize: 12 }}>Indicators are descriptive, not investment advice or automatic trading signals. Prices may be delayed. Daily change is measured against today's opening price.</p>
         </section>
         <footer style={{ marginTop: 30, color: "#8394aa", fontSize: 12, display: "flex", gap: 9, alignItems: "center", flexWrap: "wrap" }}><ShieldCheck size={15} /> Public API data · No wallet connection required · Auto-refresh every 60 seconds · Data may be delayed or temporarily unavailable</footer>
