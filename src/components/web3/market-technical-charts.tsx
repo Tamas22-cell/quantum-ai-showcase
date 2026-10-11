@@ -52,21 +52,27 @@ export function MarketTechnicalCharts({ symbol, candles }: { symbol: string; can
   const macdY = (n: number) => 105 - n / extent * 90;
   const macdX = (i: number) => 12 + i * 936 / Math.max(1, (macd?.line.length ?? 1) - 1);
   const polyline = (values: number[]) => values.map((n, i) => macdX(i) + "," + macdY(n)).join(" ");
-  const panel = { marginTop: 20, padding: 18, borderRadius: 14, border: "1px solid #344155", background: "#101827" };
+  const [hovered, setHovered] = useState<number | null>(null);
+  const panel = { marginTop: 20, padding: 18, borderRadius: 14, border: "1px solid #19506b", background: "linear-gradient(140deg,#091724,#111c33)", boxShadow: "inset 0 1px 0 #24435b" };
+  const picked = hovered == null ? recent[recent.length - 1] : recent[hovered];
+  const display = (value: number) => Number.isFinite(value) ? value.toLocaleString("en-US", {maximumFractionDigits: 2}) : "—";
   return (
     <>
       <section style={panel}>
         {feedError && <p role="status" style={{ color: "#fbbf24" }}>{feedError}</p>}
         <h3 style={{ margin: "0 0 8px", fontSize: 18 }}>Candlestick Chart · {symbol}/USD · 1H</h3>
-        <p style={{ fontSize: 12, color: "#9aaac0" }}>Green = rising candle · Red = falling candle · Last 48 hours</p>
-        <svg viewBox="0 0 960 240" preserveAspectRatio="none" role="img" aria-label={symbol + " hourly candlestick chart"} style={{ display: "block", width: "100%", height: 240 }}>
+        <p style={{ fontSize: 12, color: "#9aaac0" }}>Live Kraken OHLC · Green = rising · Red = falling · Hover candles for details</p>
+        {picked && <div style={{ display: "flex", gap: 16, flexWrap: "wrap", color: "#7dd3fc", fontSize: 12, marginBottom: 10 }}>
+          <span>O: ${display(picked.open)}</span><span>H: ${display(picked.high)}</span><span>L: ${display(picked.low)}</span><span>C: ${display(picked.close)}</span>
+        </div>}
+        <svg viewBox="0 0 960 240" preserveAspectRatio="none" role="img" aria-label={symbol + " hourly candlestick chart"} onMouseLeave={() => setHovered(null)} style={{ display: "block", width: "100%", height: 240, background: "repeating-linear-gradient(to right,transparent 0px,transparent 94px,#19344a 95px),repeating-linear-gradient(to bottom,transparent 0px,transparent 39px,#19344a 40px)", borderRadius: 8 }}>
           {recent.map((c, i) => {
             const x = 10 + i * 940 / Math.max(1, recent.length);
             const color = c.close >= c.open ? "#34d399" : "#fb7185";
             const top = Math.min(priceY(c.open), priceY(c.close));
-            return <g key={i}>
-              <line x1={x} x2={x} y1={priceY(c.high)} y2={priceY(c.low)} stroke={color} strokeWidth="2" />
-              <rect x={x - 5} y={top} width="10" height={Math.max(2, Math.abs(priceY(c.close) - priceY(c.open)))} fill={color} />
+            return <g key={i} onMouseEnter={() => setHovered(i)} style={{ cursor: "crosshair" }}>
+              <rect x={x - 9} y="0" width="18" height="240" fill="transparent" /><line x1={x} x2={x} y1={priceY(c.high)} y2={priceY(c.low)} stroke={color} strokeWidth="2" />
+              <rect x={x - 5} y={top} width="10" height={Math.max(2, Math.abs(priceY(c.close) - priceY(c.open)))} fill={color} />{hovered === i && <line x1={x} x2={x} y1="0" y2="240" stroke="#7dd3fc" strokeDasharray="4 4" opacity="0.8" />}
             </g>;
           })}
         </svg>
@@ -75,7 +81,7 @@ export function MarketTechnicalCharts({ symbol, candles }: { symbol: string; can
       <section style={panel}>
         <h3 style={{ margin: "0 0 8px", fontSize: 18 }}>MACD · 12 / 26 / 9</h3>
         <p style={{ fontSize: 12, color: "#9aaac0" }}>Blue MACD · Orange signal · Green/red histogram</p>
-        <svg viewBox="0 0 960 220" preserveAspectRatio="none" role="img" aria-label={symbol + " MACD momentum indicator"} style={{ display: "block", width: "100%", height: 220 }}>
+        <svg viewBox="0 0 960 220" preserveAspectRatio="none" role="img" aria-label={symbol + " MACD momentum indicator"} style={{ display: "block", width: "100%", height: 220, background: "repeating-linear-gradient(to right,transparent 0px,transparent 94px,#19344a 95px),repeating-linear-gradient(to bottom,transparent 0px,transparent 43px,#19344a 44px)", borderRadius: 8 }}>
           <line x1="0" x2="960" y1="105" y2="105" stroke="#64748b" strokeDasharray="5 5" />
           {macd && <>
             {macd.bars.map((value, i) => <rect key={i} x={macdX(i) - 3} y={Math.min(105, macdY(value))} width="6" height={Math.max(1, Math.abs(105 - macdY(value)))} fill={value >= 0 ? "#34d399" : "#fb7185"} />)}
