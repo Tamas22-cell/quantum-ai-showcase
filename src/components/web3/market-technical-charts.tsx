@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 export type MarketCandle = { open: number; high: number; low: number; close: number };
 
@@ -9,15 +9,42 @@ function ema(values: number[], period: number): number[] {
 }
 
 export function MarketTechnicalCharts({ symbol, candles }: { symbol: string; candles: MarketCandle[] }) {
+  const [loaded, setLoaded] = useState<MarketCandle[]>([]);
+  const [feedError, setFeedError] = useState("");
+  useEffect(() => {
+    let active = true;
+    const load = async () => {
+      try {
+        const pair = symbol === "BTC" ? "XBTUSD" : symbol + "USD";
+        const response = await fetch("https://api.kraken.com/0/public/OHLC?pair=" + pair + "&interval=60");
+        if (!response.ok) throw new Error("Market feed HTTP " + response.status);
+        const json = await response.json();
+        if (json.error?.length) throw new Error("Market feed error");
+        const key = Object.keys(json.result || {}).find(k => k !== "last");
+        if (!key) throw new Error("No candles");
+        const values: MarketCandle[] = (json.result[key] as number[][]).slice(-100).map(row => ({
+          open: Number(row[1]), high: Number(row[2]), low: Number(row[3]), close: Number(row[4])
+        })).filter(c => [c.open, c.high, c.low, c.close].every(Number.isFinite));
+        if (active) { setLoaded(values); setFeedError(""); }
+      } catch {
+        if (active) setFeedError("Candle feed temporarily unavailable");
+      }
+    };
+    setLoaded([]);
+    void load();
+    const interval = setInterval(() => void load(), 60000);
+    return () => { active = false; clearInterval(interval); };
+  }, [symbol]);
+  const series = candles.length ? candles : loaded;
   const macd = useMemo(() => {
-    if (candles.length < 35) return null;
-    const closes = candles.map(c => c.close);
+    if (series.length < 35) return null;
+    const closes = series.map(c => c.close);
     const e12 = ema(closes, 12), e26 = ema(closes, 26);
     const line = e12.map((value, i) => value - e26[i]);
     const signal = ema(line, 9);
     return { line, signal, bars: line.map((value, i) => value - signal[i]) };
-  }, [candles]);
-  const recent = candles.slice(-48);
+  }, [series]);
+  const recent = series.slice(-48);
   const low = recent.length ? Math.min(...recent.map(c => c.low)) : 0;
   const high = recent.length ? Math.max(...recent.map(c => c.high)) : 1;
   const priceY = (n: number) => 220 - ((n - low) / (high - low || 1)) * 200;
@@ -29,6 +56,7 @@ export function MarketTechnicalCharts({ symbol, candles }: { symbol: string; can
   return (
     <>
       <section style={panel}>
+        {feedError && <p role="status" style={{ color: "#fbbf24" }}>{feedError}</p>}
         <h3 style={{ margin: "0 0 8px", fontSize: 18 }}>Candlestick Chart · {symbol}/USD · 1H</h3>
         <p style={{ fontSize: 12, color: "#9aaac0" }}>Green = rising candle · Red = falling candle · Last 48 hours</p>
         <svg viewBox="0 0 960 240" preserveAspectRatio="none" role="img" aria-label={symbol + " hourly candlestick chart"} style={{ display: "block", width: "100%", height: 240 }}>
