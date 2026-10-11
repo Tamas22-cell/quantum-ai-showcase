@@ -23,7 +23,7 @@ function Web3Terminal() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [history, setHistory] = useState<number[]>([]);
-  const [markets, setMarkets] = useState<{ symbol: string; price: number; change: number; closes: number[] }[]>([]);
+  const [markets, setMarkets] = useState<{ symbol: string; price: number; change: number; closes: number[]; candles: { open: number; high: number; low: number; close: number }[] }[]>([]);
   const [marketError, setMarketError] = useState("");
   const [selected, setSelected] = useState("BTC");
   async function refreshMarkets() {
@@ -37,10 +37,11 @@ function Web3Terminal() {
         const t = Object.values(ticker.result)[0] as { c: string[]; o: string };
         const key = Object.keys(candles.result).find(k => k !== "last");
         const rows = (key ? candles.result[key] : []) as (string | number)[][];
-        const closes = rows.slice(-48).map(row => Number(row[4])).filter(Number.isFinite);
+        const candles = rows.slice(-100).map(row => ({ open: Number(row[1]), high: Number(row[2]), low: Number(row[3]), close: Number(row[4]) })).filter(c => Object.values(c).every(Number.isFinite));
+        const closes = candles.map(c => c.close);
         const price = Number(t.c[0]), open = Number(t.o);
         if (!Number.isFinite(price) || !Number.isFinite(open) || !closes.length) throw new Error("Invalid market data");
-        return { symbol, price, change: open ? ((price - open) / open) * 100 : 0, closes };
+        return { symbol, price, change: open ? ((price - open) / open) * 100 : 0, closes, candles };
       }));
       setMarkets(next);
       setMarketError("");
@@ -120,6 +121,19 @@ function Web3Terminal() {
   })();
   const rsiLine = rsiSeries.length > 1 ? rsiSeries.map((v, i) => String(i / (rsiSeries.length - 1) * 100) + "," + String(100 - v)).join(" ") : "";
   const rsiColor = indicator ? indicator.rsi >= 70 ? "#fb7185" : indicator.rsi <= 30 ? "#34d399" : "#fbbf24" : "#94a3b8";
+  const macd = (() => {
+    if (!active || active.closes.length < 35) return null;
+    const ema = (values: number[], period: number) => {
+      const alpha = 2 / (period + 1);
+      let previous = values[0];
+      return values.map(value => (previous = value * alpha + previous * (1 - alpha)));
+    };
+    const fast = ema(active.closes, 12), slow = ema(active.closes, 26);
+    const line = fast.map((v, i) => v - slow[i]);
+    const signal = ema(line, 9);
+    const histogram = line.map((v, i) => v - signal[i]);
+    return { line, signal, histogram, current: histogram[histogram.length - 1] };
+  })();
   const priceLine = active && active.closes.length > 1 ? (() => {
     const values = active.closes, lo = Math.min(...values), hi = Math.max(...values);
     return values.map((v, i) => String((i / (values.length - 1)) * 100) + "," + String(85 - (hi === lo ? 40 : ((v - lo) / (hi - lo)) * 65))).join(" ");
@@ -193,6 +207,47 @@ function Web3Terminal() {
           <svg viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label={selected + " recent price history"} style={{ width: "100%", height: 210, background: "repeating-linear-gradient(to bottom,transparent 0px,transparent 47px,#233042 48px)" }}>
             {priceLine && <polyline points={priceLine} fill="none" stroke="#41e5bb" strokeWidth="2" vectorEffect="non-scaling-stroke" />}
           </svg>
+          <div style={{ marginTop: 24, padding: 18, borderRadius: 14, border: "1px solid #344155", background: "#0b1220" }}>
+            <h3 style={{ fontSize: 18, margin: "0 0 8px" }}>Candlestick Chart · 1H</h3>
+            <p style={{ fontSize: 12, color: "#8394aa" }}>Green: close above open · Red: close below open · Last 48 hourly candles</p>
+            <svg viewBox="0 0 960 250" preserveAspectRatio="none" role="img" aria-label={selected + " hourly OHLC candlestick chart"} style={{ width: "100%", height: 260 }}>
+              {(() => {
+                const candles = active?.candles.slice(-48) || [];
+                if (!candles.length) return null;
+                const lo = Math.min(...candles.map(c => c.low)), hi = Math.max(...candles.map(c => c.high));
+                const y = (value: number) => 230 - ((value - lo) / (hi - lo || 1)) * 210;
+                return candles.map((c, i) => {
+                  const x = i * (960 / candles.length) + 10;
+                  const color = c.close >= c.open ? "#34d399" : "#fb7185";
+                  const top = Math.min(y(c.open), y(c.close));
+                  return <g key={i}><line x1={x} y1={y(c.high)} x2={x} y2={y(c.low)} stroke={color} strokeWidth="2" /><rect x={x - 6} y={top} width="12" height={Math.max(1.5, Math.abs(y(c.close) - y(c.open)))} rx="1" fill={color} /></g>;
+                });
+              })()}
+            </svg>
+          </div>
+          <div style={{ marginTop: 20, padding: 18, borderRadius: 14, border: "1px solid #344155", background: "linear-gradient(135deg,#101827,#19142b)" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
+              <h3 style={{ fontSize: 18, margin: 0 }}>MACD · 12 / 26 / 9</h3>
+              <strong style={{ color: macd ? macd.current >= 0 ? "#34d399" : "#fb7185" : "#94a3b8" }}>{macd ? (macd.current >= 0 ? "Positive momentum" : "Negative momentum") : "Loading..."}</strong>
+            </div>
+            <p style={{ fontSize: 12, color: "#8394aa" }}>Green/red histogram · Blue MACD line · Orange signal line</p>
+            <svg viewBox="0 0 960 230" preserveAspectRatio="none" role="img" aria-label={selected + " MACD indicator histogram and signal lines"} style={{ width: "100%", height: 230 }}>
+              {(() => {
+                if (!macd) return null;
+                const count = macd.line.length, extent = Math.max(0.001, ...macd.line.map(Math.abs), ...macd.signal.map(Math.abs), ...macd.histogram.map(Math.abs));
+                const y = (v: number) => 115 - v / extent * 94;
+                const x = (i: number) => 12 + i * 936 / (count - 1);
+                const points = (values: number[]) => values.map((v, i) => String(x(i)) + "," + String(y(v))).join(" ");
+                return <g>
+                  <line x1="0" y1="115" x2="960" y2="115" stroke="#64748b" strokeDasharray="5 5" />
+                  {macd.histogram.map((v, i) => <rect key={i} x={x(i) - 3} y={Math.min(115, y(v))} width="6" height={Math.max(1, Math.abs(y(v) - 115))} fill={v >= 0 ? "#34d399" : "#fb7185"} opacity="0.8" />)}
+                  <polyline points={points(macd.line)} fill="none" stroke="#60a5fa" strokeWidth="2" vectorEffect="non-scaling-stroke" />
+                  <polyline points={points(macd.signal)} fill="none" stroke="#fbbf24" strokeWidth="2" vectorEffect="non-scaling-stroke" />
+                </g>;
+              })()}
+            </svg>
+            <p style={{ fontSize: 12, color: "#8394aa" }}>MACD momentum is not a guaranteed Buy/Sell signal. EMA calculations use available hourly history.</p>
+          </div>
           <div style={{ marginTop: 24, borderRadius: 14, border: "1px solid #344155", padding: 18, background: "linear-gradient(135deg,#121b2c,#1b1430)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
               <strong style={{ fontSize: 17 }}>RSI 14 · Momentum</strong>
