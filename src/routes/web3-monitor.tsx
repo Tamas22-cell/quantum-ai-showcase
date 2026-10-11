@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { MarketTechnicalCharts } from "../components/web3/market-technical-charts";
 import { Activity, ArrowLeft, Bitcoin, Blocks, Database, RefreshCw, ShieldCheck, TrendingUp, Wifi, WifiOff } from "lucide-react";
 
 export const Route = createFileRoute("/web3-monitor")({ component: Web3Terminal });
@@ -29,7 +28,7 @@ function Web3Terminal() {
   const [selected, setSelected] = useState("BTC");
   async function refreshMarkets() {
     try {
-      const results = await Promise.allSettled([{ symbol: "BTC", pair: "XBTUSD" }, { symbol: "ETH", pair: "ETHUSD" }, { symbol: "SOL", pair: "SOLUSD" }].map(async ({ symbol, pair }) => {
+      const next = await Promise.all([{ symbol: "BTC", pair: "XBTUSD" }, { symbol: "ETH", pair: "ETHUSD" }, { symbol: "SOL", pair: "SOLUSD" }].map(async ({ symbol, pair }) => {
         const [ticker, candles] = await Promise.all([
           getJSON("https://api.kraken.com/0/public/Ticker?pair=" + pair),
           getJSON("https://api.kraken.com/0/public/OHLC?pair=" + pair + "&interval=60")
@@ -43,9 +42,8 @@ function Web3Terminal() {
         if (!Number.isFinite(price) || !Number.isFinite(open) || !closes.length) throw new Error("Invalid market data");
         return { symbol, price, change: open ? ((price - open) / open) * 100 : 0, closes };
       }));
-      const next = results.filter((r): r is PromiseFulfilledResult<{ symbol: string; price: number; change: number; closes: number[] }> => r.status === "fulfilled").map(r => r.value);
-      if (next.length) setMarkets(next);
-      setMarketError(next.length === 3 ? "" : "Some market feeds are unavailable; showing available prices.");
+      setMarkets(next);
+      setMarketError("");
     } catch {
       setMarketError("Market feed unavailable; last received prices remain visible.");
     }
@@ -195,7 +193,6 @@ function Web3Terminal() {
           <svg viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label={selected + " recent price history"} style={{ width: "100%", height: 210, background: "repeating-linear-gradient(to bottom,transparent 0px,transparent 47px,#233042 48px)" }}>
             {priceLine && <polyline points={priceLine} fill="none" stroke="#41e5bb" strokeWidth="2" vectorEffect="non-scaling-stroke" />}
           </svg>
-          <MarketTechnicalCharts symbol={selected} candles={[]} />
           <div style={{ marginTop: 24, borderRadius: 14, border: "1px solid #344155", padding: 18, background: "linear-gradient(135deg,#121b2c,#1b1430)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
               <strong style={{ fontSize: 17 }}>RSI 14 · Momentum</strong>
