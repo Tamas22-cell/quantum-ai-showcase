@@ -34,7 +34,7 @@ export function MarketTechnicalCharts({ symbol, candles }: { symbol: string; can
     void load();
     const interval = setInterval(() => void load(), 60000);
     return () => { active = false; clearInterval(interval); };
-  }, [symbol]);
+  }, [symbol, intervalMinutes]);
   const series = candles.length ? candles : loaded;
   const macd = useMemo(() => {
     if (series.length < 35) return null;
@@ -44,7 +44,7 @@ export function MarketTechnicalCharts({ symbol, candles }: { symbol: string; can
     const signal = ema(line, 9);
     return { line, signal, bars: line.map((value, i) => value - signal[i]) };
   }, [series]);
-  const recent = series.slice(-48);
+  const recent = series.slice(-windowSize);
   const low = recent.length ? Math.min(...recent.map(c => c.low)) : 0;
   const high = recent.length ? Math.max(...recent.map(c => c.high)) : 1;
   const priceY = (n: number) => 220 - ((n - low) / (high - low || 1)) * 200;
@@ -53,19 +53,34 @@ export function MarketTechnicalCharts({ symbol, candles }: { symbol: string; can
   const macdX = (i: number) => 12 + i * 936 / Math.max(1, (macd?.line.length ?? 1) - 1);
   const polyline = (values: number[]) => values.map((n, i) => macdX(i) + "," + macdY(n)).join(" ");
   const [hovered, setHovered] = useState<number | null>(null);
+  const [intervalMinutes, setIntervalMinutes] = useState(60);
+  const [windowSize, setWindowSize] = useState(48);
+  const [showSma, setShowSma] = useState(true);
   const panel = { marginTop: 20, padding: 18, borderRadius: 14, border: "1px solid #19506b", background: "linear-gradient(140deg,#091724,#111c33)", boxShadow: "inset 0 1px 0 #24435b" };
   const picked = hovered == null ? recent[recent.length - 1] : recent[hovered];
+  const smaPoints = recent.map((_, i) => {
+    if (i < 13) return null;
+    const avg = recent.slice(i - 13, i + 1).reduce((sum, c) => sum + c.close, 0) / 14;
+    return (10 + i * 940 / Math.max(1, recent.length)) + "," + priceY(avg);
+  }).filter((v): v is string => v !== null).join(" ");
   const display = (value: number) => Number.isFinite(value) ? value.toLocaleString("en-US", {maximumFractionDigits: 2}) : "—";
   return (
     <>
       <section style={panel}>
         {feedError && <p role="status" style={{ color: "#fbbf24" }}>{feedError}</p>}
-        <h3 style={{ margin: "0 0 8px", fontSize: 18 }}>Candlestick Chart · {symbol}/USD · 1H</h3>
-        <p style={{ fontSize: 12, color: "#9aaac0" }}>Live Kraken OHLC · Green = rising · Red = falling · Hover candles for details</p>
+        <h3 style={{ margin: "0 0 8px", fontSize: 18 }}>Interactive Candlestick · {symbol}/USD · {intervalMinutes}m</h3>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center", marginBottom: 12 }}>
+          {[5, 15, 60, 240, 1440].map(minutes => <button key={minutes} onClick={() => setIntervalMinutes(minutes)} aria-pressed={intervalMinutes === minutes} style={{ cursor: "pointer", borderRadius: 7, border: "1px solid #285472", padding: "7px 12px", color: "#e0f2fe", background: intervalMinutes === minutes ? "#075caa" : "#12263b" }}>{minutes === 60 ? "1H" : minutes === 240 ? "4H" : minutes === 1440 ? "1D" : minutes + "m"}</button>)}
+          <button onClick={() => setShowSma(v => !v)} aria-pressed={showSma} style={{ cursor: "pointer", borderRadius: 7, border: "1px solid #285472", padding: "7px 12px", color: showSma ? "#facc15" : "#94a3b8", background: "#12263b" }}>SMA 14 {showSma ? "●" : "○"}</button>
+          <button onClick={() => setWindowSize(v => Math.max(20, v - 12))} style={{ cursor: "pointer", borderRadius: 7, border: "1px solid #285472", padding: "7px 12px", color: "#e0f2fe", background: "#12263b" }}>Zoom +</button>
+          <button onClick={() => setWindowSize(v => Math.min(96, v + 12))} style={{ cursor: "pointer", borderRadius: 7, border: "1px solid #285472", padding: "7px 12px", color: "#e0f2fe", background: "#12263b" }}>Zoom −</button>
+        </div>
+        <p style={{ fontSize: 12, color: "#9aaac0" }}>Live Kraken OHLC · Green = rising · Red = falling · Hover for OHLC · Choose timeframe and zoom</p>
         {picked && <div style={{ display: "flex", gap: 16, flexWrap: "wrap", color: "#7dd3fc", fontSize: 12, marginBottom: 10 }}>
           <span>O: ${display(picked.open)}</span><span>H: ${display(picked.high)}</span><span>L: ${display(picked.low)}</span><span>C: ${display(picked.close)}</span>
         </div>}
         <svg viewBox="0 0 960 240" preserveAspectRatio="none" role="img" aria-label={symbol + " hourly candlestick chart"} onMouseLeave={() => setHovered(null)} style={{ display: "block", width: "100%", height: 240, background: "repeating-linear-gradient(to right,transparent 0px,transparent 94px,#19344a 95px),repeating-linear-gradient(to bottom,transparent 0px,transparent 39px,#19344a 40px)", borderRadius: 8 }}>
+          {showSma && smaPoints && <polyline points={smaPoints} stroke="#facc15" strokeWidth="2" fill="none" vectorEffect="non-scaling-stroke" />}
           {recent.map((c, i) => {
             const x = 10 + i * 940 / Math.max(1, recent.length);
             const color = c.close >= c.open ? "#34d399" : "#fb7185";
