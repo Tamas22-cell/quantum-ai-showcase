@@ -11,12 +11,15 @@ function ema(values: number[], period: number): number[] {
 export function MarketTechnicalCharts({ symbol, candles }: { symbol: string; candles: MarketCandle[] }) {
   const [loaded, setLoaded] = useState<MarketCandle[]>([]);
   const [feedError, setFeedError] = useState("");
+  const [intervalMinutes, setIntervalMinutes] = useState(60);
+  const [windowSize, setWindowSize] = useState(48);
+  const [showSma, setShowSma] = useState(true);
   useEffect(() => {
     let active = true;
     const load = async () => {
       try {
         const pair = symbol === "BTC" ? "XBTUSD" : symbol + "USD";
-        const response = await fetch("https://api.kraken.com/0/public/OHLC?pair=" + pair + "&interval=60");
+        const response = await fetch("https://api.kraken.com/0/public/OHLC?pair=" + pair + "&interval=" + intervalMinutes);
         if (!response.ok) throw new Error("Market feed HTTP " + response.status);
         const json = await response.json();
         if (json.error?.length) throw new Error("Market feed error");
