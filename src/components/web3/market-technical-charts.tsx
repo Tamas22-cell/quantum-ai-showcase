@@ -56,9 +56,6 @@ export function MarketTechnicalCharts({ symbol, candles }: { symbol: string; can
   const macdX = (i: number) => 12 + i * 936 / Math.max(1, (macd?.line.length ?? 1) - 1);
   const polyline = (values: number[]) => values.map((n, i) => macdX(i) + "," + macdY(n)).join(" ");
   const [hovered, setHovered] = useState<number | null>(null);
-  const [intervalMinutes, setIntervalMinutes] = useState(60);
-  const [windowSize, setWindowSize] = useState(48);
-  const [showSma, setShowSma] = useState(true);
   const panel = { marginTop: 20, padding: 18, borderRadius: 14, border: "1px solid #19506b", background: "linear-gradient(140deg,#091724,#111c33)", boxShadow: "inset 0 1px 0 #24435b" };
   const picked = hovered == null ? recent[recent.length - 1] : recent[hovered];
   const smaPoints = recent.map((_, i) => {
