@@ -23,6 +23,31 @@ function Web3Terminal() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [history, setHistory] = useState<number[]>([]);
+  const [markets, setMarkets] = useState<{ symbol: string; price: number; change: number; closes: number[] }[]>([]);
+  const [marketError, setMarketError] = useState("");
+  const [selected, setSelected] = useState("BTC");
+  async function refreshMarkets() {
+    try {
+      const next = await Promise.all([{ symbol: "BTC", pair: "XBTUSD" }, { symbol: "ETH", pair: "ETHUSD" }, { symbol: "SOL", pair: "SOLUSD" }].map(async ({ symbol, pair }) => {
+        const [ticker, candles] = await Promise.all([
+          getJSON("https://api.kraken.com/0/public/Ticker?pair=" + pair),
+          getJSON("https://api.kraken.com/0/public/OHLC?pair=" + pair + "&interval=60")
+        ]);
+        if (ticker.error?.length || candles.error?.length) throw new Error("Market feed unavailable");
+        const t = Object.values(ticker.result)[0] as { c: string[]; o: string };
+        const key = Object.keys(candles.result).find(k => k !== "last");
+        const rows = (key ? candles.result[key] : []) as (string | number)[][];
+        const closes = rows.slice(-48).map(row => Number(row[4])).filter(Number.isFinite);
+        const price = Number(t.c[0]), open = Number(t.o);
+        if (!Number.isFinite(price) || !Number.isFinite(open) || !closes.length) throw new Error("Invalid market data");
+        return { symbol, price, change: open ? ((price - open) / open) * 100 : 0, closes };
+      }));
+      setMarkets(next);
+      setMarketError("");
+    } catch {
+      setMarketError("Market feed unavailable; last received prices remain visible.");
+    }
+  }
   async function refresh() {
     setBusy(true);
     const results = await Promise.allSettled([
@@ -52,6 +77,7 @@ function Web3Terminal() {
     } else {
       setError("One or more public data feeds are unavailable. Showing last verified snapshot, if available.");
     }
+    await refreshMarkets();
     setBusy(false);
   }
   useEffect(() => {
@@ -63,6 +89,25 @@ function Web3Terminal() {
     const lo = Math.min(...history), hi = Math.max(...history);
     return `${(i / (history.length - 1)) * 100},${85 - (hi === lo ? 40 : ((v - lo) / (hi - lo)) * 65)}`;
   }).join(" ") : "";
+  const active = markets.find(m => m.symbol === selected);
+  const indicator = (() => {
+    if (!active || active.closes.length < 15) return null;
+    const values = active.closes;
+    const sma = values.slice(-14).reduce((a, b) => a + b, 0) / 14;
+    let gains = 0, losses = 0;
+    for (let i = values.length - 14; i < values.length; i++) {
+      const diff = values[i] - values[i - 1];
+      gains += Math.max(diff, 0);
+      losses += Math.max(-diff, 0);
+    }
+    const rsi = losses === 0 ? (gains === 0 ? 50 : 100) : 100 - 100 / (1 + gains / losses);
+    const signal = rsi < 30 ? "Oversold watch" : rsi > 70 ? "Overbought watch" : active.price > sma ? "Above SMA14" : "Below SMA14";
+    return { sma, rsi, signal };
+  })();
+  const priceLine = active && active.closes.length > 1 ? (() => {
+    const values = active.closes, lo = Math.min(...values), hi = Math.max(...values);
+    return values.map((v, i) => String((i / (values.length - 1)) * 100) + "," + String(85 - (hi === lo ? 40 : ((v - lo) / (hi - lo)) * 65))).join(" ");
+  })() : "";
   const cards = [
     { label: "BITCOIN BLOCK HEIGHT", value: data ? fmt(data.blockHeight) : "—", sub: "mempool.space / mainnet", icon: <Blocks size={20} /> },
     { label: "BTC FASTEST FEE", value: data ? fmt(data.fees.fastestFee) + " sat/vB" : "—", sub: "Recommended next block", icon: <Bitcoin size={20} /> },
@@ -108,6 +153,32 @@ function Web3Terminal() {
             <p style={{ color: "#8394aa", fontSize: 12, marginTop: 28 }}>Fee estimates are indicative, not guaranteed confirmation times.</p>
           </section>
         </div>
+        <section style={{ marginTop: 18, background: "#0d1521", border: "1px solid #253448", borderRadius: 16, padding: 26 }}>
+          <div style={{ color: "#41e5bb", fontSize: 12, letterSpacing: 1.3 }}>CRYPTO MARKET INTELLIGENCE · KRAKEN PUBLIC DATA</div>
+          <h2 style={{ fontSize: 24, marginBottom: 8 }}>BTC / ETH / SOL Live Markets</h2>
+          <p style={{ color: "#8394aa", fontSize: 13 }}>Latest prices · Daily change · Hourly candles · Auto-refresh every 60 seconds</p>
+          {marketError && <p role="status" style={{ color: "#ffb86b" }}>{marketError}</p>}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(175px,1fr))", gap: 12, margin: "18px 0" }}>
+            {(["BTC", "ETH", "SOL"] as const).map(symbol => {
+              const m = markets.find(x => x.symbol === symbol);
+              return <button key={symbol} onClick={() => setSelected(symbol)} aria-pressed={selected === symbol} style={{ textAlign: "left", cursor: "pointer", borderRadius: 12, border: selected === symbol ? "1px solid #41e5bb" : "1px solid #253448", padding: 18, background: selected === symbol ? "#10211f" : "#111c2a", color: "#e6edf7" }}>
+                <div style={{ color: "#93a3b9", fontSize: 13 }}>{symbol} / USD</div>
+                <strong style={{ display: "block", fontSize: 24, margin: "9px 0" }}>{m ? "$" + fmt(m.price, 2) : "—"}</strong>
+                <span style={{ color: m && m.change < 0 ? "#ff8f92" : "#41e5bb", fontSize: 13 }}>{m ? (m.change >= 0 ? "+" : "") + fmt(m.change, 2) + "% today" : "Loading..."}</span>
+              </button>;
+            })}
+          </div>
+          <div style={{ display: "flex", gap: 18, flexWrap: "wrap", color: "#a5b3c6", fontSize: 14, marginBottom: 12 }}>
+            <strong>{selected}/USD · Recent hourly candles</strong>
+            <span>SMA14: {indicator ? "$" + fmt(indicator.sma, 2) : "—"}</span>
+            <span>RSI14: {indicator ? fmt(indicator.rsi, 1) : "—"}</span>
+            <span style={{ color: "#41e5bb" }}>{indicator?.signal || "Waiting for market data"}</span>
+          </div>
+          <svg viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label={selected + " recent price history"} style={{ width: "100%", height: 210, background: "repeating-linear-gradient(to bottom,transparent 0px,transparent 47px,#233042 48px)" }}>
+            {priceLine && <polyline points={priceLine} fill="none" stroke="#41e5bb" strokeWidth="2" vectorEffect="non-scaling-stroke" />}
+          </svg>
+          <p style={{ color: "#8394aa", fontSize: 12 }}>Indicators are descriptive, not investment advice or automatic trading signals. Prices may be delayed. Daily change is measured against today's opening price.</p>
+        </section>
         <footer style={{ marginTop: 30, color: "#8394aa", fontSize: 12, display: "flex", gap: 9, alignItems: "center", flexWrap: "wrap" }}><ShieldCheck size={15} /> Public API data · No wallet connection required · Auto-refresh every 60 seconds · Data may be delayed or temporarily unavailable</footer>
       </div>
     </main>
