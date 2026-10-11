@@ -32,7 +32,8 @@ export type LabModule = {
     | "/lab/python"
     | "/lab/blockchain"
     | "/lab/crypto-intelligence"
-    | "/lab/web3-solidity";
+    | "/lab/web3-solidity"
+    | "/web3-monitor";
 };
 
 export const LAB_MODULES: LabModule[] = [
@@ -277,8 +278,18 @@ export const LAB_MODULES: LabModule[] = [
     to: "/lab/crypto-intelligence",
   },
   {
-    id: "web3-solidity",
+    id: "web3-monitor",
     index: "C13",
+    title: "Web3 Intelligence Terminal",
+    group: "command",
+    summary: "Live Bitcoin network metrics, transaction fees, mining hashrate and DeFi TVL trends in one interactive monitoring dashboard.",
+    topics: ["BTC network", "Live fees", "Hashrate", "DeFi TVL", "Auto-refresh"],
+    status: "available",
+    to: "/web3-monitor",
+  },
+  {
+    id: "web3-solidity",
+    index: "C14",
     title: "Web3 & Solidity Lab",
     group: "command",
     summary:
