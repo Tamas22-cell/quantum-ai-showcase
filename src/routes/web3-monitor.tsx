@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { MarketTechnicalCharts, type MarketCandle } from "../components/web3/market-technical-charts";
 import { Activity, ArrowLeft, Bitcoin, Blocks, Database, RefreshCw, ShieldCheck, TrendingUp, Wifi, WifiOff } from "lucide-react";
 
 export const Route = createFileRoute("/web3-monitor")({ component: Web3Terminal });
@@ -23,7 +24,7 @@ function Web3Terminal() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [history, setHistory] = useState<number[]>([]);
-  const [markets, setMarkets] = useState<{ symbol: string; price: number; change: number; closes: number[] }[]>([]);
+  const [markets, setMarkets] = useState<{ symbol: string; price: number; change: number; closes: number[]; candles: MarketCandle[] }[]>([]);
   const [marketError, setMarketError] = useState("");
   const [selected, setSelected] = useState("BTC");
   async function refreshMarkets() {
@@ -37,10 +38,11 @@ function Web3Terminal() {
         const t = Object.values(ticker.result)[0] as { c: string[]; o: string };
         const key = Object.keys(candles.result).find(k => k !== "last");
         const rows = (key ? candles.result[key] : []) as (string | number)[][];
-        const closes = rows.slice(-48).map(row => Number(row[4])).filter(Number.isFinite);
+        const candles: MarketCandle[] = rows.slice(-100).map(row => ({ open: Number(row[1]), high: Number(row[2]), low: Number(row[3]), close: Number(row[4]) })).filter(c => Number.isFinite(c.open) && Number.isFinite(c.high) && Number.isFinite(c.low) && Number.isFinite(c.close));
+        const closes = candles.map(c => c.close);
         const price = Number(t.c[0]), open = Number(t.o);
         if (!Number.isFinite(price) || !Number.isFinite(open) || !closes.length) throw new Error("Invalid market data");
-        return { symbol, price, change: open ? ((price - open) / open) * 100 : 0, closes };
+        return { symbol, price, change: open ? ((price - open) / open) * 100 : 0, closes, candles };
       }));
       setMarkets(next);
       setMarketError("");
@@ -193,6 +195,7 @@ function Web3Terminal() {
           <svg viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label={selected + " recent price history"} style={{ width: "100%", height: 210, background: "repeating-linear-gradient(to bottom,transparent 0px,transparent 47px,#233042 48px)" }}>
             {priceLine && <polyline points={priceLine} fill="none" stroke="#41e5bb" strokeWidth="2" vectorEffect="non-scaling-stroke" />}
           </svg>
+          <MarketTechnicalCharts symbol={selected} candles={active?.candles ?? []} />
           <div style={{ marginTop: 24, borderRadius: 14, border: "1px solid #344155", padding: 18, background: "linear-gradient(135deg,#121b2c,#1b1430)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
               <strong style={{ fontSize: 17 }}>RSI 14 · Momentum</strong>
