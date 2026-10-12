@@ -20,7 +20,6 @@ function Web3Terminal() {
   const [error, setError] = useState("");
   const [selected, setSelected] = useState<string>("BTC");
   const [demo, setDemo] = useState(false);
-  const [intervalMinutes, setIntervalMinutes] = useState(60);
   const [liveCandles, setLiveCandles] = useState<Record<string, MarketCandle[]>>({});
   const refresh = useCallback(async () => {
     setBusy(true);
@@ -98,7 +97,17 @@ function Web3Terminal() {
     const timer=setInterval(()=>void load(),60000);
     return ()=>{alive=false;clearInterval(timer)};
   },[demo]);
-  const markets = demo ? demoMarkets : symbols.map(symbol => browserMarkets.find(m=>m.symbol===symbol) ?? feed?.markets.find(m=>m.symbol===symbol)).filter((m):m is Market=>Boolean(m));
+  const markets = demo ? demoMarkets : symbols.map(symbol => {
+    const ticker = browserMarkets.find(m=>m.symbol===symbol) ?? feed?.markets.find(m=>m.symbol===symbol);
+    const candleRows = liveCandles[symbol] ?? [];
+    if (ticker) return ticker;
+    if (candleRows.length) {
+      const latest = candleRows[candleRows.length - 1].close;
+      const start = candleRows[0].open;
+      return {symbol,price:latest,change:start>0?(latest-start)/start*100:0,closes:candleRows.map(c=>c.close)};
+    }
+    return null;
+  }).filter((m):m is Market=>m!==null);
   const market = markets.find(m => m.symbol === selected);
   const closes = demo ? market?.closes ?? [] : liveCandles[selected]?.map(c => c.close) ?? market?.closes ?? [];
   const candles = demo ? closes.map((close, i) => ({ open: i ? closes[i - 1] : close, close, high: close * 1.002, low: close * 0.998 })) : [];
