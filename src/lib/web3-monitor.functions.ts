@@ -12,7 +12,7 @@ export const getWeb3Monitor = createServerFn({ method: "GET" }).handler(async ()
     "https://mempool.space/api/blocks/tip/height",
     "https://mempool.space/api/v1/fees/recommended",
     "https://mempool.space/api/v1/mining/hashrate/1m",
-    "https://api.llama.fi/v2/historicalChainTvl",
+    "https://api.llama.fi/charts",
     ...pairs.map(p => "https://api.kraken.com/0/public/Ticker?pair=" + p.pair),
     ...pairs.map(p => "https://api.kraken.com/0/public/OHLC?pair=" + p.pair + "&interval=60")
   ];
