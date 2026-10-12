@@ -25,7 +25,6 @@ export const portfolio = {
     { label: "AI Lab", href: "/lab/ai" },
     { label: "Quantum Lab", href: "#quantum-lab" },
     { label: "Crypto Intelligence", href: "/lab/crypto-intelligence" },
-    { label: "Web3 Monitor", href: "/web3-monitor" },
     { label: "Credentials", href: "#certifications" },
     { label: "Contact", href: "#contact" },
   ],
