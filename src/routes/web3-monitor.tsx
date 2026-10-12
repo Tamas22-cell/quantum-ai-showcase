@@ -162,7 +162,7 @@ function Web3Terminal() {
     { label: "BITCOIN BLOCK HEIGHT", value: shownData && Number.isFinite(shownData.blockHeight) ? fmt(shownData.blockHeight) : "—", sub: "mempool.space / mainnet", icon: <Blocks size={20} /> },
     { label: "BTC FASTEST FEE", value: shownData && Number.isFinite(shownData.fees.fastestFee) ? fmt(shownData.fees.fastestFee) + " sat/vB" : "—", sub: "Recommended next block", icon: <Bitcoin size={20} /> },
     { label: "BTC HASHRATE", value: shownData && Number.isFinite(shownData.hashrate) ? fmt(shownData.hashrate / 1e18, 2) + " EH/s" : "—", sub: "1-month estimated hashrate", icon: <Activity size={20} /> },
-    { label: "DEFI TOTAL TVL", value: shownData && Number.isFinite(shownData.defi.totalLiquidityUSD) ? usd(shownData.defi.totalLiquidityUSD) : "—", sub: "DeFiLlama / historical total", icon: <Database size={20} /> }
+    { label: "DEFI MARKET CAP", value: shownData && Number.isFinite(shownData.defi.totalLiquidityUSD) ? usd(shownData.defi.totalLiquidityUSD) : "—", sub: "CoinGecko / DeFi market cap", icon: <Database size={20} /> }
   ];
   return (
     <main style={{ minHeight: "100vh", background: "#070b12", color: "#e6edf7", fontFamily: "Inter, system-ui, sans-serif", padding: "clamp(18px,4vw,56px)" }}>
@@ -193,12 +193,12 @@ function Web3Terminal() {
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,380px),1fr))", gap: 16, marginTop: 18 }}>
           <section style={{ border: "1px solid #253448", background: "#0d1521", padding: 26, borderRadius: 16 }}>
             <div style={{ color: "#41e5bb", fontSize: 12, letterSpacing: 1.3 }}>LIQUIDITY INTELLIGENCE</div>
-            <h2 style={{ fontSize: 23 }}>DeFi Total Value Locked</h2>
-            <div style={{ color: "#8394aa", fontSize: 13 }}>Last 32 daily observations · USD</div>
+            <h2 style={{ fontSize: 23 }}>DeFi Market Capitalization</h2>
+            <div style={{ color: "#8394aa", fontSize: 13 }}>Current DeFi market capitalization · USD</div>
             <svg viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label="Historical DeFi TVL trend" style={{ width: "100%", height: 240, marginTop: 20, background: "repeating-linear-gradient(to bottom,transparent 0px,transparent 47px,#233042 48px)" }}>
               {chart && <polyline points={chart} fill="none" stroke="#41e5bb" strokeWidth="1.4" vectorEffect="non-scaling-stroke" />}
             </svg>
-            <div style={{ color: "#8394aa", fontSize: 12 }}>{demo ? "Simulated example · Not live data" : "Source: DeFiLlama · Historical data, not a price forecast"}</div>
+            <div style={{ color: "#8394aa", fontSize: 12 }}>{demo ? "Simulated example · Not live data" : "Source: CoinGecko · Current market capitalization, not TVL"}</div>
           </section>
           <section style={{ border: "1px solid #253448", background: "#0d1521", padding: 26, borderRadius: 16 }}>
             <div style={{ color: "#41e5bb", fontSize: 12, letterSpacing: 1.3 }}>BITCOIN NETWORK / FEE MARKET</div>
