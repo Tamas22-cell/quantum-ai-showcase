@@ -23,6 +23,8 @@ Object.assign(dictionary.de, {"Research":"Forschung","AI Lab":"KI-Labor","Quantu
 Object.assign(dictionary.fr, {"Research":"Recherche","AI Lab":"Laboratoire IA","Quantum Lab":"Laboratoire quantique","Crypto Intelligence":"Analyse crypto","Web3 Monitor":"Suivi Web3","AI & Quantum Computing Researcher":"Chercheur en IA et informatique quantique","Open live project":"Ouvrir le projet en ligne","Financial research":"Recherche financière","Quantum finance":"Finance quantique","Portfolio optimization":"Optimisation de portefeuille","AI agents":"Agents IA","Quantitative finance":"Finance quantitative","Quantum computing":"Informatique quantique"});
 Object.assign(dictionary.it, {"Research":"Ricerca","AI Lab":"Laboratorio IA","Quantum Lab":"Laboratorio quantistico","Crypto Intelligence":"Analisi crypto","Web3 Monitor":"Monitor Web3","AI & Quantum Computing Researcher":"Ricercatore in IA e informatica quantistica","Open live project":"Apri il progetto online","Financial research":"Ricerca finanziaria","Quantum finance":"Finanza quantistica","Portfolio optimization":"Ottimizzazione del portafoglio","AI agents":"Agenti IA","Quantitative finance":"Finanza quantitativa","Quantum computing":"Informatica quantistica"});
 
+const originalText = new WeakMap<Text, string>();
+
 export function LanguageSelector() {
   const [language, setLanguage] = useState<Language>("en");
   useEffect(() => {
@@ -33,7 +35,6 @@ export function LanguageSelector() {
   useEffect(() => {
     document.documentElement.lang = language;
     localStorage.setItem("quantum-lab-language", language);
-    const originals = new WeakMap<Text, string>();
     const translate = () => {
       document.querySelectorAll("main, header, nav, footer").forEach(root => {
         const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
@@ -41,10 +42,10 @@ export function LanguageSelector() {
         while ((node = walker.nextNode())) {
           if (node.parentElement?.closest("[data-language-selector],script,style,textarea,input,code,pre")) continue;
           const el = node as Text;
-          const original = originals.get(el) ?? el.textContent ?? "";
-          if (!originals.has(el)) originals.set(el, original);
+          const original = originalText.get(el) ?? el.textContent ?? "";
+          if (!originalText.has(el)) originalText.set(el, original);
           const key = original.trim();
-          const translation = dictionary[language][key];
+          const translation = dictionary[language][key] ?? dictionary[language][Object.keys(dictionary[language]).find(k => k.toUpperCase() === key) ?? ""]?.toUpperCase();
           const next = translation ? original.replace(key, translation) : original;
           if (el.textContent !== next) el.textContent = next;
         }
@@ -56,7 +57,7 @@ export function LanguageSelector() {
     return () => observer.disconnect();
   }, [language]);
   return (
-    <div data-language-selector="" style={{position:"fixed",top:12,right:12,zIndex:9999,background:"#101a2c",color:"white",border:"1px solid #64748b",borderRadius:9,padding:"6px 10px",fontSize:13}}>
+    <div data-language-selector="" style={{position:"fixed",bottom:18,right:12,zIndex:2147483647,background:"#101a2c",color:"white",border:"1px solid #64748b",borderRadius:9,padding:"6px 10px",fontSize:13}}>
       <label htmlFor="site-language" style={{marginRight:6}}>🌐</label>
       <select id="site-language" aria-label="Website language" value={language} onChange={e=>setLanguage(e.target.value as Language)} style={{background:"#101a2c",color:"white",border:0}}>
         {languages.map(l=><option key={l.code} value={l.code}>{l.label}</option>)}
