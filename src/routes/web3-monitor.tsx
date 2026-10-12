@@ -198,7 +198,7 @@ function Web3Terminal() {
             <svg viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label="Historical DeFi TVL trend" style={{ width: "100%", height: 240, marginTop: 20, background: "repeating-linear-gradient(to bottom,transparent 0px,transparent 47px,#233042 48px)" }}>
               {chart && <polyline points={chart} fill="none" stroke="#41e5bb" strokeWidth="1.4" vectorEffect="non-scaling-stroke" />}
             </svg>
-            <div style={{ color: "#8394aa", fontSize: 12 }}>{demo ? "Simulated example · Not live data" : "Source: CoinGecko · Current market capitalization, not TVL"}</div>
+            <div style={{ color: "#8394aa", fontSize: 12 }}>{demo ? "Simulated example · Not live data" : "Source: CoinGecko · Current market capitalization, not TVL. Historical chart unavailable from this endpoint."}</div>
           </section>
           <section style={{ border: "1px solid #253448", background: "#0d1521", padding: 26, borderRadius: 16 }}>
             <div style={{ color: "#41e5bb", fontSize: 12, letterSpacing: 1.3 }}>BITCOIN NETWORK / FEE MARKET</div>
