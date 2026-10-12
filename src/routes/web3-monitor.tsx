@@ -15,6 +15,7 @@ function Web3Terminal() {
   const [demo, setDemo] = useState(false);
   const onLiveCandles = useCallback((symbol: string, rows: MarketCandle[]) => {
     if (!symbols.includes(symbol as SymbolName)) return;
+    if (!rows.length) return;
     setCandles(previous => ({ ...previous, [symbol]: rows }));
   }, []);
   useEffect(() => {
@@ -66,7 +67,7 @@ function Web3Terminal() {
       <a href="/" style={{ color: "#9fb5c9", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8 }}><ArrowLeft size={16} /> Back to Research Lab</a>
       <header style={{ margin: "34px 0 28px" }}>
         <div style={{ color: "#43e6bc", fontSize: 12, letterSpacing: 2 }}>QUANTUM AI RESEARCH LAB / WEB3</div>
-        <h1 style={{ fontSize: "clamp(32px,5vw,56px)", margin: "10px 0" }}>Web3 Market Terminal</h1>
+        <h1 style={{ fontSize: "clamp(32px,5vw,56px)", margin: "10px 0" }}>Web3 Market Terminal · V2</h1>
         <p style={{ color: "#a7bbce" }}>Kraken public market data · Candlestick charts · SMA14 · RSI14 · MACD</p>
       </header>
       <div style={{ ...surface, marginBottom: 16, display: "flex", gap: 14, alignItems: "center", justifyContent: "space-between", flexWrap: "wrap" }}>
@@ -82,8 +83,8 @@ function Web3Terminal() {
             const pct = latest != null && start ? (latest - start) / start * 100 : null;
             return <button type="button" key={symbol} onClick={() => setSelected(symbol)} aria-pressed={selected === symbol} style={{ background: selected === symbol ? "#12382f" : "#132335", color: "#e7f4ff", border: selected === symbol ? "1px solid #43e6bc" : "1px solid #334d61", borderRadius: 12, padding: 18, cursor: "pointer", textAlign: "left" }}>
               <span style={{ color: "#a7bbce" }}>{symbol}/USD</span>
-              <strong style={{ display: "block", fontSize: 27, margin: "10px 0" }}>{latest != null ? demo ? fmt(latest) + " pts" : "$" + fmt(latest) : "Select to load"}</strong>
-              <span style={{ color: pct == null ? "#a7bbce" : pct < 0 ? "#fb7185" : "#43e6bc" }}>{pct == null ? "Awaiting candles" : (pct >= 0 ? "+" : "") + fmt(pct) + "% over chart period"}</span>
+              <strong style={{ display: "block", fontSize: 27, margin: "10px 0" }}>{latest != null ? demo ? fmt(latest) + " pts" : "$" + fmt(latest) : "Loading live chart…"}</strong>
+              <span style={{ color: pct == null ? "#a7bbce" : pct < 0 ? "#fb7185" : "#43e6bc" }}>{pct == null ? "Waiting for Kraken data" : (pct >= 0 ? "+" : "") + fmt(pct) + "% over chart period"}</span>
             </button>;
           })}
         </div>
@@ -96,6 +97,7 @@ function Web3Terminal() {
         </div>
         <MarketTechnicalCharts symbol={selected} candles={demo ? active : []} mode={demo ? "demo" : "live"} onLiveCandles={onLiveCandles} />
       </section>
+      <p style={{ color: "#43e6bc", fontSize: 12, marginTop: 22 }}>WEB3 V2 · 2026-10-12 · New deployment check</p>
       <p style={{ color: "#a7bbce", fontSize: 12, marginTop: 22 }}>Real market candles come from Kraken. Changes refer to the displayed candle period, not necessarily the daily session. Indicators are informational, not trading signals. The demo is explicitly simulated.</p>
     </div>
   </main>;
