@@ -36,7 +36,7 @@ export function LanguageSelector() {
     document.documentElement.lang = language;
     localStorage.setItem("quantum-lab-language", language);
     const translate = () => {
-      document.querySelectorAll("main, header, nav, footer").forEach(root => {
+      document.querySelectorAll("body").forEach(root => {
         const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
         let node: Node | null;
         while ((node = walker.nextNode())) {
@@ -45,14 +45,16 @@ export function LanguageSelector() {
           const original = originalText.get(el) ?? el.textContent ?? "";
           if (!originalText.has(el)) originalText.set(el, original);
           const key = original.trim();
-          const translation = dictionary[language][key] ?? dictionary[language][Object.keys(dictionary[language]).find(k => k.toUpperCase() === key) ?? ""]?.toUpperCase();
+          const exact = dictionary[language][key];
+          const upperKey = Object.keys(dictionary[language]).find(k => k.toUpperCase() === key);
+          const translation = exact ?? (upperKey ? dictionary[language][upperKey].toUpperCase() : undefined);
           const next = translation ? original.replace(key, translation) : original;
           if (el.textContent !== next) el.textContent = next;
         }
       });
     };
     translate();
-    const observer = new MutationObserver(() => { observer.disconnect(); translate(); observer.observe(document.body, {childList:true,subtree:true}); });
+    const observer = new MutationObserver(() => { observer.disconnect(); translate(); observer.observe(document.body, {childList:true,subtree:true,characterData:true}); });
     observer.observe(document.body, {childList:true,subtree:true});
     return () => observer.disconnect();
   }, [language]);
