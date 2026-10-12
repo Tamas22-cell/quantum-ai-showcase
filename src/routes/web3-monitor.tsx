@@ -14,6 +14,8 @@ const panel = { border: "1px solid #263b4b", borderRadius: 16, background: "#0d1
 const demoMarkets: Market[] = symbols.map((symbol, index) => ({ symbol, price: 100 + index * 10, change: index - 1, closes: Array.from({length: 48}, (_, i) => 100 + index * 10 + Math.sin(i / 5) * 3 + i * (index - 1) / 12) }));
 function Web3Terminal() {
   const [feed, setFeed] = useState<Feed | null>(null);
+  const [browserMarkets,setBrowserMarkets] = useState<Market[]>([]);
+  const [browserNetwork,setBrowserNetwork] = useState<Feed["snapshot"] | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [selected, setSelected] = useState<string>("BTC");
@@ -45,11 +47,62 @@ function Web3Terminal() {
   const onLiveCandles = useCallback((symbol: string, candles: MarketCandle[]) => {
     setLiveCandles(old => ({ ...old, [symbol]: candles }));
   }, []);
-  const markets = demo ? demoMarkets : feed?.markets ?? [];
+  useEffect(() => {
+    if (demo) return;
+    let alive = true;
+    const pairs = [{symbol:"BTC",pair:"XBTUSD"},{symbol:"ETH",pair:"ETHUSD"},{symbol:"SOL",pair:"SOLUSD"}];
+    const load = async () => {
+      const results = await Promise.allSettled(pairs.map(async p => {
+        const response = await fetch("https://api.kraken.com/0/public/Ticker?pair="+p.pair, {signal:AbortSignal.timeout(8000)});
+        if (!response.ok) throw new Error("HTTP "+response.status);
+        const json = await response.json();
+        const row = Object.values(json.result ?? {})[0] as {c?:string[];o?:string}|undefined;
+        const price = Number(row?.c?.[0]), open = Number(row?.o);
+        if (!Number.isFinite(price) || price <= 0) throw new Error("Invalid ticker");
+        return {symbol:p.symbol,price,change:open>0?(price-open)/open*100:0,closes:[] as number[]};
+      }));
+      if (!alive) return;
+      const valid = results.filter((r):r is PromiseFulfilledResult<Market> => r.status==="fulfilled").map(r=>r.value);
+      if (valid.length) setBrowserMarkets(valid);
+    };
+    void load();
+    const timer = setInterval(()=>void load(),60000);
+    return ()=>{alive=false;clearInterval(timer)};
+  },[demo]);
+  useEffect(() => {
+    if (demo) return;
+    let alive = true;
+    const load = async () => {
+      const endpoints = [
+        "https://mempool.space/api/blocks/tip/height",
+        "https://mempool.space/api/v1/fees/recommended",
+        "https://mempool.space/api/v1/mining/hashrate/1m",
+        "https://api.coingecko.com/api/v3/global/decentralized_finance_defi"
+      ];
+      const results = await Promise.allSettled(endpoints.map(async url => {
+        const response = await fetch(url,{signal:AbortSignal.timeout(8000)});
+        if(!response.ok) throw new Error("HTTP "+response.status);
+        return response.json();
+      }));
+      if (!alive) return;
+      const get=(i:number):any=>results[i].status==="fulfilled"?(results[i] as PromiseFulfilledResult<any>).value:null;
+      const height=Number(get(0)),fees=get(1),hash=Number(get(2)?.currentHashrate),cap=Number(get(3)?.data?.defi_market_cap);
+      setBrowserNetwork({
+        blockHeight:Number.isFinite(height)&&height>0?height:null,
+        fees:fees&&Number.isFinite(Number(fees.fastestFee))?{fastestFee:Number(fees.fastestFee),halfHourFee:Number(fees.halfHourFee),hourFee:Number(fees.hourFee)}:null,
+        hashrate:Number.isFinite(hash)&&hash>0?hash:null,
+        tvl:Number.isFinite(cap)&&cap>0?cap:null
+      });
+    };
+    void load();
+    const timer=setInterval(()=>void load(),60000);
+    return ()=>{alive=false;clearInterval(timer)};
+  },[demo]);
+  const markets = demo ? demoMarkets : symbols.map(symbol => browserMarkets.find(m=>m.symbol===symbol) ?? feed?.markets.find(m=>m.symbol===symbol)).filter((m):m is Market=>Boolean(m));
   const market = markets.find(m => m.symbol === selected);
   const closes = demo ? market?.closes ?? [] : liveCandles[selected]?.map(c => c.close) ?? market?.closes ?? [];
   const candles = demo ? closes.map((close, i) => ({ open: i ? closes[i - 1] : close, close, high: close * 1.002, low: close * 0.998 })) : [];
-  const snapshot = demo ? { blockHeight: 850000, fees: {fastestFee: 12, halfHourFee: 8, hourFee: 5}, hashrate: 650e18, tvl: 95000000000 } : feed?.snapshot;
+  const snapshot = demo ? { blockHeight: 850000, fees: {fastestFee: 12, halfHourFee: 8, hourFee: 5}, hashrate: 650e18, tvl: 95000000000 } : { blockHeight: browserNetwork?.blockHeight ?? feed?.snapshot.blockHeight ?? null, fees: browserNetwork?.fees ?? feed?.snapshot.fees ?? null, hashrate: browserNetwork?.hashrate ?? feed?.snapshot.hashrate ?? null, tvl: browserNetwork?.tvl ?? feed?.snapshot.tvl ?? null };
   const indicator = (() => {
     if (closes.length < 15) return null;
     const window = closes.slice(-15);
@@ -78,7 +131,7 @@ function Web3Terminal() {
       </header>
       <div style={{display:"flex",alignItems:"center",gap:14,flexWrap:"wrap",marginBottom:24}}>
         <button type="button" onClick={() => setDemo(d => !d)} style={{background:"#182639",color:"#e5f1fa",border:"1px solid #40576b",padding:"10px 16px",borderRadius:9,cursor:"pointer"}}>{demo?"Exit demo":"Interactive demo"}</button>
-        <span role="status" style={{color:demo?"#fbbf24":error?"#fca5a5":"#43e6bc",fontSize:13}}>{demo?"DEMO · Simulated values, not live prices":error||(!feed?"Connecting to live feeds…":"LIVE · Last request "+new Date(feed.timestamp).toLocaleTimeString())}</span>
+        <span role="status" style={{color:demo?"#fbbf24":error?"#fca5a5":"#43e6bc",fontSize:13}}>{demo?"DEMO · Simulated values, not live prices":(markets.length||snapshot.blockHeight||snapshot.fees||snapshot.tvl?"LIVE · Available public feeds":error||(!feed?"Connecting to live feeds…":"Some public feeds unavailable"))}</span>
       </div>
       <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(210px,1fr))",gap:14}}>
         {cards.map(c=><section key={c.label} style={panel}><div style={{fontSize:11,color:"#43e6bc",letterSpacing:1}}>{c.label}</div><div style={{fontSize:26,fontWeight:700,margin:"18px 0 12px"}}>{c.value}</div><div style={{fontSize:12,color:"#9fbbce"}}>{c.source}</div></section>)}
