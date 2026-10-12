@@ -8,7 +8,7 @@ function ema(values: number[], period: number): number[] {
   return values.map(value => (last = value * weight + last * (1 - weight)));
 }
 
-export function MarketTechnicalCharts({ symbol, candles, mode = "live" }: { symbol: string; candles: MarketCandle[]; mode?: "live" | "demo" }) {
+export function MarketTechnicalCharts({ symbol, candles, mode = "live", onLiveCandles }: { symbol: string; candles: MarketCandle[]; mode?: "live" | "demo"; onLiveCandles?: (symbol: string, candles: MarketCandle[]) => void }) {
   const [loaded, setLoaded] = useState<MarketCandle[]>([]);
   const [feedError, setFeedError] = useState("");
   const [intervalMinutes, setIntervalMinutes] = useState(60);
@@ -29,7 +29,7 @@ export function MarketTechnicalCharts({ symbol, candles, mode = "live" }: { symb
         const values: MarketCandle[] = (json.result[key] as number[][]).slice(-100).map(row => ({
           open: Number(row[1]), high: Number(row[2]), low: Number(row[3]), close: Number(row[4])
         })).filter(c => [c.open, c.high, c.low, c.close].every(Number.isFinite));
-        if (active) { setLoaded(values); setFeedError(""); }
+        if (active) { setLoaded(values); setFeedError(""); onLiveCandles?.(symbol, values); }
       } catch {
         if (active) setFeedError("Candle feed temporarily unavailable");
       }
@@ -38,7 +38,7 @@ export function MarketTechnicalCharts({ symbol, candles, mode = "live" }: { symb
     void load();
     const interval = setInterval(() => void load(), 60000);
     return () => { active = false; clearInterval(interval); };
-  }, [symbol, intervalMinutes, mode]);
+  }, [symbol, intervalMinutes, mode, onLiveCandles]);
   const series = candles.length ? candles : loaded;
   const macd = useMemo(() => {
     if (series.length < 35) return null;
