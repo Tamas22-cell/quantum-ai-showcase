@@ -36,6 +36,10 @@ function Web3Terminal() {
   ];
   const shownData = demo ? sample : data;
   const shownMarkets = demo ? sampleMarkets : markets;
+  const demoCandles = (shownMarkets.find(m => m.symbol === selected)?.closes ?? []).map((close, i, values) => {
+    const open = i ? values[i - 1] : close;
+    return { open, close, high: Math.max(open, close) * 1.001, low: Math.min(open, close) * 0.999 };
+  });
   const shownHistory = demo ? Array.from({length:32},(_,i)=>90e9+i*130e6+Math.sin(i/3)*3e9) : history;
   async function refreshMarkets() {
     const pairs = [{ symbol: "BTC", pair: "XBTUSD" }, { symbol: "ETH", pair: "ETHUSD" }, { symbol: "SOL", pair: "SOLUSD" }];
@@ -193,7 +197,7 @@ function Web3Terminal() {
         <section style={{ marginTop: 18, background: "#0d1521", border: "1px solid #253448", borderRadius: 16, padding: 26 }}>
           <div style={{ color: "#41e5bb", fontSize: 12, letterSpacing: 1.3 }}>CRYPTO MARKET INTELLIGENCE · KRAKEN PUBLIC DATA</div>
           <h2 style={{ fontSize: 24, marginBottom: 8 }}>BTC / ETH / SOL Live Markets</h2>
-          <p style={{ color: "#8394aa", fontSize: 13 }}>Latest prices · Daily change · Hourly candles · Auto-refresh every 60 seconds</p>
+          <p style={{ color: "#8394aa", fontSize: 13 }}>{demo ? "Simulated market scenarios · Practice indicators · No real-time prices" : "Latest prices · Daily change · Hourly candles · Auto-refresh every 60 seconds"}</p>
           {!demo && marketError && <p role="status" style={{ color: "#ffb86b" }}>{marketError}</p>}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(175px,1fr))", gap: 12, margin: "18px 0" }}>
             {(["BTC", "ETH", "SOL"] as const).map(symbol => {
@@ -214,7 +218,7 @@ function Web3Terminal() {
           <svg viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label={selected + " recent price history"} style={{ width: "100%", height: 210, background: "repeating-linear-gradient(to bottom,transparent 0px,transparent 47px,#233042 48px)" }}>
             {priceLine && <polyline points={priceLine} fill="none" stroke="#41e5bb" strokeWidth="2" vectorEffect="non-scaling-stroke" />}
           </svg>
-          {!demo && <MarketTechnicalCharts symbol={selected} candles={[]} />}
+          <MarketTechnicalCharts symbol={selected} candles={demo ? demoCandles : []} mode={demo ? "demo" : "live"} />
           <div style={{ marginTop: 24, borderRadius: 14, border: "1px solid #344155", padding: 18, background: "linear-gradient(135deg,#121b2c,#1b1430)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
               <strong style={{ fontSize: 17 }}>RSI 14 · Momentum</strong>
