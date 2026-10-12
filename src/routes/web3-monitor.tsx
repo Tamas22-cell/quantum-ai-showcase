@@ -28,58 +28,63 @@ function Web3Terminal() {
   const [marketError, setMarketError] = useState("");
   const [selected, setSelected] = useState("BTC");
   async function refreshMarkets() {
-    try {
-      const next = await Promise.all([{ symbol: "BTC", pair: "XBTUSD" }, { symbol: "ETH", pair: "ETHUSD" }, { symbol: "SOL", pair: "SOLUSD" }].map(async ({ symbol, pair }) => {
-        const [ticker, candles] = await Promise.all([
-          getJSON("https://api.kraken.com/0/public/Ticker?pair=" + pair),
-          getJSON("https://api.kraken.com/0/public/OHLC?pair=" + pair + "&interval=60")
-        ]);
-        if (ticker.error?.length || candles.error?.length) throw new Error("Market feed unavailable");
-        const t = Object.values(ticker.result)[0] as { c: string[]; o: string };
-        const key = Object.keys(candles.result).find(k => k !== "last");
-        const rows = (key ? candles.result[key] : []) as (string | number)[][];
-        const closes = rows.slice(-48).map(row => Number(row[4])).filter(Number.isFinite);
-        const price = Number(t.c[0]), open = Number(t.o);
-        if (!Number.isFinite(price) || !Number.isFinite(open) || !closes.length) throw new Error("Invalid market data");
-        return { symbol, price, change: open ? ((price - open) / open) * 100 : 0, closes };
-      }));
-      setMarkets(next);
-      setMarketError("");
-    } catch {
-      setMarketError("Market feed unavailable; last received prices remain visible.");
+    const pairs = [{ symbol: "BTC", pair: "XBTUSD" }, { symbol: "ETH", pair: "ETHUSD" }, { symbol: "SOL", pair: "SOLUSD" }];
+    const results = await Promise.allSettled(pairs.map(async ({ symbol, pair }) => {
+      const [ticker, candles] = await Promise.all([
+        getJSON("https://api.kraken.com/0/public/Ticker?pair=" + pair),
+        getJSON("https://api.kraken.com/0/public/OHLC?pair=" + pair + "&interval=60")
+      ]);
+      if (ticker.error?.length || candles.error?.length) throw new Error("Market feed unavailable");
+      const t = Object.values(ticker.result ?? {})[0] as { c: string[]; o: string } | undefined;
+      const key = Object.keys(candles.result ?? {}).find(k => k !== "last");
+      const rows = (key ? candles.result[key] : []) as (string | number)[][];
+      const closes = rows.slice(-48).map(row => Number(row[4])).filter(Number.isFinite);
+      const price = Number(t?.c?.[0]), open = Number(t?.o);
+      if (!Number.isFinite(price) || !Number.isFinite(open) || !closes.length) throw new Error("Invalid market data");
+      return { symbol, price, change: open ? ((price - open) / open) * 100 : 0, closes };
+    }));
+    const available = results.filter((r): r is PromiseFulfilledResult<{ symbol: string; price: number; change: number; closes: number[] }> => r.status === "fulfilled").map(r => r.value);
+    if (available.length) {
+      setMarkets(previous => [...available, ...previous.filter(p => !available.some(a => a.symbol === p.symbol))]);
     }
+    setMarketError(available.length === pairs.length ? "" : "Some market feeds are unavailable; showing last received values where available.");
   }
   async function refresh() {
+    if (busy) return;
     setBusy(true);
-    const results = await Promise.allSettled([
-      getJSON("https://mempool.space/api/blocks/tip/height"),
-      getJSON("https://mempool.space/api/v1/fees/recommended"),
-      getJSON("https://mempool.space/api/v1/mining/hashrate/1m"),
-      getJSON("https://api.llama.fi/v2/historicalChainTvl")
-    ]);
-    const [height, fees, hash, tvl] = results;
-    if (height.status === "fulfilled" && fees.status === "fulfilled" && hash.status === "fulfilled" && tvl.status === "fulfilled") {
-      const chains = tvl.value as { date: number; tvl: number }[];
+    try {
+      const results = await Promise.allSettled([
+        getJSON("https://mempool.space/api/blocks/tip/height"),
+        getJSON("https://mempool.space/api/v1/fees/recommended"),
+        getJSON("https://mempool.space/api/v1/mining/hashrate/1m"),
+        getJSON("https://api.llama.fi/v2/historicalChainTvl")
+      ]);
+      const [height, fees, hash, tvl] = results;
+      const validHeight = height.status === "fulfilled" ? Number(height.value) : NaN;
+      const validFees = fees.status === "fulfilled" ? fees.value as Snapshot["fees"] : null;
+      const validHash = hash.status === "fulfilled" ? Number(hash.value?.currentHashrate) : NaN;
+      const chains = tvl.status === "fulfilled" && Array.isArray(tvl.value) ? tvl.value as { date: number; tvl: number }[] : [];
       const latest = chains[chains.length - 1];
-      if (!latest || !Number.isFinite(latest.tvl)) {
-        setError("DeFi feed returned invalid data");
-      } else {
-        const next: Snapshot = {
-          blockHeight: Number(height.value),
-          fees: fees.value,
-          hashrate: Number(hash.value.currentHashrate),
-          defi: { totalLiquidityUSD: latest.tvl },
+      const validTvl = latest ? Number(latest.tvl) : NaN;
+      const goodHeight = Number.isFinite(validHeight) && validHeight > 0;
+      const goodFees = validFees && [validFees.fastestFee, validFees.halfHourFee, validFees.hourFee].every(x => Number.isFinite(Number(x)));
+      const goodHash = Number.isFinite(validHash) && validHash > 0;
+      const goodTvl = Number.isFinite(validTvl) && validTvl > 0;
+      if (goodHeight || goodFees || goodHash || goodTvl) {
+        setData(previous => ({
+          blockHeight: goodHeight ? validHeight : previous?.blockHeight ?? NaN,
+          fees: goodFees ? validFees : previous?.fees ?? { fastestFee: NaN, halfHourFee: NaN, hourFee: NaN },
+          hashrate: goodHash ? validHash : previous?.hashrate ?? NaN,
+          defi: { totalLiquidityUSD: goodTvl ? validTvl : previous?.defi.totalLiquidityUSD ?? NaN },
           timestamp: Date.now()
-        };
-        setData(next);
-        setHistory(chains.slice(-32).map(x => x.tvl));
-        setError("");
+        }));
       }
-    } else {
-      setError("One or more public data feeds are unavailable. Showing last verified snapshot, if available.");
+      if (goodTvl) setHistory(chains.slice(-32).map(x => Number(x.tvl)).filter(Number.isFinite));
+      setError(goodHeight && goodFees && goodHash && goodTvl ? "" : "Some public feeds are unavailable; available values are shown.");
+      await refreshMarkets();
+    } finally {
+      setBusy(false);
     }
-    await refreshMarkets();
-    setBusy(false);
   }
   useEffect(() => {
     void refresh();
@@ -126,10 +131,10 @@ function Web3Terminal() {
     return values.map((v, i) => String((i / (values.length - 1)) * 100) + "," + String(85 - (hi === lo ? 40 : ((v - lo) / (hi - lo)) * 65))).join(" ");
   })() : "";
   const cards = [
-    { label: "BITCOIN BLOCK HEIGHT", value: data ? fmt(data.blockHeight) : "—", sub: "mempool.space / mainnet", icon: <Blocks size={20} /> },
-    { label: "BTC FASTEST FEE", value: data ? fmt(data.fees.fastestFee) + " sat/vB" : "—", sub: "Recommended next block", icon: <Bitcoin size={20} /> },
-    { label: "BTC HASHRATE", value: data ? fmt(data.hashrate / 1e18, 2) + " EH/s" : "—", sub: "1-month estimated hashrate", icon: <Activity size={20} /> },
-    { label: "DEFI TOTAL TVL", value: data ? usd(data.defi.totalLiquidityUSD) : "—", sub: "DeFiLlama / historical total", icon: <Database size={20} /> }
+    { label: "BITCOIN BLOCK HEIGHT", value: data && Number.isFinite(data.blockHeight) ? fmt(data.blockHeight) : "—", sub: "mempool.space / mainnet", icon: <Blocks size={20} /> },
+    { label: "BTC FASTEST FEE", value: data && Number.isFinite(data.fees.fastestFee) ? fmt(data.fees.fastestFee) + " sat/vB" : "—", sub: "Recommended next block", icon: <Bitcoin size={20} /> },
+    { label: "BTC HASHRATE", value: data && Number.isFinite(data.hashrate) ? fmt(data.hashrate / 1e18, 2) + " EH/s" : "—", sub: "1-month estimated hashrate", icon: <Activity size={20} /> },
+    { label: "DEFI TOTAL TVL", value: data && Number.isFinite(data.defi.totalLiquidityUSD) ? usd(data.defi.totalLiquidityUSD) : "—", sub: "DeFiLlama / historical total", icon: <Database size={20} /> }
   ];
   return (
     <main style={{ minHeight: "100vh", background: "#070b12", color: "#e6edf7", fontFamily: "Inter, system-ui, sans-serif", padding: "clamp(18px,4vw,56px)" }}>
@@ -166,7 +171,7 @@ function Web3Terminal() {
           <section style={{ border: "1px solid #253448", background: "#0d1521", padding: 26, borderRadius: 16 }}>
             <div style={{ color: "#41e5bb", fontSize: 12, letterSpacing: 1.3 }}>BITCOIN NETWORK / FEE MARKET</div>
             <h2 style={{ fontSize: 23 }}>Transaction Priority</h2>
-            {([["Fastest", data?.fees.fastestFee], ["30 minutes", data?.fees.halfHourFee], ["60 minutes", data?.fees.hourFee]] as const).map(([name, fee]) => <div key={name} style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid #263344", padding: "18px 0", gap: 16 }}><span style={{ color: "#a5b3c6" }}>{name}</span><strong>{fee == null ? "—" : fee + " sat/vB"}</strong></div>)}
+            {([["Fastest", data?.fees.fastestFee], ["30 minutes", data?.fees.halfHourFee], ["60 minutes", data?.fees.hourFee]] as const).map(([name, fee]) => <div key={name} style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid #263344", padding: "18px 0", gap: 16 }}><span style={{ color: "#a5b3c6" }}>{name}</span><strong>{fee == null || !Number.isFinite(fee) ? "—" : fee + " sat/vB"}</strong></div>)}
             <p style={{ color: "#8394aa", fontSize: 12, marginTop: 28 }}>Fee estimates are indicative, not guaranteed confirmation times.</p>
           </section>
         </div>
@@ -181,7 +186,7 @@ function Web3Terminal() {
               return <button key={symbol} onClick={() => setSelected(symbol)} aria-pressed={selected === symbol} style={{ textAlign: "left", cursor: "pointer", borderRadius: 12, border: selected === symbol ? "1px solid #41e5bb" : "1px solid #253448", padding: 18, background: selected === symbol ? "#10211f" : "#111c2a", color: "#e6edf7" }}>
                 <div style={{ color: "#93a3b9", fontSize: 13 }}>{symbol} / USD</div>
                 <strong style={{ display: "block", fontSize: 24, margin: "9px 0" }}>{m ? "$" + fmt(m.price, 2) : "—"}</strong>
-                <span style={{ color: m && m.change < 0 ? "#ff8f92" : "#41e5bb", fontSize: 13 }}>{m ? (m.change >= 0 ? "+" : "") + fmt(m.change, 2) + "% today" : "Loading..."}</span>
+                <span style={{ color: m && m.change < 0 ? "#ff8f92" : "#41e5bb", fontSize: 13 }}>{m ? (m.change >= 0 ? "+" : "") + fmt(m.change, 2) + "% today" : marketError ? "Unavailable" : "Loading..."}</span>
               </button>;
             })}
           </div>
