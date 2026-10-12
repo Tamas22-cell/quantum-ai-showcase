@@ -35,8 +35,8 @@ function Web3Terminal() {
     const closes = candles.map(c => c.close);
     setMarkets(previous => {
       const old = previous.find(m => m.symbol === symbol);
-      if (old && old.price === price && old.closes.length === closes.length) return previous;
-      return [...previous.filter(m => m.symbol !== symbol), {symbol, price, change: open ? (price - open) / open * 100 : 0, closes}];
+      if (old && old.closes.length === closes.length && old.closes[old.closes.length - 1] === closes[closes.length - 1]) return previous;
+      return [...previous.filter(m => m.symbol !== symbol), {symbol, price: old?.price ?? price, change: old?.change ?? (open ? (price - open) / open * 100 : 0), closes}];
     });
   }, []);
   const [demo, setDemo] = useState(false);
@@ -53,6 +53,32 @@ function Web3Terminal() {
     return { open, close, high: Math.max(open, close) * 1.001, low: Math.min(open, close) * 0.999 };
   });
   const shownHistory = demo ? Array.from({length:32},(_,i)=>90e9+i*130e6+Math.sin(i/3)*3e9) : history;
+  async function fetchBrowserFallback() {
+    const urls = [
+      "https://mempool.space/api/blocks/tip/height",
+      "https://mempool.space/api/v1/fees/recommended",
+      "https://mempool.space/api/v1/mining/hashrate/1m",
+      "https://api.coingecko.com/api/v3/global/decentralized_finance_defi"
+    ];
+    const responses = await Promise.allSettled(urls.map(url => getJSON(url)));
+    const get = (i: number): any => responses[i].status === "fulfilled" ? (responses[i] as PromiseFulfilledResult<any>).value : null;
+    const height = Number(get(0));
+    const fee = get(1);
+    const hash = Number(get(2)?.currentHashrate);
+    const marketCap = Number(get(3)?.data?.defi_market_cap);
+    const valid = (n: number) => Number.isFinite(n) && n > 0;
+    const any = valid(height) || valid(Number(fee?.fastestFee)) || valid(hash) || valid(marketCap);
+    if (any) {
+      setData(previous => ({
+        blockHeight: valid(height) ? height : previous?.blockHeight ?? NaN,
+        fees: valid(Number(fee?.fastestFee)) ? { fastestFee: Number(fee.fastestFee), halfHourFee: Number(fee.halfHourFee), hourFee: Number(fee.hourFee) } : previous?.fees ?? { fastestFee: NaN, halfHourFee: NaN, hourFee: NaN },
+        hashrate: valid(hash) ? hash : previous?.hashrate ?? NaN,
+        defi: { totalLiquidityUSD: valid(marketCap) ? marketCap : previous?.defi.totalLiquidityUSD ?? NaN },
+        timestamp: Date.now()
+      }));
+    }
+    return any;
+  }
   async function refresh() {
     setBusy(true);
     try {
@@ -74,11 +100,16 @@ function Web3Terminal() {
         for (const m of result.markets) map.set(m.symbol, m);
         return [...map.values()];
       });
-      setError(anyNetwork ? "" : "Network data temporarily unavailable · Try demo");
+      if (!anyNetwork) {
+        const fallbackOk = await fetchBrowserFallback();
+        setError(fallbackOk ? "" : "Network feeds unavailable (server and browser)");
+      } else {
+        setError("");
+      }
       if (result.markets.length === 3) setMarketError("");
     } catch {
-      setError("Live data connection unavailable · Try Interactive Demo");
-      // Independent browser Kraken ticker remains available when server aggregation fails.
+      const fallbackOk = await fetchBrowserFallback();
+      setError(fallbackOk ? "" : "Live data connection unavailable · Try Interactive Demo");
     } finally {
       setBusy(false);
     }
