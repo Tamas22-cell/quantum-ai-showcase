@@ -31,9 +31,9 @@ function Web3Terminal() {
   const [demo, setDemo] = useState(false);
   const sample = { blockHeight: 850000, fees: { fastestFee: 12, halfHourFee: 8, hourFee: 5 }, hashrate: 650e18, defi: { totalLiquidityUSD: 95000000000 }, timestamp: 0 };
   const sampleMarkets = [
-    { symbol: "BTC", price: 65000, change: 1.2, closes: Array.from({length:48},(_,i)=>64000+i*20+Math.sin(i/4)*350) },
-    { symbol: "ETH", price: 3200, change: -0.4, closes: Array.from({length:48},(_,i)=>3250-i+Math.sin(i/4)*25) },
-    { symbol: "SOL", price: 150, change: 2.1, closes: Array.from({length:48},(_,i)=>145+i*.1+Math.sin(i/4)*3) }
+    { symbol: "BTC", price: 100, change: 1.2, closes: Array.from({length:48},(_,i)=>98+i*.04+Math.sin(i/4)*.6) },
+    { symbol: "ETH", price: 100, change: -0.4, closes: Array.from({length:48},(_,i)=>102-i*.04+Math.sin(i/4)*.5) },
+    { symbol: "SOL", price: 100, change: 2.1, closes: Array.from({length:48},(_,i)=>96+i*.08+Math.sin(i/4)*.7) }
   ];
   const shownData = demo ? sample : data;
   const shownMarkets = demo ? sampleMarkets : markets;
@@ -131,7 +131,7 @@ function Web3Terminal() {
         </div>
         <div style={{ marginBottom: 16, display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
           <button type="button" onClick={() => setDemo(v => !v)} style={{ padding: "12px 18px", borderRadius: 10, border: "1px solid #41e5bb", color: "#41e5bb", background: "#10211f", cursor: "pointer" }}>{demo ? "Switch to Live Data" : "Try Interactive Demo"}</button>
-          {demo && <strong role="status" style={{ color: "#fbbf24" }}>DEMO MODE — SIMULATED DATA — NOT LIVE PRICES</strong>}
+          {demo && <strong role="status" style={{ color: "#fbbf24" }}>DEMO MODE — INDEX VALUES (BASE 100), NOT USD PRICES</strong>}
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 9, color: demo ? "#fbbf24" : error ? "#ffb86b" : data ? "#41e5bb" : "#93a3b9", fontSize: 13, marginBottom: 24 }}>
           {!demo && error ? <WifiOff size={16} /> : <Wifi size={16} />}
@@ -164,21 +164,21 @@ function Web3Terminal() {
         <section style={{ marginTop: 18, background: "#0d1521", border: "1px solid #253448", borderRadius: 16, padding: 26 }}>
           <div style={{ color: "#41e5bb", fontSize: 12, letterSpacing: 1.3 }}>CRYPTO MARKET INTELLIGENCE · KRAKEN PUBLIC DATA</div>
           <h2 style={{ fontSize: 24, marginBottom: 8 }}>BTC / ETH / SOL Live Markets</h2>
-          <p style={{ color: "#8394aa", fontSize: 13 }}>{demo ? "Simulated market scenarios · Practice indicators · No real-time prices" : "Latest prices · Daily change · Hourly candles · Auto-refresh every 60 seconds"}</p>
+          <p style={{ color: "#8394aa", fontSize: 13 }}>{demo ? "Simulated normalized index (base 100) · Not USD market prices" : "Latest prices · Daily change · Hourly candles · Auto-refresh every 60 seconds"}</p>
           {!demo && marketError && <p role="status" style={{ color: "#ffb86b" }}>{marketError}</p>}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(175px,1fr))", gap: 12, margin: "18px 0" }}>
             {(["BTC", "ETH", "SOL"] as const).map(symbol => {
               const m = shownMarkets.find(x => x.symbol === symbol);
               return <button key={symbol} onClick={() => setSelected(symbol)} aria-pressed={selected === symbol} style={{ textAlign: "left", cursor: "pointer", borderRadius: 12, border: selected === symbol ? "1px solid #41e5bb" : "1px solid #253448", padding: 18, background: selected === symbol ? "#10211f" : "#111c2a", color: "#e6edf7" }}>
                 <div style={{ color: "#93a3b9", fontSize: 13 }}>{symbol} / USD</div>
-                <strong style={{ display: "block", fontSize: 24, margin: "9px 0" }}>{m ? "$" + fmt(m.price, 2) : "—"}</strong>
+                <strong style={{ display: "block", fontSize: 24, margin: "9px 0" }}>{m ? (demo ? fmt(m.price, 2) + " pts" : "$" + fmt(m.price, 2)) : "—"}</strong>
                 <span style={{ color: m && m.change < 0 ? "#ff8f92" : "#41e5bb", fontSize: 13 }}>{m ? (m.change >= 0 ? "+" : "") + fmt(m.change, 2) + (demo ? "% demo" : "% today") : marketError ? "Unavailable" : busy ? "Loading..." : "Unavailable"}</span>
               </button>;
             })}
           </div>
           <div style={{ display: "flex", gap: 18, flexWrap: "wrap", color: "#a5b3c6", fontSize: 14, marginBottom: 12 }}>
             <strong>{selected}/USD · Recent hourly candles</strong>
-            <span>SMA14: {indicator ? "$" + fmt(indicator.sma, 2) : "—"}</span>
+            <span>SMA14: {indicator ? (demo ? fmt(indicator.sma, 2) + " pts" : "$" + fmt(indicator.sma, 2)) : "—"}</span>
             <span>RSI14: {indicator ? fmt(indicator.rsi, 1) : "—"}</span>
             <span style={{ color: "#41e5bb" }}>{indicator?.signal || "Waiting for market data"}</span>
           </div>
