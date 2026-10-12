@@ -13,25 +13,39 @@ export function SystemHealthPanel() {
   const [checking, setChecking] = useState(false);
   const [results, setResults] = useState<Result[] | null>(null);
   const [checkedAt, setCheckedAt] = useState("");
+  async function probe(url: string, label: string): Promise<Result> {
+    try {
+      const response = await Promise.race([
+        fetch(url, { method: "GET", cache: "no-store", signal: AbortSignal.timeout(6000) }),
+        new Promise<never>((_, reject) => setTimeout(() => reject(new Error("Timed out")), 6500))
+      ]);
+      const html = (response.headers.get("content-type") ?? "").includes("text/html");
+      return {
+        label,
+        status: response.ok && html ? "ok" : "error",
+        detail: response.ok && html ? "HTTP " + response.status + " · Page reachable (lab execution not tested)" : "HTTP " + response.status + " · Unexpected response"
+      };
+    } catch (error) {
+      return { label, status: "error", detail: error instanceof Error ? error.message : "Connection unavailable" };
+    }
+  }
   async function checkNow() {
     if (checking) return;
     setChecking(true);
     setResults(null);
-    const checks: Result[] = [];
     try {
-      const response = await fetch(window.location.href, { method: "GET", cache: "no-store", signal: AbortSignal.timeout(7000) });
-      checks.push({ label: "Platform HTTP", status: response.ok ? "ok" : "error", detail: "HTTP " + response.status });
-    } catch { checks.push({ label: "Platform HTTP", status: "error", detail: "Request failed or timed out" }); }
-    await Promise.all(MODULES.map(async module => {
-      try {
-        const response = await fetch(module.url, { method: "GET", cache: "no-store", signal: AbortSignal.timeout(7000) });
-        const contentType = response.headers.get("content-type") || "";
-        checks.push({ label: module.name, status: response.ok && contentType.includes("text/html") ? "ok" : "error", detail: response.ok ? "HTTP " + response.status + " (route reachable; lab execution not tested)" : "HTTP " + response.status });
-      } catch { checks.push({ label: module.name, status: "error", detail: "Request failed or timed out" }); }
-    }));
-    setResults(checks);
-    setCheckedAt(new Date().toLocaleString());
-    setChecking(false);
+      const checks = await Promise.all([
+        probe(window.location.pathname, "Platform HTTP"),
+        ...MODULES.map(module => probe(module.url, module.name))
+      ]);
+      setResults(checks);
+      setCheckedAt(new Date().toLocaleString());
+    } catch {
+      setResults([{ label: "Platform Health", status: "error", detail: "Diagnostics could not complete" }]);
+      setCheckedAt(new Date().toLocaleString());
+    } finally {
+      setChecking(false);
+    }
   }
   return (
     <section id="system-health" aria-label="System Health" className="mb-12 rounded-md border border-primary/30 bg-card p-5 sm:p-6">
