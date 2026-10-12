@@ -27,7 +27,7 @@ function Web3Terminal() {
   const [markets, setMarkets] = useState<{ symbol: string; price: number; change: number; closes: number[] }[]>([]);
   const [marketError, setMarketError] = useState("");
   const [selected, setSelected] = useState("BTC");
-  const [demo, setDemo] = useState(false);
+  const [demo, setDemo] = useState(true);
   const sample = { blockHeight: 850000, fees: { fastestFee: 12, halfHourFee: 8, hourFee: 5 }, hashrate: 650e18, defi: { totalLiquidityUSD: 95000000000 }, timestamp: 0 };
   const sampleMarkets = [
     { symbol: "BTC", price: 65000, change: 1.2, closes: Array.from({length:48},(_,i)=>64000+i*20+Math.sin(i/4)*350) },
@@ -60,7 +60,6 @@ function Web3Terminal() {
     setMarketError(available.length === pairs.length ? "" : "Some market feeds are unavailable; showing last received values where available.");
   }
   async function refresh() {
-    if (busy) return;
     setBusy(true);
     try {
       const results = await Promise.allSettled([
@@ -163,8 +162,8 @@ function Web3Terminal() {
           <button type="button" onClick={() => setDemo(v => !v)} style={{ padding: "12px 18px", borderRadius: 10, border: "1px solid #41e5bb", color: "#41e5bb", background: "#10211f", cursor: "pointer" }}>{demo ? "Switch to Live Data" : "Try Interactive Demo"}</button>
           {demo && <strong role="status" style={{ color: "#fbbf24" }}>DEMO MODE — SIMULATED DATA — NOT LIVE PRICES</strong>}
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 9, color: error ? "#ffb86b" : data ? "#41e5bb" : "#93a3b9", fontSize: 13, marginBottom: 24 }}>
-          {error ? <WifiOff size={16} /> : <Wifi size={16} />}
+        <div style={{ display: "flex", alignItems: "center", gap: 9, color: demo ? "#fbbf24" : error ? "#ffb86b" : data ? "#41e5bb" : "#93a3b9", fontSize: 13, marginBottom: 24 }}>
+          {!demo && error ? <WifiOff size={16} /> : <Wifi size={16} />}
           {demo ? "Interactive demo · simulated sample values" : error || (data ? "LIVE · Last verified sync " + new Date(data.timestamp).toLocaleTimeString() : busy ? "Connecting to public feeds..." : "Live feeds unavailable · Try demo")}
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: 14 }}>
