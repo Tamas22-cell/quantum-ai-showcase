@@ -23,11 +23,12 @@ const MODULES = [
 
 export function SystemHealthPanel() {
   const [run, setRun] = useState<WorkflowRun | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [requestId, setRequestId] = useState(0);
 
   useEffect(() => {
+    let active = true;
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 8000);
     setLoading(true);
@@ -41,21 +42,22 @@ export function SystemHealthPanel() {
         if (!response.ok) throw new Error("GitHub API HTTP " + response.status);
         return response.json() as Promise<RunsResponse>;
       })
-      .then(result => { setRun(result.workflow_runs?.[0] ?? null); })
+      .then(result => { if (active) setRun(result.workflow_runs?.[0] ?? null); })
       .catch(cause => {
+        if (!active) return;
         setRun(null);
         setError(controller.signal.aborted ? "GitHub status timed out" : cause instanceof Error ? cause.message : "GitHub status unavailable");
       })
-      .finally(() => { clearTimeout(timeout); setLoading(false); });
-    return () => { controller.abort(); clearTimeout(timeout); };
+      .finally(() => { clearTimeout(timeout); if (active) setLoading(false); });
+    return () => { active = false; controller.abort(); clearTimeout(timeout); };
   }, [requestId]);
 
   function refresh() { setRequestId(id => id + 1); }
 
   const passed = run?.status === "completed" && run.conclusion === "success";
   const failed = run?.status === "completed" && run.conclusion !== "success";
-  const statusText = loading
-    ? "Checking…"
+  const statusText = loading && !run
+    ? "Checking GitHub…"
     : error
       ? "Unavailable"
       : !run
