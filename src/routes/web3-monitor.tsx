@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { MarketTechnicalCharts } from "../components/web3/market-technical-charts";
 import { getWeb3Monitor } from "../lib/web3-monitor.functions";
 import { Activity, ArrowLeft, Bitcoin, Blocks, Database, RefreshCw, ShieldCheck, TrendingUp, Wifi, WifiOff } from "lucide-react";
@@ -28,6 +28,17 @@ function Web3Terminal() {
   const [markets, setMarkets] = useState<{ symbol: string; price: number; change: number; closes: number[] }[]>([]);
   const [marketError, setMarketError] = useState("");
   const [selected, setSelected] = useState("BTC");
+  const onLiveCandles = useCallback((symbol: string, candles: {open:number;high:number;low:number;close:number}[]) => {
+    if (!candles.length) return;
+    const price = candles[candles.length - 1].close;
+    const open = candles[0].open;
+    const closes = candles.map(c => c.close);
+    setMarkets(previous => {
+      const old = previous.find(m => m.symbol === symbol);
+      if (old && old.price === price && old.closes.length === closes.length) return previous;
+      return [...previous.filter(m => m.symbol !== symbol), {symbol, price, change: open ? (price - open) / open * 100 : 0, closes}];
+    });
+  }, []);
   const [demo, setDemo] = useState(false);
   const sample = { blockHeight: 850000, fees: { fastestFee: 12, halfHourFee: 8, hourFee: 5 }, hashrate: 650e18, defi: { totalLiquidityUSD: 95000000000 }, timestamp: 0 };
   const sampleMarkets = [
@@ -185,7 +196,7 @@ function Web3Terminal() {
           <svg viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label={selected + " recent price history"} style={{ width: "100%", height: 210, background: "repeating-linear-gradient(to bottom,transparent 0px,transparent 47px,#233042 48px)" }}>
             {priceLine && <polyline points={priceLine} fill="none" stroke="#41e5bb" strokeWidth="2" vectorEffect="non-scaling-stroke" />}
           </svg>
-          <MarketTechnicalCharts symbol={selected} candles={demo ? demoCandles : []} mode={demo ? "demo" : "live"} />
+          <MarketTechnicalCharts symbol={selected} candles={demo ? demoCandles : []} mode={demo ? "demo" : "live"} onLiveCandles={onLiveCandles} />
           <div style={{ marginTop: 24, borderRadius: 14, border: "1px solid #344155", padding: 18, background: "linear-gradient(135deg,#121b2c,#1b1430)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
               <strong style={{ fontSize: 17 }}>RSI 14 · Momentum</strong>
