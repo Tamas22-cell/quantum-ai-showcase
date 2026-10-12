@@ -23,6 +23,11 @@ Object.assign(dictionary.de, {"Research":"Forschung","AI Lab":"KI-Labor","Quantu
 Object.assign(dictionary.fr, {"Research":"Recherche","AI Lab":"Laboratoire IA","Quantum Lab":"Laboratoire quantique","Crypto Intelligence":"Analyse crypto","Web3 Monitor":"Suivi Web3","AI & Quantum Computing Researcher":"Chercheur en IA et informatique quantique","Open live project":"Ouvrir le projet en ligne","Financial research":"Recherche financière","Quantum finance":"Finance quantique","Portfolio optimization":"Optimisation de portefeuille","AI agents":"Agents IA","Quantitative finance":"Finance quantitative","Quantum computing":"Informatique quantique"});
 Object.assign(dictionary.it, {"Research":"Ricerca","AI Lab":"Laboratorio IA","Quantum Lab":"Laboratorio quantistico","Crypto Intelligence":"Analisi crypto","Web3 Monitor":"Monitor Web3","AI & Quantum Computing Researcher":"Ricercatore in IA e informatica quantistica","Open live project":"Apri il progetto online","Financial research":"Ricerca finanziaria","Quantum finance":"Finanza quantistica","Portfolio optimization":"Ottimizzazione del portafoglio","AI agents":"Agenti IA","Quantitative finance":"Finanza quantitativa","Quantum computing":"Informatica quantistica"});
 
+Object.assign(dictionary.hu, {"Independent research portfolio":"Független kutatási portfólió","Researcher":"Kutató","Computing Researcher":"Számítástechnikai kutató","AI Development":"AI-fejlesztés","Explore projects":"Projektek felfedezése","Explore Projects":"Projektek megtekintése","Belépés / Regisztráció":"Belépés / Regisztráció","Research Question":"Kutatási kérdés","Planner Agent":"Tervező ügynök","Data Agent":"Adatügynök","Market Agent":"Piaci ügynök","Risk Agent":"Kockázati ügynök","Critic Agent":"Ellenőrző ügynök","Final Synthesis":"Végső összegzés","AI & Quantum":"AI és kvantum","Independent Research":"Független kutatás"});
+Object.assign(dictionary.de, {"Independent research portfolio":"Unabhängiges Forschungsportfolio","Researcher":"Forscher","Computing Researcher":"Computing-Forscher","AI Development":"KI-Entwicklung","Explore Projects":"Projekte entdecken","Belépés / Regisztráció":"Anmelden / Registrieren","Research Question":"Forschungsfrage","Planner Agent":"Planungsagent","Data Agent":"Datenagent","Market Agent":"Marktagent","Risk Agent":"Risikoagent","Critic Agent":"Prüfagent","Final Synthesis":"Abschließende Synthese","AI & Quantum":"KI und Quanten"});
+Object.assign(dictionary.fr, {"Independent research portfolio":"Portfolio de recherche indépendant","Researcher":"Chercheur","Computing Researcher":"Chercheur en informatique","AI Development":"Développement IA","Explore Projects":"Explorer les projets","Belépés / Regisztráció":"Connexion / Inscription","Research Question":"Question de recherche","Planner Agent":"Agent de planification","Data Agent":"Agent de données","Market Agent":"Agent de marché","Risk Agent":"Agent de risque","Critic Agent":"Agent critique","Final Synthesis":"Synthèse finale","AI & Quantum":"IA et quantique"});
+Object.assign(dictionary.it, {"Independent research portfolio":"Portfolio di ricerca indipendente","Researcher":"Ricercatore","Computing Researcher":"Ricercatore informatico","AI Development":"Sviluppo IA","Explore Projects":"Esplora i progetti","Belépés / Regisztráció":"Accesso / Registrazione","Research Question":"Domanda di ricerca","Planner Agent":"Agente pianificatore","Data Agent":"Agente dati","Market Agent":"Agente di mercato","Risk Agent":"Agente di rischio","Critic Agent":"Agente revisore","Final Synthesis":"Sintesi finale","AI & Quantum":"IA e quantistica"});
+
 const originalText = new WeakMap<Text, string>();
 
 export function LanguageSelector() {
@@ -55,7 +60,7 @@ export function LanguageSelector() {
     };
     translate();
     const observer = new MutationObserver(() => { observer.disconnect(); translate(); observer.observe(document.body, {childList:true,subtree:true,characterData:true}); });
-    observer.observe(document.body, {childList:true,subtree:true});
+    observer.observe(document.body, {childList:true,subtree:true,characterData:true});
     return () => observer.disconnect();
   }, [language]);
   return (
