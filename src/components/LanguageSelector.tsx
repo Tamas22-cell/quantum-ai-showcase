@@ -24,26 +24,29 @@ Object.assign(dictionary.fr, {"Research":"Recherche","AI Lab":"Laboratoire IA","
 Object.assign(dictionary.it, {"Research":"Ricerca","AI Lab":"Laboratorio IA","Quantum Lab":"Laboratorio quantistico","Crypto Intelligence":"Analisi crypto","Web3 Monitor":"Monitor Web3","AI & Quantum Computing Researcher":"Ricercatore in IA e informatica quantistica","Open live project":"Apri il progetto online","Financial research":"Ricerca finanziaria","Quantum finance":"Finanza quantistica","Portfolio optimization":"Ottimizzazione del portafoglio","AI agents":"Agenti IA","Quantitative finance":"Finanza quantitativa","Quantum computing":"Informatica quantistica"});
 
 export function LanguageSelector() {
-  const [language, setLanguage] = useState<Language>(() => {
-    if (typeof window === "undefined") return "en";
+  const [language, setLanguage] = useState<Language>("en");
+  useEffect(() => {
     const saved = window.localStorage.getItem("quantum-lab-language");
-    return languages.find(x => x.code === saved)?.code ?? "en";
-  });
+    const selected = languages.find(x => x.code === saved)?.code;
+    if (selected) setLanguage(selected);
+  }, []);
   useEffect(() => {
     document.documentElement.lang = language;
     localStorage.setItem("quantum-lab-language", language);
+    const originals = new WeakMap<Text, string>();
     const translate = () => {
       document.querySelectorAll("main, header, nav, footer").forEach(root => {
         const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
         let node: Node | null;
         while ((node = walker.nextNode())) {
           if (node.parentElement?.closest("[data-language-selector],script,style,textarea,input,code,pre")) continue;
-          const el = node as Text & { __original?: string };
-          const original = el.__original ?? el.textContent ?? "";
-          if (!el.__original) el.__original = original;
+          const el = node as Text;
+          const original = originals.get(el) ?? el.textContent ?? "";
+          if (!originals.has(el)) originals.set(el, original);
           const key = original.trim();
           const translation = dictionary[language][key];
-          el.textContent = translation ? original.replace(key, translation) : original;
+          const next = translation ? original.replace(key, translation) : original;
+          if (el.textContent !== next) el.textContent = next;
         }
       });
     };
