@@ -21,7 +21,7 @@ export const getWeb3Monitor = createServerFn({ method: "GET" }).handler(async ()
   const height = Number(value(0));
   const fees = value(1);
   const hashrate = Number(value(2)?.currentHashrate);
-  const tvlHistory = Array.isArray(value(3)) ? value(3).map((p: any) => Number(p.tvl)).filter((n: number) => Number.isFinite(n) && n > 0) : [];
+  const tvlHistory = Array.isArray(value(3)) ? value(3).map((p: any) => Number(p.totalLiquidityUSD ?? p.tvl)).filter((n: number) => Number.isFinite(n) && n > 0) : [];
   const markets = pairs.flatMap((p, i) => {
     const ticker = value(4 + i), ohlc = value(7 + i);
     const tickerRow: any = Object.values(ticker?.result ?? {})[0];
