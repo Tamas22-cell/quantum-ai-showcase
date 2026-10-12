@@ -69,16 +69,51 @@ function Web3Terminal() {
         }));
       }
       if (result.history.length) setHistory(result.history);
-      if (result.markets.length) setMarkets(result.markets);
+      if (result.markets.length) setMarkets(previous => {
+        const map = new Map(previous.map(m => [m.symbol, m]));
+        for (const m of result.markets) map.set(m.symbol, m);
+        return [...map.values()];
+      });
       setError(anyNetwork ? "" : "Network data temporarily unavailable · Try demo");
-      setMarketError(result.markets.length === 3 ? "" : "Some live market feeds are temporarily unavailable");
+      if (result.markets.length === 3) setMarketError("");
     } catch {
       setError("Live data connection unavailable · Try Interactive Demo");
-      setMarketError("Live market connection unavailable");
+      // Independent browser Kraken ticker remains available when server aggregation fails.
     } finally {
       setBusy(false);
     }
   }
+  useEffect(() => {
+    if (demo) return;
+    let active = true;
+    async function fetchMarketPrices() {
+      const pairs = [{symbol:"BTC",pair:"XBTUSD"},{symbol:"ETH",pair:"ETHUSD"},{symbol:"SOL",pair:"SOLUSD"}];
+      const results = await Promise.allSettled(pairs.map(async ({symbol,pair}) => {
+        const json = await getJSON("https://api.kraken.com/0/public/Ticker?pair="+pair);
+        if (json.error?.length) throw new Error("Kraken error");
+        const row = Object.values(json.result ?? {})[0] as {c?:string[];o?:string}|undefined;
+        const price = Number(row?.c?.[0]), open = Number(row?.o);
+        if (!Number.isFinite(price) || price <= 0) throw new Error("Invalid price");
+        return {symbol,price,change:Number.isFinite(open)&&open>0?(price-open)/open*100:0};
+      }));
+      if (!active) return;
+      const ok = results.filter((r):r is PromiseFulfilledResult<{symbol:string;price:number;change:number}>=>r.status==="fulfilled").map(r=>r.value);
+      if (ok.length) {
+        setMarkets(previous => {
+          const map = new Map(previous.map(m=>[m.symbol,m]));
+          for (const item of ok) {
+            const old = map.get(item.symbol);
+            map.set(item.symbol,{...item,closes:old?.closes??[]});
+          }
+          return [...map.values()];
+        });
+      }
+      setMarketError(ok.length ? "" : "Kraken ticker temporarily unavailable");
+    }
+    void fetchMarketPrices();
+    const timer = setInterval(()=>void fetchMarketPrices(),60000);
+    return ()=>{active=false;clearInterval(timer);};
+  }, [demo]);
   useEffect(() => {
     void refresh();
     const id = setInterval(() => void refresh(), 60000);
