@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { MarketTechnicalCharts, type MarketCandle } from "../components/web3/market-technical-charts";
 import { ArrowLeft, Activity } from "lucide-react";
 
@@ -17,6 +17,28 @@ function Web3Terminal() {
     if (!symbols.includes(symbol as SymbolName)) return;
     setCandles(previous => ({ ...previous, [symbol]: rows }));
   }, []);
+  useEffect(() => {
+    if (demo) return;
+    let alive = true;
+    async function loadAll() {
+      await Promise.allSettled(symbols.map(async symbol => {
+        const pair = symbol === "BTC" ? "XBTUSD" : symbol + "USD";
+        const response = await fetch("https://api.kraken.com/0/public/OHLC?pair=" + pair + "&interval=60", { signal: AbortSignal.timeout(12000) });
+        if (!response.ok) throw new Error("HTTP " + response.status);
+        const json = await response.json();
+        if (json.error?.length) throw new Error("Kraken feed error");
+        const key = Object.keys(json.result ?? {}).find(k => k !== "last");
+        if (!key) throw new Error("Missing candles");
+        const rows = (json.result[key] as number[][]).slice(-100).map(row => ({
+          open: Number(row[1]), high: Number(row[2]), low: Number(row[3]), close: Number(row[4])
+        })).filter(c => [c.open,c.high,c.low,c.close].every(n => Number.isFinite(n) && n > 0));
+        if (alive && rows.length) setCandles(previous => ({ ...previous, [symbol]: rows }));
+      }));
+    }
+    void loadAll();
+    const timer = setInterval(() => void loadAll(), 60000);
+    return () => { alive = false; clearInterval(timer); };
+  }, [demo]);
   const demoRows = (symbol: SymbolName): MarketCandle[] => Array.from({ length: 60 }, (_, i) => {
     const base = 100 + symbols.indexOf(symbol) * 15;
     const close = base + Math.sin(i / 5) * 3 + i * 0.06;
