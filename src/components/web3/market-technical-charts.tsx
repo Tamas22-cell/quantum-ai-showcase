@@ -8,13 +8,14 @@ function ema(values: number[], period: number): number[] {
   return values.map(value => (last = value * weight + last * (1 - weight)));
 }
 
-export function MarketTechnicalCharts({ symbol, candles }: { symbol: string; candles: MarketCandle[] }) {
+export function MarketTechnicalCharts({ symbol, candles, mode = "live" }: { symbol: string; candles: MarketCandle[]; mode?: "live" | "demo" }) {
   const [loaded, setLoaded] = useState<MarketCandle[]>([]);
   const [feedError, setFeedError] = useState("");
   const [intervalMinutes, setIntervalMinutes] = useState(60);
   const [windowSize, setWindowSize] = useState(48);
   const [showSma, setShowSma] = useState(true);
   useEffect(() => {
+    if (mode === "demo") { setLoaded([]); setFeedError(""); return; }
     let active = true;
     const load = async () => {
       try {
@@ -37,7 +38,7 @@ export function MarketTechnicalCharts({ symbol, candles }: { symbol: string; can
     void load();
     const interval = setInterval(() => void load(), 60000);
     return () => { active = false; clearInterval(interval); };
-  }, [symbol, intervalMinutes]);
+  }, [symbol, intervalMinutes, mode]);
   const series = candles.length ? candles : loaded;
   const macd = useMemo(() => {
     if (series.length < 35) return null;
@@ -75,7 +76,7 @@ export function MarketTechnicalCharts({ symbol, candles }: { symbol: string; can
           <button onClick={() => setWindowSize(v => Math.max(20, v - 12))} style={{ cursor: "pointer", borderRadius: 7, border: "1px solid #285472", padding: "7px 12px", color: "#e0f2fe", background: "#12263b" }}>Zoom +</button>
           <button onClick={() => setWindowSize(v => Math.min(96, v + 12))} style={{ cursor: "pointer", borderRadius: 7, border: "1px solid #285472", padding: "7px 12px", color: "#e0f2fe", background: "#12263b" }}>Zoom −</button>
         </div>
-        <p style={{ fontSize: 12, color: "#9aaac0" }}>Live Kraken OHLC · Green = rising · Red = falling · Hover for OHLC · Choose timeframe and zoom</p>
+        <p style={{ fontSize: 12, color: "#9aaac0" }}>{mode === "demo" ? "SIMULATED OHLC · NOT LIVE PRICES" : "Live Kraken OHLC"} · Green = rising · Red = falling · Hover for OHLC · Choose timeframe and zoom</p>
         {picked && <div style={{ display: "flex", gap: 16, flexWrap: "wrap", color: "#7dd3fc", fontSize: 12, marginBottom: 10 }}>
           <span>O: ${display(picked.open)}</span><span>H: ${display(picked.high)}</span><span>L: ${display(picked.low)}</span><span>C: ${display(picked.close)}</span>
         </div>}
