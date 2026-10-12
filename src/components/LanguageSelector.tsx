@@ -18,13 +18,11 @@ const dictionary: Record<Language, Record<string, string>> = {
 };
 
 export function LanguageSelector() {
-  const [language, setLanguage] = useState<Language>("en");
-  useEffect(() => {
-    const saved = localStorage.getItem("quantum-lab-language");
-    const browser = navigator.language.slice(0, 2);
-    const selected = languages.find(x => x.code === saved)?.code ?? languages.find(x => x.code === browser)?.code ?? "en";
-    setLanguage(selected);
-  }, []);
+  const [language, setLanguage] = useState<Language>(() => {
+    if (typeof window === "undefined") return "en";
+    const saved = window.localStorage.getItem("quantum-lab-language");
+    return languages.find(x => x.code === saved)?.code ?? "en";
+  });
   useEffect(() => {
     document.documentElement.lang = language;
     localStorage.setItem("quantum-lab-language", language);
