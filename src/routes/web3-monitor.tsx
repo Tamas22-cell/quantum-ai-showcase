@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { MarketTechnicalCharts } from "../components/web3/market-technical-charts";
+import { getWeb3Monitor } from "../lib/web3-monitor.functions";
 import { Activity, ArrowLeft, Bitcoin, Blocks, Database, RefreshCw, ShieldCheck, TrendingUp, Wifi, WifiOff } from "lucide-react";
 
 export const Route = createFileRoute("/web3-monitor")({ component: Web3Terminal });
@@ -27,7 +28,7 @@ function Web3Terminal() {
   const [markets, setMarkets] = useState<{ symbol: string; price: number; change: number; closes: number[] }[]>([]);
   const [marketError, setMarketError] = useState("");
   const [selected, setSelected] = useState("BTC");
-  const [demo, setDemo] = useState(true);
+  const [demo, setDemo] = useState(false);
   const sample = { blockHeight: 850000, fees: { fastestFee: 12, halfHourFee: 8, hourFee: 5 }, hashrate: 650e18, defi: { totalLiquidityUSD: 95000000000 }, timestamp: 0 };
   const sampleMarkets = [
     { symbol: "BTC", price: 65000, change: 1.2, closes: Array.from({length:48},(_,i)=>64000+i*20+Math.sin(i/4)*350) },
@@ -41,62 +42,28 @@ function Web3Terminal() {
     return { open, close, high: Math.max(open, close) * 1.001, low: Math.min(open, close) * 0.999 };
   });
   const shownHistory = demo ? Array.from({length:32},(_,i)=>90e9+i*130e6+Math.sin(i/3)*3e9) : history;
-  async function refreshMarkets() {
-    const pairs = [{ symbol: "BTC", pair: "XBTUSD" }, { symbol: "ETH", pair: "ETHUSD" }, { symbol: "SOL", pair: "SOLUSD" }];
-    const results = await Promise.allSettled(pairs.map(async ({ symbol, pair }) => {
-      const [ticker, candles] = await Promise.all([
-        getJSON("https://api.kraken.com/0/public/Ticker?pair=" + pair),
-        getJSON("https://api.kraken.com/0/public/OHLC?pair=" + pair + "&interval=60")
-      ]);
-      if (ticker.error?.length || candles.error?.length) throw new Error("Market feed unavailable");
-      const t = Object.values(ticker.result ?? {})[0] as { c: string[]; o: string } | undefined;
-      const key = Object.keys(candles.result ?? {}).find(k => k !== "last");
-      const rows = (key ? candles.result[key] : []) as (string | number)[][];
-      const closes = rows.slice(-48).map(row => Number(row[4])).filter(Number.isFinite);
-      const price = Number(t?.c?.[0]), open = Number(t?.o);
-      if (!Number.isFinite(price) || !Number.isFinite(open) || !closes.length) throw new Error("Invalid market data");
-      return { symbol, price, change: open ? ((price - open) / open) * 100 : 0, closes };
-    }));
-    const available = results.filter((r): r is PromiseFulfilledResult<{ symbol: string; price: number; change: number; closes: number[] }> => r.status === "fulfilled").map(r => r.value);
-    if (available.length) {
-      setMarkets(previous => [...available, ...previous.filter(p => !available.some(a => a.symbol === p.symbol))]);
-    }
-    setMarketError(available.length === pairs.length ? "" : "Some market feeds are unavailable; showing last received values where available.");
-  }
   async function refresh() {
     setBusy(true);
     try {
-      const results = await Promise.allSettled([
-        getJSON("https://mempool.space/api/blocks/tip/height"),
-        getJSON("https://mempool.space/api/v1/fees/recommended"),
-        getJSON("https://mempool.space/api/v1/mining/hashrate/1m"),
-        getJSON("https://api.llama.fi/v2/historicalChainTvl")
-      ]);
-      const [height, fees, hash, tvl] = results;
-      const validHeight = height.status === "fulfilled" ? Number(height.value) : NaN;
-      const validFees = fees.status === "fulfilled" ? fees.value as Snapshot["fees"] : null;
-      const validHash = hash.status === "fulfilled" ? Number(hash.value?.currentHashrate) : NaN;
-      const chains = tvl.status === "fulfilled" && Array.isArray(tvl.value) ? tvl.value as { date: number; tvl: number }[] : [];
-      const latest = chains[chains.length - 1];
-      const validTvl = latest ? Number(latest.tvl) : NaN;
-      const goodHeight = Number.isFinite(validHeight) && validHeight > 0;
-      const goodFees = validFees && [validFees.fastestFee, validFees.halfHourFee, validFees.hourFee].every(x => Number.isFinite(Number(x)));
-      const goodHash = Number.isFinite(validHash) && validHash > 0;
-      const goodTvl = Number.isFinite(validTvl) && validTvl > 0;
-      if (goodHeight || goodFees || goodHash || goodTvl) {
+      const result = await getWeb3Monitor();
+      const v = result.snapshot;
+      const anyNetwork = v.blockHeight !== null || v.fees !== null || v.hashrate !== null || v.tvl !== null;
+      if (anyNetwork) {
         setData(previous => ({
-          blockHeight: goodHeight ? validHeight : previous?.blockHeight ?? NaN,
-          fees: goodFees ? validFees : previous?.fees ?? { fastestFee: NaN, halfHourFee: NaN, hourFee: NaN },
-          hashrate: goodHash ? validHash : previous?.hashrate ?? NaN,
-          defi: { totalLiquidityUSD: goodTvl ? validTvl : previous?.defi.totalLiquidityUSD ?? NaN },
-          timestamp: Date.now()
+          blockHeight: v.blockHeight ?? previous?.blockHeight ?? NaN,
+          fees: v.fees ?? previous?.fees ?? { fastestFee: NaN, halfHourFee: NaN, hourFee: NaN },
+          hashrate: v.hashrate ?? previous?.hashrate ?? NaN,
+          defi: { totalLiquidityUSD: v.tvl ?? previous?.defi.totalLiquidityUSD ?? NaN },
+          timestamp: result.timestamp
         }));
       }
-      if (goodTvl) setHistory(chains.slice(-32).map(x => Number(x.tvl)).filter(Number.isFinite));
-      setError(goodHeight && goodFees && goodHash && goodTvl ? "" : "Some public feeds are unavailable; available values are shown.");
-      await refreshMarkets();
+      if (result.history.length) setHistory(result.history);
+      if (result.markets.length) setMarkets(result.markets);
+      setError(anyNetwork ? "" : "Network data temporarily unavailable · Try demo");
+      setMarketError(result.markets.length === 3 ? "" : "Some live market feeds are temporarily unavailable");
     } catch {
-      setError("Live feed error · Try Interactive Demo");
+      setError("Live data connection unavailable · Try Interactive Demo");
+      setMarketError("Live market connection unavailable");
     } finally {
       setBusy(false);
     }
