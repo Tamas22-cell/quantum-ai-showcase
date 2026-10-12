@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 export type MarketCandle = { open: number; high: number; low: number; close: number };
 
@@ -10,6 +10,8 @@ function ema(values: number[], period: number): number[] {
 
 export function MarketTechnicalCharts({ symbol, candles, mode = "live", onLiveCandles }: { symbol: string; candles: MarketCandle[]; mode?: "live" | "demo"; onLiveCandles?: (symbol: string, candles: MarketCandle[]) => void }) {
   const [loaded, setLoaded] = useState<MarketCandle[]>([]);
+  const callbackRef = useRef(onLiveCandles);
+  callbackRef.current = onLiveCandles;
   const [feedError, setFeedError] = useState("");
   const [intervalMinutes, setIntervalMinutes] = useState(60);
   const [windowSize, setWindowSize] = useState(48);
@@ -29,7 +31,7 @@ export function MarketTechnicalCharts({ symbol, candles, mode = "live", onLiveCa
         const values: MarketCandle[] = (json.result[key] as number[][]).slice(-100).map(row => ({
           open: Number(row[1]), high: Number(row[2]), low: Number(row[3]), close: Number(row[4])
         })).filter(c => [c.open, c.high, c.low, c.close].every(Number.isFinite));
-        if (active) { setLoaded(values); setFeedError(""); onLiveCandles?.(symbol, values); }
+        if (active) { setLoaded(values); setFeedError(""); callbackRef.current?.(symbol, values); }
       } catch {
         if (active) setFeedError("Candle feed temporarily unavailable");
       }
@@ -38,7 +40,10 @@ export function MarketTechnicalCharts({ symbol, candles, mode = "live", onLiveCa
     void load();
     const interval = setInterval(() => void load(), 60000);
     return () => { active = false; clearInterval(interval); };
-  }, [symbol, intervalMinutes, mode, onLiveCandles]);
+  }, [symbol, intervalMinutes, mode]);
+  useEffect(() => {
+    if (mode === "live" && loaded.length) callbackRef.current?.(symbol, loaded);
+  }, [loaded, symbol, mode]);
   const series = candles.length ? candles : loaded;
   const macd = useMemo(() => {
     if (series.length < 35) return null;
@@ -77,6 +82,7 @@ export function MarketTechnicalCharts({ symbol, candles, mode = "live", onLiveCa
           <button onClick={() => setWindowSize(v => Math.min(96, v + 12))} style={{ cursor: "pointer", borderRadius: 7, border: "1px solid #285472", padding: "7px 12px", color: "#e0f2fe", background: "#12263b" }}>Zoom −</button>
         </div>
         <p style={{ fontSize: 12, color: "#9aaac0" }}>{mode === "demo" ? "SIMULATED OHLC · NOT LIVE PRICES" : "Live Kraken OHLC"} · Green = rising · Red = falling · Hover for OHLC · Choose timeframe and zoom</p>
+        {mode === "live" && loaded.length > 0 && <p role="status" style={{ color: "#43e6bc", fontSize: 15, fontWeight: 700 }}>Latest {symbol}/USD: $ {display(loaded[loaded.length - 1].close)} · Kraken live OHLC</p>}
         {picked && <div style={{ display: "flex", gap: 16, flexWrap: "wrap", color: "#7dd3fc", fontSize: 12, marginBottom: 10 }}>
           <span>O: ${display(picked.open)}</span><span>H: ${display(picked.high)}</span><span>L: ${display(picked.low)}</span><span>C: ${display(picked.close)}</span>
         </div>}
