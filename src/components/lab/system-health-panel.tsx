@@ -1,4 +1,5 @@
-import { Activity, ArrowUpRight, CheckCircle2 } from "lucide-react";
+import { useState } from "react";
+import { Activity, ArrowUpRight, RefreshCw } from "lucide-react";
 
 const MODULES = [
   { name: "Quantum Lab", url: "/lab/qaoa" },
@@ -7,39 +8,62 @@ const MODULES = [
   { name: "Web3 / Solidity", url: "/lab/web3-solidity" },
   { name: "Crypto Intelligence", url: "/lab/crypto-intelligence" },
 ];
-
+type Result = { label: string; status: "ok" | "error"; detail: string };
 export function SystemHealthPanel() {
+  const [checking, setChecking] = useState(false);
+  const [results, setResults] = useState<Result[] | null>(null);
+  const [checkedAt, setCheckedAt] = useState("");
+  async function checkNow() {
+    if (checking) return;
+    setChecking(true);
+    setResults(null);
+    const checks: Result[] = [];
+    try {
+      const response = await fetch(window.location.href, { method: "GET", cache: "no-store", signal: AbortSignal.timeout(7000) });
+      checks.push({ label: "Platform HTTP", status: response.ok ? "ok" : "error", detail: "HTTP " + response.status });
+    } catch { checks.push({ label: "Platform HTTP", status: "error", detail: "Request failed or timed out" }); }
+    await Promise.all(MODULES.map(async module => {
+      try {
+        const response = await fetch(module.url, { method: "GET", cache: "no-store", signal: AbortSignal.timeout(7000) });
+        const contentType = response.headers.get("content-type") || "";
+        checks.push({ label: module.name, status: response.ok && contentType.includes("text/html") ? "ok" : "error", detail: response.ok ? "HTTP " + response.status + " (route reachable; lab execution not tested)" : "HTTP " + response.status });
+      } catch { checks.push({ label: module.name, status: "error", detail: "Request failed or timed out" }); }
+    }));
+    setResults(checks);
+    setCheckedAt(new Date().toLocaleString());
+    setChecking(false);
+  }
   return (
     <section id="system-health" aria-label="System Health" className="mb-12 rounded-md border border-primary/30 bg-card p-5 sm:p-6">
-      <div>
-        <span className="inline-flex items-center gap-2 font-mono text-xs uppercase text-primary">
-          <Activity className="size-4" /> System Health
-        </span>
-        <h2 className="mt-2 text-2xl font-semibold">Platform Health &amp; module status</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Research platform overview. External API uptime and individual laboratory execution are not continuously monitored.
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <span className="inline-flex items-center gap-2 font-mono text-xs uppercase text-primary"><Activity className="size-4" /> System Health</span>
+          <h2 className="mt-2 text-2xl font-semibold">Platform Health &amp; module status</h2>
+          <p className="mt-2 text-sm text-muted-foreground">On-demand platform and module route checks. These do not test laboratory calculations or external APIs.</p>
+        </div>
+        <button type="button" onClick={checkNow} disabled={checking} className="inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-xs hover:text-primary disabled:opacity-50">
+          <RefreshCw className={`size-4 ${checking ? "animate-spin" : ""}`} /> {checking ? "Checking…" : "Check now"}
+        </button>
       </div>
       <div className="mt-5 rounded-md border border-border bg-background p-4">
-        <div className="flex items-center gap-2 text-sm font-medium">
-          <CheckCircle2 className="size-4 text-emerald-400" />
-          Platform deployed
-        </div>
-        <p className="mt-2 text-xs text-muted-foreground">
-          Deployment status was verified during maintenance. This is not a live health check.
-        </p>
-        <a href="https://github.com/Tamas22-cell/quantum-ai-showcase/actions" target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex items-center gap-1 text-xs text-primary hover:underline">
-          View GitHub Actions <ArrowUpRight className="size-3" />
-        </a>
+        {!results ? <p className="text-sm text-muted-foreground">{checking ? "Checking platform and module routes…" : "Not checked yet. Select Check now to run diagnostics."}</p> :
+          <div>
+            <p className="mb-3 text-xs text-muted-foreground">Last checked: {checkedAt}</p>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {results.map(result => <div key={result.label} className="rounded border border-border p-3 text-xs">
+                <span className={result.status === "ok" ? "text-emerald-400" : "text-destructive"}>{result.status === "ok" ? "● Reachable" : "● Failed"}</span>
+                <span className="ml-2 font-semibold">{result.label}</span>
+                <p className="mt-1 text-muted-foreground">{result.detail}</p>
+              </div>)}
+            </div>
+          </div>}
       </div>
-      <h3 className="mt-6 font-mono text-xs uppercase text-muted-foreground">Research modules · links, not live health checks</h3>
+      <h3 className="mt-6 font-mono text-xs uppercase text-muted-foreground">Research modules</h3>
       <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {MODULES.map(module => (
-          <a key={module.url} href={module.url} className="flex items-center justify-between gap-3 rounded-md border border-border bg-background p-4 text-sm hover:border-primary/50 hover:text-primary">
-            <span>{module.name}<span className="mt-1 block font-mono text-[10px] text-muted-foreground">Open module · uptime unverified</span></span>
-            <ArrowUpRight className="size-4 shrink-0" />
-          </a>
-        ))}
+        {MODULES.map(module => <a key={module.url} href={module.url} className="flex items-center justify-between gap-3 rounded-md border border-border bg-background p-4 text-sm hover:border-primary/50 hover:text-primary">
+          <span>{module.name}<span className="mt-1 block font-mono text-[10px] text-muted-foreground">Open research module</span></span>
+          <ArrowUpRight className="size-4 shrink-0" />
+        </a>)}
       </div>
     </section>
   );
