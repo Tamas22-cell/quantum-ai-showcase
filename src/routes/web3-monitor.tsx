@@ -23,7 +23,6 @@ function Web3Terminal() {
   const [data, setData] = useState<Snapshot | null>(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  const [demo, setDemo] = useState(false);
   const [history, setHistory] = useState<number[]>([]);
   const [markets, setMarkets] = useState<{ symbol: string; price: number; change: number; closes: number[] }[]>([]);
   const [marketError, setMarketError] = useState("");
@@ -51,6 +50,7 @@ function Web3Terminal() {
     setMarketError(available.length === pairs.length ? "" : "Some market feeds are unavailable; showing last received values where available.");
   }
   async function refresh() {
+    if (busy) return;
     setBusy(true);
     try {
       const results = await Promise.allSettled([
@@ -91,20 +91,11 @@ function Web3Terminal() {
     const id = setInterval(() => void refresh(), 60000);
     return () => clearInterval(id);
   }, []);
-  const demoSnapshot: Snapshot = { blockHeight: 850000, fees: { fastestFee: 12, halfHourFee: 8, hourFee: 5 }, hashrate: 650e18, defi: { totalLiquidityUSD: 95000000000 }, timestamp: Date.now() };
-  const demoMarkets = [
-    { symbol: "BTC", price: 65000, change: 1.2, closes: Array.from({ length: 48 }, (_, i) => 64000 + i * 20 + Math.sin(i / 4) * 350) },
-    { symbol: "ETH", price: 3200, change: -0.4, closes: Array.from({ length: 48 }, (_, i) => 3250 - i + Math.sin(i / 4) * 25) },
-    { symbol: "SOL", price: 150, change: 2.1, closes: Array.from({ length: 48 }, (_, i) => 145 + i * 0.1 + Math.sin(i / 4) * 3) }
-  ];
-  const liveData = demo ? demoSnapshot : data;
-  const visibleMarkets = demo ? demoMarkets : markets;
-  const visibleHistory = demo ? Array.from({ length: 32 }, (_, i) => 90e9 + i * 130e6 + Math.sin(i / 3) * 3e9) : history;
-  const chart = visibleHistory.length > 1 ? visibleHistory.map((v, i) => {
-    const lo = Math.min(...visibleHistory), hi = Math.max(...visibleHistory);
-    return `${(i / (visibleHistory.length - 1)) * 100},${85 - (hi === lo ? 40 : ((v - lo) / (hi - lo)) * 65)}`;
+  const chart = history.length > 1 ? history.map((v, i) => {
+    const lo = Math.min(...history), hi = Math.max(...history);
+    return `${(i / (history.length - 1)) * 100},${85 - (hi === lo ? 40 : ((v - lo) / (hi - lo)) * 65)}`;
   }).join(" ") : "";
-  const active = visibleMarkets.find(m => m.symbol === selected);
+  const active = markets.find(m => m.symbol === selected);
   const indicator = (() => {
     if (!active || active.closes.length < 15) return null;
     const values = active.closes;
@@ -140,10 +131,10 @@ function Web3Terminal() {
     return values.map((v, i) => String((i / (values.length - 1)) * 100) + "," + String(85 - (hi === lo ? 40 : ((v - lo) / (hi - lo)) * 65))).join(" ");
   })() : "";
   const cards = [
-    { label: "BITCOIN BLOCK HEIGHT", value: liveData && Number.isFinite(liveData.blockHeight) ? fmt(liveData.blockHeight) : "—", sub: "mempool.space / mainnet", icon: <Blocks size={20} /> },
-    { label: "BTC FASTEST FEE", value: liveData && Number.isFinite(liveData.fees.fastestFee) ? fmt(liveData.fees.fastestFee) + " sat/vB" : "—", sub: "Recommended next block", icon: <Bitcoin size={20} /> },
-    { label: "BTC HASHRATE", value: liveData && Number.isFinite(liveData.hashrate) ? fmt(liveData.hashrate / 1e18, 2) + " EH/s" : "—", sub: "1-month estimated hashrate", icon: <Activity size={20} /> },
-    { label: "DEFI TOTAL TVL", value: liveData && Number.isFinite(liveData.defi.totalLiquidityUSD) ? usd(liveData.defi.totalLiquidityUSD) : "—", sub: "DeFiLlama / historical total", icon: <Database size={20} /> }
+    { label: "BITCOIN BLOCK HEIGHT", value: data && Number.isFinite(data.blockHeight) ? fmt(data.blockHeight) : "—", sub: "mempool.space / mainnet", icon: <Blocks size={20} /> },
+    { label: "BTC FASTEST FEE", value: data && Number.isFinite(data.fees.fastestFee) ? fmt(data.fees.fastestFee) + " sat/vB" : "—", sub: "Recommended next block", icon: <Bitcoin size={20} /> },
+    { label: "BTC HASHRATE", value: data && Number.isFinite(data.hashrate) ? fmt(data.hashrate / 1e18, 2) + " EH/s" : "—", sub: "1-month estimated hashrate", icon: <Activity size={20} /> },
+    { label: "DEFI TOTAL TVL", value: data && Number.isFinite(data.defi.totalLiquidityUSD) ? usd(data.defi.totalLiquidityUSD) : "—", sub: "DeFiLlama / historical total", icon: <Database size={20} /> }
   ];
   return (
     <main style={{ minHeight: "100vh", background: "#070b12", color: "#e6edf7", fontFamily: "Inter, system-ui, sans-serif", padding: "clamp(18px,4vw,56px)" }}>
@@ -154,15 +145,11 @@ function Web3Terminal() {
             <h1 style={{ fontSize: "clamp(30px,5vw,58px)", letterSpacing: -2, margin: "10px 0" }}>Intelligence Terminal<span style={{ color: "#41e5bb" }}>.</span></h1>
             <p style={{ color: "#93a3b9", margin: 0 }}>Live network intelligence · On-chain infrastructure · DeFi liquidity</p>
           </div>
-          <button onClick={() => { setDemo(false); void refresh(); }} disabled={busy} style={{ border: "1px solid #29433e", borderRadius: 10, background: "#10211f", color: "#41e5bb", padding: "12px 18px", cursor: busy ? "wait" : "pointer", display: "flex", alignItems: "center", gap: 9 }}><RefreshCw size={16} /> {busy ? "Syncing..." : "Refresh feeds"}</button>
+          <button onClick={() => void refresh()} disabled={busy} style={{ border: "1px solid #29433e", borderRadius: 10, background: "#10211f", color: "#41e5bb", padding: "12px 18px", cursor: busy ? "wait" : "pointer", display: "flex", alignItems: "center", gap: 9 }}><RefreshCw size={16} /> {busy ? "Syncing..." : "Refresh feeds"}</button>
         </div>
-        <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 18, alignItems: "center" }}>
-          <button onClick={() => setDemo(v => !v)} style={{ padding: "10px 16px", borderRadius: 9, border: "1px solid #41e5bb", color: "#41e5bb", background: "#10211f", cursor: "pointer" }}>{demo ? "Exit demo · Live data" : "Try interactive demo"}</button>
-          {demo && <strong role="status" style={{ color: "#fbbf24" }}>DEMO MODE · SIMULATED DATA · NOT LIVE PRICES</strong>}
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 9, color: error ? "#ffb86b" : liveData ? "#41e5bb" : "#93a3b9", fontSize: 13, marginBottom: 24 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 9, color: error ? "#ffb86b" : data ? "#41e5bb" : "#93a3b9", fontSize: 13, marginBottom: 24 }}>
           {error ? <WifiOff size={16} /> : <Wifi size={16} />}
-          {error || (liveData ? "LIVE · Last verified sync " + new Date(liveData.timestamp).toLocaleTimeString() : "Connecting to public feeds...")}
+          {error || (data ? "LIVE · Last verified sync " + new Date(data.timestamp).toLocaleTimeString() : "Connecting to public feeds...")}
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: 14 }}>
           {cards.map(c => <section key={c.label} style={{ background: "linear-gradient(140deg,#111c2a,#0c131e)", border: "1px solid #253448", borderRadius: 16, padding: 24 }}>
@@ -192,14 +179,14 @@ function Web3Terminal() {
           <div style={{ color: "#41e5bb", fontSize: 12, letterSpacing: 1.3 }}>CRYPTO MARKET INTELLIGENCE · KRAKEN PUBLIC DATA</div>
           <h2 style={{ fontSize: 24, marginBottom: 8 }}>BTC / ETH / SOL Live Markets</h2>
           <p style={{ color: "#8394aa", fontSize: 13 }}>Latest prices · Daily change · Hourly candles · Auto-refresh every 60 seconds</p>
-          {!demo && marketError && <p role="status" style={{ color: "#ffb86b" }}>{marketError}</p>}
+          {marketError && <p role="status" style={{ color: "#ffb86b" }}>{marketError}</p>}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(175px,1fr))", gap: 12, margin: "18px 0" }}>
             {(["BTC", "ETH", "SOL"] as const).map(symbol => {
-              const m = visibleMarkets.find(x => x.symbol === symbol);
+              const m = markets.find(x => x.symbol === symbol);
               return <button key={symbol} onClick={() => setSelected(symbol)} aria-pressed={selected === symbol} style={{ textAlign: "left", cursor: "pointer", borderRadius: 12, border: selected === symbol ? "1px solid #41e5bb" : "1px solid #253448", padding: 18, background: selected === symbol ? "#10211f" : "#111c2a", color: "#e6edf7" }}>
                 <div style={{ color: "#93a3b9", fontSize: 13 }}>{symbol} / USD</div>
                 <strong style={{ display: "block", fontSize: 24, margin: "9px 0" }}>{m ? "$" + fmt(m.price, 2) : "—"}</strong>
-                <span style={{ color: m && m.change < 0 ? "#ff8f92" : "#41e5bb", fontSize: 13 }}>{m ? (m.change >= 0 ? "+" : "") + fmt(m.change, 2) + (demo ? "% demo" : "% today") : marketError ? "Unavailable" : busy ? "Loading..." : "Unavailable"}</span>
+                <span style={{ color: m && m.change < 0 ? "#ff8f92" : "#41e5bb", fontSize: 13 }}>{m ? (m.change >= 0 ? "+" : "") + fmt(m.change, 2) + "% today" : marketError ? "Unavailable" : "Loading..."}</span>
               </button>;
             })}
           </div>
