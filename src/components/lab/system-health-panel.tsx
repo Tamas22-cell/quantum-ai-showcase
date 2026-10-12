@@ -25,28 +25,32 @@ export function SystemHealthPanel() {
   const [run, setRun] = useState<WorkflowRun | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
-  async function refresh() {
-    setLoading(true);
-    setError("");
-    try {
-      const response = await fetch(RUNS_URL, {
-        headers: { Accept: "application/vnd.github+json" },
-      });
-      if (!response.ok) throw new Error(`GitHub API HTTP ${response.status}`);
-      const result = (await response.json()) as RunsResponse;
-      setRun(result.workflow_runs?.[0] ?? null);
-    } catch (cause) {
-      setRun(null);
-      setError(cause instanceof Error ? cause.message : "GitHub status unavailable");
-    } finally {
-      setLoading(false);
-    }
-  }
+  const [requestId, setRequestId] = useState(0);
 
   useEffect(() => {
-    void refresh();
-  }, []);
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+    setLoading(true);
+    setError("");
+    fetch(RUNS_URL, {
+      headers: { Accept: "application/vnd.github+json" },
+      signal: controller.signal,
+      cache: "no-store"
+    })
+      .then(async response => {
+        if (!response.ok) throw new Error("GitHub API HTTP " + response.status);
+        return response.json() as Promise<RunsResponse>;
+      })
+      .then(result => { setRun(result.workflow_runs?.[0] ?? null); })
+      .catch(cause => {
+        setRun(null);
+        setError(controller.signal.aborted ? "GitHub status timed out" : cause instanceof Error ? cause.message : "GitHub status unavailable");
+      })
+      .finally(() => { clearTimeout(timeout); setLoading(false); });
+    return () => { controller.abort(); clearTimeout(timeout); };
+  }, [requestId]);
+
+  function refresh() { setRequestId(id => id + 1); }
 
   const passed = run?.status === "completed" && run.conclusion === "success";
   const failed = run?.status === "completed" && run.conclusion !== "success";
@@ -61,7 +65,7 @@ export function SystemHealthPanel() {
           : failed
             ? `Finished: ${run.conclusion ?? "unknown"}`
             : `In progress: ${run.status}`;
-  const statusClass = passed
+  const statusClass = loading ? "text-muted-foreground" : passed
     ? "text-emerald-400"
     : failed
       ? "text-destructive"
@@ -87,7 +91,7 @@ export function SystemHealthPanel() {
         </div>
         <button
           type="button"
-          onClick={() => void refresh()}
+          onClick={refresh}
           disabled={loading}
           className="inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-xs hover:text-primary disabled:opacity-50"
         >
