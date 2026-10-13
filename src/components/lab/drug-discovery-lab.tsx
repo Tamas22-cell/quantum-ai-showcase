@@ -25,7 +25,7 @@ export function DrugDiscoveryLab(){
     <div className="relative mt-5 flex h-40 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-violet-950/80 to-cyan-950/70">
       <div className="absolute h-28 w-28 rounded-full border border-violet-300/50 motion-safe:animate-[spin_18s_linear_infinite]"/>
       <div className="absolute h-12 w-36 rotate-45 rounded-[50%] border border-cyan-300/60"/>
-      <Atom size={68} className="text-cyan-300 motion-safe:animate-pulse"/>
+            <img key={molecule.name} src={"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/"+encodeURIComponent(molecule.name)+"/PNG?image_size=large"} alt={molecule.name+" molecular structure (PubChem)"} loading="lazy" referrerPolicy="no-referrer" className="relative z-10 h-36 w-48 rounded-xl bg-white object-contain p-2 shadow-[0_0_30px_rgba(34,211,238,.25)]" onError={e=>{e.currentTarget.style.display="none";}}/>
     </div>
     <h3 className="mt-4 text-xl font-semibold">{molecule.name} <span className="font-mono text-sm text-slate-400">{molecule.formula}</span></h3>
     <p className="mt-2 text-xs text-slate-400">{molecule.note}</p>
