@@ -80,3 +80,23 @@ export function fibonacci(a: number,b: number) {
   if (!finite(a)||!finite(b)||a<=0||b<=0||a===b) throw new Error('INVALID_ANCHORS');
   return [0,0.236,0.382,0.5,0.618,0.786,1].map(level=>({level,price:b+(a-b)*level}));
 }
+
+export function bollinger(values:number[],period=20,multiplier=2) {
+  if(!Number.isInteger(period)||period<2||!Number.isFinite(multiplier)||multiplier<=0) throw new Error('INVALID_PERIOD');
+  if(values.some(v=>!Number.isFinite(v))) throw new Error('INVALID_VALUE');
+  const middle=sma(values,period);
+  const upper=middle.map((m,i)=>{if(m===null)return null;const sample=values.slice(i-period+1,i+1);const deviation=Math.sqrt(sample.reduce((sum,v)=>sum+(v-m)**2,0)/period);return m+multiplier*deviation});
+  const lower=middle.map((m,i)=>{if(m===null)return null;const sample=values.slice(i-period+1,i+1);const deviation=Math.sqrt(sample.reduce((sum,v)=>sum+(v-m)**2,0)/period);return m-multiplier*deviation});
+  return {middle,upper,lower};
+}
+export function atr(candles:Candle[],period=14):(number|null)[] {
+  if(!Number.isInteger(period)||period<1) throw new Error('INVALID_PERIOD');
+  const cs=validateCandles(candles);
+  const tr=cs.map((c,i)=>i===0?c.high-c.low:Math.max(c.high-c.low,Math.abs(c.high-cs[i-1].close),Math.abs(c.low-cs[i-1].close)));
+  const result:(number|null)[]=cs.map(()=>null);
+  if(cs.length<period)return result;
+  let avg=tr.slice(0,period).reduce((a,b)=>a+b,0)/period;
+  result[period-1]=avg;
+  for(let i=period;i<cs.length;i++){avg=(avg*(period-1)+tr[i])/period;result[i]=avg}
+  return result;
+}
