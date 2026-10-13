@@ -11,6 +11,7 @@ import {
 } from "@/components/lab/applied-ai-labs";
 import { DeepLearningLab } from "@/components/lab/deep-learning-lab";
 import { LabShell } from "@/components/lab/lab-shell";
+import { QuantumFutureRoadmap } from "@/components/lab/quantum-future-roadmap";
 import { SystemHealthPanel } from "@/components/lab/system-health-panel";
 import { LAB_MODULES } from "@/components/lab/lab-modules";
 import { MachineLearningLab } from "@/components/lab/machine-learning-lab";
@@ -68,6 +69,8 @@ function LabDashboard() {
           otherwise; AI modules below are interactive browser-local educational experiments.
         </p>
       </div>
+
+      <QuantumFutureRoadmap />
 
       <SystemHealthPanel />
 
