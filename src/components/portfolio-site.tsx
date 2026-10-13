@@ -363,6 +363,21 @@ export function PortfolioSite() {
       <AIResearchAssistant />
 
       <main id="main">
+        <div className="border-b border-cyan-500/30 bg-slate-950 px-5 py-5 sm:px-8">
+          <div className="mx-auto flex max-w-7xl flex-col gap-3 rounded-xl border border-cyan-400/40 bg-cyan-500/10 p-5 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="font-mono text-xs font-semibold uppercase tracking-widest text-cyan-300">Live market research</p>
+              <h2 className="mt-1 text-xl font-semibold text-white">Web3 Market Terminal</h2>
+              <p className="mt-1 text-sm text-slate-300">BTC / ETH / SOL · Candlestick chart · RSI · MACD · Bollinger Bands · Volume</p>
+            </div>
+            <Link
+              to="/web3-terminal"
+              className="inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-lg bg-cyan-400 px-5 py-3 font-semibold text-slate-950 transition-colors hover:bg-cyan-300"
+            >
+              Open live chart <ArrowUpRight className="size-4" aria-hidden="true" />
+            </Link>
+          </div>
+        </div>
         {/* HERO */}
         <section
           id="top"
