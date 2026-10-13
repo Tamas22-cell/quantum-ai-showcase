@@ -36,6 +36,7 @@ Object.assign(dictionary.fr, {"Autonomous AI Systems":"Systèmes d’IA autonome
 Object.assign(dictionary.it, {"Autonomous AI Systems":"Sistemi di IA autonomi","Multi-agent coordination, financial research workflows and verifiable decision support.":"Coordinamento multi-agente, ricerca finanziaria e supporto decisionale verificabile.","Quantum Finance":"Finanza quantistica","Portfolio optimization, stress testing and hybrid classical-quantum financial experiments.":"Ottimizzazione del portafoglio, stress test ed esperimenti finanziari ibridi classico-quantistici.","Quantum Algorithms":"Algoritmi quantistici","QAOA, VQE and QML research focused on practical hybrid system design.":"Ricerca QAOA, VQE e QML per sistemi ibridi pratici.","Open AI Research":"Apri la ricerca IA","Open Finance Lab":"Apri il laboratorio finanziario","Open Quantum Lab":"Apri il laboratorio quantistico","Run research pulse":"Avvia impulso di ricerca","Research field":"Campo di ricerca","Hybrid intelligence topology":"Topologia dell’intelligenza ibrida","Agent coordination":"Coordinamento degli agenti","Quantum optimization":"Ottimizzazione quantistica","QML signal":"Segnale QML","Hybrid confidence":"Affidabilità ibrida","Awaiting pulse":"In attesa dell’impulso","Simulation / v1.0":"Simulazione / v1.0","Ask AI Research Assistant":"Chiedi all’assistente di ricerca IA","Explore research":"Esplora la ricerca","Local interactive simulation · research visualization · no quantum advantage claim":"Simulazione interattiva locale · visualizzazione di ricerca · nessun vantaggio quantistico dichiarato","Independent research portfolio":"Portfolio di ricerca indipendente","Multi-agent AI":"IA multi-agente","Market Analysis":"Analisi di mercato","Risk Analysis":"Analisi del rischio","News / Sentiment":"Notizie / sentiment","Research Question":"Domanda di ricerca","AI Financial Research Platform":"Piattaforma di ricerca finanziaria IA","Quantum Portfolio Optimizer":"Ottimizzatore di portafoglio quantistico"});
 
 const originalText = new WeakMap<Text, string>();
+const originalAttrs = new WeakMap<Element, Map<string, string>>();
 
 export function LanguageSelector() {
   const [language, setLanguage] = useState<Language>("en");
@@ -62,6 +63,20 @@ export function LanguageSelector() {
           const translation = exact ?? (upperKey ? dictionary[language][upperKey].toUpperCase() : undefined);
           const next = translation ? original.replace(key, translation) : original;
           if (el.textContent !== next) el.textContent = next;
+        }
+      });
+      document.querySelectorAll<HTMLElement>("[placeholder],[title],[aria-label],[alt]").forEach(el => {
+        if (el.closest("[data-language-selector],script,style,code,pre")) return;
+        let originals = originalAttrs.get(el);
+        if (!originals) { originals = new Map(); originalAttrs.set(el, originals); }
+        for (const attr of ["placeholder", "title", "aria-label", "alt"]) {
+          if (!el.hasAttribute(attr)) continue;
+          if (!originals.has(attr)) originals.set(attr, el.getAttribute(attr) ?? "");
+          const original = originals.get(attr) ?? "";
+          const key = original.trim();
+          const translated = dictionary[language][key];
+          const next = translated ? original.replace(key, translated) : original;
+          if (el.getAttribute(attr) !== next) el.setAttribute(attr, next);
         }
       });
     };
