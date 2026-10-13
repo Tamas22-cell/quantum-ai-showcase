@@ -10,6 +10,7 @@ const stages = [
 
 export function QuantumFutureRoadmap() {
   const [active, setActive] = useState(0);
+  const [application, setApplication] = useState<number | null>(null);
   const selected = stages[active];
   return (
     <section aria-labelledby="quantum-roadmap-heading" className="relative mb-12 overflow-hidden rounded-2xl border border-cyan-400/20 bg-[#050c20] p-5 text-white sm:p-8">
@@ -76,12 +77,49 @@ export function QuantumFutureRoadmap() {
         <div className="mt-7">
           <h3 className="mb-3 text-lg font-semibold text-slate-100">Potential Applications</h3>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {[["🧪","Chemistry"],["🧬","Drug Discovery"],["🤖","AI & Machine Learning"],["📈","Quantum Finance"]].map(([symbol,label])=>(
-              <div key={label} className="rounded-xl border border-cyan-400/20 bg-slate-900/80 p-4 text-center transition-colors hover:border-cyan-300/70">
-                <span aria-hidden="true" className="text-3xl">{symbol}</span><p className="mt-2 text-sm font-medium">{label}</p>
-              </div>
+            {[
+              { name:"Chemistry", color:"#38bdf8", desc:"Quantum simulation could help model molecular energies and reaction pathways for materials and chemical research." },
+              { name:"Drug Discovery", color:"#c084fc", desc:"Quantum chemistry research may support molecular modelling and candidate screening, subject to hardware and algorithmic advances." },
+              { name:"AI & Machine Learning", color:"#2dd4bf", desc:"Quantum machine learning explores feature maps, quantum kernels and hybrid models; practical advantage remains unproven for most tasks." },
+              { name:"Quantum Finance", color:"#fbbf24", desc:"Research applications include portfolio optimisation, sampling and risk models, benchmarked against strong classical approaches." },
+            ].map((item,i)=>(
+              <button key={item.name} type="button" aria-pressed={application===i} onClick={()=>setApplication(application===i?null:i)}
+                className="group rounded-xl border bg-slate-900/80 p-3 text-center transition-all duration-300 hover:-translate-y-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-300 sm:p-4"
+                style={{borderColor:application===i?item.color:"#334155",boxShadow:application===i?"0 0 25px "+item.color+"33":"none"}}>
+                <svg aria-hidden="true" viewBox="0 0 160 105" className="mx-auto mb-3 h-24 w-full max-w-44 overflow-visible" fill="none">
+                  <defs><radialGradient id={"glow-"+i}><stop stopColor={item.color} stopOpacity=".6"/><stop offset="1" stopColor={item.color} stopOpacity="0"/></radialGradient></defs>
+                  <circle cx="80" cy="52" r="47" fill={"url(#glow-"+i+")"} opacity=".3" className="motion-safe:animate-pulse"/>
+                  {i===0 && <>
+                    <path d="M36 65L70 28L112 48L94 83L36 65M70 28L94 83" stroke={item.color} strokeWidth="2"/>
+                    {[[36,65],[70,28],[112,48],[94,83]].map(([x,y],j)=><circle key={j} cx={x} cy={y} r={j===1?11:8} fill={item.color} stroke="#e0f2fe" strokeWidth="1.5" className="motion-safe:animate-pulse" style={{animationDelay:j*.25+"s"}}/>)}
+                  </>}
+                  {i===1 && <>
+                    <g transform="rotate(-35 80 52)"><rect x="51" y="20" width="58" height="65" rx="28" stroke={item.color} strokeWidth="3" fill="#25123b"/><path d="M51 52H109" stroke="#e9d5ff" strokeWidth="3"/><path d="M55 53H105V60Q105 81 80 81Q55 81 55 60Z" fill={item.color} opacity=".7"/></g>
+                    {[[30,24],[132,36],[128,82]].map(([x,y],j)=><circle key={j} cx={x} cy={y} r="5" fill="#e9d5ff" className="motion-safe:animate-pulse" style={{animationDelay:j*.4+"s"}}/>)}
+                  </>}
+                  {i===2 && <>
+                    {[[24,26],[24,76],[70,18],[70,52],[70,87],[130,32],[130,72]].map(([x,y],j)=><g key={j}>{j<2&&[2,3,4].map(k=><path key={k} d={`M${x} ${y}L${[70,70,70][k-2]} ${[18,52,87][k-2]}`} stroke={item.color} opacity=".5"/>)}{j>=2&&j<=4&&[5,6].map(k=><path key={k} d={`M${x} ${y}L130 ${k===5?32:72}`} stroke={item.color} opacity=".5"/>)}<circle cx={x} cy={y} r="7" fill={item.color} className="motion-safe:animate-pulse" style={{animationDelay:j*.18+"s"}}/></g>)}
+                  </>}
+                  {i===3 && <>
+                    <path d="M20 86V20M20 86H145" stroke="#94a3b8" strokeWidth="1.5"/>
+                    {[30,50,70,90,110,130].map((x,j)=><rect key={x} x={x} y={82-[18,26,21,43,54,68][j]} width="11" height={[18,26,21,43,54,68][j]} rx="2" fill={item.color} opacity={.25+j*.12}/>)}
+                    <path d="M24 70L48 61L70 66L91 40L111 47L140 15" stroke="#fde68a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="motion-safe:animate-pulse"/>
+                  </>}
+                </svg>
+                <span className="block text-sm font-semibold sm:text-base">{item.name}</span>
+                <span className="mt-2 block text-[11px] text-slate-400">Tap to explore ↗</span>
+              </button>
             ))}
           </div>
+          {application!==null&&<div aria-live="polite" className="mt-3 rounded-xl border border-cyan-400/20 bg-slate-950/80 p-4">
+            <h4 className="font-semibold text-cyan-200">{["Chemistry","Drug Discovery","AI & Machine Learning","Quantum Finance"][application]}</h4>
+            <p className="mt-2 text-sm leading-6 text-slate-300">{[
+              "Quantum simulation could help model molecular energies and reaction pathways for materials and chemical research.",
+              "Quantum chemistry research may support molecular modelling and candidate screening, subject to hardware and algorithmic advances.",
+              "Quantum machine learning explores feature maps, quantum kernels and hybrid models; practical advantage remains unproven for most tasks.",
+              "Research applications include portfolio optimisation, sampling and risk models, benchmarked against strong classical approaches."
+            ][application]}</p>
+          </div>}
         </div>
         <p className="mt-4 flex items-start gap-2 text-xs leading-5 text-slate-400"><ArrowUpRight size={15} className="mt-0.5 shrink-0"/>Research outlook only. Milestones and timing are uncertain; practical quantum advantage must be independently validated.</p>
       </div>
