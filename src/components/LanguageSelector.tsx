@@ -76,8 +76,8 @@ export function LanguageSelector() {
           if (!originalText.has(el)) originalText.set(el, original);
           const key = original.trim();
           const exact = dictionary[language][key];
-          const upperKey = Object.keys(dictionary[language]).find(k => k.toUpperCase() === key);
-          const translation = exact ?? (upperKey ? dictionary[language][upperKey].toUpperCase() : undefined);
+          const upperKey = Object.keys(dictionary[language]).find(k => k.toUpperCase() === key.toUpperCase());
+          const translation = exact ?? (upperKey ? (key === key.toUpperCase() ? dictionary[language][upperKey].toUpperCase() : dictionary[language][upperKey]) : undefined);
           const next = translation ? original.replace(key, translation) : original;
           if (el.textContent !== next) el.textContent = next;
         }
