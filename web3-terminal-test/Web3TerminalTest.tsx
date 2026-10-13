@@ -58,6 +58,29 @@ function CandleChart({candles, flags, anchors, onAnchor}: {
     {fib.map(f=><g key={f.level}><line x1="35" x2="682" y1={y(f.price)} y2={y(f.price)} stroke="#f0abfc" strokeDasharray="5 5"/><text x="610" y={y(f.price)-3} fill="#f0abfc" fontSize="10">{f.level}</text></g>)}
   </svg>;
 }
+function IndicatorPanel({title, lines, bounds, guides}: {
+  title:string;
+  lines:{values:(number|null)[];color:string;label:string}[];
+  bounds?:[number,number];
+  guides?:number[];
+}) {
+  const values=lines.flatMap(l=>l.values.slice(-90).filter((v):v is number=>v!==null&&Number.isFinite(v)));
+  const min=bounds?.[0]??Math.min(0,...values);
+  const max=bounds?.[1]??Math.max(0,...values);
+  const span=Math.max(max-min,0.000001);
+  const y=(v:number)=>12+(max-v)/span*112;
+  const x=(i:number)=>35+i*7;
+  return <div style={{marginTop:12,padding:12,background:'#0f172a',borderRadius:12}}>
+    <strong>{title}</strong>
+    <div style={{display:'flex',gap:14,flexWrap:'wrap',fontSize:12,marginTop:4}}>
+      {lines.map(l=><span key={l.label} style={{color:l.color}}>{l.label}: {l.values.at(-1)?.toFixed(2)??'—'}</span>)}
+    </div>
+    <svg viewBox="0 0 690 150" role="img" aria-label={title+' indicator chart'} style={{width:'100%',marginTop:6}}>
+      {(guides??[0]).map(g=><g key={g}><line x1="35" x2="685" y1={y(g)} y2={y(g)} stroke="#64748b" strokeDasharray="5 5"/><text x="2" y={y(g)+3} fill="#94a3b8" fontSize="11">{g}</text></g>)}
+      {lines.map(l=><polyline key={l.label} points={l.values.slice(-90).map((v,i)=>v===null?'':`${x(i)},${y(v)}`).filter(Boolean).join(' ')} stroke={l.color} fill="none" strokeWidth="2"/>)}
+    </svg>
+  </div>;
+}
 export default function Web3TerminalTest() {
   const [coin,setCoin]=useState<Coin>('BTC'),[frame,setFrame]=useState<Frame>('1h');
   const [quotes,setQuotes]=useState<Partial<Record<Coin,QuoteState>>>({});
@@ -113,8 +136,8 @@ export default function Web3TerminalTest() {
     </div>
     {flags.fib&&<div style={{marginBottom:12}}>Fibonacci: click two chart price levels, or enter prices manually. <input aria-label="First Fibonacci anchor" placeholder="Anchor A" type="number" min="0" step="any" value={anchorInput} onChange={e=>setAnchorInput(e.target.value)}/><input aria-label="Second Fibonacci anchor" placeholder="Anchor B" type="number" min="0" step="any" value={anchorEnd} onChange={e=>setAnchorEnd(e.target.value)}/><button onClick={()=>{setAnchors(null);setAnchorInput('');setAnchorEnd('')}}>Auto range</button></div>}
     {market?<CandleChart candles={market.candles} flags={flags} anchors={manualAnchors??(anchors?.[0]===anchors?.[1]?null:anchors)} onAnchor={onAnchor}/>:<p role="status">{chartError||'Loading chart…'}</p>}
-    {flags.rsi&&<p>RSI(14): {rsiLine.at(-1)?.toFixed(2)??'Warming up'}</p>}
-    {flags.macd&&<p>MACD(12,26,9): {macdLines.line.at(-1)?.toFixed(3)??'Warming up'} · Signal {macdLines.signal.at(-1)?.toFixed(3)??'Warming up'}</p>}
+    {flags.rsi&&<IndicatorPanel title="RSI (14)" lines={[{values:rsiLine,color:'#fbbf24',label:'RSI'}]} bounds={[0,100]} guides={[30,50,70]}/>}
+    {flags.macd&&<IndicatorPanel title="MACD (12, 26, 9)" lines={[{values:macdLines.line,color:'#60a5fa',label:'MACD'},{values:macdLines.signal,color:'#f97316',label:'Signal'},{values:macdLines.histogram,color:'#34d399',label:'Histogram'}]} guides={[0]}/>}
     <p style={{fontSize:12,color:'#94a3b8'}}>Quotes refreshed every 60 seconds. Last candle can be incomplete. If API requests fail or quotes expire, prices are hidden instead of presenting stale values as live. Test branch only.</p>
   </section>;
 }
