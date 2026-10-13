@@ -25,7 +25,17 @@ export function DrugDiscoveryLab(){
     <div className="relative mt-5 flex h-40 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-violet-950/80 to-cyan-950/70">
       <div className="absolute h-28 w-28 rounded-full border border-violet-300/50 motion-safe:animate-[spin_18s_linear_infinite]"/>
       <div className="absolute h-12 w-36 rotate-45 rounded-[50%] border border-cyan-300/60"/>
-            <img key={molecule.name} src={"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/"+encodeURIComponent(molecule.name)+"/PNG?image_size=large"} alt={molecule.name+" molecular structure (PubChem)"} loading="lazy" referrerPolicy="no-referrer" className="relative z-10 h-36 w-48 rounded-xl bg-white object-contain p-2 shadow-[0_0_30px_rgba(34,211,238,.25)]" onError={e=>{e.currentTarget.style.display="none";}}/>
+            {molecule.name === "Aspirin" ? (
+        <div className="relative z-10 flex w-full flex-col items-center gap-2 px-2">
+          <p className="text-center text-sm font-semibold tracking-wide text-cyan-200">Acetylsalicylic acid · C₉H₈O₄</p>
+          <div className="grid w-full grid-cols-2 gap-2">
+            <img src="https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/2244/PNG?image_size=large" alt="Aspirin 2D chemical structure" loading="lazy" className="h-28 w-full rounded-lg bg-slate-100 object-contain p-1 shadow-[0_0_16px_rgba(34,211,238,.2)]" />
+            <img src="https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/2244/PNG?record_type=3d&image_size=large" alt="Aspirin 3D ball-and-stick model" loading="lazy" className="h-28 w-full rounded-lg bg-slate-100 object-contain p-1 shadow-[0_0_16px_rgba(192,132,252,.2)]" />
+          </div>
+        </div>
+      ) : (
+        <img key={molecule.name} src={"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/"+encodeURIComponent(molecule.name)+"/PNG?image_size=large"} alt={molecule.name+" molecular structure (PubChem)"} loading="lazy" referrerPolicy="no-referrer" className="relative z-10 h-36 w-48 rounded-xl bg-white object-contain p-2 shadow-[0_0_30px_rgba(34,211,238,.25)]" />
+      )}
     </div>
     <h3 className="mt-4 text-xl font-semibold">{molecule.name} <span className="font-mono text-sm text-slate-400">{molecule.formula}</span></h3>
     <p className="mt-2 text-xs text-slate-400">{molecule.note}</p>
