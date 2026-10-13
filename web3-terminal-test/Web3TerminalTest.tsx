@@ -67,7 +67,9 @@ export default function Web3TerminalTest() {
   const [flags,setFlags]=useState({sma50:true,sma200:false,ema20:false,rsi:true,macd:true,fib:false});
   const [anchors,setAnchors]=useState<[number,number]|null>(null);
   const [anchorInput,setAnchorInput]=useState('');
+  const [anchorEnd,setAnchorEnd]=useState('');
   const [clock,setClock]=useState(Date.now());
+  useEffect(()=>{const timer=setInterval(()=>setClock(Date.now()),10000);return ()=>clearInterval(timer)},[]);
   useEffect(()=>{
     const ctrl=new AbortController();
     const poll=async()=>{
@@ -94,22 +96,23 @@ export default function Web3TerminalTest() {
   const closes=useMemo(()=>market?.candles.map(c=>c.close)??[],[market]);
   const rsiLine=useMemo(()=>rsi(closes),[closes]), macdLines=useMemo(()=>macd(closes),[closes]);
   const onAnchor=(p:number)=>{if(!Number.isFinite(p)||p<=0)return;setAnchors(prev=>prev===null?[p,p]:prev[0]===prev[1]?[prev[0],p]:[p,p]);};
+  const manualAnchors=Number(anchorInput)>0&&Number(anchorEnd)>0&&Number(anchorInput)!==Number(anchorEnd)?[Number(anchorInput),Number(anchorEnd)] as [number,number]:null;
   const setFlag=(key:keyof typeof flags)=>setFlags(v=>({...v,[key]:!v[key]}));
   return <section style={{background:'#020617',color:'#e2e8f0',padding:20,borderRadius:16,fontFamily:'system-ui'}}>
     <h2>Web3 Market Terminal — TEST ONLY</h2>
     <p>USD pairs · Kraken public API · Prices are last trades, not guaranteed executable quotes</p>
     <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
-      {COINS.map(c=>{const q=quotes[c],fresh=q&&clock-q.updated<120000;return <button key={c} onClick={()=>{setCoin(c);setAnchors(null)}} aria-pressed={coin===c} style={{padding:12,color:'white',background:c===coin?'#1d4ed8':'#1e293b',border:'1px solid #475569',borderRadius:10,minWidth:150,textAlign:'left'}}>
+      {COINS.map(c=>{const q=quotes[c],fresh=q&&clock-q.updated<120000;return <button key={c} onClick={()=>{setCoin(c);setAnchors(null);setAnchorInput('');setAnchorEnd('')}} aria-pressed={coin===c} style={{padding:12,color:'white',background:c===coin?'#1d4ed8':'#1e293b',border:'1px solid #475569',borderRadius:10,minWidth:150,textAlign:'left'}}>
         <strong>{c}/USD</strong><div>{fresh?'$'+q.price.toLocaleString('en-US'): 'Data unavailable'}</div>
         <small>{fresh?`${q.change.toFixed(2)}% · 24h H ${q.high.toFixed(2)} L ${q.low.toFixed(2)}`:errors[c]||'Waiting for quote'}</small>
       </button>})}
     </div>
     <div style={{display:'flex',gap:12,flexWrap:'wrap',margin:'16px 0'}}>
-      <label>Timeframe <select value={frame} onChange={e=>{setFrame(e.target.value as Frame);setAnchors(null)}}>{Object.keys(INTERVALS).map(v=><option key={v}>{v}</option>)}</select></label>
+      <label>Timeframe <select value={frame} onChange={e=>{setFrame(e.target.value as Frame);setAnchors(null);setAnchorInput('');setAnchorEnd('')}}>{Object.keys(INTERVALS).map(v=><option key={v}>{v}</option>)}</select></label>
       {Object.entries(flags).map(([key,on])=><label key={key}><input type="checkbox" checked={on} onChange={()=>setFlag(key as keyof typeof flags)}/>{key.toUpperCase()}</label>)}
     </div>
-    {flags.fib&&<div style={{marginBottom:12}}>Fibonacci: click two chart price levels, or enter prices manually. <input aria-label="First Fibonacci anchor" placeholder="Anchor A" type="number" step="any" value={anchors?.[0]??''} onChange={e=>setAnchorInput(e.target.value)}/><input aria-label="Second Fibonacci anchor" placeholder="Anchor B" type="number" step="any" value={anchors?.[1]??''} onChange={e=>{const a=Number(anchorInput),b=Number(e.target.value);if(a>0&&b>0&&a!==b)setAnchors([a,b]);}}/><button onClick={()=>{setAnchors(null);setAnchorInput('')}}>Auto range</button></div>}
-    {market?<CandleChart candles={market.candles} flags={flags} anchors={anchors?.[0]===anchors?.[1]?null:anchors} onAnchor={onAnchor}/>:<p role="status">{chartError||'Loading chart…'}</p>}
+    {flags.fib&&<div style={{marginBottom:12}}>Fibonacci: click two chart price levels, or enter prices manually. <input aria-label="First Fibonacci anchor" placeholder="Anchor A" type="number" min="0" step="any" value={anchorInput} onChange={e=>setAnchorInput(e.target.value)}/><input aria-label="Second Fibonacci anchor" placeholder="Anchor B" type="number" min="0" step="any" value={anchorEnd} onChange={e=>setAnchorEnd(e.target.value)}/><button onClick={()=>{setAnchors(null);setAnchorInput('');setAnchorEnd('')}}>Auto range</button></div>}
+    {market?<CandleChart candles={market.candles} flags={flags} anchors={manualAnchors??(anchors?.[0]===anchors?.[1]?null:anchors)} onAnchor={onAnchor}/>:<p role="status">{chartError||'Loading chart…'}</p>}
     {flags.rsi&&<p>RSI(14): {rsiLine.at(-1)?.toFixed(2)??'Warming up'}</p>}
     {flags.macd&&<p>MACD(12,26,9): {macdLines.line.at(-1)?.toFixed(3)??'Warming up'} · Signal {macdLines.signal.at(-1)?.toFixed(3)??'Warming up'}</p>}
     <p style={{fontSize:12,color:'#94a3b8'}}>Quotes refreshed every 60 seconds. Last candle can be incomplete. If API requests fail or quotes expire, prices are hidden instead of presenting stale values as live. Test branch only.</p>
