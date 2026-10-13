@@ -299,6 +299,12 @@ export function PortfolioSite() {
               );
             })}
             <Link
+              to="/web3-terminal"
+              className="rounded-sm border border-cyan-500/40 bg-cyan-500/10 px-3 py-2 font-mono text-[11px] uppercase tracking-wider text-cyan-300 transition-colors hover:bg-cyan-500/20"
+            >
+              Web3 Market Terminal
+            </Link>
+            <Link
               to="/account"
               className="rounded-sm px-3 py-2 font-mono text-[11px] uppercase tracking-wider text-cyan-400 hover:text-cyan-200"
             >
@@ -335,6 +341,13 @@ export function PortfolioSite() {
                   {item.label}
                 </a>
               ))}
+              <Link
+                to="/web3-terminal"
+                onClick={() => setMenuOpen(false)}
+                className="border-b border-border/60 py-3.5 font-mono text-xs uppercase tracking-wider text-cyan-300"
+              >
+                Web3 Market Terminal
+              </Link>
               <Link
                 to="/account"
                 onClick={() => setMenuOpen(false)}
