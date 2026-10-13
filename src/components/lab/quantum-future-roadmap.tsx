@@ -32,6 +32,22 @@ export function QuantumFutureRoadmap() {
         <p className="font-mono text-xs uppercase tracking-[.25em] text-cyan-300">Quantum AI Research Lab · Interactive outlook</p>
         <h2 id="quantum-roadmap-heading" className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">The Future of <span className="bg-gradient-to-r from-cyan-300 via-violet-400 to-emerald-300 bg-clip-text text-transparent">Quantum Computing</span></h2>
         <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-300">Explore scientific milestones rather than fixed predictions. Select a stage to learn what matters next.</p>
+        <div className="relative mx-auto mt-8 flex min-h-64 max-w-3xl items-center justify-center overflow-hidden rounded-2xl border border-cyan-300/20 bg-slate-950/60 sm:min-h-80">
+          <div aria-hidden="true" className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(34,211,238,.19),transparent_65%)]" />
+          <div aria-hidden="true" className="absolute left-1/2 top-1/2 h-52 w-52 -translate-x-1/2 -translate-y-1/2 rounded-full border border-cyan-300/40 shadow-[0_0_65px_rgba(34,211,238,.2)] motion-safe:animate-[spin_24s_linear_infinite] sm:h-64 sm:w-64">
+            {Array.from({length:8},(_,i)=><span key={i} className="absolute h-2 w-2 rounded-full bg-cyan-200 shadow-[0_0_15px_#67e8f9]" style={{left:(50+48*Math.cos(i*Math.PI/4))+"%",top:(50+48*Math.sin(i*Math.PI/4))+"%"}} />)}
+          </div>
+          <div aria-hidden="true" className="absolute left-1/2 top-1/2 h-36 w-72 -translate-x-1/2 -translate-y-1/2 rounded-[50%] border border-violet-400/60 motion-safe:animate-[spin_18s_linear_infinite]" style={{transform:"translate(-50%,-50%) rotate(-28deg)"}} />
+          <div className="relative flex flex-col items-center">
+            <div className="relative h-32 w-36 sm:h-40 sm:w-44">
+              <div className="absolute left-1/2 top-0 h-5 w-28 -translate-x-1/2 rounded-full border border-amber-300/80 bg-gradient-to-b from-yellow-200 to-amber-600 shadow-[0_0_24px_rgba(251,191,36,.5)] sm:w-36" />
+              {Array.from({length:7},(_,i)=><div key={i} className="absolute top-4 h-24 w-2 rounded-b-full bg-gradient-to-b from-amber-200 via-yellow-600 to-amber-900 shadow-[0_0_9px_rgba(251,191,36,.5)] sm:h-32" style={{left:(14+i*12)+"%"}} />)}
+              {[0,1,2].map(i=><div key={i} className="absolute left-1/2 h-3 -translate-x-1/2 rounded-full border border-amber-200/70 bg-amber-500/30" style={{top:(38+i*29)+"%",width:(92-i*18)+"%"}} />)}
+            </div>
+            <p className="mt-3 text-center font-mono text-xs tracking-[.2em] text-amber-200">QUANTUM PROCESSOR</p>
+          </div>
+          <div className="absolute bottom-3 left-3 text-[10px] text-slate-400">Conceptual illustration · not a hardware photograph</div>
+        </div>
         <div className="relative mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {stages.map((stage, i) => {
             const Icon = stage.icon;
@@ -48,6 +64,16 @@ export function QuantumFutureRoadmap() {
           <h3 className="mt-2 text-xl font-semibold">{selected.title}</h3>
           <p className="mt-2 text-sm leading-6 text-slate-300">{selected.details}</p>
           <div className="mt-4 flex flex-wrap gap-2">{selected.topics.map(t=><span key={t} className="rounded-full border border-white/20 px-3 py-1 text-xs text-slate-200">{t}</span>)}</div>
+        </div>
+        <div className="mt-7">
+          <h3 className="mb-3 text-lg font-semibold text-slate-100">Potential Applications</h3>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {[["🧪","Chemistry"],["🧬","Drug Discovery"],["🤖","AI & Machine Learning"],["📈","Quantum Finance"]].map(([symbol,label])=>(
+              <div key={label} className="rounded-xl border border-cyan-400/20 bg-slate-900/80 p-4 text-center transition-colors hover:border-cyan-300/70">
+                <span aria-hidden="true" className="text-3xl">{symbol}</span><p className="mt-2 text-sm font-medium">{label}</p>
+              </div>
+            ))}
+          </div>
         </div>
         <p className="mt-4 flex items-start gap-2 text-xs leading-5 text-slate-400"><ArrowUpRight size={15} className="mt-0.5 shrink-0"/>Research outlook only. Milestones and timing are uncertain; practical quantum advantage must be independently validated.</p>
       </div>
