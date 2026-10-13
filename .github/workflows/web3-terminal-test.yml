@@ -17,7 +17,7 @@ jobs:
         with:
           node-version: '22'
       - name: Install dependencies
-        run: npm ci
+        run: npm install --no-package-lock --no-audit --no-fund
       - name: Run Web3 indicator tests
         run: npx vitest run web3-terminal-test/marketMath.test.ts
       - name: Type-check isolated terminal
