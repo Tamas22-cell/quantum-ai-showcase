@@ -1,124 +1,117 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { sma, ema, rsi, macd, fibonacci, validateCandles, validateQuote, type Candle } from './marketMath';
+import { sma, ema, rsi, macd, fibonacci, validateCandles, type Candle } from './marketMath';
 
-/** Isolated preview component: do not import into production routes before approval. */
 const PAIRS = { BTC: 'XBTUSD', ETH: 'ETHUSD', SOL: 'SOLUSD' } as const;
 type Coin = keyof typeof PAIRS;
+const COINS: Coin[] = ['BTC','ETH','SOL'];
 const INTERVALS = { '5m': 5, '15m': 15, '1h': 60, '4h': 240, '1d': 1440 } as const;
 type Frame = keyof typeof INTERVALS;
-type State = { candles: Candle[]; updated: number; source: string; price: number; quoteTime: number };
-const kraken = 'https://api.kraken.com/0/public/';
-function pairResult(data: any): any {
-  if (!data || !Array.isArray(data.error) || data.error.length) throw new Error('EXCHANGE_ERROR');
-  const key = Object.keys(data.result ?? {}).find(k => k !== 'last');
+type QuoteState = { price: number; updated: number; high: number; low: number; volume: number; change: number };
+type MarketState = { candles: Candle[]; updated: number };
+const api = 'https://api.kraken.com/0/public/';
+function unwrap(payload: unknown): any {
+  const p = payload as { error?: unknown; result?: Record<string,unknown> };
+  if (!p || !Array.isArray(p.error) || p.error.length || !p.result) throw new Error('EXCHANGE_RESPONSE');
+  const key = Object.keys(p.result).find(k=>k!=='last');
   if (!key) throw new Error('MISSING_PAIR');
-  return data.result[key];
+  return p.result[key];
 }
-async function fetchJson(url: string, signal: AbortSignal) {
-  const response = await fetch(url, { signal, cache: 'no-store' });
-  if (!response.ok) throw new Error('HTTP_' + response.status);
+async function json(url: string, signal: AbortSignal): Promise<unknown> {
+  const response = await fetch(url, {signal,cache:'no-store'});
+  if (!response.ok) throw new Error('HTTP_'+response.status);
   return response.json();
 }
-function CandleChart({ candles, sma50, sma200, ema20, fib, fibAnchors }: {
-  candles: Candle[]; sma50: boolean; sma200: boolean; ema20: boolean; fib: boolean; fibAnchors: [number,number] | null;
+function parseTicker(t: any): Omit<QuoteState,'updated'> {
+  const price=Number(t?.c?.[0]), open=Number(t?.o), high=Number(t?.h?.[1]), low=Number(t?.l?.[1]), volume=Number(t?.v?.[1]);
+  if (![price,open,high,low,volume].every(Number.isFinite) || Math.min(price,open,high,low)<=0 || high<low || price>high*1.02 || price<low*.98 || volume<0) throw new Error('INVALID_TICKER');
+  return {price,high,low,volume,change:(price/open-1)*100};
+}
+function parseCandles(raw: any, interval: number): Candle[] {
+  if (!Array.isArray(raw)) throw new Error('INVALID_OHLC');
+  const candles=validateCandles(raw.map((r: unknown[])=>({
+    time:Number(r[0])*1000,open:Number(r[1]),high:Number(r[2]),low:Number(r[3]),close:Number(r[4]),volume:Number(r[6])
+  })));
+  if (candles.length<35) throw new Error('INSUFFICIENT_CANDLES');
+  const lastClosed=candles.at(-2);
+  if (!lastClosed || Date.now()-lastClosed.time>interval*60_000*3 || lastClosed.time>Date.now()+60_000) throw new Error('STALE_CANDLES');
+  return candles;
+}
+function CandleChart({candles, flags, anchors, onAnchor}: {
+  candles:Candle[]; flags:Record<string,boolean>; anchors:[number,number]|null; onAnchor:(price:number)=>void
 }) {
-  const visible = candles.slice(-90);
-  const closes = candles.map(c => c.close);
-  const start = candles.length - visible.length;
-  const layers = [
-    { enabled: sma50, data: sma(closes,50), color: '#fbbf24' },
-    { enabled: sma200, data: sma(closes,200), color: '#a78bfa' },
-    { enabled: ema20, data: ema(closes,20), color: '#60a5fa' },
+  const visible=candles.slice(-90), closes=candles.map(c=>c.close), start=candles.length-visible.length;
+  const overlays=[
+    {on:flags.sma50,values:sma(closes,50),color:'#fbbf24'},
+    {on:flags.sma200,values:sma(closes,200),color:'#c084fc'},
+    {on:flags.ema20,values:ema(closes,20),color:'#60a5fa'}
   ];
-  const extras = layers.filter(x=>x.enabled).flatMap(x=>x.data.slice(start).filter((n):n is number=>n!==null));
-  const fibLevels = fib && visible.length>1
-    ? fibonacci(...(fibAnchors ?? [Math.min(...visible.map(c=>c.low)), Math.max(...visible.map(c=>c.high))])) : [];
-  const hi = Math.max(...visible.map(c=>c.high), ...extras, ...fibLevels.map(l=>l.price));
-  const lo = Math.min(...visible.map(c=>c.low), ...extras, ...fibLevels.map(l=>l.price));
-  const span = Math.max(hi-lo,hi*0.0001);
-  const y = (p:number)=>12+(hi-p)/span*245;
-  const x = (i:number)=>38+i*7;
-  return <svg viewBox="0 0 690 300" role="img" aria-label="Candlestick chart with technical overlays" style={{width:'100%',background:'#0f172a',borderRadius:12}}>
-    {[0,.25,.5,.75,1].map((f,i)=><g key={i}><line x1="30" x2="685" y1={12+f*245} y2={12+f*245} stroke="#334155" strokeDasharray="3 4"/><text x="2" y={16+f*245} fontSize="9" fill="#cbd5e1">{(hi-span*f).toFixed(0)}</text></g>)}
-    {visible.map((c,i)=>{const cx=x(i),up=c.close>=c.open,color=up?'#34d399':'#fb7185';return <g key={c.time}><line x1={cx} x2={cx} y1={y(c.high)} y2={y(c.low)} stroke={color}/><rect x={cx-2.4} y={Math.min(y(c.open),y(c.close))} width="4.8" height={Math.max(1,Math.abs(y(c.open)-y(c.close)))} fill={color}/></g>})}
-    {layers.filter(l=>l.enabled).map((l,i)=>{const points=l.data.slice(start).map((p,j)=>p===null?null:`${x(j)},${y(p)}`).filter(Boolean).join(' ');return <polyline key={i} points={points} fill="none" stroke={l.color} strokeWidth="1.7"/>})}
-    {fibLevels.map(l=><g key={l.level}><line x1="36" x2="680" y1={y(l.price)} y2={y(l.price)} stroke="#f0abfc" strokeDasharray="5 5" opacity=".7"/><text x="590" y={y(l.price)-3} fontSize="10" fill="#f0abfc">{l.level}</text></g>)}
+  const fib=flags.fib && visible.length>1 ? fibonacci(...(anchors??[Math.min(...visible.map(c=>c.low)),Math.max(...visible.map(c=>c.high))])) : [];
+  const ext=overlays.filter(l=>l.on).flatMap(l=>l.values.slice(start).filter((v):v is number=>v!==null));
+  const high=Math.max(...visible.map(c=>c.high),...ext,...fib.map(f=>f.price));
+  const low=Math.min(...visible.map(c=>c.low),...ext,...fib.map(f=>f.price));
+  const range=Math.max(high-low,high*.0001), y=(p:number)=>12+(high-p)/range*244, x=(i:number)=>40+i*7;
+  return <svg viewBox="0 0 690 300" role="img" aria-label="Candlestick chart" style={{width:'100%',background:'#0f172a',borderRadius:12,touchAction:'manipulation'}}
+    onClick={e=>{if(!flags.fib)return;const rect=e.currentTarget.getBoundingClientRect();const ypx=(e.clientY-rect.top)/rect.height*300;onAnchor(high-(ypx-12)/244*range);}}>
+    {[0,.25,.5,.75,1].map(t=><g key={t}><line x1="32" x2="685" y1={12+t*244} y2={12+t*244} stroke="#334155" strokeDasharray="3 4"/><text x="1" y={15+t*244} fill="#cbd5e1" fontSize="9">{(high-t*range).toFixed(0)}</text></g>)}
+    {visible.map((c,i)=>{const color=c.close>=c.open?'#34d399':'#fb7185';return <g key={c.time}><line x1={x(i)} x2={x(i)} y1={y(c.high)} y2={y(c.low)} stroke={color}/><rect x={x(i)-2.4} y={Math.min(y(c.open),y(c.close))} width="4.8" height={Math.max(1,Math.abs(y(c.open)-y(c.close)))} fill={color}/></g>})}
+    {overlays.filter(l=>l.on).map((l,i)=><polyline key={i} points={l.values.slice(start).map((v,j)=>v===null?null:`${x(j)},${y(v)}`).filter(Boolean).join(' ')} fill="none" stroke={l.color} strokeWidth="1.7"/>)}
+    {fib.map(f=><g key={f.level}><line x1="35" x2="682" y1={y(f.price)} y2={y(f.price)} stroke="#f0abfc" strokeDasharray="5 5"/><text x="610" y={y(f.price)-3} fill="#f0abfc" fontSize="10">{f.level}</text></g>)}
   </svg>;
 }
 export default function Web3TerminalTest() {
-  const [coin,setCoin]=useState<Coin>('BTC');
-  const [frame,setFrame]=useState<Frame>('1h');
-  const [data,setData]=useState<State|null>(null);
-  const [snapshot,setSnapshot]=useState<Partial<Record<Coin,{price:number;updated:number}>>>({});
-  const [error,setError]=useState('');
-  const [loading,setLoading]=useState(true);
-  const [fibStart,setFibStart]=useState('');
-  const [fibEnd,setFibEnd]=useState('');
-  const [show,setShow]=useState({sma50:true,sma200:false,ema20:false,rsi:true,macd:true,fib:false});
+  const [coin,setCoin]=useState<Coin>('BTC'),[frame,setFrame]=useState<Frame>('1h');
+  const [quotes,setQuotes]=useState<Partial<Record<Coin,QuoteState>>>({});
+  const [market,setMarket]=useState<MarketState|null>(null);
+  const [errors,setErrors]=useState<Partial<Record<Coin,string>>>({});
+  const [chartError,setChartError]=useState('');
+  const [flags,setFlags]=useState({sma50:true,sma200:false,ema20:false,rsi:true,macd:true,fib:false});
+  const [anchors,setAnchors]=useState<[number,number]|null>(null);
+  const [anchorInput,setAnchorInput]=useState('');
+  const [clock,setClock]=useState(Date.now());
   useEffect(()=>{
-    const controller=new AbortController();
-    let active=true;
-    const load=async()=>{
-      try {
-        const pair=PAIRS[coin];
-        const [ohlc,ticker]=await Promise.all([
-          fetchJson(`${kraken}OHLC?pair=${pair}&interval=${INTERVALS[frame]}`,controller.signal),
-          fetchJson(`${kraken}Ticker?pair=${pair}`,controller.signal)
-        ]);
-        const raw=pairResult(ohlc);
-        const candles=validateCandles(raw.map((r:any[])=>({
-          time:Number(r[0])*1000,open:Number(r[1]),high:Number(r[2]),
-          low:Number(r[3]),close:Number(r[4]),volume:Number(r[6])
-        })));
-        const tickerResult=pairResult(ticker);
-        const price=Number(tickerResult.c[0]);
-        const lastClosed=candles.at(-2);
-        if(!lastClosed || Date.now()-lastClosed.time > INTERVALS[frame]*60_000*3 || lastClosed.time > Date.now()+60_000) throw new Error('STALE_CANDLES');
-        // Kraken ticker has no authoritative quote timestamp: label retrieval time, not exchange time.
-        validateQuote({symbol:`${coin}/USD` as 'BTC/USD'|'ETH/USD'|'SOL/USD',price,timestamp:Date.now(),source:'Kraken'},Date.now());
-        if(active){setData({candles,updated:Date.now(),source:'Kraken',price,quoteTime:Date.now()});setSnapshot(prev=>({...prev,[coin]:{price,updated:Date.now()}}));setError('');}
-      } catch(e) {if(active&&!controller.signal.aborted){setError('Live data unavailable: '+(e instanceof Error?e.message:'UNKNOWN'));setData(null);}}
-      finally {if(active)setLoading(false);}
+    const ctrl=new AbortController();
+    const poll=async()=>{
+      const outcomes=await Promise.allSettled(COINS.map(async c=>({coin:c,ticker:parseTicker(unwrap(await json(`${api}Ticker?pair=${PAIRS[c]}`,ctrl.signal)))})));
+      if(ctrl.signal.aborted)return;
+      const updated=Date.now();
+      setQuotes(prev=>{const next={...prev};outcomes.forEach((o,i)=>{if(o.status==='fulfilled')next[COINS[i]]={...o.value.ticker,updated};});return next;});
+      setErrors(prev=>{const next={...prev};outcomes.forEach((o,i)=>{next[COINS[i]]=o.status==='rejected'?'Quote unavailable':'';});return next;});
+      setClock(updated);
     };
-    setLoading(true);setData(null);load();
-    const timer=setInterval(load,60000);
-    return ()=>{active=false;clearInterval(timer);controller.abort();};
+    void poll();const timer=setInterval(()=>void poll(),60_000);
+    return ()=>{ctrl.abort();clearInterval(timer)};
+  },[]);
+  useEffect(()=>{
+    const ctrl=new AbortController();setMarket(null);setChartError('');
+    const poll=async()=>{
+      try {const candles=parseCandles(unwrap(await json(`${api}OHLC?pair=${PAIRS[coin]}&interval=${INTERVALS[frame]}`,ctrl.signal)),INTERVALS[frame]);
+        if(!ctrl.signal.aborted){setMarket({candles,updated:Date.now()});setChartError('');}
+      }catch{if(!ctrl.signal.aborted){setMarket(null);setChartError('Chart data unavailable');}}
+    };
+    void poll();const timer=setInterval(()=>void poll(),60_000);
+    return ()=>{ctrl.abort();clearInterval(timer)};
   },[coin,frame]);
-  const values=useMemo(()=>data?.candles.map(c=>c.close)??[],[data]);
-  const rsiValues=useMemo(()=>rsi(values),[values]);
-  const macdValues=useMemo(()=>macd(values),[values]);
-  const toggle=(key:keyof typeof show)=>setShow(v=>({...v,[key]:!v[key]}));
-  const last=data?.candles.at(-1);
-  const manualFib=Number(fibStart)>0&&Number(fibEnd)>0&&Number(fibStart)!==Number(fibEnd) ? [Number(fibStart),Number(fibEnd)] as [number,number] : null;
-  return <section style={{color:'#e2e8f0',background:'#020617',padding:20,borderRadius:16,fontFamily:'system-ui'}}>
+  const closes=useMemo(()=>market?.candles.map(c=>c.close)??[],[market]);
+  const rsiLine=useMemo(()=>rsi(closes),[closes]), macdLines=useMemo(()=>macd(closes),[closes]);
+  const onAnchor=(p:number)=>{if(!Number.isFinite(p)||p<=0)return;setAnchors(prev=>prev===null?[p,p]:prev[0]===prev[1]?[prev[0],p]:[p,p]);};
+  const setFlag=(key:keyof typeof flags)=>setFlags(v=>({...v,[key]:!v[key]}));
+  return <section style={{background:'#020617',color:'#e2e8f0',padding:20,borderRadius:16,fontFamily:'system-ui'}}>
     <h2>Web3 Market Terminal — TEST ONLY</h2>
-    <p style={{color:'#fbbf24'}}>Separate preview. Not connected to the public portfolio.</p>
-    <div style={{display:'flex',gap:8,flexWrap:'wrap',marginBottom:12}}>
-      {(['BTC','ETH','SOL'] as Coin[]).map(c=><button key={c} onClick={()=>setCoin(c)} aria-pressed={coin===c} style={{padding:12,border:'1px solid #64748b',borderRadius:8,background:coin===c?'#1e40af':'#1e293b',color:'white'}}><strong>{c}/USD</strong><div>{snapshot[c] ? '
-      <select value={frame} onChange={e=>setFrame(e.target.value as Frame)} aria-label="Candle interval">{Object.keys(INTERVALS).map(t=><option key={t}>{t}</option>)}</select>
+    <p>USD pairs · Kraken public API · Prices are last trades, not guaranteed executable quotes</p>
+    <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+      {COINS.map(c=>{const q=quotes[c],fresh=q&&clock-q.updated<120000;return <button key={c} onClick={()=>{setCoin(c);setAnchors(null)}} aria-pressed={coin===c} style={{padding:12,color:'white',background:c===coin?'#1d4ed8':'#1e293b',border:'1px solid #475569',borderRadius:10,minWidth:150,textAlign:'left'}}>
+        <strong>{c}/USD</strong><div>{fresh?'$'+q.price.toLocaleString('en-US'): 'Data unavailable'}</div>
+        <small>{fresh?`${q.change.toFixed(2)}% · 24h H ${q.high.toFixed(2)} L ${q.low.toFixed(2)}`:errors[c]||'Waiting for quote'}</small>
+      </button>})}
     </div>
-    <p>{loading?'Loading verified data…':error?error:last?`${coin}/USD · Ticker price: ${data!.price.toLocaleString('en-US')} (retrieved, not exchange timestamp) · Last candle close: ${last.close.toLocaleString('en-US')} · Source: ${data?.source} · Retrieved: ${new Date(data!.updated).toLocaleTimeString()}`:'Data unavailable'}</p>
-    <div style={{display:'flex',gap:12,flexWrap:'wrap',marginBottom:12}}>
-      {Object.entries(show).map(([key,value])=><label key={key}><input type="checkbox" checked={value} onChange={()=>toggle(key as keyof typeof show)}/> {key.toUpperCase()}</label>)}
+    <div style={{display:'flex',gap:12,flexWrap:'wrap',margin:'16px 0'}}>
+      <label>Timeframe <select value={frame} onChange={e=>{setFrame(e.target.value as Frame);setAnchors(null)}}>{Object.keys(INTERVALS).map(v=><option key={v}>{v}</option>)}</select></label>
+      {Object.entries(flags).map(([key,on])=><label key={key}><input type="checkbox" checked={on} onChange={()=>setFlag(key as keyof typeof flags)}/>{key.toUpperCase()}</label>)}
     </div>
-    {show.fib&&<div style={{display:'flex',gap:8,flexWrap:'wrap',marginBottom:12}}><label>Fibonacci anchor A <input type="number" min="0" step="any" value={fibStart} onChange={e=>setFibStart(e.target.value)} placeholder="Auto low"/></label><label>Anchor B <input type="number" min="0" step="any" value={fibEnd} onChange={e=>setFibEnd(e.target.value)} placeholder="Auto high"/></label><button onClick={()=>{setFibStart('');setFibEnd('');}}>Automatic swing</button></div>}
-    {data&&data.candles.length>0&&<CandleChart candles={data.candles} sma50={show.sma50} sma200={show.sma200} ema20={show.ema20} fib={show.fib} fibAnchors={manualFib}/>}
-    {show.rsi&&<p>RSI(14): {rsiValues.at(-1)?.toFixed(2)??'Warming up'}</p>}
-    {show.macd&&<p>MACD(12,26,9): {macdValues.line.at(-1)?.toFixed(3)??'Warming up'} · Signal: {macdValues.signal.at(-1)?.toFixed(3)??'Warming up'}</p>}
-    <p style={{fontSize:12,color:'#94a3b8'}}>Preview uses Kraken public endpoints. Browser CORS/network failures are surfaced; no fallback prices are invented. The last candle may be unfinished. Manual Fibonacci price anchors are available; mouse/touch drawing and simultaneous live updates for all three cards are not yet implemented.</p>
-  </section>;
-}
-+snapshot[c]!.price.toLocaleString('en-US') : 'Select to load'}</div><small>{snapshot[c] ? 'Last retrieved '+new Date(snapshot[c]!.updated).toLocaleTimeString() : 'No verified quote'}</small></button>)}
-      <select value={frame} onChange={e=>setFrame(e.target.value as Frame)} aria-label="Candle interval">{Object.keys(INTERVALS).map(t=><option key={t}>{t}</option>)}</select>
-    </div>
-    <p>{loading?'Loading verified data…':error?error:last?`${coin}/USD · Ticker price: ${data!.price.toLocaleString('en-US')} (retrieved, not exchange timestamp) · Last candle close: ${last.close.toLocaleString('en-US')} · Source: ${data?.source} · Retrieved: ${new Date(data!.updated).toLocaleTimeString()}`:'Data unavailable'}</p>
-    <div style={{display:'flex',gap:12,flexWrap:'wrap',marginBottom:12}}>
-      {Object.entries(show).map(([key,value])=><label key={key}><input type="checkbox" checked={value} onChange={()=>toggle(key as keyof typeof show)}/> {key.toUpperCase()}</label>)}
-    </div>
-    {show.fib&&<div style={{display:'flex',gap:8,flexWrap:'wrap',marginBottom:12}}><label>Fibonacci anchor A <input type="number" min="0" step="any" value={fibStart} onChange={e=>setFibStart(e.target.value)} placeholder="Auto low"/></label><label>Anchor B <input type="number" min="0" step="any" value={fibEnd} onChange={e=>setFibEnd(e.target.value)} placeholder="Auto high"/></label><button onClick={()=>{setFibStart('');setFibEnd('');}}>Automatic swing</button></div>}
-    {data&&data.candles.length>0&&<CandleChart candles={data.candles} sma50={show.sma50} sma200={show.sma200} ema20={show.ema20} fib={show.fib} fibAnchors={manualFib}/>}
-    {show.rsi&&<p>RSI(14): {rsiValues.at(-1)?.toFixed(2)??'Warming up'}</p>}
-    {show.macd&&<p>MACD(12,26,9): {macdValues.line.at(-1)?.toFixed(3)??'Warming up'} · Signal: {macdValues.signal.at(-1)?.toFixed(3)??'Warming up'}</p>}
-    <p style={{fontSize:12,color:'#94a3b8'}}>Preview uses Kraken public endpoints. Browser CORS/network failures are surfaced; no fallback prices are invented. The last candle may be unfinished. Manual Fibonacci price anchors are available; mouse/touch drawing and independent three-asset cards are not yet implemented.</p>
+    {flags.fib&&<div style={{marginBottom:12}}>Fibonacci: click two chart price levels, or enter prices manually. <input aria-label="First Fibonacci anchor" placeholder="Anchor A" type="number" step="any" value={anchors?.[0]??''} onChange={e=>setAnchorInput(e.target.value)}/><input aria-label="Second Fibonacci anchor" placeholder="Anchor B" type="number" step="any" value={anchors?.[1]??''} onChange={e=>{const a=Number(anchorInput),b=Number(e.target.value);if(a>0&&b>0&&a!==b)setAnchors([a,b]);}}/><button onClick={()=>{setAnchors(null);setAnchorInput('')}}>Auto range</button></div>}
+    {market?<CandleChart candles={market.candles} flags={flags} anchors={anchors?.[0]===anchors?.[1]?null:anchors} onAnchor={onAnchor}/>:<p role="status">{chartError||'Loading chart…'}</p>}
+    {flags.rsi&&<p>RSI(14): {rsiLine.at(-1)?.toFixed(2)??'Warming up'}</p>}
+    {flags.macd&&<p>MACD(12,26,9): {macdLines.line.at(-1)?.toFixed(3)??'Warming up'} · Signal {macdLines.signal.at(-1)?.toFixed(3)??'Warming up'}</p>}
+    <p style={{fontSize:12,color:'#94a3b8'}}>Quotes refreshed every 60 seconds. Last candle can be incomplete. If API requests fail or quotes expire, prices are hidden instead of presenting stale values as live. Test branch only.</p>
   </section>;
 }
