@@ -144,6 +144,13 @@ export const portfolio = {
       verified: true,
       href: "https://courses.edx.org/certificates/5864184ee20c43689086dd710789f4c0",
     },
+    {
+      title: "OXFALG01: Finance Fundamentals: Classical and Behavioural Finance",
+      detail:
+        "Saïd Business School, University of Oxford / edX · Verified Certificate · Issued Oct 13, 2026 · Credential ID 8241f7eefc1f4e538d1a21cd978f2162",
+      verified: true,
+      href: "https://courses.edx.org/certificates/8241f7eefc1f4e538d1a21cd978f2162",
+    },
   ],
   social: [
     {
