@@ -64,6 +64,8 @@ export function LanguageSelector() {
     document.documentElement.lang = language;
     localStorage.setItem("quantum-lab-language", language);
     const translate = () => {
+      // Refresh the source when React replaces a previously translated text node.
+
       document.querySelectorAll("body").forEach(root => {
         const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
         let node: Node | null;
