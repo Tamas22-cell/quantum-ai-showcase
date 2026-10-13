@@ -19,7 +19,7 @@ async function fetchJson(url: string, signal: AbortSignal) {
   if (!response.ok) throw new Error('HTTP_' + response.status);
   return response.json();
 }
-function CandleChart({ candles, sma50, sma200, ema20, fib }: {
+function CandleChart({ candles, sma50, sma200, ema20, fib, fibAnchors }: {
   candles: Candle[]; sma50: boolean; sma200: boolean; ema20: boolean; fib: boolean; fibAnchors: [number,number] | null;
 }) {
   const visible = candles.slice(-90);
@@ -31,13 +31,13 @@ function CandleChart({ candles, sma50, sma200, ema20, fib }: {
     { enabled: ema20, data: ema(closes,20), color: '#60a5fa' },
   ];
   const extras = layers.filter(x=>x.enabled).flatMap(x=>x.data.slice(start).filter((n):n is number=>n!==null));
-  const hi = Math.max(...visible.map(c=>c.high), ...extras);
-  const lo = Math.min(...visible.map(c=>c.low), ...extras);
+  const fibLevels = fib && visible.length>1
+    ? fibonacci(...(fibAnchors ?? [Math.min(...visible.map(c=>c.low)), Math.max(...visible.map(c=>c.high))])) : [];
+  const hi = Math.max(...visible.map(c=>c.high), ...extras, ...fibLevels.map(l=>l.price));
+  const lo = Math.min(...visible.map(c=>c.low), ...extras, ...fibLevels.map(l=>l.price));
   const span = Math.max(hi-lo,hi*0.0001);
   const y = (p:number)=>12+(hi-p)/span*245;
   const x = (i:number)=>38+i*7;
-  const fibLevels = fib && visible.length>1
-    ? fibonacci(...(fibAnchors ?? [Math.min(...visible.map(c=>c.low)), Math.max(...visible.map(c=>c.high))])) : [];
   return <svg viewBox="0 0 690 300" role="img" aria-label="Candlestick chart with technical overlays" style={{width:'100%',background:'#0f172a',borderRadius:12}}>
     {[0,.25,.5,.75,1].map((f,i)=><g key={i}><line x1="30" x2="685" y1={12+f*245} y2={12+f*245} stroke="#334155" strokeDasharray="3 4"/><text x="2" y={16+f*245} fontSize="9" fill="#cbd5e1">{(hi-span*f).toFixed(0)}</text></g>)}
     {visible.map((c,i)=>{const cx=x(i),up=c.close>=c.open,color=up?'#34d399':'#fb7185';return <g key={c.time}><line x1={cx} x2={cx} y1={y(c.high)} y2={y(c.low)} stroke={color}/><rect x={cx-2.4} y={Math.min(y(c.open),y(c.close))} width="4.8" height={Math.max(1,Math.abs(y(c.open)-y(c.close)))} fill={color}/></g>})}
@@ -49,6 +49,7 @@ export default function Web3TerminalTest() {
   const [coin,setCoin]=useState<Coin>('BTC');
   const [frame,setFrame]=useState<Frame>('1h');
   const [data,setData]=useState<State|null>(null);
+  const [snapshot,setSnapshot]=useState<Partial<Record<Coin,{price:number;updated:number}>>>({});
   const [error,setError]=useState('');
   const [loading,setLoading]=useState(true);
   const [fibStart,setFibStart]=useState('');
@@ -72,10 +73,10 @@ export default function Web3TerminalTest() {
         const tickerResult=pairResult(ticker);
         const price=Number(tickerResult.c[0]);
         const lastClosed=candles.at(-2);
-        if(!lastClosed || Date.now()-lastClosed.time > INTERVALS[frame]*60_000*3) throw new Error('STALE_CANDLES');
+        if(!lastClosed || Date.now()-lastClosed.time > INTERVALS[frame]*60_000*3 || lastClosed.time > Date.now()+60_000) throw new Error('STALE_CANDLES');
         // Kraken ticker has no authoritative quote timestamp: label retrieval time, not exchange time.
         validateQuote({symbol:`${coin}/USD` as 'BTC/USD'|'ETH/USD'|'SOL/USD',price,timestamp:Date.now(),source:'Kraken'},Date.now());
-        if(active){setData({candles,updated:Date.now(),source:'Kraken',price,quoteTime:Date.now()});setError('');}
+        if(active){setData({candles,updated:Date.now(),source:'Kraken',price,quoteTime:Date.now()});setSnapshot(prev=>({...prev,[coin]:{price,updated:Date.now()}}));setError('');}
       } catch(e) {if(active&&!controller.signal.aborted){setError('Live data unavailable: '+(e instanceof Error?e.message:'UNKNOWN'));setData(null);}}
       finally {if(active)setLoading(false);}
     };
@@ -93,7 +94,21 @@ export default function Web3TerminalTest() {
     <h2>Web3 Market Terminal — TEST ONLY</h2>
     <p style={{color:'#fbbf24'}}>Separate preview. Not connected to the public portfolio.</p>
     <div style={{display:'flex',gap:8,flexWrap:'wrap',marginBottom:12}}>
-      {(['BTC','ETH','SOL'] as Coin[]).map(c=><button key={c} onClick={()=>setCoin(c)} aria-pressed={coin===c}>{c}</button>)}
+      {(['BTC','ETH','SOL'] as Coin[]).map(c=><button key={c} onClick={()=>setCoin(c)} aria-pressed={coin===c} style={{padding:12,border:'1px solid #64748b',borderRadius:8,background:coin===c?'#1e40af':'#1e293b',color:'white'}}><strong>{c}/USD</strong><div>{snapshot[c] ? '
+      <select value={frame} onChange={e=>setFrame(e.target.value as Frame)} aria-label="Candle interval">{Object.keys(INTERVALS).map(t=><option key={t}>{t}</option>)}</select>
+    </div>
+    <p>{loading?'Loading verified data…':error?error:last?`${coin}/USD · Ticker price: ${data!.price.toLocaleString('en-US')} (retrieved, not exchange timestamp) · Last candle close: ${last.close.toLocaleString('en-US')} · Source: ${data?.source} · Retrieved: ${new Date(data!.updated).toLocaleTimeString()}`:'Data unavailable'}</p>
+    <div style={{display:'flex',gap:12,flexWrap:'wrap',marginBottom:12}}>
+      {Object.entries(show).map(([key,value])=><label key={key}><input type="checkbox" checked={value} onChange={()=>toggle(key as keyof typeof show)}/> {key.toUpperCase()}</label>)}
+    </div>
+    {show.fib&&<div style={{display:'flex',gap:8,flexWrap:'wrap',marginBottom:12}}><label>Fibonacci anchor A <input type="number" min="0" step="any" value={fibStart} onChange={e=>setFibStart(e.target.value)} placeholder="Auto low"/></label><label>Anchor B <input type="number" min="0" step="any" value={fibEnd} onChange={e=>setFibEnd(e.target.value)} placeholder="Auto high"/></label><button onClick={()=>{setFibStart('');setFibEnd('');}}>Automatic swing</button></div>}
+    {data&&data.candles.length>0&&<CandleChart candles={data.candles} sma50={show.sma50} sma200={show.sma200} ema20={show.ema20} fib={show.fib} fibAnchors={manualFib}/>}
+    {show.rsi&&<p>RSI(14): {rsiValues.at(-1)?.toFixed(2)??'Warming up'}</p>}
+    {show.macd&&<p>MACD(12,26,9): {macdValues.line.at(-1)?.toFixed(3)??'Warming up'} · Signal: {macdValues.signal.at(-1)?.toFixed(3)??'Warming up'}</p>}
+    <p style={{fontSize:12,color:'#94a3b8'}}>Preview uses Kraken public endpoints. Browser CORS/network failures are surfaced; no fallback prices are invented. The last candle may be unfinished. Manual Fibonacci price anchors are available; mouse/touch drawing and simultaneous live updates for all three cards are not yet implemented.</p>
+  </section>;
+}
++snapshot[c]!.price.toLocaleString('en-US') : 'Select to load'}</div><small>{snapshot[c] ? 'Last retrieved '+new Date(snapshot[c]!.updated).toLocaleTimeString() : 'No verified quote'}</small></button>)}
       <select value={frame} onChange={e=>setFrame(e.target.value as Frame)} aria-label="Candle interval">{Object.keys(INTERVALS).map(t=><option key={t}>{t}</option>)}</select>
     </div>
     <p>{loading?'Loading verified data…':error?error:last?`${coin}/USD · Ticker price: ${data!.price.toLocaleString('en-US')} (retrieved, not exchange timestamp) · Last candle close: ${last.close.toLocaleString('en-US')} · Source: ${data?.source} · Retrieved: ${new Date(data!.updated).toLocaleTimeString()}`:'Data unavailable'}</p>
