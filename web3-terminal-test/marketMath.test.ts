@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { validateCandles, validateQuote, sma, ema, rsi, macd, fibonacci } from './marketMath';
+import { validateCandles, validateQuote, sma, ema, rsi, macd, fibonacci, bollinger, atr } from './marketMath';
 
 describe('market-data safeguards', () => {
   const now = 1_800_000_000_000;
@@ -36,5 +36,20 @@ describe('indicators', () => {
     expect(levels[0].price).toBe(200);
     expect(levels[3].price).toBe(150);
     expect(levels.at(-1)?.price).toBe(100);
+  });
+});
+
+describe('additional chart indicators',()=>{
+  it('Bollinger Bands warm up and remain symmetric around SMA',()=>{
+    const b=bollinger([1,2,3,4,5],3,2);
+    expect(b.middle[1]).toBeNull();
+    expect(b.middle[2]).toBe(2);
+    expect(b.upper[2]!+b.lower[2]!).toBeCloseTo(4);
+  });
+  it('ATR uses true range and respects warm-up',()=>{
+    const candles=Array.from({length:4},(_,i)=>({time:i+1,open:10+i,high:12+i,low:9+i,close:11+i,volume:1}));
+    const result=atr(candles,3);
+    expect(result[1]).toBeNull();
+    expect(result[2]).toBeCloseTo(3);
   });
 });
