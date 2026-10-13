@@ -73,6 +73,24 @@ function LabDashboard() {
 
       <QuantumFutureRoadmap />
 
+      <a href="#drug-discovery-lab" className="group relative mb-8 flex min-h-64 flex-col overflow-hidden rounded-2xl border border-fuchsia-400/50 bg-gradient-to-br from-[#21104c] via-[#17275d] to-[#073b4b] p-6 text-white shadow-[0_0_35px_rgba(168,85,247,.17)] transition-all duration-300 hover:-translate-y-1 hover:border-cyan-300/70 hover:shadow-[0_0_45px_rgba(34,211,238,.23)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-300 sm:flex-row sm:items-center sm:justify-between sm:p-8">
+        <div className="relative z-10 max-w-lg">
+          <span className="inline-flex items-center gap-2 rounded-full border border-fuchsia-300/40 bg-fuchsia-400/10 px-3 py-1 font-mono text-xs tracking-widest text-fuchsia-200">🧬 AI + QUANTUM RESEARCH</span>
+          <h2 className="mt-5 text-3xl font-bold tracking-tight sm:text-4xl">Drug Discovery <span className="bg-gradient-to-r from-fuchsia-300 to-cyan-300 bg-clip-text text-transparent">Lab</span></h2>
+          <p className="mt-3 text-sm leading-6 text-slate-200">Explore molecules, compare physicochemical properties and experiment with transparent drug-likeness screening.</p>
+          <div className="mt-5 flex flex-wrap gap-2">{["Molecular Explorer","Lipinski Screening","Quantum VQE"].map(t=><span key={t} className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs text-slate-100">{t}</span>)}</div>
+          <span className="mt-6 inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-fuchsia-500 to-cyan-500 px-5 py-3 text-sm font-bold text-white shadow-lg transition-transform group-hover:scale-105">Explore the Lab <ArrowUpRight size={17}/></span>
+        </div>
+        <div aria-hidden="true" className="relative mt-6 flex h-48 w-full shrink-0 items-center justify-center sm:mt-0 sm:h-60 sm:w-64">
+          <div className="absolute h-44 w-44 rounded-full border border-cyan-300/50 shadow-[0_0_50px_rgba(34,211,238,.2)] motion-safe:animate-[spin_20s_linear_infinite]"/>
+          <div className="absolute h-20 w-56 -rotate-45 rounded-[50%] border border-fuchsia-300/70"/>
+          <svg viewBox="0 0 220 180" className="relative h-44 w-56 drop-shadow-[0_0_14px_rgba(103,232,249,.7)]" fill="none">
+            <g stroke="#a5f3fc" strokeWidth="4" strokeLinecap="round"><path d="M45 100L86 55L139 65L170 114L118 148L45 100M86 55L118 148M139 65L118 148"/></g>
+            {[[45,100,12,"#22d3ee"],[86,55,17,"#c084fc"],[139,65,12,"#34d399"],[170,114,16,"#f472b6"],[118,148,14,"#67e8f9"]].map(([x,y,rad,color],i)=><circle key={i} cx={Number(x)} cy={Number(y)} r={Number(rad)} fill={String(color)} stroke="#e0f2fe" strokeWidth="2" className="motion-safe:animate-pulse" style={{animationDelay:(i*.3)+"s"}}/>)}
+          </svg>
+        </div>
+      </a>
+
       <DrugDiscoveryLab />
 
       <SystemHealthPanel />
