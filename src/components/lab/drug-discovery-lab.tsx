@@ -26,13 +26,12 @@ export function DrugDiscoveryLab(){
       <div className="absolute h-28 w-28 rounded-full border border-violet-300/50 motion-safe:animate-[spin_18s_linear_infinite]"/>
       <div className="absolute h-12 w-36 rotate-45 rounded-[50%] border border-cyan-300/60"/>
             {molecule.name === "Aspirin" ? (
-        <div className="relative z-10 flex w-full flex-col items-center gap-2 px-2">
-          <p className="text-center text-sm font-semibold tracking-wide text-cyan-200">Acetylsalicylic acid · C₉H₈O₄</p>
-          <div className="grid w-full grid-cols-2 gap-2">
-            <img src="https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/2244/PNG?image_size=large" alt="Aspirin 2D chemical structure" loading="lazy" className="h-28 w-full rounded-lg bg-slate-100 object-contain p-1 shadow-[0_0_16px_rgba(34,211,238,.2)]" />
-            <img src="https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/2244/PNG?record_type=3d&image_size=large" alt="Aspirin 3D ball-and-stick model" loading="lazy" className="h-28 w-full rounded-lg bg-slate-100 object-contain p-1 shadow-[0_0_16px_rgba(192,132,252,.2)]" />
-          </div>
-        </div>
+        <img
+          src="/aspirin-neon.webp"
+          alt="Aspirin – dark blue molecular infographic showing 2D and 3D structure"
+          loading="lazy"
+          className="relative z-10 block h-auto w-full rounded-xl object-contain shadow-[0_0_30px_rgba(34,211,238,.2)]"
+        />
       ) : (
         <img key={molecule.name} src={"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/"+encodeURIComponent(molecule.name)+"/PNG?image_size=large"} alt={molecule.name+" molecular structure (PubChem)"} loading="lazy" referrerPolicy="no-referrer" className="relative z-10 h-36 w-48 rounded-xl bg-white object-contain p-2 shadow-[0_0_30px_rgba(34,211,238,.25)]" />
       )}
