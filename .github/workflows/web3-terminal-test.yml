@@ -3,6 +3,9 @@ on:
   push:
     branches:
       - feature/web3-terminal-test
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 jobs:
   validate:
