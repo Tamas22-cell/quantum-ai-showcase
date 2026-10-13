@@ -101,7 +101,9 @@ export function LanguageSelector() {
         if (!originals) { originals = new Map(); originalAttrs.set(el, originals); }
         for (const attr of ["placeholder", "title", "aria-label", "alt"]) {
           if (!el.hasAttribute(attr)) continue;
-          if (!originals.has(attr)) originals.set(attr, el.getAttribute(attr) ?? "");
+          const currentAttr = el.getAttribute(attr) ?? "";
+          const cachedAttr = originals.get(attr);
+          if (cachedAttr === undefined || (currentAttr !== cachedAttr && !Object.values(dictionary).some(d => Object.entries(d).some(([key, value]) => currentAttr.trim() === value || currentAttr.trim() === key)))) originals.set(attr, currentAttr);
           const original = originals.get(attr) ?? "";
           const key = original.trim();
           const translated = dictionary[language][key];
@@ -111,8 +113,8 @@ export function LanguageSelector() {
       });
     };
     translate();
-    const observer = new MutationObserver(() => { observer.disconnect(); translate(); observer.observe(document.body, {childList:true,subtree:true,characterData:true}); });
-    observer.observe(document.body, {childList:true,subtree:true,characterData:true});
+    const observer = new MutationObserver(() => { observer.disconnect(); translate(); observer.observe(document.body, {childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:["placeholder","title","aria-label","alt"]}); });
+    observer.observe(document.body, {childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:["placeholder","title","aria-label","alt"]});
     return () => observer.disconnect();
   }, [language]);
   return (
