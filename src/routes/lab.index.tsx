@@ -11,6 +11,7 @@ import {
 } from "@/components/lab/applied-ai-labs";
 import { DeepLearningLab } from "@/components/lab/deep-learning-lab";
 import { LabShell } from "@/components/lab/lab-shell";
+import { DrugDiscoveryLab } from "@/components/lab/drug-discovery-lab";
 import { QuantumFutureRoadmap } from "@/components/lab/quantum-future-roadmap";
 import { SystemHealthPanel } from "@/components/lab/system-health-panel";
 import { LAB_MODULES } from "@/components/lab/lab-modules";
@@ -71,6 +72,8 @@ function LabDashboard() {
       </div>
 
       <QuantumFutureRoadmap />
+
+      <DrugDiscoveryLab />
 
       <SystemHealthPanel />
 
