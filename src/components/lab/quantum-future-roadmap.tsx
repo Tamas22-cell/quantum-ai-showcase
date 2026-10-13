@@ -111,6 +111,22 @@ export function QuantumFutureRoadmap() {
               </button>
             ))}
           </div>
+          <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {[
+              {label:"H₂ molecule",metric:"2 atoms",detail:"VQE ground-state energy · Hartree",href:"/lab/vqe-molecular-chemistry"},
+              {label:"Molecular modelling",metric:"Research",detail:"VQE energy and exact reference",href:"/lab/vqe"},
+              {label:"QML classifier",metric:"Accuracy",detail:"Quantum vs classical baseline",href:"/lab/qml"},
+              {label:"Portfolio model",metric:"Risk / Return",detail:"QUBO asset selection · synthetic data",href:"/lab/portfolio"}
+            ].map((entry,i)=>(
+              <div key={entry.label} className="rounded-xl border border-white/10 bg-slate-950/70 p-3">
+                <p className="text-[10px] uppercase tracking-wide text-slate-400">{entry.label}</p>
+                <p className="mt-2 text-base font-bold" style={{color:["#38bdf8","#c084fc","#2dd4bf","#fbbf24"][i]}}>{entry.metric}</p>
+                <p className="mt-1 min-h-10 text-xs leading-5 text-slate-400">{entry.detail}</p>
+                <a href={entry.href} className="mt-2 inline-block text-xs font-semibold text-cyan-300 underline underline-offset-4 hover:text-white">Open research data ↗</a>
+              </div>
+            ))}
+          </div>
+          <p className="mt-2 text-xs text-slate-400">Research indicators, not live measurements. Open each lab for calculated results and methodology.</p>
           {application!==null&&<div aria-live="polite" className="mt-3 rounded-xl border border-cyan-400/20 bg-slate-950/80 p-4">
             <h4 className="font-semibold text-cyan-200">{["Chemistry","Drug Discovery","AI & Machine Learning","Quantum Finance"][application]}</h4>
             <p className="mt-2 text-sm leading-6 text-slate-300">{[
