@@ -53,7 +53,15 @@ export function QuantumFutureRoadmap() {
             const Icon = stage.icon;
             return <button type="button" key={stage.title} onClick={() => setActive(i)} aria-pressed={active === i} className="group relative min-h-52 rounded-xl border p-4 text-left transition-all duration-300 hover:-translate-y-2 hover:scale-[1.02] focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-300" style={{borderColor:active===i?stage.color:"#334155",background:active===i?"#10233a":"#0b1428",boxShadow:active===i?`0 0 28px ${stage.color}33`:"none"}}>
               <span className="text-xs font-mono" style={{color:stage.color}}>{stage.period}</span>
-              <div className="my-5 flex h-16 items-center justify-center rounded-lg bg-slate-950/70"><Icon size={45} strokeWidth={1.3} style={{color:stage.color,filter:`drop-shadow(0 0 12px ${stage.color})`}} className="motion-safe:animate-pulse transition-transform duration-500 group-hover:scale-125 group-hover:rotate-12" /></div>
+              <div className="relative my-5 flex h-28 items-center justify-center overflow-hidden rounded-lg border border-white/10 bg-slate-950/80">
+                <div className="absolute h-20 w-20 rounded-full border opacity-60 motion-safe:animate-[spin_12s_linear_infinite]" style={{borderColor:stage.color}} />
+                <div className="absolute h-10 w-24 rounded-[50%] border opacity-70 motion-safe:animate-pulse" style={{borderColor:stage.color,transform:"rotate(-30deg)"}} />
+                {i === 0 && <div className="absolute bottom-3 flex gap-2">{[0,1,2,3,4].map(n=><span key={n} className="h-9 w-2 rounded-b-full bg-gradient-to-b from-amber-200 to-amber-700" style={{height:(24+n%2*12)+"px"}} />)}</div>}
+                {i === 1 && <div className="absolute inset-0 flex items-center justify-center gap-2">{[0,1,2].map(n=><span key={n} className="h-5 w-5 rounded-full border-2 motion-safe:animate-pulse" style={{borderColor:stage.color,animationDelay:(n*.4)+"s",boxShadow:"0 0 14px "+stage.color}} />)}</div>}
+                {i === 2 && <svg viewBox="0 0 120 80" className="absolute h-20 w-28" fill="none" stroke={stage.color} strokeWidth="2"><path d="M20 20L60 10L100 25L95 65L55 70L15 55Z M20 20L55 70 M60 10L95 65 M100 25L15 55" opacity=".65"/>{[[20,20],[60,10],[100,25],[95,65],[55,70],[15,55]].map(([x,y],n)=><circle key={n} cx={x} cy={y} r="5" fill={stage.color} className="motion-safe:animate-pulse" />)}</svg>}
+                {i === 3 && <svg viewBox="0 0 120 80" className="absolute h-20 w-28" fill="none" stroke={stage.color} strokeWidth="2.5"><path d="M8 65L30 55L48 60L70 32L85 40L112 10" strokeLinecap="round" strokeLinejoin="round"/><path d="M102 10H112V20" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                <Icon size={i===0?25:19} strokeWidth={1.5} style={{color:stage.color,filter:"drop-shadow(0 0 10px "+stage.color+")"}} className="absolute right-2 top-2 motion-safe:animate-pulse" />
+              </div>
               <strong className="block text-base">{stage.title}</strong>
               <span className="mt-2 block text-xs text-slate-400">{stage.topics.join(" · ")}</span>
             </button>;
