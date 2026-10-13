@@ -363,21 +363,6 @@ export function PortfolioSite() {
       <AIResearchAssistant />
 
       <main id="main">
-        <div className="border-b border-cyan-500/30 bg-slate-950 px-5 py-5 sm:px-8">
-          <div className="mx-auto flex max-w-7xl flex-col gap-3 rounded-xl border border-cyan-400/40 bg-cyan-500/10 p-5 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="font-mono text-xs font-semibold uppercase tracking-widest text-cyan-300">Live market research</p>
-              <h2 className="mt-1 text-xl font-semibold text-white">Web3 Market Terminal</h2>
-              <p className="mt-1 text-sm text-slate-300">BTC / ETH / SOL · Candlestick chart · RSI · MACD · Bollinger Bands · Volume</p>
-            </div>
-            <Link
-              to="/web3-terminal"
-              className="inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-lg bg-cyan-400 px-5 py-3 font-semibold text-slate-950 transition-colors hover:bg-cyan-300"
-            >
-              Open live chart <ArrowUpRight className="size-4" aria-hidden="true" />
-            </Link>
-          </div>
-        </div>
         {/* HERO */}
         <section
           id="top"
@@ -853,6 +838,17 @@ export function PortfolioSite() {
               copy="Live deployed research projects and production-ready portfolio showcases."
             />
             <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+              <article className="card-interactive group relative flex min-h-[26rem] flex-col rounded-md border border-cyan-500/50 bg-card p-6 sm:p-8">
+                <span className="font-mono text-xs text-primary">WEB3 / LIVE</span>
+                <h3 className="mt-12 text-2xl font-semibold tracking-tight">Web3 Market Terminal</h3>
+                <p className="mt-4 text-sm leading-7 text-muted-foreground">BTC, ETH és SOL élő piaci grafikonok, gyertyák, RSI, MACD, Bollinger-szalagok és forgalom.</p>
+                <div className="mt-auto pt-8">
+                  <Link to="/web3-terminal" className={`inline-flex min-h-10 items-center gap-2 rounded-sm border border-primary/40 bg-signal-soft px-4 py-2 font-mono text-xs uppercase text-primary hover:border-primary hover:bg-primary hover:text-primary-foreground ${focusRing}`}>
+                    <ArrowUpRight className="size-4" aria-hidden="true" /> Grafikon megnyitása
+                  </Link>
+                </div>
+              </article>
+
               {portfolio.projects.map((project, index) => {
                 const Icon = projectIcons[index] ?? Cpu;
                 return (
