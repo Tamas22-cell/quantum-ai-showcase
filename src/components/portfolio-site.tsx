@@ -1305,7 +1305,7 @@ export function PortfolioSite() {
             <SectionHeading
               index="04"
               title="Certifications"
-              copy="This section is reserved for verified credentials. No certification claims are displayed until details are supplied."
+              copy="Verified certificates from university and professional courses, with links to their official credentials."
             />
             <div className="grid gap-4 md:grid-cols-2">
               {portfolio.certifications.map((item, index) => {
