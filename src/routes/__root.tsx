@@ -93,13 +93,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:url", content: "https://quantum-ai-showcase.vercel.app/" },
       {
         property: "og:image",
-        content: "https://quantum-ai-showcase.vercel.app/quantum-ai-lab-social.jpg",
+        content: "https://quantum-ai-showcase.vercel.app/quantum-ai-lab-social.png",
       },
       {
         property: "og:image:secure_url",
-        content: "https://quantum-ai-showcase.vercel.app/quantum-ai-lab-social.jpg",
+        content: "https://quantum-ai-showcase.vercel.app/quantum-ai-lab-social.png",
       },
-      { property: "og:image:type", content: "image/jpeg" },
+      { property: "og:image:type", content: "image/png" },
       { property: "og:image:width", content: "600" },
       { property: "og:image:height", content: "314" },
       {
@@ -115,7 +115,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       {
         name: "twitter:image",
-        content: "https://quantum-ai-showcase.vercel.app/quantum-ai-lab-social.jpg",
+        content: "https://quantum-ai-showcase.vercel.app/quantum-ai-lab-social.png",
       },
     ],
     links: [
