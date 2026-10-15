@@ -1,5 +1,8 @@
 # Roadmap
 
+- [ ] Add D-Wave Quantum Finance Research Engine page, supplied-data charts, research navigation and accessible controls.
+- [ ] Verify finance dashboard tests, desktop/mobile preview and automatic checks; preserve configuration and production.
+
 - [x] Portfolio site, design system, verified LinkedIn/GitHub links (unpublished).
 - [x] Shared quantum engine (`src/lib/quantum`) + tests.
 - [x] Research Lab dashboard (/lab): Core labs + Research Command Center groups, honest status.

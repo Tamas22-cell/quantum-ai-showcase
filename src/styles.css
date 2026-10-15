@@ -38,6 +38,7 @@
   --color-emerald-soft: var(--emerald-soft);
   --color-amber: var(--amber);
   --color-rose: var(--rose);
+  --color-research-violet: var(--research-violet);
 }
 
 :root {
@@ -70,6 +71,7 @@
   --emerald-soft: oklch(0.8 0.16 160 / 0.12);
   --amber: oklch(0.82 0.15 80);
   --rose: oklch(0.72 0.17 15);
+  --research-violet: oklch(0.75 0.15 300);
   --shadow-signal: 0 0 32px oklch(0.82 0.145 192 / 0.16);
 }
 
@@ -152,6 +154,17 @@ body {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* Finance plots animate presentation only; the reference values stay unchanged. */
+.finance-animate .finance-bar {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: finance-bar-reveal 650ms ease-out both;
+}
+@keyframes finance-bar-reveal {
+  from { opacity: 0; transform: scaleY(0.05); }
+  to { opacity: 1; transform: scaleY(1); }
 }
 
 @keyframes signal-pulse {
