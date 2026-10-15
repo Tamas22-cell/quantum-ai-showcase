@@ -49,6 +49,45 @@ function AnimatedAnnealingNetwork({ running }: { running: boolean }) {
   </section>;
 }
 
+type ShowcaseView = "annealing" | "portfolio" | "risk" | "research";
+
+function LiveQuantumShowcase({ running }: { running: boolean }) {
+  const [view, setView] = useState<ShowcaseView>("annealing");
+  const [selectedStrategy, setSelectedStrategy] = useState(0);
+  const views: { id: ShowcaseView; title: string; subtitle: string }[] = [
+    { id: "annealing", title: "Quantum Annealing", subtitle: "Conceptual optimization network" },
+    { id: "portfolio", title: "Portfolio Optimization", subtitle: "Reported asset allocations" },
+    { id: "risk", title: "Risk Analysis", subtitle: "Reported strategy risk comparison" },
+    { id: "research", title: "Financial Research", subtitle: "Historical reference performance" },
+  ];
+  const points = Array.from({ length: 16 }, (_, i) => {
+    const a = i * Math.PI / 8;
+    return { x: 240 + Math.cos(a) * 146, y: 165 + Math.sin(a) * 124 };
+  });
+  const active = views.find(v => v.id === view)!;
+  return <section className="relative mt-8 overflow-hidden rounded-2xl border border-cyan-400/40 bg-[#030e20] text-slate-100 shadow-[0_0_55px_rgba(6,182,212,.16)]" aria-label="Interactive D-Wave quantum finance showcase">
+    <div aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-30" style={{ backgroundImage: "radial-gradient(ellipse at 50% 40%,rgba(8,145,178,.45),transparent 58%),linear-gradient(rgba(34,211,238,.1) 1px,transparent 1px),linear-gradient(90deg,rgba(34,211,238,.1) 1px,transparent 1px)", backgroundSize: "auto,38px 38px,38px 38px" }} />
+    <div className="relative z-10 border-b border-cyan-400/20 p-5 sm:p-7">
+      <div className="flex flex-wrap items-center justify-between gap-3"><div><p className="font-mono text-[10px] uppercase tracking-[.25em] text-cyan-400">Interactive research dashboard · Offline reference</p><h2 className="mt-2 text-2xl font-bold tracking-tight text-white sm:text-3xl">D-WAVE <span className="text-cyan-300">QUANTUM FINANCE</span></h2><p className="mt-2 text-xs text-slate-400">Explore the research panels — click any mode below</p></div><span className="rounded-full border border-cyan-400/40 bg-cyan-400/10 px-3 py-2 font-mono text-[10px] text-cyan-200">{running ? "● VISUALS ACTIVE" : "Ⅱ VISUALS PAUSED"}</span></div>
+      <div className="mt-6 grid grid-cols-2 gap-2 lg:grid-cols-4" role="tablist" aria-label="Quantum finance visualization modes">
+        {views.map(item => <button type="button" key={item.id} role="tab" aria-selected={view === item.id} onClick={() => setView(item.id)} className={`rounded-lg border px-3 py-3 text-left text-xs font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300 ${view === item.id ? "border-cyan-300 bg-cyan-400/20 text-cyan-100 shadow-[0_0_20px_rgba(34,211,238,.2)]" : "border-cyan-400/20 bg-slate-950/50 text-slate-300 hover:border-cyan-400/70 hover:bg-cyan-400/10"}`}>{item.title}<span className="mt-1 block text-[10px] font-normal text-slate-400">{item.subtitle}</span></button>)}
+      </div>
+    </div>
+    <div className="relative z-10 min-h-[360px] p-4 sm:p-7" role="tabpanel">
+      {view === "annealing" && <div className="grid items-center gap-4 lg:grid-cols-[1fr_210px]"><svg viewBox="0 0 480 330" className="mx-auto w-full max-w-3xl drop-shadow-[0_0_24px_rgba(34,211,238,.4)]" role="img" aria-label="Animated conceptual quantum optimization graph">
+        <defs><radialGradient id="showcase-glow"><stop stopColor="#22d3ee" stopOpacity=".28"/><stop offset="1" stopColor="#22d3ee" stopOpacity="0"/></radialGradient></defs>
+        <circle cx="240" cy="165" r="155" fill="url(#showcase-glow)" />
+        {points.map((p, i) => <g key={i}><line x1={p.x} y1={p.y} x2={points[(i + 5) % points.length].x} y2={points[(i + 5) % points.length].y} stroke="#22d3ee" strokeWidth="1.1" opacity=".55" /><line x1={p.x} y1={p.y} x2="240" y2="165" stroke="#a78bfa" strokeWidth=".8" opacity=".4" /><circle cx={p.x} cy={p.y} r="4" fill="#a5f3fc">{running && <animate attributeName="opacity" values=".35;1;.35" dur={`${1.2 + i % 5 * .25}s`} repeatCount="indefinite" />}</circle></g>)}
+        <circle cx="240" cy="165" r="14" fill="#cffafe" /><circle cx="240" cy="165" r="29" fill="none" stroke="#22d3ee" strokeWidth="2" strokeDasharray="5 8" className={running ? "motion-safe:animate-spin" : ""} style={{ transformOrigin: "240px 165px" }} />
+      </svg><div className="grid grid-cols-2 gap-3 lg:grid-cols-1">{[["16","Visual nodes"],["2","Connection types"],[running ? "ON" : "OFF","Animation"]].map(([value,label])=><div key={label} className="rounded-xl border border-cyan-400/25 bg-cyan-950/30 p-4"><p className="font-mono text-2xl font-bold text-cyan-200">{value}</p><p className="mt-1 text-xs text-slate-400">{label}</p></div>)}</div></div>}
+      {view === "portfolio" && <div><h3 className="text-lg font-semibold text-cyan-100">Portfolio allocation</h3><p className="mt-1 text-xs text-slate-400">Reported asset weights · 15 supplied assets · not attributed to a specific strategy</p><div className="mt-6 grid gap-x-7 gap-y-4 md:grid-cols-2">{ASSET_WEIGHTS.slice(0,10).map(asset => <div key={asset.symbol}><div className="mb-1 flex justify-between text-xs"><span className="font-mono text-cyan-100">{asset.symbol}</span><span className="font-mono text-slate-300">{asset.weight.toFixed(2)}%</span></div><div className="h-3 overflow-hidden rounded-full bg-cyan-950/70"><div className={`h-full rounded-full bg-gradient-to-r from-cyan-500 to-violet-400 ${running ? "transition-all duration-700" : ""}`} style={{ width: `${Math.min(asset.weight,100)}%` }} /></div></div>)}</div><p className="mt-6 text-xs text-slate-400">Shown on an absolute 0–100% allocation scale. The supplied list is incomplete.</p></div>}
+      {view === "risk" && <div><h3 className="text-lg font-semibold text-cyan-100">Risk comparison</h3><p className="mt-1 text-xs text-slate-400">Select a strategy to explore its supplied risk metrics</p><div className="mt-5 flex flex-wrap gap-2">{STRATEGIES.map((strategy,i)=><button type="button" key={strategy.id} onClick={()=>setSelectedStrategy(i)} aria-pressed={selectedStrategy===i} className={`rounded-lg border px-4 py-2 text-xs ${selectedStrategy===i?"border-cyan-300 bg-cyan-400/20 text-cyan-100":"border-slate-600 text-slate-300"}`}>{strategy.label}</button>)}</div><div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{METRICS.map(metric=><div key={metric.label} className="rounded-xl border border-cyan-400/20 bg-cyan-950/30 p-5"><p className="text-xs text-slate-400">{metric.label}</p><p className="mt-3 font-mono text-2xl text-cyan-200">{metric.values[selectedStrategy]?.toFixed(metric.digits)}{metric.unit}</p></div>)}</div></div>}
+      {view === "research" && <div><h3 className="text-lg font-semibold text-cyan-100">Annual return research</h3><p className="mt-1 text-xs text-slate-400">Reported historical annual returns · 2025 is year-to-date</p><div className="mt-6 grid gap-5">{ANNUAL_RETURNS.map(row=><div key={row.period} className="grid grid-cols-[65px_1fr] items-center gap-3"><span className="font-mono text-xs text-cyan-100">{row.period}</span><div className="space-y-2">{STRATEGIES.map((strategy,i)=>{const v=row.values[i]??0;return <div key={strategy.id} className="flex items-center gap-2"><span className="w-12 shrink-0 text-[10px] text-slate-400">{strategy.short}</span><div className="relative h-3 flex-1 rounded bg-slate-800"><div className={`h-3 rounded ${strategy.bar} ${running?"transition-all duration-700":""}`} style={{width:`${Math.min(Math.abs(v),100)}%`,opacity:v<0?.55:1}} /></div><span className="w-16 text-right font-mono text-[10px] text-slate-300">{v.toFixed(2)}%</span></div>})}</div></div>)}</div></div>}
+    </div>
+    <div className="relative z-10 border-t border-cyan-400/20 bg-slate-950/70 px-5 py-3 text-[11px] text-slate-400">Interactive visual exploration of user-supplied illustrative research figures. No live market feed, solver execution, or verified quantum advantage.</div>
+  </section>;
+}
+
 export function DwaveFinanceDashboard() {
   const [visible, setVisible] = useState<StrategyId[]>(STRATEGIES.map(s => s.id));
   const [metricOrder, setMetricOrder] = useState<string[]>(METRICS.map(m => m.label));
@@ -81,17 +120,7 @@ export function DwaveFinanceDashboard() {
       </dl>
     </header>
 
-    <section className="mt-8 overflow-hidden rounded-xl border border-cyan-400/30 bg-[#061126]" aria-label="D-Wave research visual concept">
-      <img
-        src="https://raw.githubusercontent.com/Tamas22-cell/quantum-ai-showcase/a69aef46841bdf8b6bcaa12dc60f279f7302ee5e/a17e2cec-4d93-49a6-bd06-6c663b1c857e.png"
-        alt="Futuristic D-Wave Quantum Finance dashboard concept with luminous cyan quantum network, market charts and quantum processor artwork"
-        loading="lazy"
-        className="block h-auto w-full"
-      />
-      <div className="border-t border-cyan-400/20 bg-slate-950/90 px-4 py-3 text-xs text-slate-300">
-        Quantum Finance visual concept · The interactive research metrics and animated network are below.
-      </div>
-    </section>
+    <LiveQuantumShowcase running={animated} />
     <AnimatedAnnealingNetwork running={animated} />
 
     <div className="my-6 flex flex-wrap items-center justify-between gap-4">
