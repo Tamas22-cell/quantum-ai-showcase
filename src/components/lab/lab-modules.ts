@@ -25,6 +25,7 @@ export type LabModule = {
     | "/lab/reports"
     | "/lab/ibm"
     | "/lab/finance"
+    | "/lab/finance/dwave"
     | "/lab/benchmark"
     | "/lab/history"
     | "/lab/snapshot"
@@ -37,6 +38,12 @@ export type LabModule = {
 };
 
 export const LAB_MODULES: LabModule[] = [
+  {
+    id: "dwave-finance", index: "C15", title: "D-Wave Quantum Finance Research Engine",
+    summary: "Interactive reference dashboard: user-provided illustrative backtest figures for simulated annealing, exact solver and equal weight. No live D-Wave output.",
+    topics: ["Illustrative figures", "Annual returns", "Portfolio weights", "Methodology"],
+    status: "available", to: "/lab/finance/dwave", group: "command",
+  },
   { id: "quantum-teleportation", index: "11", title: "Quantum Teleportation Simulator", summary: "Prepare a qubit and explore three-qubit Bell-pair teleportation, Alice measurement outcomes and Bob corrections with exact state fidelity.", topics: ["Bell pair", "3 qubits", "Classical bits", "Fidelity"], status: "available", to: "/lab/quantum-teleportation", group: "core" },
   { id: "quantum-interference", index: "12", title: "Quantum Interference Visualizer", summary: "Adjust the relative phase of an H–Rz–H circuit and see complex amplitudes interfere constructively or destructively.", topics: ["Phase", "Interference", "Amplitudes", "Born rule"], status: "available", to: "/lab/quantum-interference", group: "core" },
   {

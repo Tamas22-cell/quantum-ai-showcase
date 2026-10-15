@@ -88,9 +88,9 @@ export function LanguageSelector() {
           const original = cached === undefined || (current !== cached && !Object.values(dictionary).some(d => Object.entries(d).some(([key, translated]) => current.trim() === translated || current.trim() === key))) ? current : cached;
           originalText.set(el, original);
           const key = original.trim();
-          const exact = dictionary[language][key];
-          const upperKey = Object.keys(dictionary[language]).find(k => k.toUpperCase() === key.toUpperCase());
-          const translation = exact ?? (upperKey ? (key === key.toUpperCase() ? dictionary[language][upperKey].toUpperCase() : dictionary[language][upperKey]) : undefined);
+          const exact = dictionary[language]?.[key];
+          const upperKey = Object.keys(dictionary[language] ?? {}).find(k => k.toUpperCase() === key.toUpperCase());
+          const translation = exact ?? (upperKey ? (key === key.toUpperCase() ? dictionary[language]?.[upperKey].toUpperCase() : dictionary[language]?.[upperKey]) : undefined);
           const next = translation ? original.replace(key, translation) : original;
           if (el.textContent !== next) el.textContent = next;
         }
@@ -106,7 +106,7 @@ export function LanguageSelector() {
           if (cachedAttr === undefined || (currentAttr !== cachedAttr && !Object.values(dictionary).some(d => Object.entries(d).some(([key, value]) => currentAttr.trim() === value || currentAttr.trim() === key)))) originals.set(attr, currentAttr);
           const original = originals.get(attr) ?? "";
           const key = original.trim();
-          const translated = dictionary[language][key];
+          const translated = dictionary[language]?.[key];
           const next = translated ? original.replace(key, translated) : original;
           if (el.getAttribute(attr) !== next) el.setAttribute(attr, next);
         }

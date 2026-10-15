@@ -25,18 +25,18 @@ export const getMiningPools = createServerFn({ method: "GET" }).handler(
       .map((item) => {
         const p = item && typeof item === "object" ? (item as Record<string, unknown>) : {};
         return {
-          name: String(p.name ?? p.poolName ?? p.slug ?? "Unknown pool"),
-          blocks: Number(p.blockCount ?? p.blocksFound ?? p.blocks ?? 0),
+          name: String(p['name'] ?? p['poolName'] ?? p['slug'] ?? "Unknown pool"),
+          blocks: Number(p['blockCount'] ?? p['blocksFound'] ?? p['blocks'] ?? 0),
         };
       })
-      .filter((p) => Number.isFinite(p.blocks) && p.blocks > 0);
+      .filter((p) => Number.isFinite(p['blocks']) && p['blocks'] > 0);
 
-    const totalBlocks = normalized.reduce((sum, p) => sum + p.blocks, 0);
+    const totalBlocks = normalized.reduce((sum, p) => sum + p['blocks'], 0);
 
     return normalized
       .map((p) => ({
         ...p,
-        share: totalBlocks > 0 ? (p.blocks / totalBlocks) * 100 : 0,
+        share: totalBlocks > 0 ? (p['blocks'] / totalBlocks) * 100 : 0,
       }))
       .sort((a, b) => b.blocks - a.blocks)
       .slice(0, 8);

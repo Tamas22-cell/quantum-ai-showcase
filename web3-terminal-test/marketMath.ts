@@ -42,7 +42,7 @@ export function ema(values: number[], period: number): (number | null)[] {
   const k = 2 / (period+1);
   return values.map((v,i) => {
     if (i < period-1) return null;
-    previous = previous === null ? seed[i]! : v*k + previous*(1-k);
+    previous = previous === null ? (seed[i] ?? 0) : v*k + previous*(1-k);
     return previous;
   });
 }
@@ -68,12 +68,12 @@ export function macd(values: number[], fast=12, slow=26, signal=9) {
   if (!(Number.isInteger(fast)&&Number.isInteger(slow)&&Number.isInteger(signal)&&fast>0&&slow>fast&&signal>0))
     throw new Error('INVALID_PERIOD');
   const a=ema(values,fast),b=ema(values,slow);
-  const line=a.map((v,i)=>v===null||b[i]===null ? null : v-b[i]!);
+  const line=a.map((v,i)=>v===null||b[i]===null ? null : v-(b[i] ?? 0));
   const valid=line.filter((v):v is number=>v!==null);
   const sig=ema(valid,signal);
   let j=0;
-  const signalLine=line.map(v=>v===null ? null : sig[j++]);
-  const histogram=line.map((v,i)=>v===null||signalLine[i]===null ? null : v-signalLine[i]!);
+  const signalLine=line.map(v=>v===null ? null : sig[j++] ?? null);
+  const histogram=line.map((v,i)=>v===null||signalLine[i]===null ? null : v-(signalLine[i] ?? 0));
   return {line,signal:signalLine,histogram};
 }
 export function fibonacci(a: number,b: number) {
