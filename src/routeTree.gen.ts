@@ -50,6 +50,7 @@ import { Route as LabAiRagRouteImport } from './routes/lab.ai.rag'
 import { Route as LabAiReinforcementLearningRouteImport } from './routes/lab.ai.reinforcement-learning'
 import { Route as LabAiTimeSeriesRouteImport } from './routes/lab.ai.time-series'
 import { Route as LabFinanceIndexRouteImport } from './routes/lab.finance.index'
+import { Route as LabFinanceDwaveRouteImport } from './routes/lab.finance.dwave'
 import { Route as LabFinanceMarketDataStructureRouteImport } from './routes/lab.finance.market-data-structure'
 import { Route as LabFinanceQuantumMarketRegimeRouteImport } from './routes/lab.finance.quantum-market-regime'
 import { Route as LabFinanceStressRouteImport } from './routes/lab.finance.stress'
@@ -263,6 +264,11 @@ const LabFinanceIndexRoute = LabFinanceIndexRouteImport.update({
   path: '/lab/finance/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LabFinanceDwaveRoute = LabFinanceDwaveRouteImport.update({
+  id: '/lab/finance/dwave',
+  path: '/lab/finance/dwave',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LabFinanceMarketDataStructureRoute =
   LabFinanceMarketDataStructureRouteImport.update({
     id: '/lab/finance/market-data-structure',
@@ -327,6 +333,7 @@ export interface FileRoutesByFullPath {
   '/lab/ai/rag': typeof LabAiRagRoute
   '/lab/ai/reinforcement-learning': typeof LabAiReinforcementLearningRoute
   '/lab/ai/time-series': typeof LabAiTimeSeriesRoute
+  '/lab/finance/dwave': typeof LabFinanceDwaveRoute
   '/lab/finance/market-data-structure': typeof LabFinanceMarketDataStructureRoute
   '/lab/finance/quantum-market-regime': typeof LabFinanceQuantumMarketRegimeRoute
   '/lab/finance/stress': typeof LabFinanceStressRoute
@@ -373,6 +380,7 @@ export interface FileRoutesByTo {
   '/lab/ai/rag': typeof LabAiRagRoute
   '/lab/ai/reinforcement-learning': typeof LabAiReinforcementLearningRoute
   '/lab/ai/time-series': typeof LabAiTimeSeriesRoute
+  '/lab/finance/dwave': typeof LabFinanceDwaveRoute
   '/lab/finance/market-data-structure': typeof LabFinanceMarketDataStructureRoute
   '/lab/finance/quantum-market-regime': typeof LabFinanceQuantumMarketRegimeRoute
   '/lab/finance/stress': typeof LabFinanceStressRoute
@@ -421,6 +429,7 @@ export interface FileRoutesById {
   '/lab/ai/rag': typeof LabAiRagRoute
   '/lab/ai/reinforcement-learning': typeof LabAiReinforcementLearningRoute
   '/lab/ai/time-series': typeof LabAiTimeSeriesRoute
+  '/lab/finance/dwave': typeof LabFinanceDwaveRoute
   '/lab/finance/market-data-structure': typeof LabFinanceMarketDataStructureRoute
   '/lab/finance/quantum-market-regime': typeof LabFinanceQuantumMarketRegimeRoute
   '/lab/finance/stress': typeof LabFinanceStressRoute
@@ -470,6 +479,7 @@ export interface FileRouteTypes {
     | '/lab/ai/rag'
     | '/lab/ai/reinforcement-learning'
     | '/lab/ai/time-series'
+    | '/lab/finance/dwave'
     | '/lab/finance/market-data-structure'
     | '/lab/finance/quantum-market-regime'
     | '/lab/finance/stress'
@@ -516,6 +526,7 @@ export interface FileRouteTypes {
     | '/lab/ai/rag'
     | '/lab/ai/reinforcement-learning'
     | '/lab/ai/time-series'
+    | '/lab/finance/dwave'
     | '/lab/finance/market-data-structure'
     | '/lab/finance/quantum-market-regime'
     | '/lab/finance/stress'
@@ -563,6 +574,7 @@ export interface FileRouteTypes {
     | '/lab/ai/rag'
     | '/lab/ai/reinforcement-learning'
     | '/lab/ai/time-series'
+    | '/lab/finance/dwave'
     | '/lab/finance/market-data-structure'
     | '/lab/finance/quantum-market-regime'
     | '/lab/finance/stress'
@@ -602,6 +614,7 @@ export interface RootRouteChildren {
   LabVqeMolecularChemistryRoute: typeof LabVqeMolecularChemistryRoute
   LabWeb3SolidityRoute: typeof LabWeb3SolidityRoute
   LabIndexRoute: typeof LabIndexRoute
+  LabFinanceDwaveRoute: typeof LabFinanceDwaveRoute
   LabFinanceMarketDataStructureRoute: typeof LabFinanceMarketDataStructureRoute
   LabFinanceQuantumMarketRegimeRoute: typeof LabFinanceQuantumMarketRegimeRoute
   LabFinanceStressRoute: typeof LabFinanceStressRoute
@@ -898,6 +911,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LabFinanceIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lab/finance/dwave': {
+      id: '/lab/finance/dwave'
+      path: '/lab/finance/dwave'
+      fullPath: '/lab/finance/dwave'
+      preLoaderRoute: typeof LabFinanceDwaveRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lab/finance/market-data-structure': {
       id: '/lab/finance/market-data-structure'
       path: '/lab/finance/market-data-structure'
@@ -988,6 +1008,7 @@ const rootRouteChildren: RootRouteChildren = {
   LabVqeMolecularChemistryRoute: LabVqeMolecularChemistryRoute,
   LabWeb3SolidityRoute: LabWeb3SolidityRoute,
   LabIndexRoute: LabIndexRoute,
+  LabFinanceDwaveRoute: LabFinanceDwaveRoute,
   LabFinanceMarketDataStructureRoute: LabFinanceMarketDataStructureRoute,
   LabFinanceQuantumMarketRegimeRoute: LabFinanceQuantumMarketRegimeRoute,
   LabFinanceStressRoute: LabFinanceStressRoute,
