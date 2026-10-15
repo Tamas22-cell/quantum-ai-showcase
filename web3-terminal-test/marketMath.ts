@@ -31,7 +31,7 @@ export function sma(values: number[], period: number): (number | null)[] {
   return values.map((v,i) => {
     if (!finite(v)) throw new Error('INVALID_VALUE');
     sum += v;
-    if (i >= period) sum -= values[i-period];
+    if (i >= period) sum -= values[i-period] ?? 0;
     return i >= period-1 ? sum / period : null;
   });
 }
@@ -52,12 +52,12 @@ export function rsi(values: number[], period=14): (number | null)[] {
   const out: (number|null)[] = values.map(() => null);
   if (values.length <= period) return out;
   let gain=0,loss=0;
-  for(let i=1;i<=period;i++){const d=values[i]-values[i-1];gain+=Math.max(d,0);loss+=Math.max(-d,0);}
+  for(let i=1;i<=period;i++){const d=(values[i] ?? 0)-(values[i-1] ?? 0);gain+=Math.max(d,0);loss+=Math.max(-d,0);}
   gain/=period; loss/=period;
   const calc=()=>loss===0 ? (gain===0 ? 50 : 100) : 100-100/(1+gain/loss);
   out[period]=calc();
   for(let i=period+1;i<values.length;i++){
-    const d=values[i]-values[i-1];
+    const d=(values[i] ?? 0)-(values[i-1] ?? 0);
     gain=(gain*(period-1)+Math.max(d,0))/period;
     loss=(loss*(period-1)+Math.max(-d,0))/period;
     out[i]=calc();
@@ -92,11 +92,11 @@ export function bollinger(values:number[],period=20,multiplier=2) {
 export function atr(candles:Candle[],period=14):(number|null)[] {
   if(!Number.isInteger(period)||period<1) throw new Error('INVALID_PERIOD');
   const cs=validateCandles(candles);
-  const tr=cs.map((c,i)=>i===0?c.high-c.low:Math.max(c.high-c.low,Math.abs(c.high-cs[i-1].close),Math.abs(c.low-cs[i-1].close)));
+  const tr=cs.map((c,i)=>{const previous=cs[i-1];return !previous?c.high-c.low:Math.max(c.high-c.low,Math.abs(c.high-previous.close),Math.abs(c.low-previous.close));});
   const result:(number|null)[]=cs.map(()=>null);
   if(cs.length<period)return result;
   let avg=tr.slice(0,period).reduce((a,b)=>a+b,0)/period;
   result[period-1]=avg;
-  for(let i=period;i<cs.length;i++){avg=(avg*(period-1)+tr[i])/period;result[i]=avg}
+  for(let i=period;i<cs.length;i++){avg=(avg*(period-1)+(tr[i] ?? 0))/period;result[i]=avg}
   return result;
 }
