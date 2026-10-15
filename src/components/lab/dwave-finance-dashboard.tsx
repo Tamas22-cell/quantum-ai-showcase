@@ -4,6 +4,34 @@ import { Activity, ArrowLeft, ArrowUpRight, Check, ChevronDown, FlaskConical, Pa
 import { Button } from "@/components/ui/button";
 import { ANNUAL_RETURNS, ASSET_WEIGHTS, METRICS, STRATEGIES, STUDY_SCOPE, SUPPLIED_WEIGHT_TOTAL, type StrategyId } from "@/lib/finance/dwave-reference";
 
+function AnimatedAnnealingNetwork({ running }: { running: boolean }) {
+  const nodes = Array.from({ length: 18 }, (_, i) => {
+    const angle = (i / 18) * Math.PI * 2;
+    return { x: 160 + Math.cos(angle) * 112, y: 145 + Math.sin(angle) * 103 };
+  });
+  return <section className="mt-8 overflow-hidden rounded-xl border border-primary/30 bg-[#081329] p-4 sm:p-6" aria-label="Animated quantum optimization network">
+    <div className="flex flex-wrap items-center justify-between gap-3">
+      <div><h2 className="flex items-center gap-2 text-base font-semibold text-cyan-200">Quantum Annealing Network</h2>
+        <p className="mt-1 text-xs text-slate-400">Interactive conceptual visualization of optimization connections</p></div>
+      <span className="rounded-full border border-cyan-400/30 px-3 py-1 font-mono text-[10px] text-cyan-200">{running ? "ANIMATION ACTIVE" : "ANIMATION PAUSED"}</span>
+    </div>
+    <svg viewBox="0 0 320 290" role="img" aria-label="Pulsing nodes and connected paths in a conceptual annealing network" className="mx-auto mt-2 h-64 w-full max-w-lg sm:h-80">
+      <defs><radialGradient id="annealing-bg"><stop stopColor="#0e7490" stopOpacity=".35"/><stop offset="1" stopColor="#0e7490" stopOpacity="0"/></radialGradient></defs>
+      <circle cx="160" cy="145" r="140" fill="url(#annealing-bg)" />
+      {nodes.map((node, i) => <g key={i}>
+        <line x1={node.x} y1={node.y} x2={nodes[(i + 5) % nodes.length].x} y2={nodes[(i + 5) % nodes.length].y} stroke="#22d3ee" strokeWidth=".8" opacity=".3" />
+        <line x1={node.x} y1={node.y} x2="160" y2="145" stroke="#a78bfa" strokeWidth=".6" opacity=".35" />
+        <circle cx={node.x} cy={node.y} r="3" fill="#67e8f9">
+          {running && <animate attributeName="opacity" values=".25;1;.25" dur={`${1.4 + (i % 5) * .3}s`} repeatCount="indefinite" />}
+        </circle>
+      </g>)}
+      <circle cx="160" cy="145" r="11" fill="#a78bfa" opacity=".9" />
+      <circle cx="160" cy="145" r="23" fill="none" stroke="#22d3ee" strokeWidth="1.5" strokeDasharray="4 6" className={running ? "motion-safe:animate-spin" : ""} style={{ transformOrigin: "160px 145px" }} />
+    </svg>
+    <p className="text-xs leading-5 text-slate-400">Visual demonstration only. Not a live D-Wave processor, hardware execution, or a verified quantum computation.</p>
+  </section>;
+}
+
 export function DwaveFinanceDashboard() {
   const [visible, setVisible] = useState<StrategyId[]>(STRATEGIES.map(s => s.id));
   const [tab, setTab] = useState<"overview" | "methodology">("overview");
@@ -32,6 +60,8 @@ export function DwaveFinanceDashboard() {
         {[[STUDY_SCOPE.assets, "Assets reported"], [STUDY_SCOPE.windows, "Walk-forward windows"], [STUDY_SCOPE.observations, "Observations reported"]].map(([value, label]) => <div key={label}><dt className="text-[10px] leading-5 text-muted-foreground sm:text-xs">{label}</dt><dd className="mt-1 font-mono text-2xl text-foreground">{value}</dd></div>)}
       </dl>
     </header>
+
+    <AnimatedAnnealingNetwork running={animated} />
 
     <div className="my-6 flex flex-wrap items-center justify-between gap-4">
       <div role="tablist" aria-label="Research views" className="flex gap-2">{(["overview", "methodology"] as const).map(value => <Button key={value} id={`finance-tab-${value}`} role="tab" aria-selected={tab === value} aria-controls="finance-view" variant={tab === value ? "secondary" : "ghost"} onClick={() => setTab(value)} className="capitalize">{value}</Button>)}</div>
