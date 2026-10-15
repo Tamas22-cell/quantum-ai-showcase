@@ -61,6 +61,17 @@ export function DwaveFinanceDashboard() {
       </dl>
     </header>
 
+    <section className="mt-8 overflow-hidden rounded-xl border border-cyan-400/30 bg-[#061126]" aria-label="D-Wave research visual concept">
+      <img
+        src="https://raw.githubusercontent.com/Tamas22-cell/quantum-ai-showcase/a69aef46841bdf8b6bcaa12dc60f279f7302ee5e/a17e2cec-4d93-49a6-bd06-6c663b1c857e.png"
+        alt="Futuristic D-Wave Quantum Finance dashboard concept with luminous cyan quantum network, market charts and quantum processor artwork"
+        loading="lazy"
+        className="block h-auto w-full"
+      />
+      <div className="border-t border-cyan-400/20 bg-slate-950/90 px-4 py-3 text-xs text-slate-300">
+        Quantum Finance visual concept · The interactive research metrics and animated network are below.
+      </div>
+    </section>
     <AnimatedAnnealingNetwork running={animated} />
 
     <div className="my-6 flex flex-wrap items-center justify-between gap-4">
