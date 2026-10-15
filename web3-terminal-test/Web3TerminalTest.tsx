@@ -49,14 +49,14 @@ function CandleChart({candles,flags,anchors,onAnchor,zoom,offset,onOffset}:{
   const closes=candles.map(c=>c.close);
   const bands=bollinger(closes);
   const overlays=[
-    {on:flags.sma50,values:sma(closes,50),color:'#fbbf24'},
-    {on:flags.sma200,values:sma(closes,200),color:'#c084fc'},
-    {on:flags.ema20,values:ema(closes,20),color:'#60a5fa'},
-    {on:flags.bb,values:bands.upper,color:'#f472b6'},
-    {on:flags.bb,values:bands.middle,color:'#f9a8d4'},
-    {on:flags.bb,values:bands.lower,color:'#f472b6'}
+    {on:flags['sma50'],values:sma(closes,50),color:'#fbbf24'},
+    {on:flags['sma200'],values:sma(closes,200),color:'#c084fc'},
+    {on:flags['ema20'],values:ema(closes,20),color:'#60a5fa'},
+    {on:flags['bb'],values:bands.upper,color:'#f472b6'},
+    {on:flags['bb'],values:bands.middle,color:'#f9a8d4'},
+    {on:flags['bb'],values:bands.lower,color:'#f472b6'}
   ];
-  const fib=flags.fib&&visible.length>1?fibonacci(...(anchors??[Math.min(...visible.map(c=>c.low)),Math.max(...visible.map(c=>c.high))])):[];
+  const fib=flags['fib']&&visible.length>1?fibonacci(...(anchors??[Math.min(...visible.map(c=>c.low)),Math.max(...visible.map(c=>c.high))])):[];
   const extra=overlays.filter(l=>l.on).flatMap(l=>l.values.slice(start,end).filter((v):v is number=>v!==null));
   const high=Math.max(...visible.map(c=>c.high),...extra,...fib.map(f=>f.price));
   const low=Math.min(...visible.map(c=>c.low),...extra,...fib.map(f=>f.price));
@@ -74,13 +74,13 @@ function CandleChart({candles,flags,anchors,onAnchor,zoom,offset,onOffset}:{
   return <div>
     <svg viewBox="0 0 690 360" role="img" aria-label="Interactive candlestick chart with volume and crosshair" style={{width:'100%',background:'#0f172a',borderRadius:12,touchAction:'pan-y'}}
       onPointerMove={move} onPointerLeave={()=>{setHover(null);setPointer(null)}}
-      onClick={e=>{if(!flags.fib)return;const rect=e.currentTarget.getBoundingClientRect();const py=(e.clientY-rect.top)/rect.height*360;if(py>=12&&py<=252)onAnchor(high-(py-12)/240*range)}}>
+      onClick={e=>{if(!flags['fib'])return;const rect=e.currentTarget.getBoundingClientRect();const py=(e.clientY-rect.top)/rect.height*360;if(py>=12&&py<=252)onAnchor(high-(py-12)/240*range)}}>
       {[0,.25,.5,.75,1].map(t=><g key={t}><line x1="35" x2="685" y1={12+t*240} y2={12+t*240} stroke="#334155" strokeDasharray="3 4"/><text x="1" y={15+t*240} fill="#cbd5e1" fontSize="10">{(high-t*range).toFixed(2)}</text></g>)}
-      {visible.map((c,i)=>{const color=c.close>=c.open?'#34d399':'#fb7185';return <g key={c.time}><line x1={x(i)} x2={x(i)} y1={y(c.high)} y2={y(c.low)} stroke={color}/><rect x={x(i)-width/2} y={Math.min(y(c.open),y(c.close))} width={width} height={Math.max(1,Math.abs(y(c.open)-y(c.close)))} fill={color}/>{flags.volume&&<rect x={x(i)-width/2} y={338-c.volume/volumeMax*65} width={width} height={c.volume/volumeMax*65} fill={color} opacity=".8"/>}</g>})}
+      {visible.map((c,i)=>{const color=c.close>=c.open?'#34d399':'#fb7185';return <g key={c.time}><line x1={x(i)} x2={x(i)} y1={y(c.high)} y2={y(c.low)} stroke={color}/><rect x={x(i)-width/2} y={Math.min(y(c.open),y(c.close))} width={width} height={Math.max(1,Math.abs(y(c.open)-y(c.close)))} fill={color}/>{flags['volume']&&<rect x={x(i)-width/2} y={338-c.volume/volumeMax*65} width={width} height={c.volume/volumeMax*65} fill={color} opacity=".8"/>}</g>})}
       {overlays.filter(l=>l.on).map((l,i)=><polyline key={i} points={l.values.slice(start,end).map((v,j)=>v===null?'':`${x(j)},${y(v)}`).filter(Boolean).join(' ')} fill="none" stroke={l.color} strokeWidth="1.8"/>)}
       {fib.map(f=><g key={f.level}><line x1="35" x2="685" y1={y(f.price)} y2={y(f.price)} stroke="#f0abfc" strokeDasharray="5 5"/><text x="620" y={y(f.price)-3} fill="#f0abfc" fontSize="10">{f.level}</text></g>)}
-      {flags.volume&&<text x="38" y="275" fill="#94a3b8" fontSize="11">VOLUME</text>}
-      {selected&&pointer&&<g pointerEvents="none"><line x1={x(hover!)} x2={x(hover!)} y1="10" y2="342" stroke="#e2e8f0" strokeDasharray="3 3"/><line x1="35" x2="685" y1={Math.min(252,Math.max(12,pointer.y))} y2={Math.min(252,Math.max(12,pointer.y))} stroke="#e2e8f0" strokeDasharray="3 3"/><rect x="40" y="3" width="340" height="21" fill="#020617" opacity=".9"/><text x="45" y="17" fill="#f8fafc" fontSize="11">{new Date(selected.time).toLocaleString()} O {selected.open.toFixed(2)} H {selected.high.toFixed(2)} L {selected.low.toFixed(2)} C {selected.close.toFixed(2)}</text></g>}
+      {flags['volume']&&<text x="38" y="275" fill="#94a3b8" fontSize="11">VOLUME</text>}
+      {selected&&pointer&&<g pointerEvents="none"><line x1={x(hover ?? 0)} x2={x(hover ?? 0)} y1="10" y2="342" stroke="#e2e8f0" strokeDasharray="3 3"/><line x1="35" x2="685" y1={Math.min(252,Math.max(12,pointer.y))} y2={Math.min(252,Math.max(12,pointer.y))} stroke="#e2e8f0" strokeDasharray="3 3"/><rect x="40" y="3" width="340" height="21" fill="#020617" opacity=".9"/><text x="45" y="17" fill="#f8fafc" fontSize="11">{new Date(selected.time).toLocaleString()} O {selected.open.toFixed(2)} H {selected.high.toFixed(2)} L {selected.low.toFixed(2)} C {selected.close.toFixed(2)}</text></g>}
     </svg>
     <div style={{display:'flex',gap:8,alignItems:'center',flexWrap:'wrap',marginTop:8}}>
       <button type="button" onClick={()=>onOffset(Math.min(candles.length-count,offset+Math.max(1,Math.floor(count/3))))}>← Older</button>
@@ -132,8 +132,8 @@ export default function Web3TerminalTest() {
       const outcomes=await Promise.allSettled(COINS.map(async c=>({coin:c,ticker:parseTicker(unwrap(await json(`${api}Ticker?pair=${PAIRS[c]}`,ctrl.signal)))})));
       if(ctrl.signal.aborted)return;
       const updated=Date.now();
-      setQuotes(prev=>{const next={...prev};outcomes.forEach((o,i)=>{if(o.status==='fulfilled')next[COINS[i]]={...o.value.ticker,updated};});return next;});
-      setErrors(prev=>{const next={...prev};outcomes.forEach((o,i)=>{next[COINS[i]]=o.status==='rejected'?'Quote unavailable':'';});return next;});
+      setQuotes(prev=>{const next={...prev};outcomes.forEach((o,i)=>{if(o.status==='fulfilled') { const coin=COINS[i]; if(coin) next[coin]={...o.value.ticker,updated}; }});return next;});
+      setErrors(prev=>{const next={...prev};outcomes.forEach((o,i)=>{const coin=COINS[i]; if(coin) next[coin]=o.status==='rejected'?'Quote unavailable':'';});return next;});
       setClock(updated);
     };
     void poll();const timer=setInterval(()=>void poll(),60_000);
@@ -169,7 +169,7 @@ export default function Web3TerminalTest() {
       {Object.entries(flags).map(([key,on])=><label key={key}><input type="checkbox" checked={on} onChange={()=>setFlag(key as keyof typeof flags)}/>{key.toUpperCase()}</label>)}
     </div>
     <div style={{display:'flex',gap:8,flexWrap:'wrap',marginBottom:12}}><button onClick={()=>setZoom(v=>Math.max(20,v-10))}>Zoom +</button><button onClick={()=>setZoom(v=>Math.min(90,v+10))}>Zoom −</button><button onClick={()=>setFullscreen(v=>!v)}>{fullscreen?'Exit full screen':'Full screen'}</button></div>
-    {flags.fib&&<div style={{marginBottom:12}}>Fibonacci: click two chart price levels, or enter prices manually. <input aria-label="First Fibonacci anchor" placeholder="Anchor A" type="number" min="0" step="any" value={anchorInput} onChange={e=>setAnchorInput(e.target.value)}/><input aria-label="Second Fibonacci anchor" placeholder="Anchor B" type="number" min="0" step="any" value={anchorEnd} onChange={e=>setAnchorEnd(e.target.value)}/><button onClick={()=>{setAnchors(null);setAnchorInput('');setAnchorEnd('')}}>Auto range</button></div>}
+    {flags['fib']&&<div style={{marginBottom:12}}>Fibonacci: click two chart price levels, or enter prices manually. <input aria-label="First Fibonacci anchor" placeholder="Anchor A" type="number" min="0" step="any" value={anchorInput} onChange={e=>setAnchorInput(e.target.value)}/><input aria-label="Second Fibonacci anchor" placeholder="Anchor B" type="number" min="0" step="any" value={anchorEnd} onChange={e=>setAnchorEnd(e.target.value)}/><button onClick={()=>{setAnchors(null);setAnchorInput('');setAnchorEnd('')}}>Auto range</button></div>}
     {market?<CandleChart candles={market.candles} flags={flags} anchors={manualAnchors??(anchors?.[0]===anchors?.[1]?null:anchors)} onAnchor={onAnchor} zoom={zoom} offset={offset} onOffset={setOffset}/>:<p role="status">{chartError||'Loading chart…'}</p>}
     {flags.rsi&&<IndicatorPanel title="RSI (14)" lines={[{values:rsiLine,color:'#fbbf24',label:'RSI'}]} bounds={[0,100]} guides={[30,50,70]}/>}
     {flags.macd&&<IndicatorPanel title="MACD (12, 26, 9)" lines={[{values:macdLines.line,color:'#60a5fa',label:'MACD'},{values:macdLines.signal,color:'#f97316',label:'Signal'},{values:macdLines.histogram,color:'#34d399',label:'Histogram'}]} guides={[0]}/>}

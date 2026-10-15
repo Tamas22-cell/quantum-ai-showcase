@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ExplainableAiLab } from "@/components/lab/applied-ai-labs";
 import { LabShell } from "@/components/lab/lab-shell";
-export const Route = createFileRoute("/lab/ai/explainable-ai")({ component: Page });
+export const Route = createFileRoute("/lab/ai/explainable-ai")({ head: () => ({ meta: [{ title: "Explainable AI Lab \u2014 Quantum AI Lab" }, { name: "description", content: "Interactive local explanations with transparent feature contributions and prediction-score changes." }, { property: "og:title", content: "Explainable AI Lab \u2014 Quantum AI Lab" }, { property: "og:description", content: "Interactive local explanations with transparent feature contributions and prediction-score changes." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }), component: Page });
 function Page() {
   return (
     <LabShell crumb="Explainable AI">

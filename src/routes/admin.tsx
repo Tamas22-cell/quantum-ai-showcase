@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { authConfigured, requireAdmin, supabase } from "../lib/site-auth";
 
-export const Route = createFileRoute("/admin")({ component: AdminPage });
+export const Route = createFileRoute("/admin")({ head: () => ({ meta: [{ title: "Quantum AI Lab \u00b7 Admin" }, { name: "description", content: "Quantum AI Lab administration and access management." }, { property: "og:title", content: "Quantum AI Lab \u00b7 Admin" }, { property: "og:description", content: "Quantum AI Lab administration and access management." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }), component: AdminPage });
 function AdminPage() {
   const [allowed, setAllowed] = useState(false);
   const [email, setEmail] = useState("");

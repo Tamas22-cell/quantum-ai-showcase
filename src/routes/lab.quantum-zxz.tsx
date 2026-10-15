@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { LabShell } from "@/components/lab/lab-shell";
 
 export const Route = createFileRoute("/lab/quantum-zxz")({
-  head: () => ({ meta: [{ title: "Interactive ZXZ Quantum Gate Simulator — Quantum AI Lab" }, { name: "description", content: "Interactive Bloch sphere with physically accurate one-qubit ZXZ gate rotations and Born-rule probabilities." }] }),
+  head: () => ({ meta: [{"property": "og:title", "content": "Interactive ZXZ Quantum Gate Simulator \u2014 Quantum AI Lab"}, {"property": "og:description", "content": "Interactive Bloch sphere with physically accurate one-qubit ZXZ gate rotations and Born-rule probabilities."}, {"property": "og:type", "content": "website"}, {"name": "twitter:card", "content": "summary"}, { title: "Interactive ZXZ Quantum Gate Simulator — Quantum AI Lab" }, { name: "description", content: "Interactive Bloch sphere with physically accurate one-qubit ZXZ gate rotations and Born-rule probabilities." }] }),
   component: ZXZLab,
 });
 

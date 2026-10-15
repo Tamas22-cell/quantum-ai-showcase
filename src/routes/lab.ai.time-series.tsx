@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { TimeSeriesLab } from "@/components/lab/applied-ai-labs";
 import { LabShell } from "@/components/lab/lab-shell";
-export const Route = createFileRoute("/lab/ai/time-series")({ component: Page });
+export const Route = createFileRoute("/lab/ai/time-series")({ head: () => ({ meta: [{ title: "Time-Series & Forecasting Lab \u2014 Quantum AI Lab" }, { name: "description", content: "Walk-forward style forecasting baseline with tunable windows, synthetic trend and error metrics." }, { property: "og:title", content: "Time-Series & Forecasting Lab \u2014 Quantum AI Lab" }, { property: "og:description", content: "Walk-forward style forecasting baseline with tunable windows, synthetic trend and error metrics." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }), component: Page });
 function Page() {
   return (
     <LabShell crumb="Time-Series">

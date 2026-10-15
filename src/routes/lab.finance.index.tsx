@@ -44,6 +44,12 @@ function Page() {
         </p>
         <div className="mt-4 grid gap-2 sm:grid-cols-2">
           <Link
+            to="/lab/finance/dwave"
+            className="inline-flex items-center gap-2 rounded-sm border border-primary/50 bg-signal-soft px-3 py-2 font-mono text-[11px] uppercase text-primary hover:bg-primary/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            D-Wave Quantum Finance Research Engine →
+          </Link>
+          <Link
             to="/lab/finance/stress"
             className="inline-flex items-center gap-2 rounded-sm border border-primary/50 bg-signal-soft px-3 py-2 font-mono text-[11px] uppercase text-primary hover:bg-primary/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >

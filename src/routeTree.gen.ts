@@ -10,6 +10,9 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AccountRouteImport } from './routes/account'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as Web3TerminalRouteImport } from './routes/web3-terminal'
 import { Route as LabIndexRouteImport } from './routes/lab.index'
 import { Route as LabAiRouteImport } from './routes/lab.ai'
 import { Route as LabArenaRouteImport } from './routes/lab.arena'
@@ -27,7 +30,10 @@ import { Route as LabQaoaRouteImport } from './routes/lab.qaoa'
 import { Route as LabQiskitRouteImport } from './routes/lab.qiskit'
 import { Route as LabQmlRouteImport } from './routes/lab.qml'
 import { Route as LabQuantumErrorCorrectionRouteImport } from './routes/lab.quantum-error-correction'
+import { Route as LabQuantumInterferenceRouteImport } from './routes/lab.quantum-interference'
 import { Route as LabQuantumNoiseFidelityRouteImport } from './routes/lab.quantum-noise-fidelity'
+import { Route as LabQuantumTeleportationRouteImport } from './routes/lab.quantum-teleportation'
+import { Route as LabQuantumZxzRouteImport } from './routes/lab.quantum-zxz'
 import { Route as LabReportsRouteImport } from './routes/lab.reports'
 import { Route as LabSnapshotRouteImport } from './routes/lab.snapshot'
 import { Route as LabVqeRouteImport } from './routes/lab.vqe'
@@ -44,6 +50,7 @@ import { Route as LabAiRagRouteImport } from './routes/lab.ai.rag'
 import { Route as LabAiReinforcementLearningRouteImport } from './routes/lab.ai.reinforcement-learning'
 import { Route as LabAiTimeSeriesRouteImport } from './routes/lab.ai.time-series'
 import { Route as LabFinanceIndexRouteImport } from './routes/lab.finance.index'
+import { Route as LabFinanceDwaveRouteImport } from './routes/lab.finance.dwave'
 import { Route as LabFinanceMarketDataStructureRouteImport } from './routes/lab.finance.market-data-structure'
 import { Route as LabFinanceQuantumMarketRegimeRouteImport } from './routes/lab.finance.quantum-market-regime'
 import { Route as LabFinanceStressRouteImport } from './routes/lab.finance.stress'
@@ -52,6 +59,21 @@ import { Route as LabFinanceVariationalRiskRouteImport } from './routes/lab.fina
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AccountRoute = AccountRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const Web3TerminalRoute = Web3TerminalRouteImport.update({
+  id: '/web3-terminal',
+  path: '/web3-terminal',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LabIndexRoute = LabIndexRouteImport.update({
@@ -140,9 +162,24 @@ const LabQuantumErrorCorrectionRoute =
     path: '/lab/quantum-error-correction',
     getParentRoute: () => rootRouteImport,
   } as any)
+const LabQuantumInterferenceRoute = LabQuantumInterferenceRouteImport.update({
+  id: '/lab/quantum-interference',
+  path: '/lab/quantum-interference',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LabQuantumNoiseFidelityRoute = LabQuantumNoiseFidelityRouteImport.update({
   id: '/lab/quantum-noise-fidelity',
   path: '/lab/quantum-noise-fidelity',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LabQuantumTeleportationRoute = LabQuantumTeleportationRouteImport.update({
+  id: '/lab/quantum-teleportation',
+  path: '/lab/quantum-teleportation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LabQuantumZxzRoute = LabQuantumZxzRouteImport.update({
+  id: '/lab/quantum-zxz',
+  path: '/lab/quantum-zxz',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LabReportsRoute = LabReportsRouteImport.update({
@@ -227,6 +264,11 @@ const LabFinanceIndexRoute = LabFinanceIndexRouteImport.update({
   path: '/lab/finance/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LabFinanceDwaveRoute = LabFinanceDwaveRouteImport.update({
+  id: '/lab/finance/dwave',
+  path: '/lab/finance/dwave',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LabFinanceMarketDataStructureRoute =
   LabFinanceMarketDataStructureRouteImport.update({
     id: '/lab/finance/market-data-structure',
@@ -253,6 +295,9 @@ const LabFinanceVariationalRiskRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/account': typeof AccountRoute
+  '/admin': typeof AdminRoute
+  '/web3-terminal': typeof Web3TerminalRoute
   '/lab/ai': typeof LabAiRouteWithChildren
   '/lab/arena': typeof LabArenaRoute
   '/lab/assistant': typeof LabAssistantRoute
@@ -269,7 +314,10 @@ export interface FileRoutesByFullPath {
   '/lab/qiskit': typeof LabQiskitRoute
   '/lab/qml': typeof LabQmlRoute
   '/lab/quantum-error-correction': typeof LabQuantumErrorCorrectionRoute
+  '/lab/quantum-interference': typeof LabQuantumInterferenceRoute
   '/lab/quantum-noise-fidelity': typeof LabQuantumNoiseFidelityRoute
+  '/lab/quantum-teleportation': typeof LabQuantumTeleportationRoute
+  '/lab/quantum-zxz': typeof LabQuantumZxzRoute
   '/lab/reports': typeof LabReportsRoute
   '/lab/snapshot': typeof LabSnapshotRoute
   '/lab/vqe': typeof LabVqeRoute
@@ -285,6 +333,7 @@ export interface FileRoutesByFullPath {
   '/lab/ai/rag': typeof LabAiRagRoute
   '/lab/ai/reinforcement-learning': typeof LabAiReinforcementLearningRoute
   '/lab/ai/time-series': typeof LabAiTimeSeriesRoute
+  '/lab/finance/dwave': typeof LabFinanceDwaveRoute
   '/lab/finance/market-data-structure': typeof LabFinanceMarketDataStructureRoute
   '/lab/finance/quantum-market-regime': typeof LabFinanceQuantumMarketRegimeRoute
   '/lab/finance/stress': typeof LabFinanceStressRoute
@@ -294,6 +343,9 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/account': typeof AccountRoute
+  '/admin': typeof AdminRoute
+  '/web3-terminal': typeof Web3TerminalRoute
   '/lab/arena': typeof LabArenaRoute
   '/lab/assistant': typeof LabAssistantRoute
   '/lab/benchmark': typeof LabBenchmarkRoute
@@ -309,7 +361,10 @@ export interface FileRoutesByTo {
   '/lab/qiskit': typeof LabQiskitRoute
   '/lab/qml': typeof LabQmlRoute
   '/lab/quantum-error-correction': typeof LabQuantumErrorCorrectionRoute
+  '/lab/quantum-interference': typeof LabQuantumInterferenceRoute
   '/lab/quantum-noise-fidelity': typeof LabQuantumNoiseFidelityRoute
+  '/lab/quantum-teleportation': typeof LabQuantumTeleportationRoute
+  '/lab/quantum-zxz': typeof LabQuantumZxzRoute
   '/lab/reports': typeof LabReportsRoute
   '/lab/snapshot': typeof LabSnapshotRoute
   '/lab/vqe': typeof LabVqeRoute
@@ -325,6 +380,7 @@ export interface FileRoutesByTo {
   '/lab/ai/rag': typeof LabAiRagRoute
   '/lab/ai/reinforcement-learning': typeof LabAiReinforcementLearningRoute
   '/lab/ai/time-series': typeof LabAiTimeSeriesRoute
+  '/lab/finance/dwave': typeof LabFinanceDwaveRoute
   '/lab/finance/market-data-structure': typeof LabFinanceMarketDataStructureRoute
   '/lab/finance/quantum-market-regime': typeof LabFinanceQuantumMarketRegimeRoute
   '/lab/finance/stress': typeof LabFinanceStressRoute
@@ -335,6 +391,9 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/account': typeof AccountRoute
+  '/admin': typeof AdminRoute
+  '/web3-terminal': typeof Web3TerminalRoute
   '/lab/ai': typeof LabAiRouteWithChildren
   '/lab/arena': typeof LabArenaRoute
   '/lab/assistant': typeof LabAssistantRoute
@@ -351,7 +410,10 @@ export interface FileRoutesById {
   '/lab/qiskit': typeof LabQiskitRoute
   '/lab/qml': typeof LabQmlRoute
   '/lab/quantum-error-correction': typeof LabQuantumErrorCorrectionRoute
+  '/lab/quantum-interference': typeof LabQuantumInterferenceRoute
   '/lab/quantum-noise-fidelity': typeof LabQuantumNoiseFidelityRoute
+  '/lab/quantum-teleportation': typeof LabQuantumTeleportationRoute
+  '/lab/quantum-zxz': typeof LabQuantumZxzRoute
   '/lab/reports': typeof LabReportsRoute
   '/lab/snapshot': typeof LabSnapshotRoute
   '/lab/vqe': typeof LabVqeRoute
@@ -367,6 +429,7 @@ export interface FileRoutesById {
   '/lab/ai/rag': typeof LabAiRagRoute
   '/lab/ai/reinforcement-learning': typeof LabAiReinforcementLearningRoute
   '/lab/ai/time-series': typeof LabAiTimeSeriesRoute
+  '/lab/finance/dwave': typeof LabFinanceDwaveRoute
   '/lab/finance/market-data-structure': typeof LabFinanceMarketDataStructureRoute
   '/lab/finance/quantum-market-regime': typeof LabFinanceQuantumMarketRegimeRoute
   '/lab/finance/stress': typeof LabFinanceStressRoute
@@ -378,6 +441,9 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/account'
+    | '/admin'
+    | '/web3-terminal'
     | '/lab/ai'
     | '/lab/arena'
     | '/lab/assistant'
@@ -394,7 +460,10 @@ export interface FileRouteTypes {
     | '/lab/qiskit'
     | '/lab/qml'
     | '/lab/quantum-error-correction'
+    | '/lab/quantum-interference'
     | '/lab/quantum-noise-fidelity'
+    | '/lab/quantum-teleportation'
+    | '/lab/quantum-zxz'
     | '/lab/reports'
     | '/lab/snapshot'
     | '/lab/vqe'
@@ -410,6 +479,7 @@ export interface FileRouteTypes {
     | '/lab/ai/rag'
     | '/lab/ai/reinforcement-learning'
     | '/lab/ai/time-series'
+    | '/lab/finance/dwave'
     | '/lab/finance/market-data-structure'
     | '/lab/finance/quantum-market-regime'
     | '/lab/finance/stress'
@@ -419,6 +489,9 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/account'
+    | '/admin'
+    | '/web3-terminal'
     | '/lab/arena'
     | '/lab/assistant'
     | '/lab/benchmark'
@@ -434,7 +507,10 @@ export interface FileRouteTypes {
     | '/lab/qiskit'
     | '/lab/qml'
     | '/lab/quantum-error-correction'
+    | '/lab/quantum-interference'
     | '/lab/quantum-noise-fidelity'
+    | '/lab/quantum-teleportation'
+    | '/lab/quantum-zxz'
     | '/lab/reports'
     | '/lab/snapshot'
     | '/lab/vqe'
@@ -450,6 +526,7 @@ export interface FileRouteTypes {
     | '/lab/ai/rag'
     | '/lab/ai/reinforcement-learning'
     | '/lab/ai/time-series'
+    | '/lab/finance/dwave'
     | '/lab/finance/market-data-structure'
     | '/lab/finance/quantum-market-regime'
     | '/lab/finance/stress'
@@ -459,6 +536,9 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/account'
+    | '/admin'
+    | '/web3-terminal'
     | '/lab/ai'
     | '/lab/arena'
     | '/lab/assistant'
@@ -475,7 +555,10 @@ export interface FileRouteTypes {
     | '/lab/qiskit'
     | '/lab/qml'
     | '/lab/quantum-error-correction'
+    | '/lab/quantum-interference'
     | '/lab/quantum-noise-fidelity'
+    | '/lab/quantum-teleportation'
+    | '/lab/quantum-zxz'
     | '/lab/reports'
     | '/lab/snapshot'
     | '/lab/vqe'
@@ -491,6 +574,7 @@ export interface FileRouteTypes {
     | '/lab/ai/rag'
     | '/lab/ai/reinforcement-learning'
     | '/lab/ai/time-series'
+    | '/lab/finance/dwave'
     | '/lab/finance/market-data-structure'
     | '/lab/finance/quantum-market-regime'
     | '/lab/finance/stress'
@@ -501,6 +585,9 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AccountRoute: typeof AccountRoute
+  AdminRoute: typeof AdminRoute
+  Web3TerminalRoute: typeof Web3TerminalRoute
   LabAiRoute: typeof LabAiRouteWithChildren
   LabArenaRoute: typeof LabArenaRoute
   LabAssistantRoute: typeof LabAssistantRoute
@@ -517,13 +604,17 @@ export interface RootRouteChildren {
   LabQiskitRoute: typeof LabQiskitRoute
   LabQmlRoute: typeof LabQmlRoute
   LabQuantumErrorCorrectionRoute: typeof LabQuantumErrorCorrectionRoute
+  LabQuantumInterferenceRoute: typeof LabQuantumInterferenceRoute
   LabQuantumNoiseFidelityRoute: typeof LabQuantumNoiseFidelityRoute
+  LabQuantumTeleportationRoute: typeof LabQuantumTeleportationRoute
+  LabQuantumZxzRoute: typeof LabQuantumZxzRoute
   LabReportsRoute: typeof LabReportsRoute
   LabSnapshotRoute: typeof LabSnapshotRoute
   LabVqeRoute: typeof LabVqeRoute
   LabVqeMolecularChemistryRoute: typeof LabVqeMolecularChemistryRoute
   LabWeb3SolidityRoute: typeof LabWeb3SolidityRoute
   LabIndexRoute: typeof LabIndexRoute
+  LabFinanceDwaveRoute: typeof LabFinanceDwaveRoute
   LabFinanceMarketDataStructureRoute: typeof LabFinanceMarketDataStructureRoute
   LabFinanceQuantumMarketRegimeRoute: typeof LabFinanceQuantumMarketRegimeRoute
   LabFinanceStressRoute: typeof LabFinanceStressRoute
@@ -538,6 +629,27 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/account': {
+      id: '/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof AccountRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/web3-terminal': {
+      id: '/web3-terminal'
+      path: '/web3-terminal'
+      fullPath: '/web3-terminal'
+      preLoaderRoute: typeof Web3TerminalRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/lab/': {
@@ -659,11 +771,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LabQuantumErrorCorrectionRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lab/quantum-interference': {
+      id: '/lab/quantum-interference'
+      path: '/lab/quantum-interference'
+      fullPath: '/lab/quantum-interference'
+      preLoaderRoute: typeof LabQuantumInterferenceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lab/quantum-noise-fidelity': {
       id: '/lab/quantum-noise-fidelity'
       path: '/lab/quantum-noise-fidelity'
       fullPath: '/lab/quantum-noise-fidelity'
       preLoaderRoute: typeof LabQuantumNoiseFidelityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lab/quantum-teleportation': {
+      id: '/lab/quantum-teleportation'
+      path: '/lab/quantum-teleportation'
+      fullPath: '/lab/quantum-teleportation'
+      preLoaderRoute: typeof LabQuantumTeleportationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lab/quantum-zxz': {
+      id: '/lab/quantum-zxz'
+      path: '/lab/quantum-zxz'
+      fullPath: '/lab/quantum-zxz'
+      preLoaderRoute: typeof LabQuantumZxzRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/lab/reports': {
@@ -778,6 +911,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LabFinanceIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lab/finance/dwave': {
+      id: '/lab/finance/dwave'
+      path: '/lab/finance/dwave'
+      fullPath: '/lab/finance/dwave'
+      preLoaderRoute: typeof LabFinanceDwaveRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lab/finance/market-data-structure': {
       id: '/lab/finance/market-data-structure'
       path: '/lab/finance/market-data-structure'
@@ -839,6 +979,9 @@ const LabAiRouteWithChildren = LabAiRoute._addFileChildren(LabAiRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AccountRoute: AccountRoute,
+  AdminRoute: AdminRoute,
+  Web3TerminalRoute: Web3TerminalRoute,
   LabAiRoute: LabAiRouteWithChildren,
   LabArenaRoute: LabArenaRoute,
   LabAssistantRoute: LabAssistantRoute,
@@ -855,13 +998,17 @@ const rootRouteChildren: RootRouteChildren = {
   LabQiskitRoute: LabQiskitRoute,
   LabQmlRoute: LabQmlRoute,
   LabQuantumErrorCorrectionRoute: LabQuantumErrorCorrectionRoute,
+  LabQuantumInterferenceRoute: LabQuantumInterferenceRoute,
   LabQuantumNoiseFidelityRoute: LabQuantumNoiseFidelityRoute,
+  LabQuantumTeleportationRoute: LabQuantumTeleportationRoute,
+  LabQuantumZxzRoute: LabQuantumZxzRoute,
   LabReportsRoute: LabReportsRoute,
   LabSnapshotRoute: LabSnapshotRoute,
   LabVqeRoute: LabVqeRoute,
   LabVqeMolecularChemistryRoute: LabVqeMolecularChemistryRoute,
   LabWeb3SolidityRoute: LabWeb3SolidityRoute,
   LabIndexRoute: LabIndexRoute,
+  LabFinanceDwaveRoute: LabFinanceDwaveRoute,
   LabFinanceMarketDataStructureRoute: LabFinanceMarketDataStructureRoute,
   LabFinanceQuantumMarketRegimeRoute: LabFinanceQuantumMarketRegimeRoute,
   LabFinanceStressRoute: LabFinanceStressRoute,

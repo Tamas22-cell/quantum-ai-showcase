@@ -49,9 +49,9 @@ export function MarketTechnicalCharts({ symbol, candles, mode = "live", onLiveCa
     if (series.length < 35) return null;
     const closes = series.map(c => c.close);
     const e12 = ema(closes, 12), e26 = ema(closes, 26);
-    const line = e12.map((value, i) => value - e26[i]);
+    const line = e12.map((value, i) => value - (e26[i] ?? 0));
     const signal = ema(line, 9);
-    return { line, signal, bars: line.map((value, i) => value - signal[i]) };
+    return { line, signal, bars: line.map((value, i) => value - (signal[i] ?? 0)) };
   }, [series]);
   const recent = series.slice(-windowSize);
   const low = recent.length ? Math.min(...recent.map(c => c.low)) : 0;
@@ -82,7 +82,7 @@ export function MarketTechnicalCharts({ symbol, candles, mode = "live", onLiveCa
           <button onClick={() => setWindowSize(v => Math.min(96, v + 12))} style={{ cursor: "pointer", borderRadius: 7, border: "1px solid #285472", padding: "7px 12px", color: "#e0f2fe", background: "#12263b" }}>Zoom −</button>
         </div>
         <p style={{ fontSize: 12, color: "#9aaac0" }}>{mode === "demo" ? "SIMULATED OHLC · NOT LIVE PRICES" : "Live Kraken OHLC"} · Green = rising · Red = falling · Hover for OHLC · Choose timeframe and zoom</p>
-        {mode === "live" && loaded.length > 0 && <p role="status" style={{ color: "#43e6bc", fontSize: 15, fontWeight: 700 }}>Latest {symbol}/USD: $ {display(loaded[loaded.length - 1].close)} · Kraken live OHLC</p>}
+        {mode === "live" && loaded.length > 0 && <p role="status" style={{ color: "#43e6bc", fontSize: 15, fontWeight: 700 }}>Latest {symbol}/USD: $ {display(loaded[loaded.length - 1]?.close ?? NaN)} · Kraken live OHLC</p>}
         {picked && <div style={{ display: "flex", gap: 16, flexWrap: "wrap", color: "#7dd3fc", fontSize: 12, marginBottom: 10 }}>
           <span>O: ${display(picked.open)}</span><span>H: ${display(picked.high)}</span><span>L: ${display(picked.low)}</span><span>C: ${display(picked.close)}</span>
         </div>}

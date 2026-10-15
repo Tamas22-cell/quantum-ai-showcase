@@ -20,7 +20,7 @@ import { NetworkHealthPanel } from "@/components/lab/network-health-panel";
 import { AiBlockchainAnalystPanel } from "@/components/lab/ai-blockchain-analyst-panel";
 export const Route = createFileRoute("/lab/crypto-intelligence")({
   head: () => ({
-    meta: [
+    meta: [{"property": "og:description", "content": "Independent crypto research workspace for Bitcoin network activity, on-chain intelligence, whale-flow monitoring, exchange-flow research, mining revenue, market/network charts, transparent health scoring and automated evidence-based analysis."}, {"name": "twitter:card", "content": "summary"}, 
       { title: "Crypto Intelligence — Quantum AI Lab" },
       {
         name: "description",

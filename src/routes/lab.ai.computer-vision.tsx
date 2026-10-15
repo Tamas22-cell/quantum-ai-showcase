@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ComputerVisionLab } from "@/components/lab/applied-ai-labs";
 import { LabShell } from "@/components/lab/lab-shell";
-export const Route = createFileRoute("/lab/ai/computer-vision")({ component: Page });
+export const Route = createFileRoute("/lab/ai/computer-vision")({ head: () => ({ meta: [{ title: "Computer Vision Lab \u2014 Quantum AI Lab" }, { name: "description", content: "Synthetic feature-map and confidence-threshold experiments for image-classification workflows." }, { property: "og:title", content: "Computer Vision Lab \u2014 Quantum AI Lab" }, { property: "og:description", content: "Synthetic feature-map and confidence-threshold experiments for image-classification workflows." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }), component: Page });
 function Page() {
   return (
     <LabShell crumb="Computer Vision">

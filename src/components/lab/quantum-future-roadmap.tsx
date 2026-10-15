@@ -11,7 +11,8 @@ const stages = [
 export function QuantumFutureRoadmap() {
   const [active, setActive] = useState(0);
   const [application, setApplication] = useState<number | null>(null);
-  const selected = stages[active];
+  const selected = stages[active] || stages[0];
+  if (!selected) return null;
   return (
     <section aria-labelledby="quantum-roadmap-heading" className="relative mb-12 overflow-hidden rounded-2xl border border-cyan-400/20 bg-[#050c20] p-5 text-white sm:p-8">
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-50" style={{backgroundImage:"radial-gradient(circle at 50% 0%, #155e75 0%, transparent 52%), radial-gradient(circle at 95% 90%, #312e81 0%, transparent 38%)"}} />
@@ -102,7 +103,7 @@ export function QuantumFutureRoadmap() {
                   </>}
                   {i===3 && <>
                     <path d="M20 86V20M20 86H145" stroke="#94a3b8" strokeWidth="1.5"/>
-                    {[30,50,70,90,110,130].map((x,j)=><rect key={x} x={x} y={82-[18,26,21,43,54,68][j]} width="11" height={[18,26,21,43,54,68][j]} rx="2" fill={item.color} opacity={.25+j*.12}/>)}
+                    {[30,50,70,90,110,130].map((x,j)=><rect key={x} x={x} y={82-([18,26,21,43,54,68][j] ?? 0)} width="11" height={[18,26,21,43,54,68][j] ?? 0} rx="2" fill={item.color} opacity={.25+j*.12}/>)}
                     <path d="M24 70L48 61L70 66L91 40L111 47L140 15" stroke="#fde68a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="motion-safe:animate-pulse"/>
                   </>}
                 </svg>
@@ -120,7 +121,7 @@ export function QuantumFutureRoadmap() {
             ].map((entry,i)=>(
               <div key={entry.label} className="rounded-xl border border-white/10 bg-slate-950/70 p-3">
                 <p className="text-[10px] uppercase tracking-wide text-slate-400">{entry.label}</p>
-                <p className="mt-2 text-base font-bold" style={{color:["#38bdf8","#c084fc","#2dd4bf","#fbbf24"][i]}}>{entry.metric}</p>
+                <p className="mt-2 text-base font-bold" style={{color:(["#38bdf8","#c084fc","#2dd4bf","#fbbf24"] as const)[i % 4]}}>{entry.metric}</p>
                 <p className="mt-1 min-h-10 text-xs leading-5 text-slate-400">{entry.detail}</p>
                 <a href={entry.href} className="mt-2 inline-block text-xs font-semibold text-cyan-300 underline underline-offset-4 hover:text-white">Open research data ↗</a>
               </div>
@@ -128,13 +129,13 @@ export function QuantumFutureRoadmap() {
           </div>
           <p className="mt-2 text-xs text-slate-400">Research indicators, not live measurements. Open each lab for calculated results and methodology.</p>
           {application!==null&&<div aria-live="polite" className="mt-3 rounded-xl border border-cyan-400/20 bg-slate-950/80 p-4">
-            <h4 className="font-semibold text-cyan-200">{["Chemistry","Drug Discovery","AI & Machine Learning","Quantum Finance"][application]}</h4>
-            <p className="mt-2 text-sm leading-6 text-slate-300">{[
+            <h4 className="font-semibold text-cyan-200">{application !== null ? (["Chemistry","Drug Discovery","AI & Machine Learning","Quantum Finance"] as const)[application] : ""}</h4>
+            <p className="mt-2 text-sm leading-6 text-slate-300">{application !== null ? ([
               "Quantum simulation could help model molecular energies and reaction pathways for materials and chemical research.",
               "Quantum chemistry research may support molecular modelling and candidate screening, subject to hardware and algorithmic advances.",
               "Quantum machine learning explores feature maps, quantum kernels and hybrid models; practical advantage remains unproven for most tasks.",
               "Research applications include portfolio optimisation, sampling and risk models, benchmarked against strong classical approaches."
-            ][application]}</p>
+            ] as const)[application] : ""}</p>
           </div>}
         </div>
         <p className="mt-4 flex items-start gap-2 text-xs leading-5 text-slate-400"><ArrowUpRight size={15} className="mt-0.5 shrink-0"/>Research outlook only. Milestones and timing are uncertain; practical quantum advantage must be independently validated.</p>

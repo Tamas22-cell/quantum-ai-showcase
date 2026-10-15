@@ -1,5 +1,9 @@
 # Roadmap
 
+- [x] Add D-Wave Quantum Finance Research Engine page, supplied-data charts, research navigation and accessible controls.
+- [x] Verify supplied-data tests, isolated desktop/mobile UI and automatic checks; preserve configuration and production.
+- [ ] Verify actual dashboard navigation in the live preview — blocked by existing Nitro dev-entry startup HTTP 500; restart did not resolve it, deployment configuration left unchanged.
+
 - [x] Portfolio site, design system, verified LinkedIn/GitHub links (unpublished).
 - [x] Shared quantum engine (`src/lib/quantum`) + tests.
 - [x] Research Lab dashboard (/lab): Core labs + Research Command Center groups, honest status.

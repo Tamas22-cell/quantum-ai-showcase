@@ -2,3 +2,4 @@
 - Blockchain lab logic lives in src/lib/blockchain/core.ts on Web Crypto (SHA-256, ECDSA P-256) — no deps, testable in Node, UI stays thin.
 
 - Web3 on-chain logic lives in src/lib/web3/* (viem, pure/testable) with UI in src/components/web3/*; wallet is injected EIP-1193 only — no private keys, no explorer API keys in client code.
+- D-Wave finance reference data lives in a browser-safe finance module with a separate dashboard and leaf route; presentation never executes or claims a solver run because no reproducible input dataset is supplied.

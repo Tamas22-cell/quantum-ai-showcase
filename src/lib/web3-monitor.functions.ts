@@ -17,7 +17,7 @@ export const getWeb3Monitor = createServerFn({ method: "GET" }).handler(async ()
     ...pairs.map(p => "https://api.kraken.com/0/public/OHLC?pair=" + p.pair + "&interval=60")
   ];
   const responses = await Promise.allSettled(requests.map(read));
-  const value = (i: number): any => responses[i].status === "fulfilled" ? (responses[i] as PromiseFulfilledResult<any>).value : null;
+  const value = (i: number): any => responses[i]?.status === "fulfilled" ? (responses[i] as PromiseFulfilledResult<any>).value : null;
   const height = Number(value(0));
   const fees = value(1);
   const hashrate = Number(value(2)?.currentHashrate);

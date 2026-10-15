@@ -2,7 +2,7 @@ import { createFileRoute, Link } from '@tanstack/react-router';
 import Web3TerminalTest from '../../web3-terminal-test/Web3TerminalTest';
 
 export const Route = createFileRoute('/web3-terminal')({
-  head: () => ({meta:[{title:'Web3 Market Terminal | Quantum AI Lab'},{name:'description',content:'Experimental BTC, ETH and SOL market terminal with Kraken USD data and technical indicators.'}]}),
+  head: () => ({meta:[{"property": "og:title", "content": "Web3 Market Terminal | Quantum AI Lab"}, {"property": "og:description", "content": "Experimental BTC, ETH and SOL market terminal with Kraken USD data and technical indicators."}, {"property": "og:type", "content": "website"}, {"name": "twitter:card", "content": "summary"}, {title:'Web3 Market Terminal | Quantum AI Lab'},{name:'description',content:'Experimental BTC, ETH and SOL market terminal with Kraken USD data and technical indicators.'}]}),
   component: Web3TerminalPage,
 });
 function Web3TerminalPage() {
