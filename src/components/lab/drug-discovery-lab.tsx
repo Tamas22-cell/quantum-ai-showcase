@@ -14,6 +14,7 @@ export function DrugDiscoveryLab(){
  const [sort,setSort]=useState<"name"|"score">("score");
  const molecule = MOLECULES[selected] || MOLECULES[0];
  const ranked=useMemo(()=>MOLECULES.map((m,i)=>({m,i,score:Math.max(0,Math.round(100-violations(m)*25-Math.abs(m.logp-2)*7-Math.abs(m.mw-300)*.04))})).sort((a,b)=>sort==="score"?b.score-a.score:a.m.name.localeCompare(b.m.name)),[sort]);
+ if (!molecule) return null;
  return <section id="drug-discovery-lab" className="mb-12 overflow-hidden rounded-2xl border border-violet-400/30 bg-[#080d22] p-5 text-white sm:p-8">
   <div className="flex items-center gap-3 text-violet-300"><Dna size={24}/><span className="font-mono text-xs uppercase tracking-[.2em]">Quantum & AI Research · Drug Discovery</span></div>
   <h2 className="mt-3 text-3xl font-bold">AI Drug Discovery Lab</h2>

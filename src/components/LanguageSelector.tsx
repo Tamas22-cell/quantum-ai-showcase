@@ -90,7 +90,7 @@ export function LanguageSelector() {
           const key = original.trim();
           const exact = dictionary[language]?.[key];
           const upperKey = Object.keys(dictionary[language] ?? {}).find(k => k.toUpperCase() === key.toUpperCase());
-          const translation = exact ?? (upperKey ? (key === key.toUpperCase() ? dictionary[language]?.[upperKey].toUpperCase() : dictionary[language]?.[upperKey]) : undefined);
+          const translation = exact ?? (upperKey ? (key === key.toUpperCase() ? dictionary[language]?.[upperKey]?.toUpperCase() : dictionary[language]?.[upperKey]) : undefined);
           const next = translation ? original.replace(key, translation) : original;
           if (el.textContent !== next) el.textContent = next;
         }

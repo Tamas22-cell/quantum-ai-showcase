@@ -12,6 +12,7 @@ export function QuantumFutureRoadmap() {
   const [active, setActive] = useState(0);
   const [application, setApplication] = useState<number | null>(null);
   const selected = stages[active] || stages[0];
+  if (!selected) return null;
   return (
     <section aria-labelledby="quantum-roadmap-heading" className="relative mb-12 overflow-hidden rounded-2xl border border-cyan-400/20 bg-[#050c20] p-5 text-white sm:p-8">
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-50" style={{backgroundImage:"radial-gradient(circle at 50% 0%, #155e75 0%, transparent 52%), radial-gradient(circle at 95% 90%, #312e81 0%, transparent 38%)"}} />
@@ -102,7 +103,7 @@ export function QuantumFutureRoadmap() {
                   </>}
                   {i===3 && <>
                     <path d="M20 86V20M20 86H145" stroke="#94a3b8" strokeWidth="1.5"/>
-                    {[30,50,70,90,110,130].map((x,j)=><rect key={x} x={x} y={82-[18,26,21,43,54,68][j]} width="11" height={[18,26,21,43,54,68][j]} rx="2" fill={item.color} opacity={.25+j*.12}/>)}
+                    {[30,50,70,90,110,130].map((x,j)=><rect key={x} x={x} y={82-([18,26,21,43,54,68][j] ?? 0)} width="11" height={[18,26,21,43,54,68][j] ?? 0} rx="2" fill={item.color} opacity={.25+j*.12}/>)}
                     <path d="M24 70L48 61L70 66L91 40L111 47L140 15" stroke="#fde68a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="motion-safe:animate-pulse"/>
                   </>}
                 </svg>
@@ -134,7 +135,7 @@ export function QuantumFutureRoadmap() {
               "Quantum chemistry research may support molecular modelling and candidate screening, subject to hardware and algorithmic advances.",
               "Quantum machine learning explores feature maps, quantum kernels and hybrid models; practical advantage remains unproven for most tasks.",
               "Research applications include portfolio optimisation, sampling and risk models, benchmarked against strong classical approaches."
-             as const)[application] : ""}</p>
+            ] as const)[application] : ""}</p>
           </div>}
         </div>
         <p className="mt-4 flex items-start gap-2 text-xs leading-5 text-slate-400"><ArrowUpRight size={15} className="mt-0.5 shrink-0"/>Research outlook only. Milestones and timing are uncertain; practical quantum advantage must be independently validated.</p>
