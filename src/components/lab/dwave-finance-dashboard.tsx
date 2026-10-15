@@ -5,47 +5,24 @@ import { Button } from "@/components/ui/button";
 import { ANNUAL_RETURNS, ASSET_WEIGHTS, METRICS, STRATEGIES, STUDY_SCOPE, SUPPLIED_WEIGHT_TOTAL, type StrategyId } from "@/lib/finance/dwave-reference";
 
 function AnimatedAnnealingNetwork({ running }: { running: boolean }) {
-  const nodes = Array.from({ length: 24 }, (_, i) => {
-    const angle = (i / 24) * Math.PI * 2;
-    return { x: 300 + Math.cos(angle) * 205, y: 220 + Math.sin(angle) * 175 };
+  const nodes = Array.from({ length: 12 }, (_, i) => {
+    const a = i * Math.PI / 6;
+    return { x: 240 + Math.cos(a) * 118, y: 140 + Math.sin(a) * 106 };
   });
-  return <section className="relative mt-8 overflow-hidden rounded-2xl border border-cyan-400/40 bg-[#061329] p-4 shadow-[0_0_45px_rgba(6,182,212,0.12)] sm:p-7" aria-label="Animated quantum optimization network">
-    <div aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-25" style={{ backgroundImage: "linear-gradient(rgba(34,211,238,.14) 1px,transparent 1px),linear-gradient(90deg,rgba(34,211,238,.14) 1px,transparent 1px)", backgroundSize: "34px 34px" }} />
-    <div className="relative z-10 flex flex-wrap items-start justify-between gap-3">
-      <div><h2 className="text-lg font-bold tracking-wide text-cyan-100 sm:text-xl">QUANTUM ANNEALING NETWORK</h2>
-        <p className="mt-1 text-xs text-cyan-200/70">Animated optimization topology · conceptual research visualization</p></div>
-      <span className="rounded-full border border-cyan-400/50 bg-cyan-400/10 px-3 py-1 font-mono text-[11px] text-cyan-200">{running ? "● NETWORK ACTIVE" : "Ⅱ ANIMATION PAUSED"}</span>
-    </div>
-    <div className="relative z-10 grid items-center gap-2 lg:grid-cols-[minmax(0,1fr)_190px]">
-      <svg viewBox="0 0 600 440" role="img" aria-label="Large animated quantum network with pulsing nodes and connected optimization paths" className="mx-auto block w-full max-w-4xl drop-shadow-[0_0_22px_rgba(34,211,238,0.35)]">
-        <defs>
-          <radialGradient id="annealing-bg"><stop stopColor="#06b6d4" stopOpacity=".45"/><stop offset=".6" stopColor="#0891b2" stopOpacity=".13"/><stop offset="1" stopColor="#0e7490" stopOpacity="0"/></radialGradient>
-          <linearGradient id="annealing-line" x1="0" y1="0" x2="1" y2="1"><stop stopColor="#22d3ee"/><stop offset="1" stopColor="#a78bfa"/></linearGradient>
-        </defs>
-        <circle cx="300" cy="220" r="215" fill="url(#annealing-bg)" />
-        <circle cx="300" cy="220" r="198" fill="none" stroke="#22d3ee" strokeWidth="1" strokeDasharray="3 12" opacity=".4" />
-        {nodes.map((node, i) => <g key={i}>
-          <line x1={node.x} y1={node.y} x2={nodes[(i + 7) % nodes.length].x} y2={nodes[(i + 7) % nodes.length].y} stroke="url(#annealing-line)" strokeWidth="1.4" opacity=".48" />
-          <line x1={node.x} y1={node.y} x2={nodes[(i + 11) % nodes.length].x} y2={nodes[(i + 11) % nodes.length].y} stroke="#22d3ee" strokeWidth=".9" opacity=".22" />
-          <line x1={node.x} y1={node.y} x2="300" y2="220" stroke="#a78bfa" strokeWidth=".85" opacity=".36" />
-          <circle cx={node.x} cy={node.y} r="7" fill="#22d3ee" opacity=".18" />
-          <circle cx={node.x} cy={node.y} r="3.7" fill="#a5f3fc">
-            {running && <animate attributeName="opacity" values=".25;1;.25" dur={`${1.3 + (i % 6) * .25}s`} repeatCount="indefinite" />}
-          </circle>
-        </g>)}
-        <circle cx="300" cy="220" r="33" fill="#22d3ee" opacity=".12" />
-        <circle cx="300" cy="220" r="14" fill="#e0f2fe" />
-        <circle cx="300" cy="220" r="25" fill="none" stroke="#22d3ee" strokeWidth="2" strokeDasharray="5 6" className={running ? "motion-safe:animate-spin" : ""} style={{ transformOrigin: "300px 220px" }} />
-        <circle cx="300" cy="220" r="65" fill="none" stroke="#a78bfa" strokeWidth=".8" strokeDasharray="2 9" opacity=".55" />
+  return <section className="relative mt-6 overflow-hidden rounded-xl border border-cyan-400/25 bg-[#061329] p-4 sm:p-5" aria-label="Compact animated quantum optimization network">
+    <div className="flex flex-wrap items-center justify-between gap-2"><div><h2 className="text-base font-semibold text-cyan-100">QUANTUM ANNEALING NETWORK</h2><p className="mt-1 text-xs text-slate-400">Compact conceptual visualization</p></div><span className="rounded-full border border-cyan-400/30 px-3 py-1 font-mono text-[10px] text-cyan-200">{running ? "● ACTIVE" : "Ⅱ PAUSED"}</span></div>
+    <div className="mt-3 grid items-center gap-4 md:grid-cols-[minmax(0,1fr)_150px]">
+      <svg viewBox="0 0 480 280" role="img" aria-label="Twelve glowing quantum network nodes linked in a clean circular pattern" className="mx-auto block h-auto w-full max-w-[440px]">
+        <defs><radialGradient id="compact-q-glow"><stop stopColor="#22d3ee" stopOpacity=".24"/><stop offset="1" stopColor="#22d3ee" stopOpacity="0"/></radialGradient></defs>
+        <circle cx="240" cy="140" r="127" fill="url(#compact-q-glow)" />
+        <circle cx="240" cy="140" r="118" fill="none" stroke="#22d3ee" strokeDasharray="4 9" opacity=".35"/>
+        {nodes.map((node,i)=><g key={i}><line x1={node.x} y1={node.y} x2={nodes[(i+1)%12].x} y2={nodes[(i+1)%12].y} stroke="#22d3ee" strokeWidth="1.8" opacity=".65"/><line x1={node.x} y1={node.y} x2={nodes[(i+3)%12].x} y2={nodes[(i+3)%12].y} stroke="#a78bfa" strokeWidth="1" opacity=".3"/><circle cx={node.x} cy={node.y} r="4.5" fill="#a5f3fc">{running && <animate attributeName="opacity" values=".4;1;.4" dur={`${1.5+i%4*.3}s`} repeatCount="indefinite"/>}</circle></g>)}
+        <circle cx="240" cy="140" r="17" fill="#22d3ee" opacity=".3"/><circle cx="240" cy="140" r="8" fill="#cffafe"/>
+        <circle cx="240" cy="140" r="29" fill="none" stroke="#22d3ee" strokeDasharray="4 8" className={running?"motion-safe:animate-spin":""} style={{transformOrigin:"240px 140px"}}/>
       </svg>
-      <div className="grid grid-cols-3 gap-2 lg:grid-cols-1">
-        {[["24", "Visual nodes"], ["3", "Connection layers"], [running ? "ON" : "OFF", "Motion status"]].map(([value, label]) => <div key={label} className="rounded-lg border border-cyan-400/25 bg-cyan-950/40 px-3 py-3 backdrop-blur-sm">
-          <div className="font-mono text-xl font-semibold text-cyan-200 sm:text-2xl">{value}</div>
-          <div className="mt-1 text-[10px] uppercase tracking-wide text-slate-300">{label}</div>
-        </div>)}
-      </div>
+      <div className="grid grid-cols-3 gap-2 md:grid-cols-1">{[["12","Nodes"],["2","Link layers"],[running?"ON":"OFF","Motion"]].map(([v,l])=><div key={l} className="rounded-lg border border-cyan-400/20 bg-cyan-950/30 px-3 py-2"><div className="font-mono text-lg text-cyan-200">{v}</div><div className="text-[10px] text-slate-400">{l}</div></div>)}</div>
     </div>
-    <p className="relative z-10 mt-2 border-t border-cyan-400/20 pt-3 text-[11px] leading-5 text-slate-400">Conceptual animation only — not a live D-Wave processor, hardware execution, or verified quantum computation.</p>
+    <p className="mt-2 text-[10px] text-slate-500">Illustrative animation, not live D-Wave hardware execution.</p>
   </section>;
 }
 
