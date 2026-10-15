@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { DeepLearningLab } from "@/components/lab/applied-ai-labs";
 import { LabShell } from "@/components/lab/lab-shell";
-export const Route = createFileRoute("/lab/ai/deep-learning")({ component: Page });
+export const Route = createFileRoute("/lab/ai/deep-learning")({ head: () => ({ meta: [{ title: "Deep Learning Lab \u2014 Quantum AI Lab" }, { name: "description", content: "Interactive neural-network training diagnostics with architecture, optimization and regularization controls." }, { property: "og:title", content: "Deep Learning Lab \u2014 Quantum AI Lab" }, { property: "og:description", content: "Interactive neural-network training diagnostics with architecture, optimization and regularization controls." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }), component: Page });
 function Page() {
   return (
     <LabShell crumb="Deep Learning">

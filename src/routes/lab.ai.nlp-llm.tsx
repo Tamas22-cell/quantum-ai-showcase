@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { NlpLlmLab } from "@/components/lab/applied-ai-labs";
 import { LabShell } from "@/components/lab/lab-shell";
-export const Route = createFileRoute("/lab/ai/nlp-llm")({ component: Page });
+export const Route = createFileRoute("/lab/ai/nlp-llm")({ head: () => ({ meta: [{ title: "NLP & LLM Lab \u2014 Quantum AI Lab" }, { name: "description", content: "Prompt structure, token-budget and evaluation diagnostics in a transparent browser-local sandbox." }, { property: "og:title", content: "NLP & LLM Lab \u2014 Quantum AI Lab" }, { property: "og:description", content: "Prompt structure, token-budget and evaluation diagnostics in a transparent browser-local sandbox." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }), component: Page });
 function Page() {
   return (
     <LabShell crumb="NLP & LLM">

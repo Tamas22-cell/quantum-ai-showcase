@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { LabShell } from "@/components/lab/lab-shell";
-export const Route=createFileRoute("/lab/quantum-interference")({head:()=>({meta:[{title:"Quantum Interference Visualizer — Quantum AI Lab"},{name:"description",content:"Phase-based quantum interference using exact H–Rz–H circuit amplitudes."}]}),component:InterferenceLab});
+export const Route=createFileRoute("/lab/quantum-interference")({head:()=>({meta:[{"property": "og:title", "content": "Quantum Interference Visualizer \u2014 Quantum AI Lab"}, {"property": "og:description", "content": "Phase-based quantum interference using exact H\u2013Rz\u2013H circuit amplitudes."}, {"property": "og:type", "content": "website"}, {"name": "twitter:card", "content": "summary"}, {title:"Quantum Interference Visualizer — Quantum AI Lab"},{name:"description",content:"Phase-based quantum interference using exact H–Rz–H circuit amplitudes."}]}),component:InterferenceLab});
 function InterferenceLab(){
  const [degrees,setDegrees]=useState(90),[stage,setStage]=useState(3);
  const phi=degrees*Math.PI/180;

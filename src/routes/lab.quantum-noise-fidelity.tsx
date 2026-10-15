@@ -6,7 +6,7 @@ import { LabShell } from "@/components/lab/lab-shell";
 
 export const Route = createFileRoute("/lab/quantum-noise-fidelity")({
   head: () => ({
-    meta: [
+    meta: [{"property": "og:title", "content": "Quantum Noise & Fidelity Lab \u2014 Quantum AI Lab"}, {"property": "og:description", "content": "Interactive educational quantum noise and fidelity model showing how circuit depth and noise strength affect survival probability and state fidelity."}, {"property": "og:type", "content": "website"}, {"name": "twitter:card", "content": "summary"}, 
       { title: "Quantum Noise & Fidelity Lab — Quantum AI Lab" },
       {
         name: "description",

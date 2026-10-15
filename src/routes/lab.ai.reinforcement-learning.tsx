@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ReinforcementLearningLab } from "@/components/lab/applied-ai-labs";
 import { LabShell } from "@/components/lab/lab-shell";
-export const Route = createFileRoute("/lab/ai/reinforcement-learning")({ component: Page });
+export const Route = createFileRoute("/lab/ai/reinforcement-learning")({ head: () => ({ meta: [{ title: "Reinforcement Learning Lab \u2014 Quantum AI Lab" }, { name: "description", content: "Interactive Q-learning controls for exploration, discounting, reward and training progress." }, { property: "og:title", content: "Reinforcement Learning Lab \u2014 Quantum AI Lab" }, { property: "og:description", content: "Interactive Q-learning controls for exploration, discounting, reward and training progress." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }), component: Page });
 function Page() {
   return (
     <LabShell crumb="Reinforcement Learning">

@@ -8,7 +8,7 @@ import { getExperimentHistory, type ExperimentSnapshot } from "@/lib/experiment-
 
 export const Route = createFileRoute("/lab/snapshot")({
   head: () => ({
-    meta: [
+    meta: [{"name": "twitter:card", "content": "summary"}, 
       { title: "Generate Research Snapshot — Quantum AI Lab" },
       {
         name: "description",

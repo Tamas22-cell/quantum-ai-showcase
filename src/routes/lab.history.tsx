@@ -14,7 +14,7 @@ import {
 
 export const Route = createFileRoute("/lab/history")({
   head: () => ({
-    meta: [
+    meta: [{"name": "twitter:card", "content": "summary"}, 
       { title: "Experiment History — Quantum AI Lab" },
       {
         name: "description",

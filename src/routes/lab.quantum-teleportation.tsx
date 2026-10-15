@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { LabShell } from "@/components/lab/lab-shell";
 
 export const Route = createFileRoute("/lab/quantum-teleportation")({
-  head: () => ({meta:[{title:"Quantum Teleportation Simulator — Quantum AI Lab"},{name:"description",content:"Interactive three-qubit quantum teleportation with exact statevector and Bell-measurement correction."}]}),
+  head: () => ({meta:[{"property": "og:title", "content": "Quantum Teleportation Simulator \u2014 Quantum AI Lab"}, {"property": "og:description", "content": "Interactive three-qubit quantum teleportation with exact statevector and Bell-measurement correction."}, {"property": "og:type", "content": "website"}, {"name": "twitter:card", "content": "summary"}, {title:"Quantum Teleportation Simulator — Quantum AI Lab"},{name:"description",content:"Interactive three-qubit quantum teleportation with exact statevector and Bell-measurement correction."}]}),
   component: TeleportationLab,
 });
 type C={re:number;im:number};

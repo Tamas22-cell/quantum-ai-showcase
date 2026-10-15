@@ -6,7 +6,7 @@ import { LabShell } from "@/components/lab/lab-shell";
 
 export const Route = createFileRoute("/lab/quantum-error-correction")({
   head: () => ({
-    meta: [
+    meta: [{"property": "og:title", "content": "Quantum Error Correction Lab \u2014 Quantum AI Lab"}, {"property": "og:description", "content": "Interactive educational quantum error-correction lab for bit-flip and phase-flip error detection, syndrome interpretation and recovery logic."}, {"property": "og:type", "content": "website"}, {"name": "twitter:card", "content": "summary"}, 
       { title: "Quantum Error Correction Lab — Quantum AI Lab" },
       {
         name: "description",
