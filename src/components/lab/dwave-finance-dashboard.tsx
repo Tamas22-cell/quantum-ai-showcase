@@ -4,28 +4,6 @@ import { Activity, ArrowLeft, ArrowUpRight, Check, ChevronDown, FlaskConical, Pa
 import { Button } from "@/components/ui/button";
 import { ANNUAL_RETURNS, ASSET_WEIGHTS, METRICS, STRATEGIES, STUDY_SCOPE, SUPPLIED_WEIGHT_TOTAL, type StrategyId } from "@/lib/finance/dwave-reference";
 
-function AnimatedAnnealingNetwork({ running }: { running: boolean }) {
-  const nodes = Array.from({ length: 12 }, (_, i) => {
-    const a = i * Math.PI / 6;
-    return { x: 240 + Math.cos(a) * 118, y: 140 + Math.sin(a) * 106 };
-  });
-  return <section className="relative mt-6 overflow-hidden rounded-xl border border-cyan-400/25 bg-[#061329] p-4 sm:p-5" aria-label="Compact animated quantum optimization network">
-    <div className="flex flex-wrap items-center justify-between gap-2"><div><h2 className="text-base font-semibold text-cyan-100">QUANTUM ANNEALING NETWORK</h2><p className="mt-1 text-xs text-slate-400">Compact conceptual visualization</p></div><span className="rounded-full border border-cyan-400/30 px-3 py-1 font-mono text-[10px] text-cyan-200">{running ? "● ACTIVE" : "Ⅱ PAUSED"}</span></div>
-    <div className="mt-3 grid items-center gap-4 md:grid-cols-[minmax(0,1fr)_150px]">
-      <svg viewBox="0 0 480 280" role="img" aria-label="Twelve glowing quantum network nodes linked in a clean circular pattern" className="mx-auto block h-auto w-full max-w-[440px]">
-        <defs><radialGradient id="compact-q-glow"><stop stopColor="#22d3ee" stopOpacity=".24"/><stop offset="1" stopColor="#22d3ee" stopOpacity="0"/></radialGradient></defs>
-        <circle cx="240" cy="140" r="127" fill="url(#compact-q-glow)" />
-        <circle cx="240" cy="140" r="118" fill="none" stroke="#22d3ee" strokeDasharray="4 9" opacity=".35"/>
-        {nodes.map((node,i)=><g key={i}><line x1={node.x} y1={node.y} x2={nodes[(i+1)%12].x} y2={nodes[(i+1)%12].y} stroke="#22d3ee" strokeWidth="1.8" opacity=".65"/><line x1={node.x} y1={node.y} x2={nodes[(i+3)%12].x} y2={nodes[(i+3)%12].y} stroke="#a78bfa" strokeWidth="1" opacity=".3"/><circle cx={node.x} cy={node.y} r="4.5" fill="#a5f3fc">{running && <animate attributeName="opacity" values=".4;1;.4" dur={`${1.5+i%4*.3}s`} repeatCount="indefinite"/>}</circle></g>)}
-        <circle cx="240" cy="140" r="17" fill="#22d3ee" opacity=".3"/><circle cx="240" cy="140" r="8" fill="#cffafe"/>
-        <circle cx="240" cy="140" r="29" fill="none" stroke="#22d3ee" strokeDasharray="4 8" className={running?"motion-safe:animate-spin":""} style={{transformOrigin:"240px 140px"}}/>
-      </svg>
-      <div className="grid grid-cols-3 gap-2 md:grid-cols-1">{[["12","Nodes"],["2","Link layers"],[running?"ON":"OFF","Motion"]].map(([v,l])=><div key={l} className="rounded-lg border border-cyan-400/20 bg-cyan-950/30 px-3 py-2"><div className="font-mono text-lg text-cyan-200">{v}</div><div className="text-[10px] text-slate-400">{l}</div></div>)}</div>
-    </div>
-    <p className="mt-2 text-[10px] text-slate-500">Illustrative animation, not live D-Wave hardware execution.</p>
-  </section>;
-}
-
 type ShowcaseView = "annealing" | "portfolio" | "risk" | "research";
 
 function LiveQuantumShowcase({ running }: { running: boolean }) {
@@ -107,7 +85,7 @@ export function DwaveFinanceDashboard() {
       <p className="border-t border-cyan-400/20 bg-slate-950/90 px-4 py-3 text-xs text-slate-300">Quantum Finance concept artwork · Interactive controls and animated visualizations are below.</p>
     </section>
     <LiveQuantumShowcase running={animated} />
-    <AnimatedAnnealingNetwork running={animated} />
+
 
     <div className="my-6 flex flex-wrap items-center justify-between gap-4">
       <div role="tablist" aria-label="Research views" className="flex gap-2">{(["overview", "methodology"] as const).map(value => <Button key={value} id={`finance-tab-${value}`} role="tab" aria-selected={tab === value} aria-controls="finance-view" variant={tab === value ? "secondary" : "ghost"} onClick={() => setTab(value)} className="capitalize">{value}</Button>)}</div>
