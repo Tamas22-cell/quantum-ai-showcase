@@ -100,13 +100,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content: "https://quantum-ai-showcase.vercel.app/quantum-ai-lab-social.png",
       },
       { property: "og:image:type", content: "image/png" },
-      { property: "og:image:width", content: "600" },
-      { property: "og:image:height", content: "314" },
       {
         property: "og:image:alt",
         content: "Quantum AI Lab research portfolio with three live AI and quantum projects",
       },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:url", content: "https://quantum-ai-showcase.vercel.app/" },
       { name: "twitter:title", content: "Quantum AI Lab — Tamás Németh" },
       {
         name: "twitter:description",
