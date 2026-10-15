@@ -102,6 +102,13 @@ export const portfolio = {
   ],
   certifications: [
     {
+      title: "QCS13000: Quantum Computer Systems Design III: Working with Noisy Systems",
+      detail:
+        "UChicagoX / edX · Verified Certificate · Issued Oct 15, 2026 · Credential ID f4352aa537c64236a0dab42693c87941",
+      verified: true,
+      href: "https://courses.edx.org/certificates/f4352aa537c64236a0dab42693c87941",
+    },
+    {
       title: "Development and Applications of Germanium Quantum Technologies",
       detail:
         "DelftX / edX · Verified Certificate · Issued Sep 2026 · Credential ID c7a7a5d0baf54375b6b2523afbdbb856",
