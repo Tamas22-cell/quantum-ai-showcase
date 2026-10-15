@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Activity, ArrowLeft, ArrowUpRight, Check, ChevronDown, FlaskConical, Pause, Play, RotateCcw, ShieldCheck } from "lucide-react";
+import { Activity, ArrowLeft, ArrowUpRight, Check, ChevronDown, FlaskConical, Pause, Play, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ANNUAL_RETURNS, ASSET_WEIGHTS, METRICS, STRATEGIES, STUDY_SCOPE, SUPPLIED_WEIGHT_TOTAL, type StrategyId } from "@/lib/finance/dwave-reference";
 
@@ -74,7 +74,6 @@ export function DwaveFinanceDashboard() {
       <div className="mb-4 flex flex-wrap items-center gap-2 font-mono text-[10px] uppercase text-primary"><span className="border border-primary/40 bg-signal-soft px-2 py-1">Quantum finance / Research engine</span><span className="text-muted-foreground">Reference study · 2022–2025 YTD</span></div>
       <h1 className="max-w-4xl text-3xl font-semibold leading-tight sm:text-4xl">D-Wave Quantum Finance<br className="hidden sm:block" /> <span className="text-primary">Research Engine</span></h1>
       <p className="mt-4 max-w-3xl text-sm leading-6 text-muted-foreground">Portfolio allocation research comparing simulated annealing, an exact solver and an equal-weight baseline.</p>
-      <div role="note" className="mt-5 flex max-w-4xl items-start gap-3 border-l-2 border-research-violet bg-research-violet/5 px-4 py-3 text-xs leading-6 text-muted-foreground"><ShieldCheck className="mt-1 size-4 shrink-0 text-research-violet" /><p><strong className="text-foreground">All metrics are user-provided illustrative backtest figures.</strong> Not live D-Wave output, independently verified results or evidence of quantum advantage. No solver or market feed is running.</p></div>
       <dl className="mt-7 grid grid-cols-3 gap-4 sm:max-w-xl">
         {[[STUDY_SCOPE.assets, "Assets reported"], [STUDY_SCOPE.windows, "Walk-forward windows"], [STUDY_SCOPE.observations, "Observations reported"]].map(([value, label]) => <div key={label}><dt className="text-[10px] leading-5 text-muted-foreground sm:text-xs">{label}</dt><dd className="mt-1 font-mono text-2xl text-foreground">{value}</dd></div>)}
       </dl>
