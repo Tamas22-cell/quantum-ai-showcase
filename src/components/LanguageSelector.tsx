@@ -101,7 +101,7 @@ export function LanguageSelector() {
         const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
         let node: Node | null;
         while ((node = walker.nextNode())) {
-          if (node.parentElement?.closest("[data-language-selector],script,style,textarea,input,code,pre") || isEnglishOnlyLab(node.parentElement)) continue;
+          if (node.parentElement?.closest("[data-language-selector],script,style,textarea,input,code,pre")) continue;
           const el = node as Text;
           const current = el.textContent ?? "";
           const cached = originalText.get(el);
@@ -111,12 +111,14 @@ export function LanguageSelector() {
           const exact = dictionary[language]?.[key];
           const upperKey = Object.keys(dictionary[language] ?? {}).find(k => k.toUpperCase() === key.toUpperCase());
           const translation = exact ?? (upperKey ? (key === key.toUpperCase() ? dictionary[language]?.[upperKey]?.toUpperCase() : dictionary[language]?.[upperKey]) : undefined);
-          const next = translation ? original.replace(key, translation) : original;
+          const restoreEnglish = isEnglishOnlyLab(node.parentElement);
+          const sourceEnglish = Object.entries(dictionary).flatMap(([, entries]) => Object.entries(entries)).find(([, value]) => value === key)?.[0];
+          const next = restoreEnglish ? (sourceEnglish ? original.replace(key, sourceEnglish) : original) : (translation ? original.replace(key, translation) : original);
           if (el.textContent !== next) el.textContent = next;
         }
       });
       document.querySelectorAll<HTMLElement>("[placeholder],[title],[aria-label],[alt]").forEach(el => {
-        if (el.closest("[data-language-selector],script,style,code,pre") || isEnglishOnlyLab(el)) return;
+        if (el.closest("[data-language-selector],script,style,code,pre")) return;
         let originals = originalAttrs.get(el);
         if (!originals) { originals = new Map(); originalAttrs.set(el, originals); }
         for (const attr of ["placeholder", "title", "aria-label", "alt"]) {
@@ -127,7 +129,8 @@ export function LanguageSelector() {
           const original = originals.get(attr) ?? "";
           const key = original.trim();
           const translated = dictionary[language]?.[key];
-          const next = translated ? original.replace(key, translated) : original;
+          const sourceEnglish = Object.entries(dictionary).flatMap(([, entries]) => Object.entries(entries)).find(([, value]) => value === key)?.[0];
+          const next = isEnglishOnlyLab(el) ? (sourceEnglish ? original.replace(key, sourceEnglish) : original) : (translated ? original.replace(key, translated) : original);
           if (el.getAttribute(attr) !== next) el.setAttribute(attr, next);
         }
       });
