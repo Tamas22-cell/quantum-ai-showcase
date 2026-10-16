@@ -473,6 +473,34 @@ export function PortfolioSite() {
               </span>
             </div>
 
+            {/* Decorative animated quantum network: CSS-only, responsive and reduced-motion aware. */}
+            <div aria-hidden="true" className="relative mb-5 h-32 overflow-hidden rounded-xl border border-cyan-400/20 bg-[#061526] sm:h-40">
+              <div className="absolute inset-0 opacity-60" style={{ background: "radial-gradient(ellipse at 50% 45%, rgba(34,211,238,.15), transparent 65%), radial-gradient(ellipse at 75% 60%, rgba(168,85,247,.12), transparent 60%)" }} />
+              <svg className="absolute inset-0 h-full w-full" viewBox="0 0 1000 180" preserveAspectRatio="xMidYMid slice" focusable="false">
+                <defs>
+                  <linearGradient id="research-network-gradient" x1="0" x2="1"><stop stopColor="#22d3ee" stopOpacity=".18"/><stop offset=".5" stopColor="#a78bfa" stopOpacity=".8"/><stop offset="1" stopColor="#22d3ee" stopOpacity=".18"/></linearGradient>
+                </defs>
+                {Array.from({ length: 22 }, (_, i) => {
+                  const x = 45 + (i * 137) % 910;
+                  const y = 22 + (i * 71) % 135;
+                  const next = (i + 7) % 22;
+                  const x2 = 45 + (next * 137) % 910;
+                  const y2 = 22 + (next * 71) % 135;
+                  return <g key={i}>
+                    <line x1={x} y1={y} x2={x2} y2={y2} stroke="url(#research-network-gradient)" strokeWidth=".8" opacity=".55"/>
+                    <circle cx={x} cy={y} r={i % 4 === 0 ? 4 : 2.5} fill={i % 3 === 0 ? "#a78bfa" : "#67e8f9"}>
+                      <animate attributeName="opacity" values=".35;1;.35" dur={`${2.4 + i % 5 * .7}s`} repeatCount="indefinite"/>
+                      <animate attributeName="r" values="2;4;2" dur={`${3 + i % 4}s`} repeatCount="indefinite"/>
+                    </circle>
+                  </g>;
+                })}
+                <circle cx="500" cy="90" r="45" fill="none" stroke="#22d3ee" strokeWidth=".8" opacity=".3" strokeDasharray="5 9">
+                  <animateTransform attributeName="transform" type="rotate" from="0 500 90" to="360 500 90" dur="32s" repeatCount="indefinite"/>
+                </circle>
+              </svg>
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#061526]/50 via-transparent to-[#061526]/50" />
+            </div>
+
             <div className="grid gap-4 md:grid-cols-3">
               <a
                 href="#ai-agents"
