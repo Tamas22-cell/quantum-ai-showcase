@@ -179,6 +179,35 @@ for (const [hu, en] of Object.entries(finalPhotoTranslations)) {
   dictionary.en[hu] = en;
 }
 
+// Explicit English equivalents for remaining Hungarian source UI labels.
+const englishUiCorrections: Record<string,string> = {
+ "Rólam":"About","Projektek":"Projects","Kutatás":"Research",
+ "AI Labor":"AI Lab","Kvantumlabor":"Quantum Lab",
+ "Kriptopiaci elemzés":"Crypto Market Analysis",
+ "Tanúsítványok":"Credentials","Kapcsolat":"Contact",
+ "Belépés / Regisztráció":"Sign In / Sign Up",
+ "Web3 Market Terminál":"Web3 Market Terminal",
+ "Kvantumportfólió-optimalizáló":"Quantum Portfolio Optimizer",
+ "Kvantitatív pénzügyek":"Quantitative Finance",
+ "Kvantumszámítástechnika":"Quantum Computing",
+ "AI-ügynökök":"AI Agents","Pénzügyi kutatás":"Financial Research",
+ "Kutatási impulzus indítása":"Launch Research Pulse",
+ "Kvantumlabor megnyitása":"Open Quantum Lab",
+ "Kvantumlabort megnyitása":"Open Quantum Lab",
+ "Élő projekt megnyitása":"Open Live Project",
+ "Grafikon megnyitása":"Open Chart",
+ "Gyógyszerkutatás Lab":"Drug Discovery Lab",
+ "A jövője: Kvantumszámítástechnika":"The Future of Quantum Computing",
+ "Autonóm AI-rendszerek":"Autonomous AI Systems",
+ "Kvantumpénzügyek":"Quantum Finance",
+ "Többügynökös koordináció pénzügyi kutatási munkafolyamatok és ellenőrizhető döntéstámogatás.":"Multi-agent coordination for financial research workflows and auditable decision support.",
+ "Portfólióoptimalizálás, stressztesztek és hibrid klasszikus-kvantum pénzügyi kísérletek.":"Portfolio optimization, stress testing, and hybrid classical-quantum finance experiments."
+};
+for (const [hu,en] of Object.entries(englishUiCorrections)) {
+ dictionary.en[hu]=en;
+ dictionary.en[hu.toUpperCase()]=en.toUpperCase();
+}
+
 const originalText = new WeakMap<Text, string>();
 const originalAttrs = new WeakMap<Element, Map<string, string>>();
 
