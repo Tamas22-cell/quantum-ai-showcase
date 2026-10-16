@@ -687,32 +687,6 @@ export function PortfolioSite() {
           </div>
         </section>
 
-        {/* Large research image gallery immediately before About. */}
-        <section className="border-b border-border px-5 py-14 sm:px-8 lg:py-20" aria-label="Research visual gallery">
-          <div className="mx-auto max-w-7xl">
-            <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
-              <div>
-                <p className="font-mono text-[11px] uppercase tracking-[.2em] text-fuchsia-400">Research gallery</p>
-                <h2 className="mt-2 text-2xl font-semibold text-foreground sm:text-3xl">Inside the Research Lab</h2>
-              </div>
-              <span className="font-mono text-xs text-muted-foreground">AI · Quantum · Finance</span>
-            </div>
-            <div className="grid gap-5 md:grid-cols-2">
-              {[
-                {src:"/quantum-ai-lab-social.png",alt:"AI and quantum research visualization",label:"AI Research"},
-                {src:"/aspirin-neon.webp",alt:"Neon molecular quantum discovery visualization",label:"Quantum Discovery"},
-                {src:"https://raw.githubusercontent.com/Tamas22-cell/quantum-ai-showcase/main/a17e2cec-4d93-49a6-bd06-6c663b1c857e.png",alt:"Quantum finance research visualization",label:"Quantum Finance"}
-              ].map((item,index)=>(
-                <div key={item.label} className={`group relative min-h-64 overflow-hidden rounded-2xl border border-fuchsia-400/30 bg-[#070a1c] shadow-[0_10px_40px_rgba(168,85,247,.13)] sm:min-h-80 ${index===2?"md:col-span-2 md:min-h-[380px]":""}`}>
-                  <img src={item.src} alt={item.alt} loading="lazy" className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#030617]/85 via-transparent to-transparent"/>
-                  <div className="absolute bottom-5 left-6 font-mono text-sm font-semibold tracking-[.12em] text-white">{item.label}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
         {/* ABOUT + capability map */}
         <section id="about" className="border-b border-border px-5 py-24 sm:px-8 lg:py-32">
           <div className="mx-auto max-w-7xl">
