@@ -284,6 +284,24 @@ Object.assign(dictionary.it, {
 "Ready to measure":"Pronto per la misura",
 });
 
+// Final pass: arrow CTAs, roadmap heading and hero byline.
+Object.assign(dictionary.hu, {
+"Open AI research →":"AI-kutatás megnyitása →","Open finance lab →":"Pénzügyi labor megnyitása →","Open quantum lab →":"Kvantumlabor megnyitása →",
+"The Future of":"A kvantumszámítástechnika","Explore scientific milestones rather than fixed predictions. Select a stage to learn what matters next.":"Fedezze fel a tudományos mérföldköveket rögzített jóslatok helyett. Válasszon egy szakaszt, és nézze meg, mi jön ezután.","Quantum AI Research Lab · Interactive outlook":"Quantum AI Research Lab · Interaktív kilátások","/ Researcher":"/ Kutató","OPEN LAB →":"LABOR MEGNYITÁSA →",
+});
+Object.assign(dictionary.de, {
+"Open AI research →":"KI-Forschung öffnen →","Open finance lab →":"Finanzlabor öffnen →","Open quantum lab →":"Quantenlabor öffnen →",
+"The Future of":"Die Zukunft des","Explore scientific milestones rather than fixed predictions. Select a stage to learn what matters next.":"Entdecken Sie wissenschaftliche Meilensteine statt fester Prognosen. Wählen Sie eine Stufe, um zu erfahren, was als Nächstes wichtig ist.","Quantum AI Research Lab · Interactive outlook":"Quantum AI Research Lab · Interaktiver Ausblick","/ Researcher":"/ Forscher","OPEN LAB →":"LABOR ÖFFNEN →",
+});
+Object.assign(dictionary.fr, {
+"Open AI research →":"Ouvrir la recherche IA →","Open finance lab →":"Ouvrir le laboratoire finance →","Open quantum lab →":"Ouvrir le laboratoire quantique →",
+"The Future of":"L'avenir de","Explore scientific milestones rather than fixed predictions. Select a stage to learn what matters next.":"Explorez des jalons scientifiques plutôt que des prédictions figées. Sélectionnez une étape pour découvrir ce qui comptera ensuite.","Quantum AI Research Lab · Interactive outlook":"Quantum AI Research Lab · Perspectives interactives","/ Researcher":"/ Chercheur","OPEN LAB →":"OUVRIR LE LABO →",
+});
+Object.assign(dictionary.it, {
+"Open AI research →":"Apri la ricerca IA →","Open finance lab →":"Apri il laboratorio finanziario →","Open quantum lab →":"Apri il laboratorio quantistico →",
+"The Future of":"Il futuro del","Explore scientific milestones rather than fixed predictions. Select a stage to learn what matters next.":"Esplora le tappe scientifiche invece di previsioni fisse. Seleziona una fase per scoprire cosa conterà dopo.","Quantum AI Research Lab · Interactive outlook":"Quantum AI Research Lab · Prospettive interattive","/ Researcher":"/ Ricercatore","OPEN LAB →":"APRI IL LABORATORIO →",
+});
+
 export function LanguageSelector() {
   const [language, setLanguage] = useState<Language>("en");
   useEffect(() => {
