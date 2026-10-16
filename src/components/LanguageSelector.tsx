@@ -90,13 +90,18 @@ export function LanguageSelector() {
     document.documentElement.lang = language;
     localStorage.setItem("quantum-lab-language", language);
     const translate = () => {
+      // Keep lab content in English; site navigation remains multilingual.
+      const isLabPage = window.location.pathname.startsWith("/lab/");
+      const isEnglishOnlyLab = (element: Element | null) =>
+        Boolean(element?.closest("#quantum-lab, [data-lab-english-only]")) ||
+        (isLabPage && Boolean(element?.closest("main")));
       // Refresh the source when React replaces a previously translated text node.
 
       document.querySelectorAll("body").forEach(root => {
         const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
         let node: Node | null;
         while ((node = walker.nextNode())) {
-          if (node.parentElement?.closest("[data-language-selector],script,style,textarea,input,code,pre")) continue;
+          if (node.parentElement?.closest("[data-language-selector],script,style,textarea,input,code,pre") || isEnglishOnlyLab(node.parentElement)) continue;
           const el = node as Text;
           const current = el.textContent ?? "";
           const cached = originalText.get(el);
@@ -111,7 +116,7 @@ export function LanguageSelector() {
         }
       });
       document.querySelectorAll<HTMLElement>("[placeholder],[title],[aria-label],[alt]").forEach(el => {
-        if (el.closest("[data-language-selector],script,style,code,pre")) return;
+        if (el.closest("[data-language-selector],script,style,code,pre") || isEnglishOnlyLab(el)) return;
         let originals = originalAttrs.get(el);
         if (!originals) { originals = new Map(); originalAttrs.set(el, originals); }
         for (const attr of ["placeholder", "title", "aria-label", "alt"]) {
