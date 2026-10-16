@@ -687,6 +687,29 @@ export function PortfolioSite() {
           </div>
         </section>
 
+        {/* New original GitHub-uploaded artwork above About. */}
+        <section className="border-b border-border px-5 py-14 sm:px-8 lg:py-20" aria-label="Research artwork">
+          <div className="mx-auto max-w-7xl">
+            <div className="mb-6">
+              <p className="font-mono text-[11px] uppercase tracking-[.2em] text-fuchsia-400">Research gallery</p>
+              <h2 className="mt-2 text-2xl font-semibold text-foreground sm:text-3xl">AI &amp; Quantum Visions</h2>
+            </div>
+            <div className="grid gap-5 lg:grid-cols-2">
+              {[
+                {src:"https://raw.githubusercontent.com/Tamas22-cell/quantum-ai-showcase/main/cc720d50-073d-46f9-9378-1e97226c39b2.png",label:"AI Research",alt:"AI research artwork"},
+                {src:"https://raw.githubusercontent.com/Tamas22-cell/quantum-ai-showcase/main/fa39176a-5b1c-43f6-a705-0760ddae19c7.png",label:"Quantum Innovation",alt:"Quantum innovation artwork"}
+              ].map((item)=>(
+                <figure key={item.src} className="group relative min-h-72 overflow-hidden rounded-2xl border border-fuchsia-400/35 bg-[#060b20] shadow-[0_0_40px_rgba(139,92,246,.12)] sm:min-h-[370px]">
+                  <img src={item.src} alt={item.alt} loading="lazy" className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"/>
+                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#050718]/90 via-[#050718]/35 to-transparent px-6 pb-5 pt-20">
+                    <figcaption className="font-mono text-sm font-semibold tracking-widest text-white">{item.label}</figcaption>
+                  </div>
+                </figure>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* ABOUT + capability map */}
         <section id="about" className="border-b border-border px-5 py-24 sm:px-8 lg:py-32">
           <div className="mx-auto max-w-7xl">
