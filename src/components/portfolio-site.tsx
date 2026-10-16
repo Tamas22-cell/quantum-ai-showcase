@@ -187,6 +187,7 @@ const sectionIds = portfolio.navigation
 
 export function PortfolioSite() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [galleryTopic, setGalleryTopic] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
   const [researchPulse, setResearchPulse] = useState(false);
   const [activeAgent, setActiveAgent] = useState("Planner Agent");
@@ -696,16 +697,54 @@ export function PortfolioSite() {
             </div>
             <div className="grid gap-7">
               {[
-                {src:"https://raw.githubusercontent.com/Tamas22-cell/quantum-ai-showcase/main/cc720d50-073d-46f9-9378-1e97226c39b2.png",alt:"AI research visual presentation"},
-                {src:"https://raw.githubusercontent.com/Tamas22-cell/quantum-ai-showcase/main/fa39176a-5b1c-43f6-a705-0760ddae19c7.png",alt:"Quantum innovation visual presentation"}
+                {src:"https://raw.githubusercontent.com/Tamas22-cell/quantum-ai-showcase/main/cc720d50-073d-46f9-9378-1e97226c39b2.png",alt:"AI research visual presentation",topics:["AI Intelligence","Quantum Research","Financial Innovation"]},
+                {src:"https://raw.githubusercontent.com/Tamas22-cell/quantum-ai-showcase/main/fa39176a-5b1c-43f6-a705-0760ddae19c7.png",alt:"Quantum innovation visual presentation",topics:["Blockchain","Machine Learning","Super Charts & AI"]}
               ].map((item)=>(
                 <figure key={item.src} className="overflow-hidden rounded-2xl border border-fuchsia-400/35 bg-[#060b20] p-1 shadow-[0_0_40px_rgba(139,92,246,.12)] sm:p-2">
-                  <img src={item.src} alt={item.alt} loading="lazy" className="block h-auto w-full object-contain" />
+                  <div className="relative">
+                    <img src={item.src} alt={item.alt} loading="lazy" className="block h-auto w-full object-contain" />
+                    <div className="absolute inset-x-0 bottom-0 grid h-[34%] grid-cols-3">
+                      {item.topics.map((topic)=>(
+                        <button key={topic} type="button" onClick={()=>setGalleryTopic(topic)} aria-label={`Learn more about ${topic}`} title={`Learn more: ${topic}`} className="cursor-pointer rounded-md bg-transparent transition-colors hover:bg-white/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-cyan-300" />
+                      ))}
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 p-2 sm:gap-3 sm:p-3">
+                    {item.topics.map((topic)=>(
+                      <button key={topic} type="button" onClick={()=>setGalleryTopic(topic)} className="rounded-lg border border-cyan-400/35 bg-cyan-400/10 px-2 py-2 text-center text-[10px] font-semibold text-cyan-100 transition-colors hover:bg-cyan-400/25 sm:text-sm">{topic} <span aria-hidden="true">→</span></button>
+                    ))}
+                  </div>
                 </figure>
               ))}
             </div>
           </div>
         </section>
+
+        {galleryTopic && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#020617]/85 p-4 backdrop-blur-md" role="presentation" onMouseDown={(event)=>{if(event.target===event.currentTarget)setGalleryTopic(null)}}>
+            <section role="dialog" aria-modal="true" aria-labelledby="gallery-topic-title" className="relative w-full max-w-xl rounded-2xl border border-fuchsia-400/45 bg-[#0b1230] p-6 shadow-[0_0_75px_rgba(139,92,246,.25)] sm:p-9">
+              <button type="button" onClick={()=>setGalleryTopic(null)} aria-label="Close details" className="absolute right-4 top-4 rounded-lg p-2 text-slate-300 hover:bg-white/10"><X className="size-5"/></button>
+              <p className="mb-3 font-mono text-xs uppercase tracking-widest text-cyan-300">Research Lab · Explore</p>
+              <h2 id="gallery-topic-title" className="mb-4 pr-8 text-2xl font-bold text-white sm:text-3xl">{galleryTopic}</h2>
+              <p className="mb-7 leading-7 text-slate-300">{({
+                "AI Intelligence":"Multi-agent AI research, autonomous workflows, intelligent decision support and evaluation pipelines built with Python and modern agent frameworks.",
+                "Quantum Research":"Hybrid quantum-classical research covering QAOA, VQE, quantum optimization and practical experiments with quantum computing tools.",
+                "Financial Innovation":"Data-driven financial research, portfolio optimization, risk analysis and AI-assisted quantitative workflows.",
+                "Blockchain":"Smart contract development, Ethereum and Solidity experiments, on-chain verification and decentralized application research.",
+                "Machine Learning":"Predictive modeling, data preparation, evaluation, neural networks and research-oriented machine learning experiments.",
+                "Super Charts & AI":"Interactive financial charts, market intelligence, quantitative signals and AI-powered research visualization."
+              } as Record<string,string>)[galleryTopic]}</p>
+              <Link to={({
+                "AI Intelligence":"/lab/python",
+                "Quantum Research":"/lab/finance",
+                "Financial Innovation":"/lab/finance",
+                "Blockchain":"/lab/blockchain",
+                "Machine Learning":"/lab/python",
+                "Super Charts & AI":"/lab/finance"
+              } as Record<string,string>)[galleryTopic]} onClick={()=>setGalleryTopic(null)} className="inline-flex items-center gap-2 rounded-lg border border-cyan-300/60 bg-cyan-400/15 px-5 py-3 font-semibold text-cyan-100 hover:bg-cyan-400/25">Explore research lab <ArrowUpRight className="size-4"/></Link>
+            </section>
+          </div>
+        )}
 
         {/* ABOUT + capability map */}
         <section id="about" className="border-b border-border px-5 py-24 sm:px-8 lg:py-32">
