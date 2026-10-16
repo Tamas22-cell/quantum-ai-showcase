@@ -34,7 +34,7 @@ function QuantumNetwork({ playing }: { playing: boolean }) {
     <defs><radialGradient id="dw-glow"><stop stopColor="#22d3ee" stopOpacity=".4"/><stop offset="1" stopColor="#22d3ee" stopOpacity="0"/></radialGradient></defs>
     <circle cx="50" cy="50" r="45" fill="url(#dw-glow)" />
     {nodes.map((n,i)=><g key={i}>
-      <line x1={n.x} y1={n.y} x2={nodes[(i+5)%16].x} y2={nodes[(i+5)%16].y} stroke="#22d3ee" strokeOpacity=".22" strokeWidth=".25"/>
+      <line x1={n.x} y1={n.y} x2={nodes[(i+5)%16]!.x} y2={nodes[(i+5)%16]!.y} stroke="#22d3ee" strokeOpacity=".22" strokeWidth=".25"/>
       <line x1={n.x} y1={n.y} x2="50" y2="50" stroke="#a78bfa" strokeOpacity=".28" strokeWidth=".25"/>
       <circle cx={n.x} cy={n.y} r="1.4" fill="#67e8f9"><animate attributeName="opacity" values={playing?"0.25;1;0.25":"1;1"} dur={`${1.6+i%5*.35}s`} repeatCount="indefinite"/></circle>
     </g>)}
