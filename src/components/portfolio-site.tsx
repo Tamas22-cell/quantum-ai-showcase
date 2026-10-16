@@ -572,6 +572,26 @@ export function PortfolioSite() {
                   Open quantum lab →
                 </p>
               </Link>
+            <div className="mt-7">
+              <div className="mb-3 flex items-center justify-between">
+                <h3 className="text-base font-semibold tracking-wide text-foreground">Research visual gallery</h3>
+                <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">AI · Quantum · Finance</span>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-3">
+                {[
+                  {src:"/quantum-ai-lab-social.png",alt:"AI and quantum research visualization",label:"AI Research"},
+                  {src:"/aspirin-neon.webp",alt:"Neon quantum molecular research visualization",label:"Quantum Discovery"},
+                  {src:"https://raw.githubusercontent.com/Tamas22-cell/quantum-ai-showcase/main/a17e2cec-4d93-49a6-bd06-6c663b1c857e.png",alt:"Quantum finance research artwork",label:"Quantum Finance"}
+                ].map((item)=>(
+                  <div key={item.label} className="group relative aspect-[16/10] overflow-hidden rounded-xl border border-fuchsia-400/25 bg-[#080b1c]">
+                    <img src={item.src} alt={item.alt} loading="lazy" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#050717] via-[#050717]/65 to-transparent px-4 pb-3 pt-10">
+                      <span className="font-mono text-xs font-medium tracking-wider text-white">{item.label}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
             </div>
           </div>
         </section>
