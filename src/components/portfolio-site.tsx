@@ -483,10 +483,17 @@ export function PortfolioSite() {
                 </defs>
                 {Array.from({length:6},(_,j)=>{const points=Array.from({length:101},(_,i)=>{const x=i*10;const y=130+Math.sin(i*.105+j*.65)* (34+j*7)+Math.cos(i*.052-j*.8)*25;return `${x},${y}`}).join(" ");return <g key={j}><polyline points={points} fill="none" stroke="url(#research-spectrum)" strokeWidth={j===2?8:4} opacity=".25" filter="url(#research-spectrum-glow)"/><polyline points={points} fill="none" stroke="url(#research-spectrum)" strokeWidth={j===2?3:1.5} opacity={.5+j*.075} strokeDasharray={j%2?"16 9":"none"} style={{animation:`research-spectrum-flow ${10+j*3}s linear infinite`}}/></g>})}
                 {Array.from({length:28},(_,i)=>{const x=25+i*36;const y=130+Math.sin(i*.44)*70;return <circle key={i} cx={x} cy={y} r={i%5===0?4:2} fill={["#fb7185","#e879f9","#38bdf8","#34d399","#facc15"][i%5]} style={{animation:`research-spectrum-twinkle ${2+i%4}s ease-in-out infinite`}}/>})}
+                {/* Three extra independently moving depth layers, with warm and cool colors. */}
+                <g style={{animation:"research-depth-drift 16s ease-in-out infinite"}}>
+                  {Array.from({length:5},(_,j)=><ellipse key={j} cx={500+j*17-34} cy={130+j*6-12} rx={135+j*38} ry={24+j*13} transform={`rotate(${j*17-33} 500 130)`} fill="none" stroke={["#22d3ee","#f472b6","#facc15","#a78bfa","#34d399"][j]} strokeWidth={j===0?3:1.6} strokeOpacity={.72-j*.08}/>)}
+                </g>
+                <g style={{animation:"research-depth-drift-reverse 22s ease-in-out infinite"}}>
+                  {Array.from({length:4},(_,j)=><path key={j} d={`M -50 ${65+j*43} C 210 ${-20+j*35}, 350 ${270-j*27}, 550 ${115+j*15} S 850 ${65+j*35}, 1050 ${180-j*21}`} fill="none" stroke={["#ff4fa3","#38bdf8","#a3e635","#f59e0b"][j]} strokeWidth={2.6-j*.3} strokeOpacity=".58"/>)}
+                </g>
                 <path d="M0 215 Q250 175 500 220 T1000 200" fill="none" stroke="#a78bfa" strokeWidth="1" opacity=".35"/>
               </svg>
               <div className="absolute bottom-3 left-4 font-mono text-[10px] uppercase tracking-[.24em] text-pink-200/80 sm:left-6">AI <span className="text-sky-300">/ Finance</span> <span className="text-amber-200">/ Quantum</span></div>
-              <style>{`@keyframes research-spectrum-flow{to{stroke-dashoffset:-300}}@keyframes research-spectrum-twinkle{0%,100%{opacity:.3;transform:scale(.75)}50%{opacity:1;transform:scale(1.3)}}@media(prefers-reduced-motion:reduce){svg [style*="research-spectrum"]{animation:none!important}}`}</style>
+              <style>{`@keyframes research-depth-drift{0%,100%{transform:translateY(-7px) rotate(-2deg)}50%{transform:translateY(8px) rotate(2deg)}}@keyframes research-depth-drift-reverse{0%,100%{transform:translateX(-15px)}50%{transform:translateX(18px)}}@keyframes research-spectrum-flow{to{stroke-dashoffset:-300}}@keyframes research-spectrum-twinkle{0%,100%{opacity:.3;transform:scale(.75)}50%{opacity:1;transform:scale(1.3)}}@media(prefers-reduced-motion:reduce){svg [style*="research-spectrum"],svg [style*="research-depth"]{animation:none!important}}`}</style>
             </div>
 
             <div className="grid gap-4 md:grid-cols-3">
