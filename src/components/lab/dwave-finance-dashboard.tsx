@@ -79,6 +79,9 @@ export function DwaveFinanceDashboard() {
       </dl>
     </header>
 
+    <section className="mt-8 overflow-hidden rounded-2xl border border-cyan-400/40 bg-[#061126] shadow-[0_0_35px_rgba(34,211,238,.12)]" aria-label="D-Wave quantum finance artwork">
+      <img src="https://raw.githubusercontent.com/Tamas22-cell/quantum-ai-showcase/main/a17e2cec-4d93-49a6-bd06-6c663b1c857e.png" alt="D-Wave Quantum Finance research visualization" loading="lazy" className="block h-auto w-full" />
+    </section>
     <LiveQuantumShowcase running={animated} />
 
 
