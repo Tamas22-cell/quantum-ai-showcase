@@ -20,3 +20,6 @@
 - [x] C5 — Research Report Generator (/lab/reports): client-side jsPDF reports for all 7 labs, 13 tests.
 - [x] Python Research Lab (/lab/python, Pyodide worker, presets, history save, Python card + C10).
 - [x] Blockchain Research Lab (/lab/blockchain, C11, Blockchain card link, history save).
+- [x] i18n audit: expanded centralized dictionaries (hu/de/fr/it) for hero, marquee, showcases, lab dashboard, assistant, footer; English default + localStorage persistence verified
+- [x] Fixed pre-existing typecheck errors in dwave-finance-dashboard.tsx and d-wave.tsx
+- [ ] Live preview dev server still returns HTTP 500 (pre-existing Nitro dev-entry issue); verified via local production build preview instead
