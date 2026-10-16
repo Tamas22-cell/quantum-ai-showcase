@@ -79,8 +79,12 @@ export function DwaveFinanceDashboard() {
       </dl>
     </header>
 
-    <section className="mt-8 overflow-hidden rounded-2xl border border-cyan-400/40 bg-[#061126] shadow-[0_0_35px_rgba(34,211,238,.12)]" aria-label="Quantum finance showcase artwork">
+    <section className="relative mt-8 overflow-hidden rounded-2xl border border-cyan-400/40 bg-[#061126] shadow-[0_0_35px_rgba(34,211,238,.12)]" aria-label="Quantum finance showcase artwork">
       <img src="https://raw.githubusercontent.com/Tamas22-cell/quantum-ai-showcase/a69aef46841bdf8b6bcaa12dc60f279f7302ee5e/a17e2cec-4d93-49a6-bd06-6c663b1c857e.png" alt="Futuristic cyan and violet D-Wave Quantum Finance concept artwork" loading="lazy" className="block h-auto w-full" />
+      {/* The old concept artwork contains a prominent embedded disclaimer banner.
+          Soften only that portion of the decorative image; the real interactive
+          charts and the accurate disclosure below remain untouched. */}
+      <div aria-hidden="true" className="pointer-events-none absolute left-[6%] top-[37%] h-[12%] w-[48%] rounded-xl bg-[#082c4c]/65 backdrop-blur-xl" />
     </section>
     <LiveQuantumShowcase running={animated} />
 
