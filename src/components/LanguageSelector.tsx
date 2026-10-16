@@ -109,12 +109,39 @@ for (const [hu, values] of Object.entries(photographedLabels)) {
 const normalizedTranslation = (key: string, language: Language): string | undefined => {
   if (dictionary[language][key]) return dictionary[language][key];
   const english = Object.entries(dictionary.hu).find(([,value]) => value === key)?.[0]
-    ?? Object.entries(photographedLabels).find(([,values]) => values.includes(key))?.[1][0]
+    ?? Object.entries({...photographedLabels,...additionalPhotoTranslations}).find(([,values]) => values.includes(key))?.[1][0]
     ?? Object.entries(dictionary).flatMap(([,entries]) => Object.entries(entries)).find(([,value]) => value === key)?.[0];
   if (!english) return undefined;
   if (language === "en") return english;
   return dictionary[language][english] ?? dictionary[language][key];
 };
+
+
+const additionalPhotoTranslations: Record<string, [string,string,string,string]> = {
+ "Gyógyszerkutatás Lab":["Drug Discovery Lab","Arzneimittelforschungslabor","Laboratoire de découverte de médicaments","Laboratorio di scoperta di farmaci"],
+ "A jövője: Kvantumszámítástechnika":["The Future of Quantum Computing","Die Zukunft des Quantencomputings","L’avenir de l’informatique quantique","Il futuro dell’informatica quantistica"],
+ "Kvantumprocesszor":["Quantum Processor","Quantenprozessor","Processeur quantique","Processore quantistico"],
+ "KUTATÓLABOR":["RESEARCH LAB","FORSCHUNGSLABOR","LABORATOIRE DE RECHERCHE","LABORATORIO DI RICERCA"],
+ "Kutatólabor":["Research Lab","Forschungslabor","Laboratoire de recherche","Laboratorio di ricerca"],
+ "Kutatási irányok":["Research Directions","Forschungsrichtungen","Axes de recherche","Direzioni di ricerca"],
+ "Kvantumos közelítő optimalizálás":["Quantum Approximate Optimization","Quantenapproximationsoptimierung","Optimisation quantique approchée","Ottimizzazione quantistica approssimata"],
+ "Variációs kvantum sajátérték-megoldó":["Variational Quantum Eigensolver","Variationaler Quanten-Eigenwertlöser","Solveur variationnel quantique de valeurs propres","Risolutore quantistico variazionale degli autovalori"],
+ "Kvantumszoftveres munkafolyamatok":["Quantum Software Workflows","Quanten-Software-Workflows","Flux de travail logiciels quantiques","Flussi di lavoro software quantistici"],
+ "Hibrid algoritmusok":["Hybrid Algorithms","Hybride Algorithmen","Algorithmes hybrides","Algoritmi ibridi"],
+ "Kutatási impulzus indítása":["Launch Research Pulse","Forschungsimpuls starten","Lancer une impulsion de recherche","Avvia impulso di ricerca"],
+ "Kvantumlabort megnyitása":["Open Quantum Lab","Quantenlabor öffnen","Ouvrir le laboratoire quantique","Apri il laboratorio quantistico"],
+ "Kutatási platform":["Research Platform","Forschungsplattform","Plateforme de recherche","Piattaforma di ricerca"],
+ "Kutatás felfedezése":["Explore Research","Forschung erkunden","Explorer la recherche","Esplora la ricerca"],
+ "Kvantumszámítástechnikai kutató":["Quantum Computing Researcher","Quantencomputing-Forscher","Chercheur en informatique quantique","Ricercatore in informatica quantistica"],
+ "Kvantumelőny":["Quantum Advantage","Quantenvorteil","Avantage quantique","Vantaggio quantistico"],
+ "Tanúsítványok":["Credentials","Zertifikate","Certifications","Certificazioni"],
+ "Belépés / Regisztráció":["Sign In / Sign Up","Anmelden / Registrieren","Connexion / Inscription","Accesso / Registrazione"],
+ "Kutatási kérdés":["Research Question","Forschungsfrage","Question de recherche","Domanda di ricerca"],
+ "Kvantumportfólió-optimalizáló":["Quantum Portfolio Optimizer","Quantenportfolio-Optimierer","Optimiseur de portefeuille quantique","Ottimizzatore di portafoglio quantistico"]
+};
+for (const [hu, values] of Object.entries(additionalPhotoTranslations)) {
+  (["en","de","fr","it"] as const).forEach((code, index) => { dictionary[code][hu] = values[index]; });
+}
 
 const originalText = new WeakMap<Text, string>();
 const originalAttrs = new WeakMap<Element, Map<string, string>>();
@@ -152,7 +179,7 @@ export function LanguageSelector() {
           const upperKey = Object.keys(dictionary[language] ?? {}).find(k => k.toUpperCase() === key.toUpperCase());
           const translation = exact ?? (upperKey ? (key === key.toUpperCase() ? dictionary[language]?.[upperKey]?.toUpperCase() : dictionary[language]?.[upperKey]) : undefined);
           const restoreEnglish = isEnglishOnlyLab(node.parentElement);
-          const sourceEnglish = Object.entries(dictionary).flatMap(([, entries]) => Object.entries(entries)).find(([, value]) => value === key)?.[0];
+          const sourceEnglish = normalizedTranslation(key, "en");
           const next = restoreEnglish ? (sourceEnglish ? original.replace(key, sourceEnglish) : original) : (translation ? original.replace(key, translation) : original);
           if (el.textContent !== next) el.textContent = next;
         }
