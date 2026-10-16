@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as DWaveRouteImport } from './routes/d-wave'
 import { Route as Web3TerminalRouteImport } from './routes/web3-terminal'
 import { Route as LabIndexRouteImport } from './routes/lab.index'
 import { Route as LabAiRouteImport } from './routes/lab.ai'
@@ -69,6 +70,11 @@ const AccountRoute = AccountRouteImport.update({
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DWaveRoute = DWaveRouteImport.update({
+  id: '/d-wave',
+  path: '/d-wave',
   getParentRoute: () => rootRouteImport,
 } as any)
 const Web3TerminalRoute = Web3TerminalRouteImport.update({
@@ -297,6 +303,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
   '/admin': typeof AdminRoute
+  '/d-wave': typeof DWaveRoute
   '/web3-terminal': typeof Web3TerminalRoute
   '/lab/ai': typeof LabAiRouteWithChildren
   '/lab/arena': typeof LabArenaRoute
@@ -345,6 +352,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
   '/admin': typeof AdminRoute
+  '/d-wave': typeof DWaveRoute
   '/web3-terminal': typeof Web3TerminalRoute
   '/lab/arena': typeof LabArenaRoute
   '/lab/assistant': typeof LabAssistantRoute
@@ -393,6 +401,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
   '/admin': typeof AdminRoute
+  '/d-wave': typeof DWaveRoute
   '/web3-terminal': typeof Web3TerminalRoute
   '/lab/ai': typeof LabAiRouteWithChildren
   '/lab/arena': typeof LabArenaRoute
@@ -443,6 +452,7 @@ export interface FileRouteTypes {
     | '/'
     | '/account'
     | '/admin'
+    | '/d-wave'
     | '/web3-terminal'
     | '/lab/ai'
     | '/lab/arena'
@@ -491,6 +501,7 @@ export interface FileRouteTypes {
     | '/'
     | '/account'
     | '/admin'
+    | '/d-wave'
     | '/web3-terminal'
     | '/lab/arena'
     | '/lab/assistant'
@@ -538,6 +549,7 @@ export interface FileRouteTypes {
     | '/'
     | '/account'
     | '/admin'
+    | '/d-wave'
     | '/web3-terminal'
     | '/lab/ai'
     | '/lab/arena'
@@ -587,6 +599,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AccountRoute: typeof AccountRoute
   AdminRoute: typeof AdminRoute
+  DWaveRoute: typeof DWaveRoute
   Web3TerminalRoute: typeof Web3TerminalRoute
   LabAiRoute: typeof LabAiRouteWithChildren
   LabArenaRoute: typeof LabArenaRoute
@@ -643,6 +656,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/d-wave': {
+      id: '/d-wave'
+      path: '/d-wave'
+      fullPath: '/d-wave'
+      preLoaderRoute: typeof DWaveRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/web3-terminal': {
@@ -981,6 +1001,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AccountRoute: AccountRoute,
   AdminRoute: AdminRoute,
+  DWaveRoute: DWaveRoute,
   Web3TerminalRoute: Web3TerminalRoute,
   LabAiRoute: LabAiRouteWithChildren,
   LabArenaRoute: LabArenaRoute,
