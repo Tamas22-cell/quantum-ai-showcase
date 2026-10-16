@@ -208,6 +208,48 @@ for (const [hu,en] of Object.entries(englishUiCorrections)) {
  dictionary.en[hu.toUpperCase()]=en.toUpperCase();
 }
 
+// Photo-verified labels: canonical English equivalents for legacy Hungarian UI.
+const remainingEnglishLabels: Record<string, string> = {
+  "KRIPTOPIACI ELEMZÉS":"CRYPTO MARKET ANALYSIS",
+  "AI-ÜGYNÖKÖK":"AI AGENTS",
+  "PÉNZÜGYI KUTATÁS":"FINANCIAL RESEARCH",
+  "TÖBBÜGYNÖKÖS AI":"MULTI-AGENT AI",
+  "KUTATÁS":"RESEARCH",
+  "KVANTUMPÉNZÜGY":"QUANTUM FINANCE",
+  "PORTFÓLIÓOPTIMALIZÁLÁS":"PORTFOLIO OPTIMIZATION",
+  "ÉLŐ PROJEKT MEGNYITÁSA":"OPEN LIVE PROJECT",
+  "GRAFIKON MEGNYITÁSA":"OPEN CHART",
+  "KUTATÁSI IMPULZUS INDÍTÁSA":"LAUNCH RESEARCH PULSE",
+  "KUTATÁSI TERÜLET":"RESEARCH AREA",
+  "ÜGYNÖKKOORDINÁCIÓ":"AGENT COORDINATION",
+  "AI pénzügyi kutatási platform":"AI Financial Research Platform",
+  "Többügynökös AI":"Multi-Agent AI",
+  "Kvantumportfólió-optimalizáló":"Quantum Portfolio Optimizer",
+  "BTC, ETH és SOL élő piaci grafikonok, gyertyák, RSI, MACD, Bollinger-szalagok és forgalom.":"Live BTC, ETH and SOL market charts, candlesticks, RSI, MACD, Bollinger Bands and volume.",
+  "AI pénzügyi kutatás":"AI Financial Research",
+  "Hibrid algoritmusok":"Hybrid Algorithms",
+  "Kutatási impulzus indítása":"Launch Research Pulse",
+  "Kvantumlabor megnyitása":"Open Quantum Lab",
+  "Élő projekt megnyitása":"Open Live Project",
+  "Grafikon megnyitása":"Open Chart",
+};
+for (const [hu, en] of Object.entries(remainingEnglishLabels)) dictionary.en[hu] = en;
+
+// Translate either original English or previously translated localized content.
+const canonicalEnglish = (text: string): string => {
+  if (dictionary.en[text]) return dictionary.en[text];
+  for (const code of ["hu","de","fr","it"] as const) {
+    for (const [english, localized] of Object.entries(dictionary[code])) {
+      if (localized === text) return english;
+    }
+  }
+  return text;
+};
+const localizedText = (text: string, language: Language): string => {
+  const english = canonicalEnglish(text);
+  return language === "en" ? english : (dictionary[language][english] ?? dictionary[language][text] ?? english);
+};
+
 const originalText = new WeakMap<Text, string>();
 const originalAttrs = new WeakMap<Element, Map<string, string>>();
 
@@ -237,15 +279,13 @@ export function LanguageSelector() {
           const el = node as Text;
           const current = el.textContent ?? "";
           const cached = originalText.get(el);
-          const original = cached === undefined || (current !== cached && !Object.values(dictionary).some(d => Object.entries(d).some(([key, translated]) => current.trim() === translated || current.trim() === key))) ? current : cached;
+          // React can replace the text on re-render; retain its canonical source.
+          const original = cached !== undefined && localizedText(cached, language) === current
+            ? cached : current;
           originalText.set(el, original);
           const key = original.trim();
-          const exact = normalizedTranslation(key, language);
-          const upperKey = Object.keys(dictionary[language] ?? {}).find(k => k.toUpperCase() === key.toUpperCase());
-          const translation = exact ?? (upperKey ? (key === key.toUpperCase() ? dictionary[language]?.[upperKey]?.toUpperCase() : dictionary[language]?.[upperKey]) : undefined);
-          const restoreEnglish = isEnglishOnlyLab(node.parentElement);
-          const sourceEnglish = normalizedTranslation(key, "en");
-          const next = restoreEnglish ? (sourceEnglish ? original.replace(key, sourceEnglish) : original) : (translation ? original.replace(key, translation) : original);
+          const next = original.replace(key, isEnglishOnlyLab(node.parentElement)
+            ? canonicalEnglish(key) : localizedText(key, language));
           if (el.textContent !== next) el.textContent = next;
         }
       });
@@ -260,9 +300,7 @@ export function LanguageSelector() {
           if (cachedAttr === undefined || (currentAttr !== cachedAttr && !Object.values(dictionary).some(d => Object.entries(d).some(([key, value]) => currentAttr.trim() === value || currentAttr.trim() === key)))) originals.set(attr, currentAttr);
           const original = originals.get(attr) ?? "";
           const key = original.trim();
-          const translated = normalizedTranslation(key, language);
-          const sourceEnglish = Object.entries(dictionary).flatMap(([, entries]) => Object.entries(entries)).find(([, value]) => value === key)?.[0];
-          const next = isEnglishOnlyLab(el) ? (sourceEnglish ? original.replace(key, sourceEnglish) : original) : (translated ? original.replace(key, translated) : original);
+          const next = original.replace(key, isEnglishOnlyLab(el) ? canonicalEnglish(key) : localizedText(key, language));
           if (el.getAttribute(attr) !== next) el.setAttribute(attr, next);
         }
       });
