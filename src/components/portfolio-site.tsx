@@ -694,16 +694,13 @@ export function PortfolioSite() {
               <p className="font-mono text-[11px] uppercase tracking-[.2em] text-fuchsia-400">Research gallery</p>
               <h2 className="mt-2 text-2xl font-semibold text-foreground sm:text-3xl">AI &amp; Quantum Visions</h2>
             </div>
-            <div className="grid gap-5 lg:grid-cols-2">
+            <div className="grid gap-7">
               {[
-                {src:"https://raw.githubusercontent.com/Tamas22-cell/quantum-ai-showcase/main/cc720d50-073d-46f9-9378-1e97226c39b2.png",label:"AI Research",alt:"AI research artwork"},
-                {src:"https://raw.githubusercontent.com/Tamas22-cell/quantum-ai-showcase/main/fa39176a-5b1c-43f6-a705-0760ddae19c7.png",label:"Quantum Innovation",alt:"Quantum innovation artwork"}
+                {src:"https://raw.githubusercontent.com/Tamas22-cell/quantum-ai-showcase/main/cc720d50-073d-46f9-9378-1e97226c39b2.png",alt:"AI research visual presentation"},
+                {src:"https://raw.githubusercontent.com/Tamas22-cell/quantum-ai-showcase/main/fa39176a-5b1c-43f6-a705-0760ddae19c7.png",alt:"Quantum innovation visual presentation"}
               ].map((item)=>(
-                <figure key={item.src} className="group relative min-h-72 overflow-hidden rounded-2xl border border-fuchsia-400/35 bg-[#060b20] shadow-[0_0_40px_rgba(139,92,246,.12)] sm:min-h-[370px]">
-                  <img src={item.src} alt={item.alt} loading="lazy" className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"/>
-                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#050718]/90 via-[#050718]/35 to-transparent px-6 pb-5 pt-20">
-                    <figcaption className="font-mono text-sm font-semibold tracking-widest text-white">{item.label}</figcaption>
-                  </div>
+                <figure key={item.src} className="overflow-hidden rounded-2xl border border-fuchsia-400/35 bg-[#060b20] p-1 shadow-[0_0_40px_rgba(139,92,246,.12)] sm:p-2">
+                  <img src={item.src} alt={item.alt} loading="lazy" className="block h-auto w-full object-contain" />
                 </figure>
               ))}
             </div>
