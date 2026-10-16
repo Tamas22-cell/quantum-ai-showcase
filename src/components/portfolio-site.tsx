@@ -473,34 +473,20 @@ export function PortfolioSite() {
               </span>
             </div>
 
-            {/* Animated quantum orb: self-contained SVG, no external assets. */}
-            <div aria-hidden="true" className="relative mb-6 h-56 overflow-hidden rounded-2xl border border-cyan-400/30 bg-[#030b1e] shadow-[inset_0_0_65px_rgba(34,211,238,.12),0_0_32px_rgba(124,58,237,.12)] sm:h-72">
-              <div className="absolute inset-0" style={{background:"radial-gradient(ellipse at 50% 52%,rgba(8,145,178,.23),transparent 48%),radial-gradient(ellipse at 70% 40%,rgba(139,92,246,.14),transparent 56%)"}}/>
-              <svg className="absolute inset-0 h-full w-full" viewBox="0 0 1000 300" preserveAspectRatio="xMidYMid meet" focusable="false">
+            {/* Colorful animated research spectrum: intentionally distinct from the quantum orb elsewhere. */}
+            <div aria-hidden="true" className="relative mb-6 h-52 overflow-hidden rounded-2xl border border-fuchsia-400/35 bg-[#09071b] shadow-[0_0_32px_rgba(217,70,239,.14)] sm:h-64">
+              <div className="absolute inset-0" style={{background:"radial-gradient(ellipse at 16% 55%,rgba(236,72,153,.22),transparent 40%),radial-gradient(ellipse at 50% 55%,rgba(14,165,233,.2),transparent 43%),radial-gradient(ellipse at 86% 50%,rgba(250,204,21,.18),transparent 42%)"}}/>
+              <svg viewBox="0 0 1000 260" preserveAspectRatio="xMidYMid slice" className="absolute inset-0 h-full w-full" focusable="false">
                 <defs>
-                  <radialGradient id="research-orb-core"><stop stopColor="#c4b5fd" stopOpacity=".85"/><stop offset=".24" stopColor="#22d3ee" stopOpacity=".32"/><stop offset="1" stopColor="#0891b2" stopOpacity=".025"/></radialGradient>
-                  <linearGradient id="research-orb-line"><stop stopColor="#22d3ee" stopOpacity=".15"/><stop offset=".5" stopColor="#a78bfa" stopOpacity=".95"/><stop offset="1" stopColor="#22d3ee" stopOpacity=".15"/></linearGradient>
-                  <filter id="research-orb-glow"><feGaussianBlur stdDeviation="5"/></filter>
+                  <linearGradient id="research-spectrum" x1="0" y1="0" x2="1" y2="0"><stop stopColor="#fb7185"/><stop offset=".22" stopColor="#e879f9"/><stop offset=".48" stopColor="#38bdf8"/><stop offset=".72" stopColor="#34d399"/><stop offset="1" stopColor="#facc15"/></linearGradient>
+                  <filter id="research-spectrum-glow"><feGaussianBlur stdDeviation="9"/></filter>
                 </defs>
-                {Array.from({length:45},(_,i)=><circle key={i} cx={(i*137+39)%1000} cy={(i*83+31)%300} r={i%5===0?1.7:.85} fill={i%3===0?"#c4b5fd":"#67e8f9"} opacity={.2+(i%5)*.13}/>)}
-                <circle cx="500" cy="150" r="112" fill="url(#research-orb-core)" filter="url(#research-orb-glow)" opacity=".75"/>
-                <circle cx="500" cy="150" r="89" fill="none" stroke="#67e8f9" strokeWidth="1" opacity=".28"/>
-                <g stroke="url(#research-orb-line)" fill="none" strokeWidth="1.4" style={{transformOrigin:"500px 150px",animation:"research-orb-spin 18s linear infinite"}}>
-                  <ellipse cx="500" cy="150" rx="136" ry="55" transform="rotate(-30 500 150)"/>
-                  <ellipse cx="500" cy="150" rx="136" ry="55" transform="rotate(30 500 150)"/>
-                  <ellipse cx="500" cy="150" rx="136" ry="55" transform="rotate(90 500 150)"/>
-                  <ellipse cx="500" cy="150" rx="97" ry="97" strokeDasharray="3 9" opacity=".65"/>
-                </g>
-                <g style={{transformOrigin:"500px 150px",animation:"research-orb-spin-reverse 25s linear infinite"}} fill="none" stroke="#22d3ee" opacity=".7">
-                  <ellipse cx="500" cy="150" rx="170" ry="72" transform="rotate(18 500 150)" strokeWidth="1" strokeDasharray="10 11"/>
-                  <ellipse cx="500" cy="150" rx="170" ry="72" transform="rotate(-18 500 150)" strokeWidth=".8" opacity=".5"/>
-                </g>
-                <circle cx="500" cy="150" r="33" fill="url(#research-orb-core)" style={{animation:"research-orb-pulse 4s ease-in-out infinite"}}/>
-                <circle cx="500" cy="150" r="7" fill="#cffafe" filter="url(#research-orb-glow)"/>
-                {Array.from({length:16},(_,i)=>{const angle=i*Math.PI*2/16;const x=500+Math.cos(angle)*115;const y=150+Math.sin(angle)*80;return <g key={i}><line x1="500" y1="150" x2={x} y2={y} stroke="#22d3ee" strokeOpacity=".18"/><circle cx={x} cy={y} r={i%4===0?3.2:2} fill={i%3===0?"#c4b5fd":"#67e8f9"} style={{animation:`research-orb-pulse ${2.5+i%4}s ease-in-out infinite`}}/></g>})}
+                {Array.from({length:6},(_,j)=>{const points=Array.from({length:101},(_,i)=>{const x=i*10;const y=130+Math.sin(i*.105+j*.65)* (34+j*7)+Math.cos(i*.052-j*.8)*25;return `${x},${y}`}).join(" ");return <g key={j}><polyline points={points} fill="none" stroke="url(#research-spectrum)" strokeWidth={j===2?8:4} opacity=".25" filter="url(#research-spectrum-glow)"/><polyline points={points} fill="none" stroke="url(#research-spectrum)" strokeWidth={j===2?3:1.5} opacity={.5+j*.075} strokeDasharray={j%2?"16 9":"none"} style={{animation:`research-spectrum-flow ${10+j*3}s linear infinite`}}/></g>})}
+                {Array.from({length:28},(_,i)=>{const x=25+i*36;const y=130+Math.sin(i*.44)*70;return <circle key={i} cx={x} cy={y} r={i%5===0?4:2} fill={["#fb7185","#e879f9","#38bdf8","#34d399","#facc15"][i%5]} style={{animation:`research-spectrum-twinkle ${2+i%4}s ease-in-out infinite`}}/>})}
+                <path d="M0 215 Q250 175 500 220 T1000 200" fill="none" stroke="#a78bfa" strokeWidth="1" opacity=".35"/>
               </svg>
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#030b1e]/45 via-transparent to-[#030b1e]/45"/>
-              <style>{`@keyframes research-orb-spin{to{transform:rotate(360deg)}}@keyframes research-orb-spin-reverse{to{transform:rotate(-360deg)}}@keyframes research-orb-pulse{0%,100%{opacity:.45}50%{opacity:1}}@media(prefers-reduced-motion:reduce){svg [style*="research-orb"]{animation:none!important}}`}</style>
+              <div className="absolute bottom-3 left-4 font-mono text-[10px] uppercase tracking-[.24em] text-pink-200/80 sm:left-6">AI <span className="text-sky-300">/ Finance</span> <span className="text-amber-200">/ Quantum</span></div>
+              <style>{`@keyframes research-spectrum-flow{to{stroke-dashoffset:-300}}@keyframes research-spectrum-twinkle{0%,100%{opacity:.3;transform:scale(.75)}50%{opacity:1;transform:scale(1.3)}}@media(prefers-reduced-motion:reduce){svg [style*="research-spectrum"]{animation:none!important}}`}</style>
             </div>
 
             <div className="grid gap-4 md:grid-cols-3">
