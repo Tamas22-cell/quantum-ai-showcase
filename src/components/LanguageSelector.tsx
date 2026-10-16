@@ -91,7 +91,7 @@ export function LanguageSelector() {
     localStorage.setItem("quantum-lab-language", language);
     const translate = () => {
       // Keep lab content in English; site navigation remains multilingual.
-      const isLabPage = window.location.pathname.startsWith("/lab/");
+      const isLabPage = (window.location.pathname === "/lab" || window.location.pathname.startsWith("/lab/"));
       const isEnglishOnlyLab = (element: Element | null) =>
         Boolean(element?.closest("#quantum-lab, [data-lab-english-only]")) ||
         (isLabPage && Boolean(element?.closest("main")));
