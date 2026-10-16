@@ -287,7 +287,7 @@ Object.assign(dictionary.it, {
 // Final pass: arrow CTAs, roadmap heading and hero byline.
 Object.assign(dictionary.hu, {
 "Open AI research →":"AI-kutatás megnyitása →","Open finance lab →":"Pénzügyi labor megnyitása →","Open quantum lab →":"Kvantumlabor megnyitása →",
-"The Future of":"A kvantumszámítástechnika","Explore scientific milestones rather than fixed predictions. Select a stage to learn what matters next.":"Fedezze fel a tudományos mérföldköveket rögzített jóslatok helyett. Válasszon egy szakaszt, és nézze meg, mi jön ezután.","Quantum AI Research Lab · Interactive outlook":"Quantum AI Research Lab · Interaktív kilátások","/ Researcher":"/ Kutató","OPEN LAB →":"LABOR MEGNYITÁSA →",
+"The Future of":"A jövő:","Explore scientific milestones rather than fixed predictions. Select a stage to learn what matters next.":"Fedezze fel a tudományos mérföldköveket rögzített jóslatok helyett. Válasszon egy szakaszt, és nézze meg, mi jön ezután.","Quantum AI Research Lab · Interactive outlook":"Quantum AI Research Lab · Interaktív kilátások","/ Researcher":"/ Kutató","OPEN LAB →":"LABOR MEGNYITÁSA →",
 });
 Object.assign(dictionary.de, {
 "Open AI research →":"KI-Forschung öffnen →","Open finance lab →":"Finanzlabor öffnen →","Open quantum lab →":"Quantenlabor öffnen →",
