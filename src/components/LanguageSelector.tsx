@@ -237,13 +237,14 @@ for (const [hu, en] of Object.entries(remainingEnglishLabels)) dictionary.en[hu]
 
 // Translate either original English or previously translated localized content.
 const canonicalEnglish = (text: string): string => {
-  if (dictionary.en[text]) return dictionary.en[text];
+  // Resolve translated text to its original English key first. Some Hungarian
+  // values (e.g. Rólam) are also keys in the legacy English correction map.
   for (const code of ["hu","de","fr","it"] as const) {
     for (const [english, localized] of Object.entries(dictionary[code])) {
-      if (localized === text) return english;
+      if (localized === text && english !== text) return english;
     }
   }
-  return text;
+  return dictionary.en[text] ?? text;
 };
 const localizedText = (text: string, language: Language): string => {
   const english = canonicalEnglish(text);
