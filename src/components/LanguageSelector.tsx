@@ -143,6 +143,42 @@ for (const [hu, values] of Object.entries(additionalPhotoTranslations)) {
   (["en","de","fr","it"] as const).forEach((code, index) => { dictionary[code][hu] = values[index]; });
 }
 
+
+const finalPhotoTranslations: Record<string, string> = {
+ "Autonóm AI-rendszerek": "Autonomous AI Systems",
+ "Autonóm AI-rendszerek.": "Autonomous AI Systems.",
+ "Kvantumpénzügyek": "Quantum Finance",
+ "Többügynökös koordináció pénzügyi kutatási munkafolyamatok és ellenőrizhető döntéstámogatás.": "Multi-agent coordination for financial research workflows and auditable decision support.",
+ "Portfólióoptimalizálás, stressztesztek és hibrid klasszikus-kvantum pénzügyi kísérletek.": "Portfolio optimization, stress testing, and hybrid classical-quantum finance experiments.",
+ "AI-ügynökök": "AI Agents",
+ "Hibrid intelligencia topológiája": "Hybrid Intelligence Topology",
+ "KUTATÁSI TERÜLET": "RESEARCH AREA",
+ "ÜGYNÖKKOORDINÁCIÓ": "AGENT COORDINATION",
+ "QML-JEL": "QML SIGNAL",
+ "IMPULZUSRA VÁR": "AWAITING PULSE",
+ "HELYI INTERAKTÍV SZIMULÁCIÓ": "LOCAL INTERACTIVE SIMULATION",
+ "KUTATÁSI VIZUALIZÁCIÓ": "RESEARCH VISUALIZATION",
+ "NEM ÁLLÍT KVANTUMELŐNYT": "NO CLAIM OF QUANTUM ADVANTAGE",
+ "AI-ügynökök koordinációja": "AI Agent Coordination",
+ "Kvantitatív pénzügyek": "Quantitative Finance",
+ "Kvantumszámítástechnika": "Quantum Computing",
+ "Hibrid algoritmusok": "Hybrid Algorithms",
+ "AI PÉNZÜGYI KUTATÁSI PLATFORM": "AI FINANCIAL RESEARCH PLATFORM",
+ "PÉNZÜGYI KUTATÁS": "FINANCIAL RESEARCH",
+ "KUTATÁS": "RESEARCH",
+ "KRIPTOPIACI ELEMZÉS": "CRYPTO MARKET ANALYSIS",
+ "TANÚSÍTVÁNYOK": "CREDENTIALS",
+ "KAPCSOLAT": "CONTACT",
+ "RÓLAM": "ABOUT",
+ "PROJEKTEK": "PROJECTS",
+ "KVANTUMLABOR": "QUANTUM LAB",
+ "BELÉPÉS / REGISZTRÁCIÓ": "SIGN IN / SIGN UP",
+ "Kvantumportfólió-optimalizáló": "Quantum Portfolio Optimizer"
+};
+for (const [hu, en] of Object.entries(finalPhotoTranslations)) {
+  dictionary.en[hu] = en;
+}
+
 const originalText = new WeakMap<Text, string>();
 const originalAttrs = new WeakMap<Element, Map<string, string>>();
 
