@@ -4,5 +4,5 @@ import path from "node:path";
 // Standalone test config (the app's vite config loads SSR/worker plugins not needed for unit tests).
 export default defineConfig({
   resolve: { alias: { "@": path.resolve(__dirname, "src") } },
-  test: { include: ["src/**/*.test.ts"], environment: "node" },
+  test: { include: ["src/**/*.test.ts", "web3-terminal-test/**/*.test.ts"], environment: "node" },
 });
