@@ -20,8 +20,12 @@ test("no horizontal document overflow on mobile", async ({ page, isMobile }) => 
 test("mobile navigation opens and Escape closes", async ({ page, isMobile }) => {
   test.skip(!isMobile, "Mobile viewport only");
   await page.goto("/");
-  // Wait for client hydration so the first click is handled by React, not static SSR markup.
-  await page.waitForLoadState("networkidle");
+  // SSR can paint the menu button before React attaches its click handler.
+  // Wait for React to attach props to this particular control before interacting.
+  await page.waitForFunction(() => {
+    const button = document.querySelector('button[aria-controls="mobile-navigation"]');
+    return button && Object.keys(button).some((key) => key.startsWith("__reactProps$"));
+  });
   const trigger = page.locator('button[aria-controls="mobile-navigation"]');
   await expect(trigger).toHaveAttribute("aria-expanded", "false");
   await trigger.click();
