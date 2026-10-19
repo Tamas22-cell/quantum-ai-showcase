@@ -20,7 +20,9 @@ test("no horizontal document overflow on mobile", async ({ page, isMobile }) => 
 test("mobile navigation opens and Escape closes", async ({ page, isMobile }) => {
   test.skip(!isMobile, "Mobile viewport only");
   await page.goto("/");
-  // Wait for client hydration so the first click is handled by React, not static SSR markup.\n  await page.waitForLoadState("networkidle");\n  const trigger = page.locator('button[aria-controls="mobile-navigation"]');
+  // Wait for client hydration so the first click is handled by React, not static SSR markup.
+  await page.waitForLoadState("networkidle");
+  const trigger = page.locator('button[aria-controls="mobile-navigation"]');
   await expect(trigger).toHaveAttribute("aria-expanded", "false");
   await trigger.click();
   await expect(trigger).toHaveAttribute("aria-expanded", "true");
