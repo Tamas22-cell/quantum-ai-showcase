@@ -2,7 +2,7 @@ name: Browser mobile smoke tests
 
 on:
   pull_request:
-    branches: [main]
+    branches: [main, feature/web-quality-performance]
   workflow_dispatch:
 
 permissions:
