@@ -4,7 +4,7 @@ test("home page renders research portfolio and navigation", async ({ page }) => 
   await page.goto("/");
   await expect(page.locator("main#main")).toBeVisible();
   await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible();
-  await expect(page.locator("title")).toHaveText(/Quantum AI Lab/i);
+  await expect(page).toHaveTitle(/Quantum AI Lab/i);
 });
 
 test("no horizontal document overflow on mobile", async ({ page, isMobile }) => {
@@ -21,8 +21,10 @@ test("mobile navigation opens and Escape closes", async ({ page, isMobile }) => 
   test.skip(!isMobile, "Mobile viewport only");
   await page.goto("/");
   const trigger = page.getByRole("button", { name: "Open navigation" });
+  await expect(trigger).toHaveAttribute("aria-expanded", "false");
   await trigger.click();
-  await expect(page.getByRole("navigation", { name: "Mobile navigation" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Close navigation" })).toHaveAttribute("aria-expanded", "true");
+  await expect(page.locator("#mobile-navigation")).toBeVisible();
   await expect(page.getByRole("button", { name: "Close navigation" })).toHaveAttribute("aria-expanded", "true");
   await page.keyboard.press("Escape");
   await expect(page.getByRole("navigation", { name: "Mobile navigation" })).toBeHidden();
