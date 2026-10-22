@@ -102,6 +102,13 @@ export const portfolio = {
   ],
   certifications: [
     {
+      title: "CS109xb: Introduction to Neural Networks and Deep Learning with Python",
+      detail:
+        "HarvardX / edX · Verified Certificate · Issued Oct 22, 2026 · Credential ID 7c7c45833a9d47cea3a7e2343d92694e",
+      verified: true,
+      href: "https://courses.edx.org/certificates/7c7c45833a9d47cea3a7e2343d92694e",
+    },
+    {
       title: "QCS13000: Quantum Computer Systems Design III: Working with Noisy Systems",
       detail:
         "UChicagoX / edX · Verified Certificate · Issued Oct 15, 2026 · Credential ID f4352aa537c64236a0dab42693c87941",
