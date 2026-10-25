@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, Suspense, lazy, useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   ArrowDown,
@@ -28,12 +28,12 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { portfolio } from "@/data/portfolio";
-import { QuantumLab } from "@/components/quantum-lab";
+const QuantumLab = lazy(() => import("@/components/quantum-lab").then((module) => ({ default: module.QuantumLab })));
 import { QuantumField } from "@/components/quantum-field";
 import { AIResearchAssistant } from "@/components/ai-research-assistant";
 import { LiveResearchMarquee } from "@/components/live-research-marquee";
-import { QuantumProjectsShowcase } from "@/components/quantum-projects-showcase";
-import { AIProjectsShowcase } from "@/components/ai-projects-showcase";
+const QuantumProjectsShowcase = lazy(() => import("@/components/quantum-projects-showcase").then((module) => ({ default: module.QuantumProjectsShowcase })));
+const AIProjectsShowcase = lazy(() => import("@/components/ai-projects-showcase").then((module) => ({ default: module.AIProjectsShowcase })));
 import { AiAgentExecutionMonitor } from "@/components/ai-agent-execution-monitor";
 
 const projectIcons = [ShieldCheck, Network, Orbit];
@@ -908,8 +908,10 @@ export function PortfolioSite() {
           </div>
         </section>
 
-        <QuantumProjectsShowcase />
-        <AIProjectsShowcase />
+        <Suspense fallback={<div className="mx-auto max-w-7xl px-5 py-12 text-sm text-muted-foreground" role="status">Loading research projects…</div>}>
+          <QuantumProjectsShowcase />
+          <AIProjectsShowcase />
+        </Suspense>
 
         {/* PROJECTS */}
         <section id="projects" className="bg-surface px-5 py-24 sm:px-8 lg:py-32">
@@ -1361,7 +1363,9 @@ export function PortfolioSite() {
               title="Interactive Quantum Lab"
               copy="A single-qubit circuit simulator running in your browser. Apply gates, watch the state move on the Bloch sphere, and sample measurements."
             />
-            <QuantumLab />
+            <Suspense fallback={<div className="min-h-72 rounded-md border border-border bg-card p-6 text-sm text-muted-foreground" role="status">Loading interactive quantum laboratory…</div>}>
+              <QuantumLab />
+            </Suspense>
             <div className="mt-8 flex flex-col items-start justify-between gap-4 rounded-md border border-border bg-card/80 p-5 sm:flex-row sm:items-center">
               <div>
                 <p className="font-mono text-xs uppercase text-primary">

@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowUpRight, BarChart3, CheckCircle2, Gauge, Layers3, Repeat2 } from "lucide-react";
 
 import { LabShell } from "@/components/lab/lab-shell";
+import { BenchmarkTrialAnalyzer } from "@/components/lab/benchmark-trial-analyzer";
 
 export const Route = createFileRoute("/lab/benchmark")({
   head: () => ({
@@ -152,6 +153,8 @@ function BenchmarkDashboard() {
           ))}
         </div>
       </section>
+
+      <BenchmarkTrialAnalyzer />
 
       <section className="mt-8 rounded-md border border-border bg-card p-5">
         <h2 className="text-lg font-semibold">How to use this dashboard</h2>
