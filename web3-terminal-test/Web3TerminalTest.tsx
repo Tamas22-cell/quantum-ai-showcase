@@ -9,7 +9,7 @@ type Frame = keyof typeof INTERVALS;
 type QuoteState = { price: number; updated: number; high: number; low: number; volume: number; change: number };
 type MarketState = { candles: Candle[]; updated: number };
 const api = 'https://api.kraken.com/0/public/';
-function unwrap(payload: unknown): any {
+function unwrap(payload: unknown): unknown {
   const p = payload as { error?: unknown; result?: Record<string,unknown> };
   if (!p || !Array.isArray(p.error) || p.error.length || !p.result) throw new Error('EXCHANGE_RESPONSE');
   const key = Object.keys(p.result).find(k=>k!=='last');
@@ -21,12 +21,13 @@ async function json(url: string, signal: AbortSignal): Promise<unknown> {
   if (!response.ok) throw new Error('HTTP_'+response.status);
   return response.json();
 }
-function parseTicker(t: any): Omit<QuoteState,'updated'> {
+function parseTicker(payload: unknown): Omit<QuoteState,'updated'> {
+  const t = payload as { c?: unknown[]; o?: unknown; h?: unknown[]; l?: unknown[]; v?: unknown[] } | null | undefined;
   const price=Number(t?.c?.[0]), open=Number(t?.o), high=Number(t?.h?.[1]), low=Number(t?.l?.[1]), volume=Number(t?.v?.[1]);
   if (![price,open,high,low,volume].every(Number.isFinite) || Math.min(price,open,high,low)<=0 || high<low || price>high*1.02 || price<low*.98 || volume<0) throw new Error('INVALID_TICKER');
   return {price,high,low,volume,change:(price/open-1)*100};
 }
-function parseCandles(raw: any, interval: number): Candle[] {
+function parseCandles(raw: unknown, interval: number): Candle[] {
   if (!Array.isArray(raw)) throw new Error('INVALID_OHLC');
   const candles=validateCandles(raw.map((r: unknown[])=>({
     time:Number(r[0])*1000,open:Number(r[1]),high:Number(r[2]),low:Number(r[3]),close:Number(r[4]),volume:Number(r[6])
