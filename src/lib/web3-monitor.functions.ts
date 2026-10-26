@@ -1,6 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
 
-async function read(url: string): Promise<any> {
+type NumericValue = string | number;
+type FeeResponse = { fastestFee: NumericValue; halfHourFee: NumericValue; hourFee: NumericValue };
+type TickerResponse = { result?: Record<string, { c?: NumericValue[]; o?: NumericValue }> };
+type OhlcResponse = { result: Record<string, NumericValue[][] | number> };
+
+async function read(url: string): Promise<unknown> {
   const response = await fetch(url, { signal: AbortSignal.timeout(7000), headers: { Accept: "application/json" } });
   if (!response.ok) throw new Error("Upstream " + response.status);
   return response.json();
@@ -17,16 +22,19 @@ export const getWeb3Monitor = createServerFn({ method: "GET" }).handler(async ()
     ...pairs.map(p => "https://api.kraken.com/0/public/OHLC?pair=" + p.pair + "&interval=60")
   ];
   const responses = await Promise.allSettled(requests.map(read));
-  const value = (i: number): any => responses[i]?.status === "fulfilled" ? (responses[i] as PromiseFulfilledResult<any>).value : null;
-  const height = Number(value(0));
-  const fees = value(1);
-  const hashrate = Number(value(2)?.currentHashrate);
-  const defiMarketCap = Number(value(3)?.data?.defi_market_cap);
+  const value = <T,>(i: number): T | null => {
+    const response = responses[i];
+    return response?.status === "fulfilled" ? response.value as T : null;
+  };
+  const height = Number(value<NumericValue>(0));
+  const fees = value<FeeResponse>(1);
+  const hashrate = Number(value<{ currentHashrate?: NumericValue }>(2)?.currentHashrate);
+  const defiMarketCap = Number(value<{ data?: { defi_market_cap?: NumericValue } }>(3)?.data?.defi_market_cap);
   const markets = pairs.flatMap((p, i) => {
-    const ticker = value(4 + i), ohlc = value(7 + i);
-    const tickerRow: any = Object.values(ticker?.result ?? {})[0];
+    const ticker = value<TickerResponse>(4 + i), ohlc = value<OhlcResponse>(7 + i);
+    const tickerRow = Object.values(ticker?.result ?? {})[0];
     const key = Object.keys(ohlc?.result ?? {}).find(k => k !== "last");
-    const rows: any[] = key ? ohlc.result[key] : [];
+    const rows = (key ? ohlc!.result[key] : []) as NumericValue[][];
     const closes = rows.slice(-48).map(row => Number(row[4])).filter(Number.isFinite);
     const price = Number(tickerRow?.c?.[0]), open = Number(tickerRow?.o);
     if (!Number.isFinite(price) || price <= 0) return [];
