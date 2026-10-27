@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ArrowUpRight, CheckCircle2, CircleHelp, Cloud, Code2, Database, GitBranch, Search, ShieldCheck, Workflow } from "lucide-react";
 
 export const Route = createFileRoute("/engineering-dashboard")({
@@ -10,7 +10,7 @@ export const Route = createFileRoute("/engineering-dashboard")({
   component: EngineeringDashboard,
 });
 
-type Status = "documented" | "unverified";
+type Status = "verified" | "documented" | "unverified";
 type Priority = "P0" | "P1" | "P2";
 type Item = {
   name: string;
@@ -24,10 +24,10 @@ type Item = {
 
 const profile = "https://github.com/Tamas22-cell";
 const items: Item[] = [
-  { name: "Frontend & deployment", category: "Application", status: "documented", priority: "P1", evidence: "React, TypeScript, TanStack Start and Vercel documented in quantum-ai-showcase; deployment still needs live verification.", next: "Verify a production build and a deployed route.", link: profile + "/quantum-ai-showcase" },
+  { name: "Frontend & deployment", category: "Application", status: "verified", priority: "P1", evidence: "React/TypeScript app and Vercel production READY for main commit 1fc6cf3 (27 Oct 2026).", next: "Monitor production errors, accessibility and user-facing smoke tests.", link: profile + "/quantum-ai-showcase" },
   { name: "Python ML & API", category: "AI", status: "documented", priority: "P1", evidence: "FastAPI, scikit-learn and Qiskit described in machine-learning-quantum-lab README.", next: "Run API integration and model reproducibility tests.", link: profile + "/machine-learning-quantum-lab" },
   { name: "Multi-agent research", category: "AI", status: "documented", priority: "P1", evidence: "Orchestrator and agents source directories in the original financial research repository; v2.3 is a README/presentation repository.", next: "Audit agent execution, failure handling and data-source quality.", link: profile + "/AI-Multi-Agent-Financial-Research-Platform" },
-  { name: "GitHub Actions CI/CD", category: "DevOps", status: "unverified", priority: "P0", evidence: "Workflow implementation and successful runs were not verified during this audit.", next: "Add lint, typecheck, tests, build and security checks; require green checks before merge.", link: profile + "/quantum-ai-showcase/actions" },
+  { name: "GitHub Actions CI/CD", category: "DevOps", status: "verified", priority: "P0", evidence: "ci.yml executes lint, Vitest and production build; main run 40474210896 completed successfully on 27 Oct 2026.", next: "Extend pipeline with explicit TypeScript checks, security scans and protected release approvals.", link: profile + "/quantum-ai-showcase/actions/runs/40474210896" },
   { name: "Docker & reproducible runtime", category: "DevOps", status: "unverified", priority: "P0", evidence: "Container build and compose startup were not verified.", next: "Add multi-stage Dockerfiles, Compose and health checks.", link: profile + "/quantum-ai-showcase" },
   { name: "Azure cloud deployment", category: "Cloud", status: "unverified", priority: "P0", evidence: "No Azure deployment or infrastructure evidence verified.", next: "Deploy staging using OIDC, managed secrets and a defined budget.", link: profile + "/quantum-ai-showcase" },
   { name: "Automated backend tests", category: "Quality", status: "unverified", priority: "P0", evidence: "Frontend Vitest script exists; full backend/integration coverage and latest passing run not verified.", next: "Implement pytest, API integration tests and report coverage.", link: profile + "/quantum-ai-showcase" },
@@ -50,13 +50,46 @@ function EngineeringDashboard() {
   const [status, setStatus] = useState("All");
   const [search, setSearch] = useState("");
   const [done, setDone] = useState<string[]>([]);
+  const [live, setLive] = useState<{ ci: string; sha: string; deployed: string; checked: string } | null>(null);
+  const [liveError, setLiveError] = useState(false);
+  useEffect(() => {
+    const controller = new AbortController();
+    async function refresh() {
+      try {
+        const urls = [
+          "https://api.github.com/repos/Tamas22-cell/quantum-ai-showcase/actions/workflows/ci.yml/runs?branch=main&per_page=1",
+          "https://api.github.com/repos/Tamas22-cell/quantum-ai-showcase/commits/main/status",
+        ];
+        const responses = await Promise.all(urls.map(url => fetch(url, {
+          signal: controller.signal, headers: { Accept: "application/vnd.github+json" },
+        })));
+        if (responses.some(r => !r.ok)) throw new Error("GitHub data unavailable");
+        const [actions, deployment] = await Promise.all(responses.map(r => r.json()));
+        if (controller.signal.aborted) return;
+        const run = actions.workflow_runs?.[0];
+        const deploy = deployment.statuses?.find((x: { context?: string }) => x.context === "Vercel");
+        setLive({
+          ci: run ? (run.status === "completed" ? run.conclusion : run.status) : "No run",
+          sha: run?.head_sha?.slice(0, 8) ?? "Unknown",
+          deployed: deploy?.state ?? "Not reported",
+          checked: new Date().toLocaleString(),
+        });
+        setLiveError(false);
+      } catch {
+        if (!controller.signal.aborted) setLiveError(true);
+      }
+    }
+    void refresh();
+    return () => controller.abort();
+  }, []);
   const visible = useMemo(() => items.filter((item) =>
     (category === "All" || item.category === category) &&
     (status === "All" || item.status === status) &&
     (item.name + " " + item.next + " " + item.category).toLowerCase().includes(search.toLowerCase())
   ), [category, status, search]);
+  const verified = items.filter((x) => x.status === "verified").length;
   const documented = items.filter((x) => x.status === "documented").length;
-  const unverified = items.length - documented;
+  const unverified = items.length - documented - verified;
   const p0 = items.filter((x) => x.priority === "P0" && x.status === "unverified").length;
   const progress = Math.round(done.length / items.length * 100);
   return (
@@ -74,8 +107,8 @@ function EngineeringDashboard() {
         <section className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4" aria-label="Summary">
           {[
             { label: "Assessment areas", value: items.length, note: "Scoped engineering checks" },
-            { label: "Documented", value: documented, note: "Evidence in repository/README" },
-            { label: "Not yet verified", value: unverified, note: "Not necessarily absent" },
+            { label: "Verified", value: verified, note: "Passing CI or production deployment" },
+            { label: "Unverified", value: unverified, note: documented + " more are documented only" },
             { label: "Priority P0", value: p0, note: "Recommended first" },
           ].map((metric, index) => {
             const Icon = icons[index];
@@ -99,11 +132,24 @@ function EngineeringDashboard() {
           <div className="rounded-2xl border border-amber-500/20 bg-amber-500/[0.05] p-6">
             <CircleHelp className="text-amber-300"/><h2 className="mt-4 text-lg font-semibold">Evidence rules</h2>
             <ul className="mt-3 space-y-3 text-sm leading-6 text-slate-300">
-              <li><strong className="text-emerald-300">Documented:</strong> feature or relevant source exists; does not imply tests passed.</li>
+              <li><strong className="text-emerald-300">Verified:</strong> a dated successful run or deployment was checked.</li><li><strong className="text-cyan-300">Documented:</strong> feature or relevant source exists; does not imply tests passed.</li>
               <li><strong className="text-amber-300">Unverified:</strong> needs code or live-environment checks; never treated as a proven absence.</li>
               <li><strong className="text-slate-100">No invented metrics:</strong> cloud cost, CI results, latency and uptime are omitted until connected.</li>
             </ul>
           </div>
+        </section>
+
+        <section className="mt-8 rounded-2xl border border-cyan-500/25 bg-cyan-500/[0.05] p-5" aria-label="Live GitHub evidence">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div><p className="text-xs font-semibold uppercase tracking-widest text-cyan-400">Live public GitHub API</p><h2 className="mt-1 text-lg font-semibold">CI & Production evidence</h2></div>
+            <a href="https://github.com/Tamas22-cell/quantum-ai-showcase/actions" target="_blank" rel="noopener noreferrer" className="text-sm text-cyan-300 underline">Inspect workflow runs</a>
+          </div>
+          {live ? <div className="mt-4 grid gap-3 sm:grid-cols-3">
+            <div className="rounded-xl bg-slate-950/50 p-4"><p className="text-xs text-slate-400">Latest main CI</p><p className="mt-1 text-lg font-semibold capitalize">{live.ci}</p></div>
+            <div className="rounded-xl bg-slate-950/50 p-4"><p className="text-xs text-slate-400">CI commit</p><p className="mt-1 font-mono text-lg">{live.sha}</p></div>
+            <div className="rounded-xl bg-slate-950/50 p-4"><p className="text-xs text-slate-400">Vercel commit status</p><p className="mt-1 text-lg font-semibold capitalize">{live.deployed}</p></div>
+          </div> : <p className="mt-3 text-sm text-slate-400">{liveError ? "Live API unavailable or rate-limited; use the linked GitHub runs. Snapshot below remains dated." : "Checking public GitHub data…"}</p>}
+          <p className="mt-3 text-xs text-slate-500">{live ? "Checked: " + live.checked : "Last independently reviewed snapshot: 27 October 2026."} • Live data is read-only, not a cloud cost/uptime monitor.</p>
         </section>
 
         <section className="mt-8">
@@ -111,13 +157,13 @@ function EngineeringDashboard() {
           <div className="mt-5 grid gap-3 md:grid-cols-[1fr_auto_auto]">
             <label className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.05] px-4"><Search size={17} className="text-slate-400"/><input aria-label="Search engineering tasks" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search tasks..." className="min-w-0 flex-1 bg-transparent py-3 text-sm outline-none placeholder:text-slate-500"/></label>
             <select aria-label="Category" value={category} onChange={e => setCategory(e.target.value)} className="rounded-xl border border-white/10 bg-[#151e2e] px-4 py-3 text-sm">{categories.map(x => <option key={x} value={x}>{x}</option>)}</select>
-            <select aria-label="Evidence status" value={status} onChange={e => setStatus(e.target.value)} className="rounded-xl border border-white/10 bg-[#151e2e] px-4 py-3 text-sm"><option value="All">All evidence</option><option value="documented">Documented</option><option value="unverified">Unverified</option></select>
+            <select aria-label="Evidence status" value={status} onChange={e => setStatus(e.target.value)} className="rounded-xl border border-white/10 bg-[#151e2e] px-4 py-3 text-sm"><option value="All">All evidence</option><option value="verified">Verified</option><option value="documented">Documented</option><option value="unverified">Unverified</option></select>
           </div>
           <div className="mt-4 grid gap-3">
             {visible.map(item => <article key={item.name} className="rounded-xl border border-white/10 bg-white/[0.035] p-5 transition-colors hover:border-cyan-500/30">
               <div className="flex flex-wrap items-start gap-3">
                 <input aria-label={"Mark task reviewed: " + item.name} type="checkbox" checked={done.includes(item.name)} onChange={e => setDone(old => e.target.checked ? [...old, item.name] : old.filter(x => x !== item.name))} className="mt-1 h-4 w-4 accent-cyan-400"/>
-                <div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-2"><h3 className="font-semibold">{item.name}</h3><span className={"rounded-full border px-2 py-0.5 text-[10px] font-semibold " + priorityColor[item.priority]}>{item.priority}</span><span className="rounded-full border border-white/15 px-2 py-0.5 text-[10px] text-slate-400">{item.category}</span><span className={"inline-flex items-center gap-1 text-xs " + (item.status === "documented" ? "text-emerald-300" : "text-amber-300")}>{item.status === "documented" ? <CheckCircle2 size={13}/> : <CircleHelp size={13}/>} {item.status === "documented" ? "Documented" : "Unverified"}</span></div>
+                <div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-2"><h3 className="font-semibold">{item.name}</h3><span className={"rounded-full border px-2 py-0.5 text-[10px] font-semibold " + priorityColor[item.priority]}>{item.priority}</span><span className="rounded-full border border-white/15 px-2 py-0.5 text-[10px] text-slate-400">{item.category}</span><span className={"inline-flex items-center gap-1 text-xs " + (item.status === "verified" ? "text-emerald-300" : item.status === "documented" ? "text-cyan-300" : "text-amber-300")}>{item.status === "verified" ? <CheckCircle2 size={13}/> : <CircleHelp size={13}/>} {item.status === "verified" ? "Verified" : item.status === "documented" ? "Documented" : "Unverified"}</span></div>
                   <p className="mt-3 text-sm leading-6 text-slate-400">{item.evidence}</p><p className="mt-2 text-sm leading-6"><strong className="text-cyan-300">Next:</strong> {item.next}</p>
                 </div>
                 <a href={item.link} target="_blank" rel="noopener noreferrer" aria-label={"GitHub evidence for " + item.name} className="rounded-lg border border-white/10 p-2 text-slate-300 hover:bg-white/10"><ArrowUpRight size={17}/></a>
@@ -126,7 +172,7 @@ function EngineeringDashboard() {
             {visible.length === 0 && <p className="rounded-xl border border-white/10 p-10 text-center text-slate-400">No matching items. Change your filters.</p>}
           </div>
         </section>
-        <footer className="mt-10 border-t border-white/10 py-6 text-xs text-slate-500">Engineering Readiness • Source: connected GitHub repositories • No live Azure/GitHub Actions metrics connected • Checklist resets on reload</footer>
+        <footer className="mt-10 border-t border-white/10 py-6 text-xs text-slate-500">Engineering Readiness • Source: connected GitHub repositories • Public GitHub CI/status API connected; Azure metrics not connected • Checklist resets on reload</footer>
       </div>
     </main>
   );
