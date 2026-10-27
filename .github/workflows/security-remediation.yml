@@ -1,40 +1,26 @@
-name: Security remediation verification
+name: Production dependency security audit
 on:
+  pull_request:
+    branches: [main]
   push:
-    branches: [feature/security-remediation-verified]
+    branches: [main]
+  schedule:
+    - cron: "17 6 * * 1"
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  audit-and-regression:
+  audit:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: feature/security-remediation-verified
-          persist-credentials: true
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: "1.3.6"
-      - name: Resolve updated dependencies and lockfile
-        run: bun install
+      - name: Install locked dependencies
+        run: bun install --frozen-lockfile
       - name: Reject high and critical production advisories
         run: bun audit --prod --audit-level=high
-      - name: Regression - lint
-        run: bun run lint
-      - name: Regression - tests
-        run: bun run test
-      - name: Regression - production build
-        run: bun run build
-      - name: Commit resolved lockfile only after all checks pass
-        run: |
-          if ! git diff --quiet -- bun.lock; then
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add bun.lock
-            git commit -m "chore: lock audited dependency versions"
-            git push origin HEAD:feature/security-remediation-verified
-          fi
