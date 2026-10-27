@@ -84,7 +84,7 @@ const aiAreas = [
     code: "ENG",
     title: "Engineering Readiness Dashboard",
     description: "Evidence-based cloud, CI/CD, MLOps and AI engineering readiness with actionable priorities.",
-    topics: ["Azure", "CI/CD", "Docker", "Observability"],
+    topics: ["Vercel", "CI/CD", "Docker", "Observability"],
     status: "ENGINEERING",
     href: "/engineering-dashboard",
   },
