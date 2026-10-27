@@ -17,7 +17,7 @@ jobs:
       - name: Build production Docker image
         run: docker build -t quantum-ai-showcase:ci .
       - name: Load image into local cluster
-        run: kind load docker-image quantum-ai-showcase:ci
+        run: kind load docker-image quantum-ai-showcase:ci --name chart-testing
       - name: Apply isolated local manifests
         run: kubectl apply -f infra/kubernetes/
       - name: Wait for ready replica
