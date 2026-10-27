@@ -1,0 +1,55 @@
+name: Local Kubernetes and Terraform validation
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  kind-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: helm/kind-action@v1.14.0
+      - name: Build production Docker image
+        run: docker build -t quantum-ai-showcase:ci .
+      - name: Load image into local cluster
+        run: kind load docker-image quantum-ai-showcase:ci
+      - name: Apply isolated local manifests
+        run: kubectl apply -f infra/kubernetes/
+      - name: Wait for ready replica
+        run: kubectl rollout status deployment/quantum-ai-showcase --timeout=180s
+      - name: Verify dashboard HTTP endpoint
+        run: |
+          kubectl port-forward svc/quantum-ai-showcase 3000:80 >/tmp/k8s-port-forward.log 2>&1 &
+          pid=$!
+          trap 'kill "$pid" || true' EXIT
+          for i in $(seq 1 30); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:3000/engineering-dashboard || true)
+            if [ "$code" = "200" ]; then exit 0; fi
+            sleep 2
+          done
+          cat /tmp/k8s-port-forward.log
+          kubectl get pods
+          exit 1
+      - name: Diagnostics on failure
+        if: failure()
+        run: |
+          kubectl get pods -o wide || true
+          kubectl describe pods || true
+          kubectl logs deployment/quantum-ai-showcase || true
+  terraform-validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - name: Initialize provider schema only
+        working-directory: infra/terraform
+        run: terraform init -backend=false -input=false
+      - name: Validate HCL without provisioning
+        working-directory: infra/terraform
+        run: terraform validate
