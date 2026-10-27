@@ -27,8 +27,22 @@ function AccountPage() {
         if (error) throw error;
         setMessage("Regisztráció elküldve. Ellenőrizd az e-mail címed.");
       } else if (mode === "login") {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
+        // Request an HttpOnly admin cookie only when the server verifies the role.
+        // Normal users stay signed in without admin privileges.
+        if (data.session?.access_token) {
+          const admin = await fetch("/api/admin/session", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            credentials: "same-origin",
+            body: JSON.stringify({ accessToken: data.session.access_token }),
+          }).catch(() => null);
+          if (admin?.status === 204) {
+            window.location.assign("/admin");
+            return;
+          }
+        }
         // The 30-day checkbox is a preference only until backend session TTL is configured.
         setMessage(
           remember
