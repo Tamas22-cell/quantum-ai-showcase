@@ -33,6 +33,11 @@ function AdminPage() {
     await check();
     if (!(await requireAdmin())) setError("Nincs adminjogosultságod.");
   }
+  async function logout() {
+    await fetch("/api/admin/logout", { method: "POST", credentials: "same-origin" });
+    await supabase?.auth.signOut();
+    window.location.assign("/account");
+  }
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100 p-6">
       <div className="max-w-5xl mx-auto">
@@ -40,6 +45,7 @@ function AdminPage() {
           ← Vissza az oldalra
         </a>
         <h1 className="text-3xl font-bold mt-8">Quantum AI Lab · Admin</h1>
+        {allowed && <button type="button" onClick={logout} className="mt-3 rounded border border-slate-600 px-3 py-2 text-sm">Kijelentkezés</button>}
         {!authConfigured && (
           <p role="alert" className="mt-6 text-amber-300">
             Az admin backend konfigurációjára vár.
