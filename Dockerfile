@@ -14,7 +14,7 @@ ENV PORT=3000
 ENV NITRO_HOST=0.0.0.0
 ENV NITRO_PORT=3000
 WORKDIR /app
-COPY --from=build --chown=node:node /app/dist ./dist
-USER node
+COPY --from=build --chown=bun:bun /app/dist ./dist
+USER bun
 EXPOSE 3000
 CMD ["bun", "dist/server/index.mjs"]
