@@ -2,7 +2,19 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { authConfigured, supabase } from "../lib/site-auth";
 
-export const Route = createFileRoute("/account")({ head: () => ({ meta: [{ title: "{ ( { login: \"Bejelentkez\u00e9s\", register: \"Regisztr\u00e1ci\u00f3\", forgot: \"Elfelejtett jelsz\u00f3\", change: \"Jelsz\u00f3 m\u00f3dos\u00edt\u00e1sa\", } as Record \u2014 Quantum AI Lab" }, { name: "description", content: "Manage your Quantum AI Lab account." }, { property: "og:title", content: "{ ( { login: \"Bejelentkez\u00e9s\", register: \"Regisztr\u00e1ci\u00f3\", forgot: \"Elfelejtett jelsz\u00f3\", change: \"Jelsz\u00f3 m\u00f3dos\u00edt\u00e1sa\", } as Record \u2014 Quantum AI Lab" }, { property: "og:description", content: "Manage your Quantum AI Lab account." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }), component: AccountPage });
+export const Route = createFileRoute("/account")({
+  head: () => ({
+    meta: [
+      { title: "Bejelentkezés és regisztráció — Quantum AI Lab" },
+      { name: "description", content: "Manage your Quantum AI Lab account." },
+      { property: "og:title", content: "Bejelentkezés és regisztráció — Quantum AI Lab" },
+      { property: "og:description", content: "Manage your Quantum AI Lab account." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
+  component: AccountPage,
+});
 
 type Mode = "login" | "register" | "forgot" | "change";
 function AccountPage() {
