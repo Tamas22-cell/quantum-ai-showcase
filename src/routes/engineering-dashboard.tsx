@@ -29,7 +29,6 @@ const items: Item[] = [
   { name: "Multi-agent research", category: "AI", status: "documented", priority: "P1", evidence: "Orchestrator and agents source directories in the original financial research repository; v2.3 is a README/presentation repository.", next: "Audit agent execution, failure handling and data-source quality.", link: profile + "/AI-Multi-Agent-Financial-Research-Platform" },
   { name: "GitHub Actions CI/CD", category: "DevOps", status: "verified", priority: "P0", evidence: "ci.yml executes lint, Vitest and production build; main run 40474210896 completed successfully on 27 Oct 2026.", next: "Extend pipeline with explicit TypeScript checks, security scans and protected release approvals.", link: profile + "/quantum-ai-showcase/actions/runs/40474210896" },
   { name: "Docker & reproducible runtime", category: "DevOps", status: "verified", priority: "P0", evidence: "Docker image built and /engineering-dashboard returned HTTP 200 in Actions run 40476010242 (27 Oct 2026).", next: "Add image vulnerability scanning, versioned releases and deployment monitoring.", link: profile + "/quantum-ai-showcase/actions/runs/40476010242" },
-  { name: "Azure cloud deployment", category: "Cloud", status: "unverified", priority: "P0", evidence: "Manual Azure Container Apps OIDC deployment workflow is prepared but has not run; no Azure resources verified.", next: "Connect an approved Azure subscription and existing Container App, configure GitHub environment, then run a supervised staging deployment.", link: profile + "/quantum-ai-showcase" },
   { name: "Automated backend tests", category: "Quality", status: "unverified", priority: "P0", evidence: "Frontend Vitest script exists; full backend/integration coverage and latest passing run not verified.", next: "Implement pytest, API integration tests and report coverage.", link: profile + "/quantum-ai-showcase" },
   { name: "Langfuse & OpenTelemetry", category: "Observability", status: "unverified", priority: "P1", evidence: "Live traces, LLM cost telemetry and correlation IDs not verified.", next: "Instrument API, agents and tool calls; show real trace links.", link: profile + "/AI-Multi-Agent-Financial-Research-Platform" },
   { name: "MLOps & model lifecycle", category: "AI", status: "unverified", priority: "P1", evidence: "A portfolio MLOps evaluation route exists; MLflow registry and production serving not verified.", next: "Track experiments, datasets and model versions with reproducible evaluations.", link: profile + "/quantum-ai-showcase" },
@@ -124,7 +123,7 @@ function EngineeringDashboard() {
             <div className="mt-6 grid gap-3 sm:grid-cols-3">
               {[
                 ["01 / Foundation", "Tests, Docker, CI", "P0"],
-                ["02 / Production", "Azure, tracing, security", "P1"],
+                ["02 / Production", "Vercel, tracing, security", "P1"],
                 ["03 / Scale", "MLOps, IaC, Kubernetes", "P2"],
               ].map(([phase, label, pr]) => <div key={phase} className="rounded-xl border border-white/10 bg-slate-950/50 p-4"><span className="text-xs text-cyan-400">{phase}</span><p className="mt-2 text-sm font-medium">{label}</p><span className="mt-3 inline-block text-xs text-slate-500">{pr} milestone</span></div>)}
             </div>
@@ -172,7 +171,7 @@ function EngineeringDashboard() {
             {visible.length === 0 && <p className="rounded-xl border border-white/10 p-10 text-center text-slate-400">No matching items. Change your filters.</p>}
           </div>
         </section>
-        <footer className="mt-10 border-t border-white/10 py-6 text-xs text-slate-500">Engineering Readiness • Source: connected GitHub repositories • Public GitHub CI/status API connected; Azure metrics not connected • Checklist resets on reload</footer>
+        <footer className="mt-10 border-t border-white/10 py-6 text-xs text-slate-500">Engineering Readiness • Source: connected GitHub repositories • Public GitHub CI/status API connected; Additional cloud metrics not connected • Checklist resets on reload</footer>
       </div>
     </main>
   );
