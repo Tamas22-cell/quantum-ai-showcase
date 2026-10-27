@@ -105,7 +105,13 @@ export default {
       const response = await handler.fetch(request, env, ctx);
       const normalized = await normalizeCatastrophicSsrResponse(response);
       if (shouldDenyAdminRequest(request.url)) {
-        normalized.headers.set("cache-control", "private, no-store");
+        const headers = new Headers(normalized.headers);
+        headers.set("cache-control", "private, no-store");
+        return new Response(normalized.body, {
+          status: normalized.status,
+          statusText: normalized.statusText,
+          headers,
+        });
       }
       return normalized;
     } catch (error) {
