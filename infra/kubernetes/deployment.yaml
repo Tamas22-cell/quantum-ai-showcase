@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: quantum-ai-showcase
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: quantum-ai-showcase
+  template:
+    metadata:
+      labels:
+        app: quantum-ai-showcase
+    spec:
+      containers:
+        - name: web
+          image: quantum-ai-showcase:ci
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 3000
+          env:
+            - name: NODE_ENV
+              value: production
+            - name: PORT
+              value: "3000"
+            - name: NITRO_PORT
+              value: "3000"
+            - name: NITRO_HOST
+              value: 0.0.0.0
+          readinessProbe:
+            httpGet:
+              path: /engineering-dashboard
+              port: 3000
+            periodSeconds: 5
+            initialDelaySeconds: 5
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: "1"
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            capabilities:
+              drop: ["ALL"]
