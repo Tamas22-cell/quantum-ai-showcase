@@ -1,0 +1,14 @@
+node_modules
+.git
+.github
+dist
+.output
+.vercel
+.nitro
+.tanstack
+coverage
+*.log
+*.local
+.env
+.env.*
+!.env.example

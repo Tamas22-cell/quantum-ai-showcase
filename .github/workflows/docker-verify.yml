@@ -1,0 +1,45 @@
+name: Docker build and smoke test
+on:
+  push:
+    branches: [main]
+    paths:
+      - Dockerfile
+      - .dockerignore
+      - docker-compose.yml
+      - .github/workflows/docker-verify.yml
+      - src/**
+      - package.json
+      - bun.lock
+      - vite.config.ts
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build production image
+        run: docker build -t quantum-ai-showcase:ci .
+      - name: Start container
+        run: docker run -d --name quantum-ai-smoke -p 127.0.0.1:3000:3000 quantum-ai-showcase:ci
+      - name: Verify dashboard HTTP response
+        run: |
+          for i in $(seq 1 30); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:3000/engineering-dashboard || true)
+            if [ "$code" = "200" ]; then exit 0; fi
+            sleep 2
+          done
+          docker logs quantum-ai-smoke
+          exit 1
+      - name: Container logs on failure
+        if: failure()
+        run: docker logs quantum-ai-smoke || true
+      - name: Stop container
+        if: always()
+        run: docker rm -f quantum-ai-smoke || true
