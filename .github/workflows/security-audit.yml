@@ -22,6 +22,6 @@ jobs:
         with:
           bun-version: "1.3.6"
       - name: Preview compatible dependency fixes (no file changes)
-        run: bun audit fix --dry-run || true
+        run: bun audit fix --dry-run --json || true
       - name: Scan production dependency advisories
         run: bun audit --prod --audit-level=high
