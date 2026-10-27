@@ -7,7 +7,7 @@ COPY . .
 ENV NODE_ENV=production
 RUN bun run build
 
-FROM node:24-alpine AS runtime
+FROM oven/bun:1.3.6-alpine AS runtime
 ENV NODE_ENV=production
 ENV HOST=0.0.0.0
 ENV PORT=3000
@@ -17,4 +17,4 @@ WORKDIR /app
 COPY --from=build --chown=node:node /app/dist ./dist
 USER node
 EXPOSE 3000
-CMD ["node", "dist/server/index.mjs"]
+CMD ["bun", "dist/server/index.mjs"]
