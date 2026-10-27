@@ -81,6 +81,14 @@ const aiAreas = [
     href: "/lab/ai/explainable-ai",
   },
   {
+    code: "ENG",
+    title: "Engineering Readiness Dashboard",
+    description: "Evidence-based cloud, CI/CD, MLOps and AI engineering readiness with actionable priorities.",
+    topics: ["Azure", "CI/CD", "Docker", "Observability"],
+    status: "ENGINEERING",
+    href: "/engineering-dashboard",
+  },
+  {
     code: "MLOPS",
     title: "MLOps & AI Evaluation",
     description:
@@ -117,7 +125,7 @@ export function AiResearchHub() {
 
         <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
           <div className="rounded-sm border border-border bg-surface p-3">
-            <div className="font-mono text-xl font-semibold text-foreground">10</div>
+            <div className="font-mono text-xl font-semibold text-foreground">11</div>
             <div className="mt-1 font-mono text-[10px] uppercase text-muted-foreground">
               AI domains
             </div>
