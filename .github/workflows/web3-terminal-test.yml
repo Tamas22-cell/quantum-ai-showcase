@@ -13,12 +13,12 @@ jobs:
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: oven-sh/setup-bun@v2
         with:
-          node-version: '22'
+          bun-version: '1.3.6'
       - name: Install dependencies
-        run: npm install --no-package-lock --no-audit --no-fund
+        run: bun install --frozen-lockfile
       - name: Run Web3 indicator tests
-        run: npx vitest run web3-terminal-test/marketMath.test.ts
+        run: bunx vitest run web3-terminal-test/marketMath.test.ts
       - name: Type-check isolated terminal
-        run: npx tsc --noEmit --jsx react-jsx --target ES2022 --module ESNext --moduleResolution Bundler --esModuleInterop --skipLibCheck web3-terminal-test/marketMath.ts web3-terminal-test/Web3TerminalTest.tsx
+        run: bunx tsc --noEmit --jsx react-jsx --target ES2022 --module ESNext --moduleResolution Bundler --esModuleInterop --skipLibCheck web3-terminal-test/marketMath.ts web3-terminal-test/Web3TerminalTest.tsx
