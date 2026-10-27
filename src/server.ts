@@ -97,7 +97,12 @@ export default {
     if (shouldDenyAdminRequest(request.url)) {
       const cookie = request.headers.get("cookie")?.split(";").map((part) => part.trim())
         .find((part) => part.startsWith("__Host-admin_session="));
-      const token = cookie ? decodeURIComponent(cookie.slice("__Host-admin_session=".length)) : undefined;
+      let token: string | undefined;
+      try {
+        token = cookie ? decodeURIComponent(cookie.slice("__Host-admin_session=".length)) : undefined;
+      } catch {
+        return reject(403);
+      }
       if (!await verifySupabaseAdmin(token, authConfig)) return reject(403);
     }
     try {
