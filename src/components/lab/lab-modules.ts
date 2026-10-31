@@ -33,6 +33,7 @@ export type LabModule = {
     | "/lab/python"
     | "/lab/blockchain"
     | "/lab/crypto-intelligence"
+    | "/lab/geopolitics-intelligence"
     | "/lab/web3-solidity"
     ;
 };
@@ -283,6 +284,16 @@ export const LAB_MODULES: LabModule[] = [
     topics: ["Bitcoin network", "On-chain", "Mining revenue", "Market intelligence", "AI analyst"],
     status: "available",
     to: "/lab/crypto-intelligence",
+  },
+  {
+    id: "geopolitics-intelligence",
+    index: "C13",
+    title: "Geopolitics Intelligence",
+    group: "command",
+    summary: "Source-linked geopolitical research dashboard with five regional feeds, headline topic signals, market exposure and direct publisher evidence.",
+    topics: ["Global risk", "Regional monitoring", "Topic signals", "Source evidence", "Markets"],
+    status: "available",
+    to: "/lab/geopolitics-intelligence",
   },
   {
     id: "web3-solidity",
