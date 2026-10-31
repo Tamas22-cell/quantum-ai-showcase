@@ -35,7 +35,11 @@ function GeopoliticsPage() {
   const refresh = async () => {
     setLoading(true);
     setFailure("");
-    try { setFeed(await getGeopoliticalNews()); }
+    try {
+      const latest = await getGeopoliticalNews();
+      if (latest.regions.some((item) => item.articles.length > 0)) setFeed(latest);
+      else setFailure("News sources are temporarily unavailable. Showing the last successful data, if any.");
+    }
     catch { setFailure("Could not contact the news service. Please retry."); }
     finally { setLoading(false); }
   };
