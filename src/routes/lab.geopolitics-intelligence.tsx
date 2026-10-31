@@ -51,14 +51,38 @@ function GeopoliticsPage() {
     });
   }, [feed, region, search]);
   const unavailable = feed?.regions.filter((r) => r.error).map((r) => r.name) ?? [];
+  const allReports = feed?.regions.flatMap((r) => r.articles) ?? [];
+  const publishers = new Set(allReports.map((item) => item.domain)).size;
+  const topics = [
+    { label: "Defence & security", pattern: /military|missile|army|NATO|war|attack|defen[cs]e/i },
+    { label: "Diplomacy & policy", pattern: /minister|president|talks|summit|agreement|election|policy/i },
+    { label: "Trade & sanctions", pattern: /trade|tariff|sanction|export|import|economy/i },
+    { label: "Energy & resources", pattern: /oil|gas|OPEC|energy|pipeline|crude/i },
+  ];
+  const signals = topics.map((topic) => ({ label: topic.label, count: allReports.filter((item) => topic.pattern.test(item.title)).length }));
+  const maxSignal = Math.max(1, ...signals.map((item) => item.count));
   return (
     <LabShell crumb="Geopolitics Intelligence">
       <div className="mb-8 max-w-4xl">
         <span className="font-mono text-xs uppercase text-primary">Research / Global risk monitoring</span>
         <h1 className="mt-2 flex items-center gap-3 text-3xl font-semibold tracking-tight sm:text-4xl"><Globe2 className="size-8 text-primary" /> Geopolitics Intelligence</h1>
-        <p className="mt-3 text-sm leading-7 text-muted-foreground">A source-linked global news monitor with regional coverage and a cross-asset risk research framework. Headlines are external reporting, not verified facts or investment signals.</p>
-        <a href="#geo-headlines" className="mt-5 inline-flex min-h-12 items-center justify-center gap-2 rounded-md bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground shadow-sm hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"><Activity className="size-5" /> Open live news & data ↓</a>
+        <p className="mt-3 text-sm leading-7 text-muted-foreground">A research command centre for regional activity, headline-derived signals, market exposure and source-linked evidence. News volume is not a threat score.</p>
+        <a href="#geo-headlines" className="mt-5 inline-flex min-h-12 items-center justify-center gap-2 rounded-md bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground shadow-sm hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"><Activity className="size-5" /> Explore intelligence dashboard ↓</a>
       </div>
+
+      <section className="mb-5 rounded-md border border-border bg-card p-4 sm:p-6" aria-label="Geopolitical intelligence overview">
+        <div className="mb-5"><div className="font-mono text-[10px] uppercase text-primary">Intelligence command centre</div><h2 className="mt-1 text-xl font-semibold">Global situation overview</h2><p className="mt-2 text-xs text-muted-foreground">Real feed coverage and transparent keyword signals — no synthetic risk scores.</p></div>
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <div className="rounded-md border border-border bg-background p-4"><div className="text-[10px] uppercase text-muted-foreground">Indexed reports</div><div className="mt-2 text-3xl font-semibold tabular-nums text-primary">{loading ? "…" : allReports.length}</div></div>
+          <div className="rounded-md border border-border bg-background p-4"><div className="text-[10px] uppercase text-muted-foreground">Publishers</div><div className="mt-2 text-3xl font-semibold tabular-nums text-primary">{loading ? "…" : publishers}</div></div>
+          <div className="rounded-md border border-border bg-background p-4"><div className="text-[10px] uppercase text-muted-foreground">Connected regions</div><div className="mt-2 text-3xl font-semibold tabular-nums text-primary">{loading ? "…" : (5 - unavailable.length) + "/5"}</div></div>
+          <div className="rounded-md border border-border bg-background p-4"><div className="text-[10px] uppercase text-muted-foreground">Data window</div><div className="mt-2 text-3xl font-semibold text-primary">48h</div></div>
+        </div>
+        <div className="mt-5 grid gap-5 lg:grid-cols-2">
+          <div><h3 className="mb-3 text-sm font-semibold">Regional evidence activity</h3><div className="grid gap-2 sm:grid-cols-2">{(feed?.regions ?? []).map((item) => <button key={item.name} type="button" onClick={() => { setRegion(item.name); document.getElementById("geo-headlines")?.scrollIntoView({ behavior: "smooth" }); }} className="min-h-24 rounded-md border border-border bg-background p-4 text-left hover:border-primary/60"><div className="text-xs font-semibold">{item.name}</div><div className="mt-2 text-xl font-semibold tabular-nums text-primary">{item.articles.length} <span className="text-[10px] font-normal text-muted-foreground">reports</span></div><div className="mt-1 text-[10px] text-primary">Inspect evidence →</div></button>)}</div></div>
+          <div><h3 className="mb-3 text-sm font-semibold">Headline topic signals</h3><p className="mb-4 text-xs text-muted-foreground">Counts are keyword matches, not verified geopolitical events or predictive analytics.</p><div className="space-y-4">{signals.map((item) => <div key={item.label}><div className="mb-1 flex justify-between text-xs"><span>{item.label}</span><span className="font-mono text-primary">{item.count}</span></div><div className="h-2 rounded-full bg-background"><div className="h-2 rounded-full bg-primary" style={{ width: String((item.count / maxSignal) * 100) + "%" }} /></div></div>)}</div></div>
+        </div>
+      </section>
       <div className="mb-5 grid gap-3 sm:grid-cols-3">
         <div className="rounded-md border border-border bg-card p-4"><span className="font-mono text-[10px] uppercase text-muted-foreground">Source</span><p className="mt-2 font-semibold">BBC News RSS</p><p className="text-xs text-muted-foreground">Direct publisher article links</p></div>
         <div className="rounded-md border border-border bg-card p-4"><span className="font-mono text-[10px] uppercase text-muted-foreground">Coverage</span><p className="mt-2 font-semibold">Past 48 hours</p><p className="text-xs text-muted-foreground">English-language source articles</p></div>
