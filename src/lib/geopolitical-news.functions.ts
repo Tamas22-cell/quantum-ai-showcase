@@ -13,7 +13,7 @@ const REGIONS = [
   { name: "United States", query: "United States foreign policy geopolitics" },
   { name: "China / Taiwan", query: "China Taiwan geopolitics" },
   { name: "Middle East", query: "Israel Iran Gaza Middle East" },
-  { name: "Global Economy", query: "sanctions trade tariffs OPEC oil" },
+  { name: "Global Economy", query: "oil OPEC sanctions" },
 ] as const;
 
 function decodeXml(value: string) {
