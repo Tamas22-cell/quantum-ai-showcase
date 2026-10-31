@@ -67,10 +67,10 @@ function GeopoliticsPage() {
         <span className="font-mono text-xs uppercase text-primary">Research / Global risk monitoring</span>
         <h1 className="mt-2 flex items-center gap-3 text-3xl font-semibold tracking-tight sm:text-4xl"><Globe2 className="size-8 text-primary" /> Geopolitics Intelligence</h1>
         <p className="mt-3 text-sm leading-7 text-muted-foreground">A research command centre for regional activity, headline-derived signals, market exposure and source-linked evidence. News volume is not a threat score.</p>
-        <a href="#geo-headlines" className="mt-5 inline-flex min-h-12 items-center justify-center gap-2 rounded-md bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground shadow-sm hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"><Activity className="size-5" /> Explore intelligence dashboard ↓</a>
+        <a href="#intel-overview" className="mt-5 inline-flex min-h-12 items-center justify-center gap-2 rounded-md bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground shadow-sm hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"><Activity className="size-5" /> Explore intelligence dashboard ↓</a>
       </div>
 
-      <section className="mb-5 rounded-md border border-border bg-card p-4 sm:p-6" aria-label="Geopolitical intelligence overview">
+      <section id="intel-overview" className="mb-5 scroll-mt-24 rounded-md border border-border bg-card p-4 sm:p-6" aria-label="Geopolitical intelligence overview">
         <div className="mb-5"><div className="font-mono text-[10px] uppercase text-primary">Intelligence command centre</div><h2 className="mt-1 text-xl font-semibold">Global situation overview</h2><p className="mt-2 text-xs text-muted-foreground">Real feed coverage and transparent keyword signals — no synthetic risk scores.</p></div>
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           <div className="rounded-md border border-border bg-background p-4"><div className="text-[10px] uppercase text-muted-foreground">Indexed reports</div><div className="mt-2 text-3xl font-semibold tabular-nums text-primary">{loading ? "…" : allReports.length}</div></div>
@@ -90,7 +90,7 @@ function GeopoliticsPage() {
       </div>
       <section className="rounded-md border border-border bg-card p-4 sm:p-6" aria-labelledby="geo-headlines">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div><span className="font-mono text-[10px] uppercase tracking-wider text-primary">Open-source news intelligence</span><h2 id="geo-headlines" className="mt-1 text-xl font-semibold">Global headlines</h2></div>
+          <div><span className="font-mono text-[10px] uppercase tracking-wider text-primary">Evidence library</span><h2 id="geo-headlines" className="mt-1 text-xl font-semibold">Source reports</h2></div>
           <button type="button" onClick={() => void refresh()} disabled={loading} className="inline-flex items-center gap-2 rounded-sm border border-border px-3 py-2 text-xs hover:border-primary/60 disabled:opacity-50"><RefreshCw className={`size-4 ${loading ? "animate-spin" : ""}`} /> Refresh</button>
         </div>
         <div className="my-5 flex flex-wrap gap-2">
