@@ -12,9 +12,8 @@ const themes = [
   { name: "Supply chains", assets: "Semiconductors · Shipping", detail: "Trade controls, Taiwan Strait risk and transport bottlenecks." },
 ];
 function stamp(raw: string) {
-  if (!/^\d{14}$/.test(raw)) return "Publication time unavailable";
-  const iso = `${raw.slice(0, 4)}-${raw.slice(4, 6)}-${raw.slice(6, 8)}T${raw.slice(8, 10)}:${raw.slice(10, 12)}:${raw.slice(12, 14)}Z`;
-  const date = new Date(iso);
+  if (!raw) return "Publication time unavailable";
+  const date = new Date(raw);
   return Number.isNaN(date.valueOf()) ? "Publication time unavailable" : date.toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short", timeZone: "UTC" }) + " UTC";
 }
 export const Route = createFileRoute("/lab/geopolitics-intelligence")({
@@ -60,7 +59,7 @@ function GeopoliticsPage() {
         <p className="mt-3 text-sm leading-7 text-muted-foreground">A source-linked global news monitor with regional coverage and a cross-asset risk research framework. Headlines are external reporting, not verified facts or investment signals.</p>
       </div>
       <div className="mb-5 grid gap-3 sm:grid-cols-3">
-        <div className="rounded-md border border-border bg-card p-4"><span className="font-mono text-[10px] uppercase text-muted-foreground">Source</span><p className="mt-2 font-semibold">GDELT Project</p><p className="text-xs text-muted-foreground">Public news discovery index</p></div>
+        <div className="rounded-md border border-border bg-card p-4"><span className="font-mono text-[10px] uppercase text-muted-foreground">Source</span><p className="mt-2 font-semibold">Google News RSS</p><p className="text-xs text-muted-foreground">Third-party publisher headlines</p></div>
         <div className="rounded-md border border-border bg-card p-4"><span className="font-mono text-[10px] uppercase text-muted-foreground">Coverage</span><p className="mt-2 font-semibold">Past 48 hours</p><p className="text-xs text-muted-foreground">English-language source articles</p></div>
         <div className="rounded-md border border-border bg-card p-4"><span className="font-mono text-[10px] uppercase text-muted-foreground">Last fetch</span><p className="mt-2 font-semibold">{feed ? new Date(feed.fetchedAt).toLocaleTimeString("en-GB", { timeZone: "UTC" }) + " UTC" : "—"}</p><p className="text-xs text-muted-foreground">On-demand refresh; not a live push feed</p></div>
       </div>
@@ -88,7 +87,7 @@ function GeopoliticsPage() {
             </a>
           ))}
         </div>
-        <p className="mt-5 text-xs leading-5 text-muted-foreground">GDELT indexes third-party news reporting. Always open the original publisher, verify the event date and corroborate consequential claims with independent sources. Listing does not imply endorsement.</p>
+        <p className="mt-5 text-xs leading-5 text-muted-foreground">Google News aggregates reporting from third-party publishers. Always open the original publisher, verify the event date and corroborate consequential claims with independent sources. Listing does not imply endorsement.</p>
       </section>
       <section className="mt-5 rounded-md border border-border bg-card p-4 sm:p-6" aria-labelledby="geo-markets">
         <span className="font-mono text-[10px] uppercase text-primary">Analyst framework · qualitative, not real-time pricing</span>
