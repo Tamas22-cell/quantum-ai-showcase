@@ -9,11 +9,11 @@ export type GeoArticle = {
 };
 
 const REGIONS = [
-  { name: "Europe", query: "Ukraine Russia European Union NATO" },
-  { name: "United States", query: "United States foreign policy geopolitics" },
-  { name: "China / Taiwan", query: "China Taiwan geopolitics" },
-  { name: "Middle East", query: "Israel Iran Gaza Middle East" },
-  { name: "Global Economy", query: "oil OPEC sanctions" },
+  { name: "Europe", url: "https://feeds.bbci.co.uk/news/world/europe/rss.xml" },
+  { name: "United States", url: "https://feeds.bbci.co.uk/news/world/us_and_canada/rss.xml" },
+  { name: "China / Taiwan", url: "https://feeds.bbci.co.uk/news/world/asia/rss.xml" },
+  { name: "Middle East", url: "https://feeds.bbci.co.uk/news/world/middle_east/rss.xml" },
+  { name: "Global Economy", url: "https://feeds.bbci.co.uk/news/business/rss.xml" },
 ] as const;
 
 function decodeXml(value: string) {
@@ -51,16 +51,11 @@ function parseRss(xml: string, region: string): GeoArticle[] {
     }];
   });
 }
-async function fetchRegion(name: string, query: string) {
-  const rss = new URL("https://news.google.com/rss/search");
-  rss.searchParams.set("q", query + " when:2d");
-  rss.searchParams.set("hl", "en-US");
-  rss.searchParams.set("gl", "US");
-  rss.searchParams.set("ceid", "US:en");
+async function fetchRegion(name: string, feedUrl: string) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 10000);
   try {
-    const res = await fetch(rss, {
+    const res = await fetch(feedUrl, {
       signal: controller.signal,
       headers: { accept: "application/rss+xml, application/xml, text/xml" },
       cache: "no-store",
@@ -77,7 +72,7 @@ async function fetchRegion(name: string, query: string) {
 export const getGeopoliticalNews = createServerFn({ method: "GET" }).handler(async () => {
   return {
     fetchedAt: new Date().toISOString(),
-    provider: "Google News RSS (third-party publishers)",
-    regions: await Promise.all(REGIONS.map(({ name, query }) => fetchRegion(name, query))),
+    provider: "BBC News section RSS (direct publisher links)",
+    regions: await Promise.all(REGIONS.map(({ name, url }) => fetchRegion(name, url))),
   };
 });
