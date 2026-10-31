@@ -39,7 +39,13 @@ function GeopoliticsPage() {
     catch { setFailure("Could not contact the news service. Please retry."); }
     finally { setLoading(false); }
   };
-  useEffect(() => { void refresh(); }, []);
+  useEffect(() => {
+    void refresh();
+    const interval = window.setInterval(() => {
+      if (document.visibilityState === "visible") void refresh();
+    }, 15 * 60 * 1000);
+    return () => window.clearInterval(interval);
+  }, []);
   const articles = useMemo(() => {
     const seen = new Set<string>();
     return (feed?.regions ?? []).flatMap((r) => r.articles).filter((item: GeoArticle) => {
@@ -86,7 +92,7 @@ function GeopoliticsPage() {
       <div className="mb-5 grid gap-3 sm:grid-cols-3">
         <div className="rounded-md border border-border bg-card p-4"><span className="font-mono text-[10px] uppercase text-muted-foreground">Source</span><p className="mt-2 font-semibold">BBC News RSS</p><p className="text-xs text-muted-foreground">Direct publisher article links</p></div>
         <div className="rounded-md border border-border bg-card p-4"><span className="font-mono text-[10px] uppercase text-muted-foreground">Coverage</span><p className="mt-2 font-semibold">Past 48 hours</p><p className="text-xs text-muted-foreground">English-language source articles</p></div>
-        <div className="rounded-md border border-border bg-card p-4"><span className="font-mono text-[10px] uppercase text-muted-foreground">Last fetch</span><p className="mt-2 font-semibold">{feed ? new Date(feed.fetchedAt).toLocaleTimeString("en-GB", { timeZone: "UTC" }) + " UTC" : "—"}</p><p className="text-xs text-muted-foreground">On-demand refresh; not a live push feed</p></div>
+        <div className="rounded-md border border-border bg-card p-4"><span className="font-mono text-[10px] uppercase text-muted-foreground">Last fetch</span><p className="mt-2 font-semibold">{feed ? new Date(feed.fetchedAt).toLocaleTimeString("en-GB", { timeZone: "UTC" }) + " UTC" : "—"}</p><p className="text-xs text-muted-foreground">Auto-refresh every 15 min while page is visible</p></div>
       </div>
       <section className="rounded-md border border-border bg-card p-4 sm:p-6" aria-labelledby="geo-headlines">
         <div className="flex flex-wrap items-center justify-between gap-3">
