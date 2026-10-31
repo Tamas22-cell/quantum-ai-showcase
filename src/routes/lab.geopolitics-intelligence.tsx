@@ -57,6 +57,7 @@ function GeopoliticsPage() {
         <span className="font-mono text-xs uppercase text-primary">Research / Global risk monitoring</span>
         <h1 className="mt-2 flex items-center gap-3 text-3xl font-semibold tracking-tight sm:text-4xl"><Globe2 className="size-8 text-primary" /> Geopolitics Intelligence</h1>
         <p className="mt-3 text-sm leading-7 text-muted-foreground">A source-linked global news monitor with regional coverage and a cross-asset risk research framework. Headlines are external reporting, not verified facts or investment signals.</p>
+        <a href="#geo-headlines" className="mt-5 inline-flex min-h-12 items-center justify-center gap-2 rounded-md bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground shadow-sm hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"><Activity className="size-5" /> Élő hírek és adatok megnyitása ↓</a>
       </div>
       <div className="mb-5 grid gap-3 sm:grid-cols-3">
         <div className="rounded-md border border-border bg-card p-4"><span className="font-mono text-[10px] uppercase text-muted-foreground">Source</span><p className="mt-2 font-semibold">Google News RSS</p><p className="text-xs text-muted-foreground">Third-party publisher headlines</p></div>
@@ -70,7 +71,7 @@ function GeopoliticsPage() {
         </div>
         <div className="my-5 flex flex-wrap gap-2">
           {["All", ...(feed?.regions.map((r) => r.name) ?? ["Europe", "United States", "China / Taiwan", "Middle East", "Global Economy"])].map((name) => (
-            <button key={name} type="button" onClick={() => setRegion(name)} aria-pressed={region === name} className={`rounded-sm border px-3 py-2 font-mono text-[10px] uppercase ${region === name ? "border-primary bg-signal-soft text-primary" : "border-border text-muted-foreground hover:text-foreground"}`}>{name}</button>
+            <button key={name} type="button" onClick={() => setRegion(name)} aria-pressed={region === name} className={`min-h-11 rounded-sm border px-4 py-2 font-mono text-[11px] uppercase ${region === name ? "border-primary bg-signal-soft text-primary" : "border-border text-muted-foreground hover:text-foreground"}`}>{name}</button>
           ))}
         </div>
         <input aria-label="Search headlines" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Filter headlines or publishers…" className="mb-4 w-full rounded-sm border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary" />
@@ -84,6 +85,7 @@ function GeopoliticsPage() {
               <div className="mb-2 flex justify-between gap-3 font-mono text-[10px] text-muted-foreground"><span>{item.region} · {item.domain}</span><ExternalLink className="size-3.5 shrink-0" /></div>
               <h3 className="text-sm font-semibold leading-6 group-hover:text-primary">{item.title}</h3>
               <p className="mt-3 text-[11px] text-muted-foreground">{stamp(item.publishedAt)}</p>
+              <span className="mt-4 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md border border-primary/60 bg-signal-soft px-4 py-2 text-xs font-semibold text-primary group-hover:bg-primary group-hover:text-primary-foreground">Eredeti hír megnyitása <ExternalLink className="size-4" /></span>
             </a>
           ))}
         </div>
