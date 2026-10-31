@@ -60,7 +60,7 @@ function GeopoliticsPage() {
         <a href="#geo-headlines" className="mt-5 inline-flex min-h-12 items-center justify-center gap-2 rounded-md bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground shadow-sm hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"><Activity className="size-5" /> Élő hírek és adatok megnyitása ↓</a>
       </div>
       <div className="mb-5 grid gap-3 sm:grid-cols-3">
-        <div className="rounded-md border border-border bg-card p-4"><span className="font-mono text-[10px] uppercase text-muted-foreground">Source</span><p className="mt-2 font-semibold">Google News RSS</p><p className="text-xs text-muted-foreground">Third-party publisher headlines</p></div>
+        <div className="rounded-md border border-border bg-card p-4"><span className="font-mono text-[10px] uppercase text-muted-foreground">Source</span><p className="mt-2 font-semibold">BBC News RSS</p><p className="text-xs text-muted-foreground">Direct publisher article links</p></div>
         <div className="rounded-md border border-border bg-card p-4"><span className="font-mono text-[10px] uppercase text-muted-foreground">Coverage</span><p className="mt-2 font-semibold">Past 48 hours</p><p className="text-xs text-muted-foreground">English-language source articles</p></div>
         <div className="rounded-md border border-border bg-card p-4"><span className="font-mono text-[10px] uppercase text-muted-foreground">Last fetch</span><p className="mt-2 font-semibold">{feed ? new Date(feed.fetchedAt).toLocaleTimeString("en-GB", { timeZone: "UTC" }) + " UTC" : "—"}</p><p className="text-xs text-muted-foreground">On-demand refresh; not a live push feed</p></div>
       </div>
@@ -89,7 +89,7 @@ function GeopoliticsPage() {
             </a>
           ))}
         </div>
-        <p className="mt-5 text-xs leading-5 text-muted-foreground">Google News aggregates reporting from third-party publishers. Always open the original publisher, verify the event date and corroborate consequential claims with independent sources. Listing does not imply endorsement.</p>
+        <p className="mt-5 text-xs leading-5 text-muted-foreground">News headlines are fetched from BBC News regional and business RSS feeds. Always open the original publisher, verify the event date and corroborate consequential claims with independent sources. Listing does not imply endorsement.</p>
       </section>
       <section className="mt-5 rounded-md border border-border bg-card p-4 sm:p-6" aria-labelledby="geo-markets">
         <span className="font-mono text-[10px] uppercase text-primary">Analyst framework · qualitative, not real-time pricing</span>
