@@ -103,6 +103,13 @@ export const portfolio = {
   ],
   certifications: [
     {
+      title: "AI0224EN: RAG: Vector Databases and Retrievers",
+      detail:
+        "IBM / edX · Verified Certificate · Issued Nov 5, 2026 · Credential ID e774cb7b718f4117b64c0c63cf49dc43",
+      verified: true,
+      href: "https://courses.edx.org/certificates/e774cb7b718f4117b64c0c63cf49dc43",
+    },
+    {
       title: "CS109xb: Introduction to Neural Networks and Deep Learning with Python",
       detail:
         "HarvardX / edX · Verified Certificate · Issued Oct 22, 2026 · Credential ID 7c7c45833a9d47cea3a7e2343d92694e",
