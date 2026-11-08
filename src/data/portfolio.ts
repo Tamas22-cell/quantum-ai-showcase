@@ -103,6 +103,14 @@ export const portfolio = {
   ],
   certifications: [
     {
+      title: "CC0201EN: Introduction to Containers, Kubernetes and OpenShift",
+      detail:
+        "IBM / edX · Verified Certificate · Issued Nov 7, 2026 · Credential ID cf70804afad7400d93bee02ab9531519",
+      verified: true,
+      href: "https://courses.edx.org/certificates/cf70804afad7400d93bee02ab9531519",
+      pdfHref: "/certificates/ibm-cc0201en-certificate.pdf",
+    },
+    {
       title: "AI0224EN: RAG: Vector Databases and Retrievers",
       detail:
         "IBM / edX · Verified Certificate · Issued Nov 5, 2026 · Credential ID e774cb7b718f4117b64c0c63cf49dc43",

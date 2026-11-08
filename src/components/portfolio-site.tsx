@@ -1419,14 +1419,25 @@ export function PortfolioSite() {
                         {item.detail}
                       </p>
                       {"href" in item && item.href ? (
-                        <a
-                          href={item.href}
-                          target="_blank"
-                          rel="noreferrer"
-                          className={`mt-4 inline-flex items-center gap-2 font-mono text-[10px] uppercase text-primary hover:underline ${focusRing}`}
-                        >
-                          View credential <ArrowUpRight className="size-3" aria-hidden="true" />
-                        </a>
+                        <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2">
+                          <a
+                            href={item.href}
+                            target="_blank"
+                            rel="noreferrer"
+                            className={`inline-flex items-center gap-2 font-mono text-[10px] uppercase text-primary hover:underline ${focusRing}`}
+                          >
+                            View credential <ArrowUpRight className="size-3" aria-hidden="true" />
+                          </a>
+                          {"pdfHref" in item && item.pdfHref ? (
+                            <a
+                              href={item.pdfHref}
+                              download
+                              className={`inline-flex items-center gap-2 font-mono text-[10px] uppercase text-primary hover:underline ${focusRing}`}
+                            >
+                              Download PDF <ArrowDown className="size-3" aria-hidden="true" />
+                            </a>
+                          ) : null}
+                        </div>
                       ) : null}
                     </div>
                   </div>
