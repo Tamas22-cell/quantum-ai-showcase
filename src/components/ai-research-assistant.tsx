@@ -29,7 +29,7 @@ export function AIResearchAssistant() {
     setMessages((current) => [...current, { role: "user", content: question }]);
     setLoading(true);
     try {
-      const result = await askAIResearchAssistant({ data: { question } });
+      const result = await askAIResearchAssistant({ data: { mode: "explain-algorithm", question } });
       setMessages((current) => [...current, { role: "assistant", content: result.answer }]);
     } catch {
       setMessages((current) => [
