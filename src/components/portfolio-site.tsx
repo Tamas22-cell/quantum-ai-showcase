@@ -1407,6 +1407,16 @@ export function PortfolioSite() {
                       )}
                     </span>
                     <div className="min-w-0">
+                      {"imageHref" in item && item.imageHref ? (
+                        <a href={item.imageHref} target="_blank" rel="noreferrer">
+                          <img
+                            src={item.imageHref}
+                            alt={`${item.title} certificate`}
+                            loading="lazy"
+                            className="mb-4 w-full max-w-[16rem] rounded border border-border object-contain"
+                          />
+                        </a>
+                      ) : null}
                       <div className="flex flex-wrap items-center gap-3">
                         <h3 className="font-medium text-muted-foreground">{item.title}</h3>
                         <span
