@@ -103,14 +103,6 @@ export const portfolio = {
   ],
   certifications: [
     {
-      title: "IBM Generative AI Engineering Professional Certificate",
-      detail:
-        "IBM / Coursera · Professional Certificate · 16 courses · Issued May 15, 2026 · Credential ID OVID4H19PSSY",
-      verified: true,
-      href: "https://coursera.org/verify/professional-cert/OVID4H19PSSY",
-      imageHref: "/certificates/ibm-generative-ai-engineering.jpg",
-    },
-    {
       title: "CC0201EN: Introduction to Containers, Kubernetes and OpenShift",
       detail:
         "IBM / edX · Verified Certificate · Issued Nov 7, 2026 · Credential ID cf70804afad7400d93bee02ab9531519",
