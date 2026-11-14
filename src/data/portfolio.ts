@@ -108,6 +108,7 @@ export const portfolio = {
         "IBM / edX · Verified Certificate · Issued Nov 14, 2026 · Credential ID 9acadc313fe9437e8894d3426e79869e",
       verified: true,
       href: "https://courses.edx.org/certificates/9acadc313fe9437e8894d3426e79869e",
+      badgeHref: "https://www.credly.com/badges/889781a1-60e3-4056-9161-f64758b21525/public_url",
     },
     {
       title: "CC0201EN: Introduction to Containers, Kubernetes and OpenShift",
