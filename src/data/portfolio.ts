@@ -125,6 +125,7 @@ export const portfolio = {
         "IBM / edX · Verified Certificate · Issued Nov 5, 2026 · Credential ID e774cb7b718f4117b64c0c63cf49dc43",
       verified: true,
       href: "https://courses.edx.org/certificates/e774cb7b718f4117b64c0c63cf49dc43",
+      badgeHref: "https://www.credly.com/badges/d051769e-0d2a-485f-b148-a6a8ae030470/public_url",
     },
     {
       title: "CS109xb: Introduction to Neural Networks and Deep Learning with Python",
