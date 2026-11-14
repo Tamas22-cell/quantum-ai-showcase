@@ -1,5 +1,7 @@
 # Quantum AI Showcase
 
+[![Quantum AI Showcase — AI and Quantum Computing Portfolio](public/quantum-ai-lab-social.png)](https://quantum-ai-showcase.vercel.app/)
+
 Professional AI & Quantum Computing research portfolio for Tamás Németh.
 
 ## Live site
