@@ -116,6 +116,7 @@ export const portfolio = {
         "IBM / edX · Verified Certificate · Issued Nov 7, 2026 · Credential ID cf70804afad7400d93bee02ab9531519",
       verified: true,
       href: "https://courses.edx.org/certificates/cf70804afad7400d93bee02ab9531519",
+      badgeHref: "https://www.credly.com/badges/25baac33-1491-4ec3-ae09-7164065fc1cf/public_url",
       pdfHref: "/certificates/ibm-cc0201en-certificate.pdf",
     },
     {
