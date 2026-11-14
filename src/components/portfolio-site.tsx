@@ -1428,6 +1428,16 @@ export function PortfolioSite() {
                           >
                             View credential <ArrowUpRight className="size-3" aria-hidden="true" />
                           </a>
+                          {"badgeHref" in item && item.badgeHref ? (
+                            <a
+                              href={item.badgeHref}
+                              target="_blank"
+                              rel="noreferrer"
+                              className={`inline-flex items-center gap-2 font-mono text-[10px] uppercase text-primary hover:underline ${focusRing}`}
+                            >
+                              View Credly badge <ArrowUpRight className="size-3" aria-hidden="true" />
+                            </a>
+                          ) : null}
                           {"pdfHref" in item && item.pdfHref ? (
                             <a
                               href={item.pdfHref}
