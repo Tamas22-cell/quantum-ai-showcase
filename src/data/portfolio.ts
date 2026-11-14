@@ -103,6 +103,13 @@ export const portfolio = {
   ],
   certifications: [
     {
+      title: "CD0223EN: Monitoring and Observability for Application Developers",
+      detail:
+        "IBM / edX · Verified Certificate · Issued Nov 14, 2026 · Credential ID 9acadc313fe9437e8894d3426e79869e",
+      verified: true,
+      href: "https://courses.edx.org/certificates/9acadc313fe9437e8894d3426e79869e",
+    },
+    {
       title: "CC0201EN: Introduction to Containers, Kubernetes and OpenShift",
       detail:
         "IBM / edX · Verified Certificate · Issued Nov 7, 2026 · Credential ID cf70804afad7400d93bee02ab9531519",
