@@ -931,6 +931,19 @@ export function PortfolioSite() {
                 </div>
               </article>
 
+              <article className="card-interactive group relative flex min-h-[26rem] flex-col rounded-md border border-primary/50 bg-card p-6 sm:p-8">
+                <Cpu className="size-9 text-primary" aria-hidden="true" />
+                <span className="mt-5 font-mono text-xs text-primary">HPC / RESEARCH RELEASE CANDIDATE</span>
+                <h3 className="mt-4 text-2xl font-semibold tracking-tight">Hybrid Quantum–AI HPC Platform</h3>
+                <p className="mt-4 text-sm leading-7 text-muted-foreground">
+                  Cloud CPU and Qiskit simulation workloads, Redis job orchestration, PostgreSQL benchmark history, CSV/JSON reports and dependency status. Local CUDA experiments are separate; physical QPU and cloud GPU validation remain open.
+                </p>
+                <div className="mt-auto flex flex-wrap gap-3 pt-8">
+                  <a href="https://hybrid-quantum-ai-hpc-platform.vercel.app" target="_blank" rel="noopener noreferrer" className="rounded-sm border border-primary/40 px-3 py-2 font-mono text-xs text-primary">Open dashboard (authenticated)</a>
+                  <a href="https://github.com/Tamas22-cell/hybrid-quantum-ai-hpc-platform" target="_blank" rel="noopener noreferrer" className="rounded-sm border border-border px-3 py-2 font-mono text-xs">GitHub source</a>
+                </div>
+              </article>
+
               {portfolio.projects.map((project, index) => {
                 const Icon = projectIcons[index] ?? Cpu;
                 return (
