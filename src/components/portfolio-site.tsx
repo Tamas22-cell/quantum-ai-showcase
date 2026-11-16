@@ -309,7 +309,7 @@ export function PortfolioSite() {
               to="/account"
               className="rounded-sm px-3 py-2 font-mono text-[11px] uppercase tracking-wider text-cyan-400 hover:text-cyan-200"
             >
-              Belépés / Regisztráció
+              Sign in / Sign up
             </Link>
           </nav>
           <Button
@@ -921,12 +921,12 @@ export function PortfolioSite() {
             />
             <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
               <article className="card-interactive group relative flex min-h-[26rem] flex-col rounded-md border border-cyan-500/50 bg-card p-6 sm:p-8">
-                <span className="font-mono text-xs text-primary">WEB3 / LIVE</span>
+                <span className="font-mono text-xs text-primary">WEB3 / EXPERIMENTAL</span>
                 <h3 className="mt-12 text-2xl font-semibold tracking-tight">Web3 Market Terminal</h3>
-                <p className="mt-4 text-sm leading-7 text-muted-foreground">BTC, ETH és SOL élő piaci grafikonok, gyertyák, RSI, MACD, Bollinger-szalagok és forgalom.</p>
+                <p className="mt-4 text-sm leading-7 text-muted-foreground">Experimental BTC, ETH and SOL charts with candles, RSI, MACD, Bollinger Bands and volume. Market data depends on Kraken public API availability.</p>
                 <div className="mt-auto pt-8">
                   <Link to="/web3-terminal" className={`inline-flex min-h-10 items-center gap-2 rounded-sm border border-primary/40 bg-signal-soft px-4 py-2 font-mono text-xs uppercase text-primary hover:border-primary hover:bg-primary hover:text-primary-foreground ${focusRing}`}>
-                    <ArrowUpRight className="size-4" aria-hidden="true" /> Grafikon megnyitása
+                    <ArrowUpRight className="size-4" aria-hidden="true" /> Open terminal
                   </Link>
                 </div>
               </article>
@@ -1526,8 +1526,7 @@ export function PortfolioSite() {
         <div className="mx-auto flex max-w-7xl flex-col gap-3 font-mono text-[10px] uppercase text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
           <span>© 2026 {portfolio.name} · Quantum AI Lab</span>
           <span className="flex items-center gap-2">
-            <Check className="size-3 text-primary" aria-hidden="true" /> Portfolio content awaiting
-            final verification
+            <Check className="size-3 text-primary" aria-hidden="true" /> Independent research projects and live data
           </span>
         </div>
       </footer>
