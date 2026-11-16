@@ -157,7 +157,7 @@ export default function Web3TerminalTest() {
   const manualAnchors=Number(anchorInput)>0&&Number(anchorEnd)>0&&Number(anchorInput)!==Number(anchorEnd)?[Number(anchorInput),Number(anchorEnd)] as [number,number]:null;
   const setFlag=(key:keyof typeof flags)=>setFlags(v=>({...v,[key]:!v[key]}));
   return <section style={{background:'#020617',color:'#e2e8f0',padding:20,borderRadius:16,fontFamily:'system-ui',...(fullscreen?{position:'fixed' as const,inset:0,zIndex:9999,overflowY:'auto' as const}:{})}}>
-    <h2>Web3 Market Terminal — TEST ONLY</h2>
+    <h2>Web3 Market Terminal — EXPERIMENTAL</h2>
     <p>USD pairs · Kraken public API · Prices are last trades, not guaranteed executable quotes</p>
     <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
       {COINS.map(c=>{const q=quotes[c],fresh=q&&clock-q.updated<120000;return <button key={c} onClick={()=>{setCoin(c);setOffset(0);setAnchors(null);setAnchorInput('');setAnchorEnd('')}} aria-pressed={coin===c} style={{padding:12,color:'white',background:c===coin?'#1d4ed8':'#1e293b',border:'1px solid #475569',borderRadius:10,minWidth:150,textAlign:'left'}}>
@@ -175,6 +175,6 @@ export default function Web3TerminalTest() {
     {flags.rsi&&<IndicatorPanel title="RSI (14)" lines={[{values:rsiLine,color:'#fbbf24',label:'RSI'}]} bounds={[0,100]} guides={[30,50,70]}/>}
     {flags.macd&&<IndicatorPanel title="MACD (12, 26, 9)" lines={[{values:macdLines.line,color:'#60a5fa',label:'MACD'},{values:macdLines.signal,color:'#f97316',label:'Signal'},{values:macdLines.histogram,color:'#34d399',label:'Histogram'}]} guides={[0]}/>}
     {flags.atr&&<IndicatorPanel title="ATR (14)" lines={[{values:atrLine,color:'#a78bfa',label:'ATR'}]}/>}
-    <p style={{fontSize:12,color:'#94a3b8'}}>Quotes refreshed every 60 seconds. Last candle can be incomplete. If API requests fail or quotes expire, prices are hidden instead of presenting stale values as live. Test branch only.</p>
+    <p style={{fontSize:12,color:'#94a3b8'}}>Quotes refreshed every 60 seconds. Last candle can be incomplete. If API requests fail or quotes expire, prices are hidden instead of presenting stale values as live.</p>
   </section>;
 }
