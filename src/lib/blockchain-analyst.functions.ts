@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { loadWhaleFlow } from "@/lib/whale-flow.functions";
 
 type M = { count?: number; vsize?: number };
 type F = { fastestFee?: number; hourFee?: number };
@@ -10,10 +11,6 @@ type B = {
   tx_count?: number;
   extras?: { totalFees?: number };
 }[];
-type R = { txid?: string; value?: number; fee?: number; vsize?: number }[];
-
-const WHALE_THRESHOLD_BTC = 10;
-
 async function j<T>(p: string): Promise<T> {
   const r = await fetch(`https://mempool.space/api${p}`, {
     headers: { accept: "application/json", "user-agent": "quantum-ai-showcase/1.0" },
@@ -23,13 +20,13 @@ async function j<T>(p: string): Promise<T> {
 }
 
 export const getBlockchainAnalyst = createServerFn({ method: "GET" }).handler(async () => {
-  const [m, f, h, d, b, recent] = await Promise.all([
+  const [m, f, h, d, b, whaleFlow] = await Promise.all([
     j<M>("/mempool"),
     j<F>("/v1/fees/recommended"),
     j<H>("/v1/mining/hashrate/1m"),
     j<D>("/v1/difficulty-adjustment"),
     j<B>("/v1/blocks"),
-    j<R>("/mempool/recent"),
+    loadWhaleFlow(),
   ]);
   const ts = b.map((x) => x.timestamp).filter((x): x is number => typeof x === "number");
   const ints = ts
@@ -43,14 +40,10 @@ export const getBlockchainAnalyst = createServerFn({ method: "GET" }).handler(as
   const diff = typeof d.difficultyChange === "number" ? d.difficultyChange : null;
   const mem = (m.vsize ?? 0) / 1e6;
   const hour = f.hourFee ?? null;
-  const transfers = recent.flatMap((t) =>
-    typeof t.value === "number" && t.value > 0 ? [t.value / 1e8] : [],
-  );
-  const totalTransfer = transfers.reduce((a, c) => a + c, 0);
-  const whaleTransfers = transfers.filter((v) => v >= WHALE_THRESHOLD_BTC);
-  const whaleVolume = whaleTransfers.reduce((a, c) => a + c, 0);
-  const whaleShare = totalTransfer > 0 ? (whaleVolume / totalTransfer) * 100 : null;
-  const largestTransfer = transfers.length ? Math.max(...transfers) : null;
+  const whaleTransactions = whaleFlow.whaleTransactions;
+  const whaleVolume = whaleFlow.whaleVolumeBtc;
+  const whaleShare = whaleFlow.whaleSharePct;
+  const largestTransfer = whaleFlow.largest[0]?.valueBtc ?? null;
   const observations = [
     hash == null ? null : `Network security: hashrate is ${hash.toFixed(1)} EH/s.`,
     interval == null
@@ -67,7 +60,7 @@ export const getBlockchainAnalyst = createServerFn({ method: "GET" }).handler(as
       : `Miner economics: sampled recent blocks average ${avgFees.toFixed(4)} BTC in transaction fees.`,
     whaleShare == null
       ? null
-      : `Whale activity: ${whaleTransfers.length} transfer(s) at or above ${WHALE_THRESHOLD_BTC} BTC account for ${whaleShare.toFixed(1)}% of the latest sampled transfer value${largestTransfer == null ? "." : `; largest observed transfer is ${largestTransfer.toFixed(2)} BTC.`}`,
+      : `Whale activity: ${whaleTransactions} transfer(s) at or above ${whaleFlow.thresholdBtc} BTC account for ${whaleShare.toFixed(1)}% of the latest sampled transfer value${largestTransfer == null ? "." : `; largest observed transfer is ${largestTransfer.toFixed(2)} BTC.`}`,
   ].filter((x): x is string => x != null);
   const watch = [
     interval != null && interval > 12
@@ -94,7 +87,7 @@ export const getBlockchainAnalyst = createServerFn({ method: "GET" }).handler(as
       hourFee: hour,
       mempoolMb: mem,
       avgFeesBtc: avgFees,
-      whaleTransactions: whaleTransfers.length,
+      whaleTransactions,
       whaleVolumeBtc: whaleVolume,
       whaleSharePct: whaleShare,
       largestTransferBtc: largestTransfer,
