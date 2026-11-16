@@ -5,7 +5,7 @@ import { authConfigured, supabase } from "../lib/site-auth";
 export const Route = createFileRoute("/account")({
   head: () => ({
     meta: [
-      { title: "Bejelentkezés és regisztráció — Quantum AI Lab" },
+      { title: "Sign in or create an account — Quantum AI Lab" },
       { name: "description", content: "Manage your Quantum AI Lab account." },
       { property: "og:title", content: "Bejelentkezés és regisztráció — Quantum AI Lab" },
       { property: "og:description", content: "Manage your Quantum AI Lab account." },
@@ -37,7 +37,7 @@ function AccountPage() {
           options: { emailRedirectTo: window.location.origin + "/account" },
         });
         if (error) throw error;
-        setMessage("Regisztráció elküldve. Ellenőrizd az e-mail címed.");
+        setMessage("Registration submitted. Check your email.");
       } else if (mode === "login") {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
@@ -58,22 +58,22 @@ function AccountPage() {
         // The 30-day checkbox is a preference only until backend session TTL is configured.
         setMessage(
           remember
-            ? "Sikeres belépés. A 30 napos munkamenethez szerveroldali TTL beállítás szükséges."
-            : "Sikeres bejelentkezés.",
+            ? "Sign-in successful. The 30-day session requires server-side TTL configuration."
+            : "Successfully signed in.",
         );
       } else if (mode === "forgot") {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
           redirectTo: window.location.origin + "/account",
         });
         if (error) throw error;
-        setMessage("Ha a cím létezik, elküldtük a jelszó-visszaállító linket.");
+        setMessage("If the address exists, a password reset link has been sent.");
       } else {
         const { error } = await supabase.auth.updateUser({ password });
         if (error) throw error;
-        setMessage("A jelszavad megváltozott.");
+        setMessage("Your password has been changed.");
       }
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Sikertelen művelet");
+      setMessage(error instanceof Error ? error.message : "Action failed");
     } finally {
       setBusy(false);
     }
@@ -88,23 +88,23 @@ function AccountPage() {
           {
             (
               {
-                login: "Bejelentkezés",
-                register: "Regisztráció",
-                forgot: "Elfelejtett jelszó",
-                change: "Jelszó módosítása",
+                login: "Sign in",
+                register: "Create account",
+                forgot: "Forgot password",
+                change: "Change password",
               } as Record<Mode, string>
             )[mode]
           }
         </h1>
         {!authConfigured && (
           <p role="alert" className="mt-4 rounded bg-amber-950 p-3 text-amber-200">
-            A hitelesítés beállítására vár. Supabase környezeti változók szükségesek.
+            Authentication is not configured. Supabase environment variables are required.
           </p>
         )}
         <form onSubmit={submit} className="mt-6 space-y-4">
           {mode !== "change" && (
             <label className="block text-sm">
-              E-mail cím
+              Email address
               <input
                 required
                 type="email"
@@ -117,7 +117,7 @@ function AccountPage() {
           )}
           {mode !== "forgot" && (
             <label className="block text-sm">
-              {mode === "change" ? "Új jelszó" : "Jelszó"}
+              {mode === "change" ? "New password" : "Password"}
               <input
                 required
                 minLength={8}
@@ -136,7 +136,7 @@ function AccountPage() {
                 checked={remember}
                 onChange={(e) => setRemember(e.target.checked)}
               />{" "}
-              Maradjak bejelentkezve 30 napig (backend beállítás után)
+              Keep me signed in for 30 days (after backend configuration)
             </label>
           )}
           <button
@@ -144,7 +144,7 @@ function AccountPage() {
             disabled={!authConfigured || busy}
             className="w-full rounded-lg bg-cyan-600 p-3 font-semibold disabled:opacity-50"
           >
-            {busy ? "Feldolgozás..." : "Folytatás"}
+            {busy ? "Processing..." : "Continue"}
           </button>
         </form>
         {message && (
@@ -166,10 +166,10 @@ function AccountPage() {
               {
                 (
                   {
-                    login: "Belépés",
-                    register: "Regisztráció",
-                    forgot: "Jelszó visszaállítás",
-                    change: "Jelszócsere",
+                    login: "Sign in",
+                    register: "Sign up",
+                    forgot: "Reset password",
+                    change: "Change password",
                   } as Record<Mode, string>
                 )[m]
               }
@@ -177,8 +177,7 @@ function AccountPage() {
           ))}
         </nav>
         <p className="mt-6 text-xs text-slate-400">
-          A robotellenőrzést szerveroldalon ellenőrzött CAPTCHA-val kell aktiválni. A 3×3 képes
-          feladvány típusa a CAPTCHA-szolgáltatótól függ.
+          Server-verified CAPTCHA must be configured to enable bot protection. The CAPTCHA provider determines the 3×3 image challenge.
         </p>
       </div>
     </main>
