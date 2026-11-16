@@ -45,7 +45,7 @@ function mapTx(t: RecentTx | TxDetail, btcUsd: number | null) {
   };
 }
 
-export const getWhaleFlow = createServerFn({ method: "GET" }).handler(async () => {
+export async function loadWhaleFlow() {
   const [recentResult, priceResult, blocksResult] = await Promise.allSettled([
     mempoolJson<RecentTx[]>("/mempool/recent"),
     mempoolJson<PriceResponse>("/v1/prices"),
@@ -108,4 +108,6 @@ export const getWhaleFlow = createServerFn({ method: "GET" }).handler(async () =
     updatedAt: new Date().toISOString(),
     methodology: `Large-transfer detector using the live mempool plus up to ${BLOCK_COUNT} recent Bitcoin blocks. The ≥${WHALE_THRESHOLD_BTC} BTC threshold is applied to transaction output totals. Exchange wallets are not attributed.`,
   };
-});
+}
+
+export const getWhaleFlow = createServerFn({ method: "GET" }).handler(loadWhaleFlow);
