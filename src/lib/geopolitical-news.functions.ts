@@ -62,8 +62,17 @@ async function fetchRegion(name: string, feedUrl: string) {
     });
     if (!res.ok) throw new Error("RSS HTTP " + res.status);
     const xml = await res.text();
-    const articles = parseRss(xml, name).slice(0, 12);
-    if (!articles.length) throw new Error("No valid RSS items");
+    const parsed = parseRss(xml, name);
+    if (!parsed.length) throw new Error("No valid RSS items");
+    const now = Date.now();
+    const cutoff = now - 48 * 60 * 60 * 1000;
+    const articles = parsed
+      .filter((article) => {
+        const publishedAt = Date.parse(article.publishedAt);
+        return Number.isFinite(publishedAt) && publishedAt >= cutoff && publishedAt <= now;
+      })
+      .sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt))
+      .slice(0, 12);
     return { name, articles, error: null as string | null };
   } catch {
     return { name, articles: [] as GeoArticle[], error: "News source temporarily unavailable" };
