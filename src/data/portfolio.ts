@@ -19,6 +19,7 @@ export const portfolio = {
   intro:
     "Exploring intelligent agents, computational finance, and quantum algorithms at the boundary between research and practical systems.",
   navigation: [
+    { label: "Publications", href: "#publications" },
     { label: "About", href: "#about" },
     { label: "Projects", href: "#projects" },
     { label: "Research", href: "#research" },
