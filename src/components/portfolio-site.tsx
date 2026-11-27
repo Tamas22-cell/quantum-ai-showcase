@@ -455,22 +455,6 @@ export function PortfolioSite() {
           </div>
         </section>
 
-        <section id="publications" aria-labelledby="book-title" className="border-b border-border px-5 py-10 sm:px-8">
-          <div className="mx-auto grid max-w-7xl gap-6 rounded-xl border border-primary/30 bg-card p-6 sm:grid-cols-[12rem_minmax(0,1fr)] sm:items-center sm:p-8">
-            <img src="/qiskit-book-cover.svg" alt="Qiskit Engineering — Developer Preview Edition book cover" width={480} height={679} className="mx-auto h-auto w-full max-w-48 rounded-md" />
-            <div className="min-w-0">
-              <p className="font-mono text-xs uppercase tracking-wider text-primary">Publications</p>
-              <h2 id="book-title" className="mt-3 text-3xl font-semibold tracking-tight">Qiskit Engineering</h2>
-              <p className="mt-2 text-muted-foreground">Developer Preview Edition · 50 pages · 23 code listings</p>
-              <p className="mt-3 text-sm leading-7 text-muted-foreground">From quantum fundamentals to hybrid AI and financial optimization.</p>
-              <Button asChild variant="signal" className="mt-5">
-                <a href="https://qiskit-engineering-reader.onrender.com/read/1" target="_blank" rel="noopener noreferrer">Read the Book <ArrowUpRight aria-hidden="true" /></a>
-              </Button>
-              <p className="mt-2 text-xs text-muted-foreground">Registration or sign-in required.</p>
-            </div>
-          </div>
-        </section>
-
         <LiveResearchMarquee />
 
         {/* RESEARCH HIGHLIGHTS */}
@@ -761,6 +745,22 @@ export function PortfolioSite() {
             </section>
           </div>
         )}
+
+        <section id="publications" aria-labelledby="book-title" className="border-b border-border px-5 py-10 sm:px-8">
+          <div className="mx-auto grid max-w-7xl gap-6 rounded-xl border border-primary/30 bg-card p-6 sm:grid-cols-[12rem_minmax(0,1fr)] sm:items-center sm:p-8">
+            <img src="/qiskit-book-cover.svg" alt="Qiskit Engineering — Developer Preview Edition book cover" width={480} height={679} className="mx-auto h-auto w-full max-w-48 rounded-md" />
+            <div className="min-w-0">
+              <p className="font-mono text-xs uppercase tracking-wider text-primary">Publications</p>
+              <h2 id="book-title" className="mt-3 text-3xl font-semibold tracking-tight">Qiskit Engineering</h2>
+              <p className="mt-2 text-muted-foreground">Developer Preview Edition · 50 pages · 23 code listings</p>
+              <p className="mt-3 text-sm leading-7 text-muted-foreground">From quantum fundamentals to hybrid AI and financial optimization.</p>
+              <Button asChild variant="signal" className="mt-5">
+                <a href="https://qiskit-engineering-reader.onrender.com/read/1" target="_blank" rel="noopener noreferrer">Read the Book <ArrowUpRight aria-hidden="true" /></a>
+              </Button>
+              <p className="mt-2 text-xs text-muted-foreground">Registration or sign-in required.</p>
+            </div>
+          </div>
+        </section>
 
         {/* ABOUT + capability map */}
         <section id="about" className="border-b border-border px-5 py-24 sm:px-8 lg:py-32">
