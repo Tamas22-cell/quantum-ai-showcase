@@ -690,6 +690,7 @@ export function PortfolioSite() {
 
         {/* New original GitHub-uploaded artwork above About. */}
         <QuantumResearchDemo />
+        <AIEngineeringDemo />
 
         <section className="border-b border-border px-5 py-14 sm:px-8 lg:py-20" aria-label="Research artwork">
           <div className="mx-auto max-w-7xl">
@@ -1643,4 +1644,39 @@ function QuantumResearchDemo() {
       </div>
     </section>
   );
+}
+
+function AIEngineeringDemo() {
+  const [mode,setMode]=useState("rag");
+  const [step,setStep]=useState(-1);
+  const [running,setRunning]=useState(false);
+  const timer=useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(()=>()=>{if(timer.current!==null)clearTimeout(timer.current)},[]);
+  const rag=mode==="rag";
+  const stages=rag?["Query","Retrieve","Rank","Generate","Validate"]:["Task","Plan","Tool call","Observe","Respond"];
+  const details=rag?["How does a Bell circuit work?","Local reference: H gate and CNOT","Select relevant circuit facts","H creates superposition; CNOT correlates the qubits.","Check answer against local reference."]:["Summarize a research task","Select a calculation tool","Calculate 4096 × 0.25","Expected count: 1024 per outcome","Return the calculated result."];
+  function run(){
+    setRunning(true);setStep(0);
+    let i=0;
+    function next(){i++;if(i===5){setRunning(false);return;}setStep(i);timer.current=setTimeout(next,650);}
+    timer.current=setTimeout(next,650);
+  }
+  return <section aria-label="Live AI engineering demo" className="border-b border-border px-5 py-14 sm:px-8 lg:py-20">
+    <div className="mx-auto max-w-6xl">
+      <p className="text-xs font-semibold uppercase tracking-[.25em] text-violet-400">Interactive engineering • Workflow simulation</p>
+      <h2 className="mt-2 text-2xl font-semibold text-foreground sm:text-3xl">Live AI Engineering Demo</h2>
+      <p className="mt-3 text-sm text-muted-foreground">Explore RAG and agentic tool orchestration with illustrative local workflows. No external LLM or API is called.</p>
+      <div className="mt-7 rounded-2xl border border-violet-400/40 bg-[#080f25] p-5 text-slate-100 shadow-[0_0_35px_rgba(168,85,247,.18)] sm:p-8">
+        <div className="flex flex-wrap items-end gap-4">
+          <label className="grid gap-2 text-xs text-violet-200">Workflow<select value={mode} disabled={running} onChange={e=>{setMode(e.target.value);setStep(-1)}} className="rounded-lg border border-violet-400/40 bg-slate-900 p-2 text-white"><option value="rag">RAG Pipeline</option><option value="agent">AI Agent / Tool Calling</option></select></label>
+          <button type="button" disabled={running} onClick={run} className="rounded-lg bg-violet-300 px-5 py-2 font-semibold text-slate-950 shadow-[0_0_18px_rgba(168,85,247,.5)] disabled:opacity-50">{running?"Processing…":"Run AI Workflow"}</button>
+        </div>
+        <div className="mt-7 grid gap-3 sm:grid-cols-5">{stages.map((s,i)=><div key={s} className={"rounded-xl border p-4 transition-all duration-500 "+(i<=step?"border-cyan-300 bg-cyan-950/60 shadow-[0_0_18px_rgba(34,211,238,.25)]":"border-violet-400/25 bg-slate-950/60")}><p className="text-xs text-violet-300">0{i+1} / {i<step||(!running&&i===step)?"DONE":i===step?"ACTIVE":"WAIT"}</p><p className="mt-2 font-semibold">{s}</p><div className="mt-3 h-1 rounded bg-slate-800"><div className="h-full rounded bg-gradient-to-r from-violet-500 to-cyan-300 transition-all duration-500" style={{width:i<=step?"100%":"0%"}}/></div></div>)}</div>
+        <div className="mt-6 grid gap-4 lg:grid-cols-2">
+          <div className="rounded-xl border border-violet-400/30 bg-slate-950/60 p-4" aria-live="polite"><p className="text-xs uppercase tracking-widest text-violet-300">Execution trace</p><div className="mt-4 grid gap-2 font-mono text-xs">{step<0?<p className="text-slate-400">Run a workflow to inspect its stages.</p>:details.slice(0,step+1).map((d,i)=><p key={i} className="text-cyan-200">[{stages[i]}] {d}</p>)}</div></div>
+          <div className="rounded-xl border border-cyan-400/30 bg-slate-950/60 p-4"><p className="text-xs uppercase tracking-widest text-cyan-300">Workflow output</p><p className="mt-4 text-sm">{step===4&&!running?(rag?"A Bell circuit applies H to the first qubit and CNOT to entangle the pair. Ideal measurements yield 00 or 11.":"4096 × 25% = "+(4096*.25)+" expected measurements per outcome."):running?"Executing illustrative pipeline…":"Awaiting execution."}</p><p className="mt-4 text-xs text-slate-400">Local demonstration • scripted stages, not live model inference</p></div>
+        </div>
+      </div>
+    </div>
+  </section>;
 }
