@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   ArrowDown,
@@ -703,6 +703,7 @@ export function PortfolioSite() {
                 <figure key={item.src} className="overflow-hidden rounded-2xl border border-fuchsia-400/35 bg-[#060b20] p-1 shadow-[0_0_40px_rgba(139,92,246,.12)] sm:p-2">
                   <div className="relative">
                     <img src={item.src} alt={item.alt} loading="lazy" className="block h-auto w-full object-contain" />
+                    <GalleryMotion variant={item.topics[0] === "AI Intelligence" ? 0 : 1} />
                     <div className="absolute inset-x-0 bottom-0 grid h-[34%] grid-cols-3">
                       {item.topics.map((topic)=>(
                         <button key={topic} type="button" onClick={()=>setGalleryTopic(topic)} aria-label={`Learn more about ${topic}`} title={`Learn more: ${topic}`} className="cursor-pointer rounded-md bg-transparent transition-colors hover:bg-white/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-cyan-300" />
@@ -1548,6 +1549,37 @@ export function PortfolioSite() {
           </span>
         </div>
       </footer>
+    </div>
+  );
+}
+
+
+function GalleryMotion({ variant }: { variant: number }) {
+  const [active, setActive] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const node = ref.current;
+    if (!node || !("IntersectionObserver" in window)) return;
+    const observer = new IntersectionObserver(([entry]) => setActive(entry.isIntersecting), { threshold: 0.1 });
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+  return (
+    <div ref={ref} aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden" style={{mixBlendMode:"screen"}}>
+      <style>{`
+        @keyframes gallery-pulse { 0%,100% {opacity:.12;transform:scale(.85)} 50% {opacity:.65;transform:scale(1.12)} }
+        @keyframes gallery-orbit { from {transform:rotate(0deg)} to {transform:rotate(360deg)} }
+        @keyframes gallery-scan { 0% {transform:translateX(-100%);opacity:0} 25%,75% {opacity:.55} 100% {transform:translateX(100%);opacity:0} }
+        @media (prefers-reduced-motion: reduce) { .gallery-motion-layer {display:none!important} }
+      `}</style>
+      <div className="gallery-motion-layer absolute inset-0" style={{visibility:active?"visible":"hidden"}}>
+        {[0,1,2].map((column) => (
+          <div key={column} className="absolute overflow-hidden" style={{left:`${4+column*31}%`,width:"29%",top:"12%",height:"40%"}}>
+            <div className="absolute inset-0" style={{background:`radial-gradient(ellipse at 50% 50%, ${["#22d3ee","#a855f7","#facc15"][column]}55, transparent 65%)`,animation:"gallery-pulse 5s ease-in-out infinite",animationDelay:`${column*-1.3}s`,animationPlayState:active?"running":"paused"}} />
+            {column===1 && variant===0 ? <div className="absolute inset-[20%] rounded-full" style={{border:"1px solid transparent",borderTopColor:"#c084fc",borderBottomColor:"#22d3ee",animation:"gallery-orbit 7s linear infinite",animationPlayState:active?"running":"paused"}} /> : <div className="absolute inset-0" style={{background:"linear-gradient(110deg,transparent 40%,#67e8f944 50%,transparent 60%)",animation:"gallery-scan 6s linear infinite",animationDelay:`${column*-2}s`,animationPlayState:active?"running":"paused"}} />}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
