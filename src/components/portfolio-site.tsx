@@ -691,6 +691,7 @@ export function PortfolioSite() {
         {/* New original GitHub-uploaded artwork above About. */}
         <QuantumResearchDemo />
         <AIEngineeringDemo />
+        <FinancialIntelligenceDemo />
 
         <section className="border-b border-border px-5 py-14 sm:px-8 lg:py-20" aria-label="Research artwork">
           <div className="mx-auto max-w-7xl">
@@ -1676,6 +1677,55 @@ function AIEngineeringDemo() {
           <div className="rounded-xl border border-violet-400/30 bg-slate-950/60 p-4" aria-live="polite"><p className="text-xs uppercase tracking-widest text-violet-300">Execution trace</p><div className="mt-4 grid gap-2 font-mono text-xs">{step<0?<p className="text-slate-400">Run a workflow to inspect its stages.</p>:details.slice(0,step+1).map((d,i)=><p key={i} className="text-cyan-200">[{stages[i]}] {d}</p>)}</div></div>
           <div className="rounded-xl border border-cyan-400/30 bg-slate-950/60 p-4"><p className="text-xs uppercase tracking-widest text-cyan-300">Workflow output</p><p className="mt-4 text-sm">{step===4&&!running?(rag?"A Bell circuit applies H to the first qubit and CNOT to entangle the pair. Ideal measurements yield 00 or 11.":"4096 × 25% = "+(4096*.25)+" expected measurements per outcome."):running?"Executing illustrative pipeline…":"Awaiting execution."}</p><p className="mt-4 text-xs text-slate-400">Local demonstration • scripted stages, not live model inference</p></div>
         </div>
+      </div>
+    </div>
+  </section>;
+}
+
+function FinancialIntelligenceDemo() {
+  const [risk,setRisk]=useState(50);
+  const [result,setResult]=useState<{weights:number[];ret:number;vol:number;sharpe:number}|null>(null);
+  const assets=["Equities","Bonds","Crypto"];
+  const returns=[.09,.035,.16];
+  const cov=[[.0324,.0018,.0495],[.0018,.0036,.00165],[.0495,.00165,.3025]];
+  function metrics(w:number[]){
+    const ret=w.reduce((s,x,i)=>s+x*returns[i],0);
+    const vol=Math.sqrt(w.reduce((s,x,i)=>s+w.reduce((t,y,j)=>t+x*y*cov[i][j],0),0));
+    return {weights:w,ret,vol,sharpe:(ret-.02)/vol};
+  }
+  function optimize(){
+    let best=metrics([0,1,0]),score=-Infinity;
+    for(let i=0;i<=100;i+=2)for(let j=0;j<=100-i;j+=2){
+      const m=metrics([i/100,j/100,(100-i-j)/100]);
+      const value=m.ret-(.2+(100-risk)/100*12)*m.vol*m.vol/2;
+      if(value>score){score=value;best=m;}
+    }
+    setResult(best);
+  }
+  const baseline=metrics([.4,.4,.2]);
+  return <section aria-label="Financial intelligence demo" className="border-b border-border px-5 py-14 sm:px-8 lg:py-20">
+    <div className="mx-auto max-w-6xl">
+      <p className="text-xs font-semibold uppercase tracking-[.25em] text-amber-400">Interactive research • Quantitative finance</p>
+      <h2 className="mt-2 text-2xl font-semibold text-foreground sm:text-3xl">Live Financial Intelligence Demo</h2>
+      <p className="mt-3 text-sm text-muted-foreground">Explore long-only mean-variance portfolio optimization using hypothetical annual returns and covariance. Educational model, not live market data or investment advice.</p>
+      <div className="mt-7 rounded-2xl border border-amber-400/40 bg-[#080f25] p-5 text-slate-100 shadow-[0_0_35px_rgba(251,191,36,.15)] sm:p-8">
+        <div className="flex flex-wrap items-end gap-5">
+          <label className="grid min-w-48 flex-1 gap-2 text-xs text-amber-200">Risk tolerance: {risk}/100<input type="range" min="0" max="100" step="5" value={risk} onChange={e=>{setRisk(Number(e.target.value));setResult(null)}} className="w-full accent-amber-400"/><span className="flex justify-between text-slate-400"><span>Conservative</span><span>Aggressive</span></span></label>
+          <button type="button" onClick={optimize} className="rounded-lg bg-amber-300 px-5 py-2 font-semibold text-slate-950 shadow-[0_0_18px_rgba(251,191,36,.5)]">Optimize Portfolio</button>
+        </div>
+        <div className="mt-7 grid gap-6 lg:grid-cols-2">
+          <div className="rounded-xl border border-amber-400/30 bg-slate-950/60 p-4" aria-live="polite">
+            <p className="text-xs uppercase tracking-widest text-amber-300">Portfolio allocation</p>
+            <div className="mt-5 grid gap-4">{assets.map((name,i)=><div key={name}><div className="flex justify-between text-xs"><span>{name}</span><span>{((result??baseline).weights[i]*100).toFixed(0)}%</span></div><div className="mt-2 h-4 overflow-hidden rounded bg-slate-800"><div className="h-full rounded transition-all duration-700" style={{width:((result??baseline).weights[i]*100)+"%",background:["#22d3ee","#a78bfa","#fbbf24"][i]}}/></div></div>)}</div>
+            <p className="mt-4 text-xs text-slate-400">{result?"Optimized allocation • weights sum to 100%":"Baseline allocation • 40/40/20"}</p>
+          </div>
+          <div className="rounded-xl border border-cyan-400/30 bg-slate-950/60 p-4" aria-live="polite">
+            <p className="text-xs uppercase tracking-widest text-cyan-300">Annualized model metrics</p>
+            <div className="mt-4 grid gap-3">{[["Expected return",((result??baseline).ret*100).toFixed(2)+"%"],["Volatility",((result??baseline).vol*100).toFixed(2)+"%"],["Sharpe ratio",((result??baseline).sharpe).toFixed(2)]].map(([label,value])=><div key={label} className="flex items-center justify-between rounded-lg border border-slate-700 p-3"><span className="text-xs text-slate-300">{label}</span><span className="font-mono text-lg text-cyan-300">{value}</span></div>)}</div>
+            <p className="mt-4 text-xs text-slate-400">Grid search in 2% increments • assumed risk-free rate 2% • no leverage or shorting.</p>
+          </div>
+        </div>
+        <p className="mt-5 text-xs text-slate-400">Model assumptions: annual expected returns 9%, 3.5%, 16%; volatility 18%, 6%, 55% for equities, bonds and crypto respectively. Hypothetical inputs, not forecasts.</p>
       </div>
     </div>
   </section>;
