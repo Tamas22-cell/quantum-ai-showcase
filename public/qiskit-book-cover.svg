@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="480" height="678.8569" viewBox="0 0 595.2756 841.8898">
+<rect width="595.2756" height="841.8898" fill="#10243c"/><rect width="12" height="841.8898" fill="#29c6d5"/>
+<g font-family="DejaVu Sans, Arial, sans-serif">
+<text x="50" y="71.8898" fill="#29c6d5" font-size="14" font-weight="bold" textLength="243" lengthAdjust="spacing">QUANTUM COMPUTING SERIES</text>
+<text x="50" y="176.8898" fill="white" font-size="56" font-weight="bold" textLength="210" lengthAdjust="spacing">QISKIT</text>
+<text x="50" y="231.8898" fill="white" font-size="40" font-weight="bold" textLength="308" lengthAdjust="spacing">ENGINEERING</text>
+<text x="50" y="278" fill="white" font-size="16" font-weight="bold" textLength="238" lengthAdjust="spacing">Developer Preview Edition</text>
+<text x="50" y="303" fill="white" font-size="12.3" textLength="417" lengthAdjust="spacing">From quantum fundamentals to hybrid AI and financial optimization</text>
+<g transform="translate(0 841.8898) scale(1 -1)" fill="none" stroke="#29c6d5" stroke-width="1.2">
+<path d="M420 335C420 401.2742 366.2742 455 300 455 233.7258 455 180 401.2742 180 335 180 268.7258 233.7258 215 300 215 366.2742 215 420 268.7258 420 335"/>
+<path d="M420 335C420 354.33 366.2742 370 300 370 233.7258 370 180 354.33 180 335 180 315.67 233.7258 300 300 300 366.2742 300 420 315.67 420 335"/>
+<path d="M345 335C345 401.2742 324.8528 455 300 455 275.1472 455 255 401.2742 255 335 255 268.7258 275.1472 215 300 215 324.8528 215 345 268.7258 345 335"/>
+<path d="M300 195V475"/><path d="M300 335 365 420" stroke-width="4"/><circle cx="365" cy="420" r="7" fill="#29c6d5" stroke="none"/>
+</g>
+<text x="50" y="726.8898" fill="#29c6d5" font-size="15" font-weight="bold" textLength="208" lengthAdjust="spacing" xml:space="preserve">PYTHON  /  QAOA  /  VQE</text>
+<text x="50" y="758" fill="#29c6d5" font-size="12" textLength="281" lengthAdjust="spacing" xml:space="preserve">2026  •  20 chapters  /  4 research appendices</text>
+<text x="50" y="790" fill="white" font-size="16" font-weight="bold">Tamás Németh</text>
+<text x="50" y="810" fill="white" font-size="11.5">AI Engineer &amp; Quantum Developer</text>
+</g></svg>
