@@ -1570,13 +1570,17 @@ function GalleryMotion({ variant }: { variant: number }) {
         @keyframes gallery-pulse { 0%,100% {opacity:.21;transform:scale(.85)} 50% {opacity:1;transform:scale(1.12)} }
         @keyframes gallery-orbit { from {transform:rotate(0deg)} to {transform:rotate(360deg)} }
         @keyframes gallery-scan { 0% {transform:translateX(-100%);opacity:0} 25%,75% {opacity:.9625} 100% {transform:translateX(100%);opacity:0} }
+        @keyframes gallery-particle { 0% {transform:translate(0,0);opacity:0} 20% {opacity:1} 80% {opacity:.85} 100% {transform:translate(55px,-65px);opacity:0} }
+        @keyframes gallery-ring-pulse { 0%,100% {transform:scale(.88);opacity:.65} 50% {transform:scale(1.12);opacity:1} }
         @media (prefers-reduced-motion: reduce) { .gallery-motion-layer {display:none!important} }
       `}</style>
       <div className="gallery-motion-layer absolute inset-0" style={{visibility:active?"visible":"hidden"}}>
         {[0,1,2].map((column) => (
           <div key={column} className="absolute overflow-hidden" style={{left:`${4+column*31}%`,width:"29%",top:"12%",height:"40%"}}>
             <div className="absolute inset-0" style={{background:`radial-gradient(ellipse at 50% 50%, ${["#22d3ee","#a855f7","#facc15"][column]}60, transparent 70%)`,animation:"gallery-pulse 5s ease-in-out infinite",animationDelay:`${column*-1.3}s`,animationPlayState:active?"running":"paused"}} />
-            {column===1 && variant===0 ? <div className="absolute inset-[20%] rounded-full" style={{border:"1.75px solid transparent",filter:"drop-shadow(0 0 4.2px #a855f7)",borderTopColor:"#c084fc",borderBottomColor:"#22d3ee",animation:"gallery-orbit 7s linear infinite",animationPlayState:active?"running":"paused"}} /> : <div className="absolute inset-0" style={{background:"linear-gradient(110deg,transparent 36%,#67e8f944 50%,transparent 64%)",animation:"gallery-scan 6s linear infinite",animationDelay:`${column*-2}s`,animationPlayState:active?"running":"paused"}} />}
+            {Array.from({length:6},(_,p) => <span key={p} className="absolute rounded-full" style={{left:`${8+(p*17)%82}%`,top:`${25+(p*23)%65}%`,width:p%2===0?4:3,height:p%2===0?4:3,background:"#ecfeff",boxShadow:"0 0 7px 2px #22d3ee",animation:"gallery-particle 4s ease-in-out infinite",animationDelay:`${-p*.67-column*.4}s`,animationPlayState:active?"running":"paused"}} />)}
+            {column===1 && variant===0 && <div className="absolute inset-[18%] rounded-full" style={{border:"2px solid #a855f7",boxShadow:"0 0 12px #a855f7,inset 0 0 8px #22d3ee",animation:"gallery-ring-pulse 3s ease-in-out infinite",animationPlayState:active?"running":"paused"}} />}
+            {column===1 && variant===0 ? <div className="absolute inset-[10%] rounded-full" style={{border:"3px solid transparent",filter:"drop-shadow(0 0 7px #a855f7)",borderTopColor:"#c084fc",borderBottomColor:"#22d3ee",animation:"gallery-orbit 5s linear infinite",animationPlayState:active?"running":"paused"}} /> : <div className="absolute inset-0" style={{background:"linear-gradient(110deg,transparent 30%,#22d3ee55 43%,#ecfeffcc 50%,#a855f755 57%,transparent 70%)",animation:"gallery-scan 4.5s linear infinite",animationDelay:`${column*-2}s`,animationPlayState:active?"running":"paused"}} />}
           </div>
         ))}
       </div>
