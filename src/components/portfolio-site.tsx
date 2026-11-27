@@ -1684,6 +1684,9 @@ function AIEngineeringDemo() {
 
 function FinancialIntelligenceDemo() {
   const [risk,setRisk]=useState(50);
+  const [objective,setObjective]=useState("balanced");
+  const [capital,setCapital]=useState(10000);
+  const [years,setYears]=useState(5);
   const [result,setResult]=useState<{weights:number[];ret:number;vol:number;sharpe:number}|null>(null);
   const assets=["Equities","Bonds","Crypto"];
   const returns=[.09,.035,.16];
@@ -1697,12 +1700,18 @@ function FinancialIntelligenceDemo() {
     let best=metrics([0,1,0]),score=-Infinity;
     for(let i=0;i<=100;i+=2)for(let j=0;j<=100-i;j+=2){
       const m=metrics([i/100,j/100,(100-i-j)/100]);
-      const value=m.ret-(.2+(100-risk)/100*12)*m.vol*m.vol/2;
+      const value=objective==="sharpe"?m.sharpe:objective==="minimum"?-m.vol:m.ret-(.2+(100-risk)/100*12)*m.vol*m.vol/2;
       if(value>score){score=value;best=m;}
     }
     setResult(best);
   }
   const baseline=metrics([.4,.4,.2]);
+  const current=result??baseline;
+  const colors=["#22d3ee","#a78bfa","#fbbf24"];
+  const money=(n:number)=>"$"+Math.round(n).toLocaleString("en-US");
+  const maxValue=capital*Math.pow(1+Math.max(current.ret,baseline.ret),years)*1.05;
+  const curve=(ret:number)=>Array.from({length:years+1},(_,i)=>[40+280*i/years,145-120*(capital*Math.pow(1+ret,i)-capital)/(maxValue-capital)].join(",")).join(" ");
+  const pie=current.weights.map((w,i)=>colors[i]+" "+(current.weights.slice(0,i).reduce((a,b)=>a+b,0)*100)+"% "+(current.weights.slice(0,i+1).reduce((a,b)=>a+b,0)*100)+"%").join(",");
   return <section aria-label="Financial intelligence demo" className="border-b border-border px-5 py-14 sm:px-8 lg:py-20">
     <div className="mx-auto max-w-6xl">
       <p className="text-xs font-semibold uppercase tracking-[.25em] text-amber-400">Interactive research • Quantitative finance</p>
@@ -1710,7 +1719,10 @@ function FinancialIntelligenceDemo() {
       <p className="mt-3 text-sm text-muted-foreground">Explore long-only mean-variance portfolio optimization using hypothetical annual returns and covariance. Educational model, not live market data or investment advice.</p>
       <div className="mt-7 rounded-2xl border border-amber-400/40 bg-[#080f25] p-5 text-slate-100 shadow-[0_0_35px_rgba(251,191,36,.15)] sm:p-8">
         <div className="flex flex-wrap items-end gap-5">
-          <label className="grid min-w-48 flex-1 gap-2 text-xs text-amber-200">Risk tolerance: {risk}/100<input type="range" min="0" max="100" step="5" value={risk} onChange={e=>{setRisk(Number(e.target.value));setResult(null)}} className="w-full accent-amber-400"/><span className="flex justify-between text-slate-400"><span>Conservative</span><span>Aggressive</span></span></label>
+          <label className="grid gap-2 text-xs text-amber-200">Strategy<select value={objective} onChange={e=>{setObjective(e.target.value);setResult(null)}} className="rounded-lg border border-amber-400/40 bg-slate-900 p-2 text-white"><option value="balanced">Risk / Return</option><option value="sharpe">Maximum Sharpe</option><option value="minimum">Minimum Volatility</option></select></label>
+          <label className="grid gap-2 text-xs text-amber-200">Capital (USD)<select value={capital} onChange={e=>setCapital(Number(e.target.value))} className="rounded-lg border border-amber-400/40 bg-slate-900 p-2 text-white">{[1000,5000,10000,50000,100000].map(n=><option key={n} value={n}>{money(n)}</option>)}</select></label>
+          <label className="grid gap-2 text-xs text-amber-200">Horizon<select value={years} onChange={e=>setYears(Number(e.target.value))} className="rounded-lg border border-amber-400/40 bg-slate-900 p-2 text-white">{[1,3,5,10,20].map(n=><option key={n} value={n}>{n} years</option>)}</select></label>
+          <label className="grid min-w-48 flex-1 gap-2 text-xs text-amber-200">Risk tolerance: {objective==="balanced"?risk+"/100":"Not used for this strategy"}<input type="range" disabled={objective!=="balanced"} min="0" max="100" step="5" value={risk} onChange={e=>{setRisk(Number(e.target.value));setResult(null)}} className="w-full accent-amber-400"/><span className="flex justify-between text-slate-400"><span>Conservative</span><span>Aggressive</span></span></label>
           <button type="button" onClick={optimize} className="rounded-lg bg-amber-300 px-5 py-2 font-semibold text-slate-950 shadow-[0_0_18px_rgba(251,191,36,.5)]">Optimize Portfolio</button>
         </div>
         <div className="mt-7 grid gap-6 lg:grid-cols-2">
@@ -1724,6 +1736,10 @@ function FinancialIntelligenceDemo() {
             <div className="mt-4 grid gap-3">{[["Expected return",((result??baseline).ret*100).toFixed(2)+"%"],["Volatility",((result??baseline).vol*100).toFixed(2)+"%"],["Sharpe ratio",((result??baseline).sharpe).toFixed(2)]].map(([label,value])=><div key={label} className="flex items-center justify-between rounded-lg border border-slate-700 p-3"><span className="text-xs text-slate-300">{label}</span><span className="font-mono text-lg text-cyan-300">{value}</span></div>)}</div>
             <p className="mt-4 text-xs text-slate-400">Grid search in 2% increments • assumed risk-free rate 2% • no leverage or shorting.</p>
           </div>
+        </div>
+        <div className="mt-6 grid gap-6 lg:grid-cols-2">
+          <div className="rounded-xl border border-amber-400/30 bg-slate-950/60 p-4"><p className="text-xs uppercase tracking-widest text-amber-300">Capital distribution</p><div className="mt-5 flex flex-wrap items-center justify-center gap-6"><div role="img" aria-label="Portfolio allocation donut chart" className="grid size-40 place-items-center rounded-full shadow-[0_0_24px_rgba(251,191,36,.2)]" style={{background:"conic-gradient("+pie+")"}}><div className="grid size-28 place-items-center rounded-full bg-[#080f25] font-mono text-sm">{money(capital)}</div></div><div className="grid gap-3">{assets.map((name,i)=><div key={name} className="flex items-center gap-2 text-xs"><span className="size-3 rounded-full" style={{background:colors[i]}}/>{name}: {money(capital*current.weights[i])}</div>)}</div></div></div>
+          <div className="rounded-xl border border-cyan-400/30 bg-slate-950/60 p-4"><p className="text-xs uppercase tracking-widest text-cyan-300">Hypothetical growth • {years} years</p><svg viewBox="0 0 340 175" className="mt-3 w-full" role="img" aria-label="Illustrative compounded growth comparison"><path d="M40 15 V145 H320" stroke="#64748b" fill="none"/>{[25,65,105,145].map(y=><path key={y} d={"M40 "+y+" H320"} stroke="#334155" strokeDasharray="3 5"/>)}<polyline points={curve(baseline.ret)} stroke="#a78bfa" strokeWidth="2" strokeDasharray="5 4" fill="none"/><polyline points={curve(current.ret)} stroke="#22d3ee" strokeWidth="3" fill="none"/><text x="40" y="165" fill="#94a3b8" fontSize="10">Today</text><text x="320" y="165" textAnchor="end" fill="#94a3b8" fontSize="10">Year {years}</text></svg><div className="flex flex-wrap justify-between gap-2 text-xs"><span className="text-violet-300">Baseline: {money(capital*Math.pow(1+baseline.ret,years))}</span><span className="text-cyan-300">Selected: {money(capital*Math.pow(1+current.ret,years))}</span></div><p className="mt-3 text-xs text-slate-400">Constant assumed return; excludes fees, taxes and market fluctuations.</p></div>
         </div>
         <p className="mt-5 text-xs text-slate-400">Model assumptions: annual expected returns 9%, 3.5%, 16%; volatility 18%, 6%, 55% for equities, bonds and crypto respectively. Hypothetical inputs, not forecasts.</p>
       </div>
