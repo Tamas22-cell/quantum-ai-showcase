@@ -939,6 +939,7 @@ export function PortfolioSite() {
               <p className="font-mono text-xs uppercase tracking-wider text-primary">Publications</p>
               <h2 id="ai-book-title" className="mt-3 text-3xl font-semibold tracking-tight">AI Engineering &amp; Machine Learning</h2>
               <p className="mt-2 text-muted-foreground">Independent Learning Edition · 55 pages · 48 lessons</p>
+              <p className="mt-2 text-sm font-medium">Compiled by Tamás Németh with AI assistance</p>
               <p className="mt-3 text-sm leading-7 text-muted-foreground">From neural networks to autonomous AI agents.</p>
               <Button asChild variant="signal" className="mt-5">
                 <a href="https://qiskit-engineering-reader.onrender.com/ai/read/1" target="_blank" rel="noopener noreferrer">Read the Book <ArrowUpRight aria-hidden="true" /></a>
