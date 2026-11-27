@@ -919,7 +919,8 @@ export function PortfolioSite() {
         <AIProjectsShowcase />
 
         <section id="publications" aria-labelledby="book-title" className="border-b border-border px-5 py-10 sm:px-8">
-          <div className="mx-auto grid max-w-7xl gap-6 rounded-xl border border-primary/30 bg-card p-6 sm:grid-cols-[12rem_minmax(0,1fr)] sm:items-center sm:p-8">
+          <div className="mx-auto grid max-w-7xl gap-6 lg:grid-cols-2">
+          <div className="grid gap-6 rounded-xl border border-primary/30 bg-card p-6 sm:grid-cols-[10rem_minmax(0,1fr)] sm:items-center">
             <img src="/qiskit-book-cover.svg" alt="Qiskit Engineering — Developer Preview Edition book cover" width={480} height={679} className="mx-auto h-auto w-full max-w-48 rounded-md" />
             <div className="min-w-0">
               <p className="font-mono text-xs uppercase tracking-wider text-primary">Publications</p>
@@ -931,6 +932,20 @@ export function PortfolioSite() {
               </Button>
               <p className="mt-2 text-xs text-muted-foreground">Registration or sign-in required.</p>
             </div>
+          </div>
+          <div className="grid gap-6 rounded-xl border border-primary/30 bg-card p-6 sm:grid-cols-[10rem_minmax(0,1fr)] sm:items-center">
+            <img src="/1be65fc1-baeb-4cfa-b84b-b0ded21742a3.png" alt="AI Engineering and Machine Learning book cover" width={480} height={679} className="mx-auto h-auto w-full max-w-48 rounded-md" />
+            <div className="min-w-0">
+              <p className="font-mono text-xs uppercase tracking-wider text-primary">Publications</p>
+              <h2 id="ai-book-title" className="mt-3 text-3xl font-semibold tracking-tight">AI Engineering &amp; Machine Learning</h2>
+              <p className="mt-2 text-muted-foreground">Independent Learning Edition · 55 pages · 48 lessons</p>
+              <p className="mt-3 text-sm leading-7 text-muted-foreground">From neural networks to autonomous AI agents.</p>
+              <Button asChild variant="signal" className="mt-5">
+                <a href="https://qiskit-engineering-reader.onrender.com/ai/read/1" target="_blank" rel="noopener noreferrer">Read the Book <ArrowUpRight aria-hidden="true" /></a>
+              </Button>
+              <p className="mt-2 text-xs text-muted-foreground">Registration or sign-in required.</p>
+            </div>
+          </div>
           </div>
         </section>
 
