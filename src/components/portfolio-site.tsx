@@ -689,6 +689,8 @@ export function PortfolioSite() {
         </section>
 
         {/* New original GitHub-uploaded artwork above About. */}
+        <QuantumResearchDemo />
+
         <section className="border-b border-border px-5 py-14 sm:px-8 lg:py-20" aria-label="Research artwork">
           <div className="mx-auto max-w-7xl">
             <div className="mb-6">
@@ -1585,5 +1587,60 @@ function GalleryMotion({ variant }: { variant: number }) {
         ))}
       </div>
     </div>
+  );
+}
+
+
+function QuantumResearchDemo() {
+  const [mode, setMode] = useState("bell");
+  const [shots, setShots] = useState(1024);
+  const [counts, setCounts] = useState<number[] | null>(null);
+  const [running, setRunning] = useState(false);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => { if (timer.current !== null) clearTimeout(timer.current); }, []);
+  function run() {
+    setRunning(true); setCounts(null);
+    timer.current = setTimeout(() => {
+      const result = [0,0,0,0];
+      for (let i=0;i<shots;i++) {
+        const outcome = mode === "bell" ? (Math.random()<.5?0:3) : Math.floor(Math.random()*4);
+        result[outcome]++;
+      }
+      setCounts(result); setRunning(false);
+    }, 1000);
+  }
+  return (
+    <section aria-label="Live quantum research demo" className="border-b border-border px-5 py-14 sm:px-8 lg:py-20">
+      <div className="mx-auto max-w-6xl">
+        <p className="text-xs font-semibold uppercase tracking-[.25em] text-cyan-400">Interactive research • Browser simulation</p>
+        <h2 className="mt-2 text-2xl font-semibold text-foreground sm:text-3xl">Live Quantum Research Demo</h2>
+        <p className="mt-3 text-sm text-muted-foreground">Explore two-qubit measurement statistics using an ideal circuit probability model. No quantum hardware is connected.</p>
+        <div className="mt-7 rounded-2xl border border-cyan-400/40 bg-[#080f25] p-5 text-slate-100 shadow-[0_0_35px_rgba(34,211,238,.15)] sm:p-8">
+          <div className="flex flex-wrap items-end gap-4">
+            <label className="grid gap-2 text-xs text-cyan-200">Circuit<select disabled={running} value={mode} onChange={e=>{setMode(e.target.value);setCounts(null)}} className="rounded-lg border border-cyan-400/40 bg-slate-900 p-2 text-white"><option value="bell">Bell state (H + CNOT)</option><option value="uniform">Superposition (H + H)</option></select></label>
+            <label className="grid gap-2 text-xs text-cyan-200">Shots<select disabled={running} value={shots} onChange={e=>{setShots(Number(e.target.value));setCounts(null)}} className="rounded-lg border border-cyan-400/40 bg-slate-900 p-2 text-white">{[128,512,1024,4096].map(n=><option key={n}>{n}</option>)}</select></label>
+            <button type="button" disabled={running} onClick={run} className="rounded-lg bg-cyan-300 px-5 py-2 font-semibold text-slate-950 shadow-[0_0_18px_rgba(34,211,238,.5)] disabled:opacity-50">{running?"Measuring…":"Run Simulation"}</button>
+          </div>
+          <div className="mt-7 grid gap-6 lg:grid-cols-2">
+            <div className="rounded-xl border border-violet-400/30 bg-slate-950/60 p-4">
+              <p className="text-xs uppercase tracking-widest text-violet-300">Quantum circuit</p>
+              <svg viewBox="0 0 340 145" className="mt-4 w-full" role="img" aria-label={mode==="bell"?"Hadamard and controlled NOT circuit":"Two Hadamard gates"}>
+                <g stroke="#67e8f9" strokeWidth="2"><path d="M45 45 H315 M45 105 H315"/>{mode==="bell"&&<path d="M185 45 V105"/>}</g>
+                <g fill="#c4b5fd" fontSize="13"><text x="4" y="49">q0 |0⟩</text><text x="4" y="109">q1 |0⟩</text></g>
+                <g fill="#312e81" stroke="#a78bfa" strokeWidth="2"><rect x="90" y="28" width="34" height="34" rx="5"/>{mode==="uniform"?<rect x="90" y="88" width="34" height="34" rx="5"/>:<><circle cx="185" cy="45" r="5" fill="#67e8f9"/><circle cx="185" cy="105" r="13"/><path d="M172 105 H198 M185 92 V118" stroke="#67e8f9"/></>}</g>
+                <g fill="white" textAnchor="middle" fontSize="15"><text x="107" y="50">H</text>{mode==="uniform"&&<text x="107" y="110">H</text>}</g>
+                {[45,105].map(y=><g key={y}><rect x="260" y={y-15} width="32" height="30" rx="5" fill="#164e63" stroke="#67e8f9"/><text x="276" y={y+5} fill="white" textAnchor="middle">M</text>{running&&<circle cy={y} r="4" fill="#fff"><animate attributeName="cx" from="45" to="315" dur="0.8s" repeatCount="indefinite"/></circle>}</g>)}
+              </svg>
+              <p className="text-xs text-slate-400">{mode==="bell"?"Ideal Bell state: (|00⟩ + |11⟩) / √2":"Ideal independent superposition: all four outcomes equally likely."}</p>
+            </div>
+            <div className="rounded-xl border border-cyan-400/30 bg-slate-950/60 p-4" aria-live="polite">
+              <p className="text-xs uppercase tracking-widest text-cyan-300">Measurement results</p>
+              <div className="mt-5 grid gap-3">{["00","01","10","11"].map((label,i)=><div key={label} className="grid grid-cols-[28px_1fr_76px] items-center gap-2 text-xs"><span>{label}</span><div className="h-4 overflow-hidden rounded bg-slate-800"><div className="h-full rounded bg-gradient-to-r from-violet-500 to-cyan-300 transition-all duration-700" style={{width:counts?String(counts[i]/shots*100)+"%":"0%"}}/></div><span className="text-right tabular-nums">{counts?counts[i]+" / "+(counts[i]/shots*100).toFixed(1)+"%":"—"}</span></div>)}</div>
+              <p className="mt-4 text-xs text-slate-400">{running?"Sampling ideal probabilities…":counts?shots+" simulated measurements completed.":"Run the simulation to generate a new sample."}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
