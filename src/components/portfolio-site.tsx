@@ -1567,16 +1567,16 @@ function GalleryMotion({ variant }: { variant: number }) {
   return (
     <div ref={ref} aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden" style={{mixBlendMode:"screen"}}>
       <style>{`
-        @keyframes gallery-pulse { 0%,100% {opacity:.15;transform:scale(.85)} 50% {opacity:.8125;transform:scale(1.12)} }
+        @keyframes gallery-pulse { 0%,100% {opacity:.21;transform:scale(.85)} 50% {opacity:1;transform:scale(1.12)} }
         @keyframes gallery-orbit { from {transform:rotate(0deg)} to {transform:rotate(360deg)} }
-        @keyframes gallery-scan { 0% {transform:translateX(-100%);opacity:0} 25%,75% {opacity:.6875} 100% {transform:translateX(100%);opacity:0} }
+        @keyframes gallery-scan { 0% {transform:translateX(-100%);opacity:0} 25%,75% {opacity:.9625} 100% {transform:translateX(100%);opacity:0} }
         @media (prefers-reduced-motion: reduce) { .gallery-motion-layer {display:none!important} }
       `}</style>
       <div className="gallery-motion-layer absolute inset-0" style={{visibility:active?"visible":"hidden"}}>
         {[0,1,2].map((column) => (
           <div key={column} className="absolute overflow-hidden" style={{left:`${4+column*31}%`,width:"29%",top:"12%",height:"40%"}}>
-            <div className="absolute inset-0" style={{background:`radial-gradient(ellipse at 50% 50%, ${["#22d3ee","#a855f7","#facc15"][column]}55, transparent 65%)`,animation:"gallery-pulse 5s ease-in-out infinite",animationDelay:`${column*-1.3}s`,animationPlayState:active?"running":"paused"}} />
-            {column===1 && variant===0 ? <div className="absolute inset-[20%] rounded-full" style={{border:"1.25px solid transparent",filter:"drop-shadow(0 0 3px #a855f7)",borderTopColor:"#c084fc",borderBottomColor:"#22d3ee",animation:"gallery-orbit 7s linear infinite",animationPlayState:active?"running":"paused"}} /> : <div className="absolute inset-0" style={{background:"linear-gradient(110deg,transparent 40%,#67e8f944 50%,transparent 60%)",animation:"gallery-scan 6s linear infinite",animationDelay:`${column*-2}s`,animationPlayState:active?"running":"paused"}} />}
+            <div className="absolute inset-0" style={{background:`radial-gradient(ellipse at 50% 50%, ${["#22d3ee","#a855f7","#facc15"][column]}60, transparent 70%)`,animation:"gallery-pulse 5s ease-in-out infinite",animationDelay:`${column*-1.3}s`,animationPlayState:active?"running":"paused"}} />
+            {column===1 && variant===0 ? <div className="absolute inset-[20%] rounded-full" style={{border:"1.75px solid transparent",filter:"drop-shadow(0 0 4.2px #a855f7)",borderTopColor:"#c084fc",borderBottomColor:"#22d3ee",animation:"gallery-orbit 7s linear infinite",animationPlayState:active?"running":"paused"}} /> : <div className="absolute inset-0" style={{background:"linear-gradient(110deg,transparent 36%,#67e8f944 50%,transparent 64%)",animation:"gallery-scan 6s linear infinite",animationDelay:`${column*-2}s`,animationPlayState:active?"running":"paused"}} />}
           </div>
         ))}
       </div>
